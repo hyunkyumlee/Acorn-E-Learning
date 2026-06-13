@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-001 B - Mission Brief</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .brief-shell { position: relative; z-index: 1; }
+    .brief-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(420px, 1.1fr); gap: 32px; align-items: center; min-height: calc(100vh - 124px); padding: 34px 3vw; }
+    .brief-copy { display: grid; gap: 22px; max-width: 660px; }
+    .brief-copy .hero-copy { color: rgba(255,255,255,.72); }
+    .brief-board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .brief-card { min-height: 170px; border: 1px solid rgba(255,255,255,.16); border-radius: var(--radius); background: rgba(255,255,255,.08); padding: 18px; backdrop-filter: blur(14px); }
+    .brief-card.wide { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; }
+    .brief-card h2, .brief-card h3, .brief-card p { margin: 0; }
+    .brief-card h2 { font-size: 30px; }
+    .brief-card h3 { margin-bottom: 10px; font-size: 19px; }
+    .brief-card p { color: rgba(255,255,255,.7); line-height: 1.55; }
+    .ring-meter { width: 126px; height: 126px; border-radius: 50%; background: conic-gradient(var(--primary-green) 0 68%, rgba(255,255,255,.12) 68% 100%); display: grid; place-items: center; box-shadow: inset 0 0 0 12px rgba(255,255,255,.08); font-weight: 900; font-size: 24px; }
+    @media (max-width: 980px) { .brief-grid, .brief-card.wide { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .brief-board { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="sample-page dark-space starfield">
+  <div class="sample-shell brief-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Mission Brief</span></span>
+      </a>
+      <nav class="nav" aria-label="welcome navigation">
+        <a class="active" href="#">소개</a>
+        <a href="#">튜토리얼</a>
+        <a href="#">로그인</a>
+      </nav>
+    </header>
+
+    <main class="brief-grid">
+      <section class="brief-copy">
+        <span class="eyebrow"><i class="dot"></i> 첫 방문자 briefing</span>
+        <h1 class="hero-title">오늘의 학습 궤도를<br>먼저 확인하세요.</h1>
+        <p class="hero-copy">Knowva는 가입 전 학습 기능을 열지 않습니다. 대신 튜토리얼에서 mission, planet node, coding test gate가 어떻게 이어지는지 빠르게 보여줍니다.</p>
+        <div class="btn-row">
+          <a class="btn primary" href="#">튜토리얼 시작</a>
+          <a class="btn dark" href="#">바로 로그인하기</a>
+        </div>
+      </section>
+
+      <section class="brief-board" aria-label="service briefing cards">
+        <article class="brief-card wide">
+          <div>
+            <h2>Java 반복문 mission</h2>
+            <p>10문항, 예상 7분, +20 XP. 로그인 후에는 진행률과 오답 queue가 저장됩니다.</p>
+          </div>
+          <div class="ring-meter">68%</div>
+        </article>
+        <article class="brief-card">
+          <h3>Planet Node</h3>
+          <p>완료, 현재, 잠김, 복습 상태를 색상과 label로 함께 표시합니다.</p>
+        </article>
+        <article class="brief-card">
+          <h3>Gate</h3>
+          <p>진행률 80% 달성 시 coding test gate가 unlock됩니다.</p>
+        </article>
+        <article class="brief-card">
+          <h3>Nova Guide</h3>
+          <p>학습을 대신하지 않고 다음 행동을 짧게 안내합니다.</p>
+        </article>
+        <article class="brief-card">
+          <h3>Social Login</h3>
+          <p>Google, Kakao, email 진입을 분리해 첫 진입 장벽을 낮춥니다.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

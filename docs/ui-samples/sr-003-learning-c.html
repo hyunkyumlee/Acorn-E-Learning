@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-003 C - Focus Console</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .console-page { background: #f3f6fb; }
+    .console-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; min-height: calc(100vh - 110px); padding-top: 16px; }
+    .console-main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; min-width: 0; }
+    .console-card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; padding: 16px; box-shadow: 0 10px 24px rgba(17,25,54,.08); }
+    .console-card h1, .console-card h2, .console-card h3, .console-card p { margin: 0; }
+    .console-card p { color: var(--muted); line-height: 1.5; }
+    .console-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .mini-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .compact-map { position: relative; min-height: 430px; overflow: hidden; background: linear-gradient(90deg, #f9fbfd 1px, transparent 1px), linear-gradient(0deg, #eef2f6 1px, transparent 1px), #fff; background-size: 42px 42px; }
+    .compact-map .node { transform: scale(.88); }
+    .task-list { display: grid; gap: 10px; }
+    .task { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: var(--radius); padding: 11px; }
+    .task i { width: 12px; height: 12px; border-radius: 50%; background: var(--primary-green); }
+    .task.lock i { background: var(--gate-violet); }
+    .task span { color: var(--muted); font-size: 12px; font-weight: 800; }
+    @media (max-width: 1100px) { .console-layout, .console-main { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) { .mini-grid, .console-hero { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="sample-page console-page">
+  <div class="sample-shell">
+    <header class="topbar app-panel" style="padding:0 18px">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Focus Console</span></span>
+      </a>
+      <nav class="nav" aria-label="main navigation">
+        <a class="active" href="#">학습</a>
+        <a href="#">분석</a>
+        <a href="#">커뮤니티</a>
+        <a href="#">마이페이지</a>
+        <button type="button">설정</button>
+      </nav>
+    </header>
+
+    <main class="console-layout">
+      <aside class="sidebar app-panel">
+        <section class="subject-card">
+          <small>JAVA 입문</small>
+          <strong>반복문 과정</strong>
+          <span>오늘 2 session 남음</span>
+        </section>
+        <nav class="side-menu">
+          <a class="active" href="#">과목선택 <span>JAVA</span></a>
+          <a href="#">로드맵 <span>2/5</span></a>
+          <a href="#">진행률 <span>68%</span></a>
+          <a href="#">오답노트 <span>5</span></a>
+          <a href="#">리더보드 <span>15위</span></a>
+        </nav>
+      </aside>
+
+      <section class="console-main">
+        <div>
+          <article class="console-card console-hero">
+            <div>
+              <h1>오늘의 목표: 반복문</h1>
+              <p>10문항 · 예상 7분 · 조건문과 반복문 조합을 집중 복습합니다.</p>
+            </div>
+            <a class="btn primary" href="#">오늘의 미션 시작</a>
+          </article>
+
+          <section class="mini-grid" aria-label="summary metrics">
+            <div class="metric"><span>진행률</span><b>68%</b><div class="progress"><i style="width:68%"></i></div></div>
+            <div class="metric"><span>주간 XP</span><b>420</b><div class="progress"><i style="width:52%"></i></div></div>
+            <div class="metric"><span>랭킹</span><b>15위</b><span>출석 점수 제외</span></div>
+          </section>
+
+          <section class="console-card compact-map" aria-label="compact roadmap">
+            <div class="route-line"></div>
+            <div class="node completed" style="left:6%; top:52%">JAVA</div>
+            <div class="node completed" style="left:25%; top:32%">자료형</div>
+            <div class="node completed" style="left:44%; top:54%">조건문</div>
+            <div class="node current" style="left:61%; top:30%">반복문</div>
+            <div class="node locked" style="left:70%; top:62%">배열</div>
+            <div class="node gate" style="right:4%; top:40%">Gate</div>
+          </section>
+        </div>
+
+        <aside class="task-list">
+          <article class="console-card">
+            <h3>Quest Progress</h3>
+            <p>오답 5개 중 3개 복습</p>
+            <div class="progress"><i style="width:60%"></i></div>
+          </article>
+          <article class="task">
+            <i></i>
+            <strong>조건문 mission 2/3 완료</strong>
+            <span>+12 XP</span>
+          </article>
+          <article class="task">
+            <i></i>
+            <strong>반복문 문제 6/10 완료</strong>
+            <span>4개 남음</span>
+          </article>
+          <article class="task lock">
+            <i></i>
+            <strong>코딩테스트 gate</strong>
+            <span>80% unlock</span>
+          </article>
+          <article class="console-card">
+            <h3>AI Signal Preview</h3>
+            <p>약점 유형 1개와 추천 복습 단원 1개만 표시합니다. 상세 분석은 SR-009에서 처리합니다.</p>
+            <a class="btn ghost" href="#">분석 자세히 보기</a>
+          </article>
+          <article class="console-card">
+            <h3>Streak</h3>
+            <p>3일 연속 학습 중. 출석은 랭킹 점수에 반영되지 않습니다.</p>
+          </article>
+        </aside>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

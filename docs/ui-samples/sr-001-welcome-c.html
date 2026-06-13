@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-001 C - Soft Orbit</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .soft-shell { background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%); }
+    .soft-grid { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 34px; align-items: center; min-height: calc(100vh - 124px); padding: 28px 5vw 44px; }
+    .soft-hero { display: grid; gap: 22px; max-width: 720px; }
+    .soft-hero h1 { max-width: 680px; }
+    .soft-panel { display: grid; gap: 14px; border: 1px solid var(--line); border-radius: 24px; background: #fff; padding: 18px; box-shadow: var(--shadow); }
+    .soft-panel h2, .soft-panel p { margin: 0; }
+    .login-option { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; font-weight: 900; }
+    .login-icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); color: var(--ink); }
+    .save-note { border-radius: var(--radius); background: rgba(28,176,246,.1); color: #0c6b95; padding: 14px; font-size: 14px; font-weight: 800; line-height: 1.5; }
+    .orbit-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    .step { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; padding: 14px; box-shadow: 0 8px 20px rgba(17,25,54,.07); }
+    .step b { display: block; margin-bottom: 6px; }
+    .step span { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    @media (max-width: 960px) { .soft-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 660px) { .orbit-steps { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="sample-page soft-shell">
+  <div class="sample-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Soft Orbit</span></span>
+      </a>
+      <nav class="nav" aria-label="welcome navigation">
+        <a class="active" href="#">웰컴</a>
+        <a href="#">소개</a>
+        <a href="#">로그인</a>
+      </nav>
+    </header>
+
+    <main class="soft-grid">
+      <section class="soft-hero">
+        <span class="eyebrow"><i class="dot"></i> 가입 전에는 가볍게, 로그인 후에는 이어서</span>
+        <h1 class="hero-title">코딩 학습을 시작하기 전<br>내 궤도를 먼저 고르세요.</h1>
+        <p class="hero-copy">튜토리얼에서 과목 선택, roadmap, 진행률, gate 구조를 확인한 뒤 가입할 수 있습니다. 학습 기록과 profile 설정은 로그인 후 제공됩니다.</p>
+        <div class="btn-row">
+          <a class="btn primary" href="#">튜토리얼 시작</a>
+          <a class="btn ghost" href="#">서비스 소개 보기</a>
+        </div>
+        <div class="orbit-steps">
+          <div class="step"><b>1. 언어 선택</b><span>Java, CSS, 알고리즘 중 첫 과목을 선택합니다.</span></div>
+          <div class="step"><b>2. Mission 확인</b><span>오늘의 목표와 예상 시간을 확인합니다.</span></div>
+          <div class="step"><b>3. Login 저장</b><span>가입 후 진행률과 오답 queue가 저장됩니다.</span></div>
+        </div>
+      </section>
+
+      <aside class="soft-panel" aria-label="login panel">
+        <h2>바로 시작하기</h2>
+        <p class="hero-copy" style="font-size:15px">소셜 로그인 또는 이메일로 학습 기록을 저장하세요.</p>
+        <a class="login-option" href="#"><span class="login-icon">G</span>Google로 계속</a>
+        <a class="login-option" href="#"><span class="login-icon">K</span>Kakao로 계속</a>
+        <a class="login-option" href="#"><span class="login-icon">@</span>이메일로 가입</a>
+        <div class="save-note">학습 시작, 커뮤니티 활동, profile 설정은 가입/로그인 후 가능합니다.</div>
+      </aside>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-003 B - Planet Path</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .planet-shell { position: relative; z-index: 1; }
+    .planet-layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px; min-height: calc(100vh - 110px); padding-top: 20px; }
+    .planet-main { position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: var(--radius); background: rgba(255,255,255,.07); padding: 18px; }
+    .planet-main .mission-card { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.12); color: #fff; }
+    .planet-main .mission-card p { color: rgba(255,255,255,.7); }
+    .space-map { position: relative; min-height: 720px; margin-top: 16px; border-radius: 22px; background: radial-gradient(circle at 50% 40%, rgba(28,176,246,.16), transparent 30%); }
+    .space-map .node { color: var(--ink); }
+    .space-map .route-line { top: 50%; left: 9%; right: 8%; transform: rotate(-9deg); height: 5px; opacity: .75; }
+    .unlock-card { position: absolute; right: 28px; bottom: 30px; width: 300px; border: 1px solid rgba(255,255,255,.18); border-radius: var(--radius); background: rgba(8,11,25,.74); color: #fff; padding: 16px; backdrop-filter: blur(14px); }
+    .unlock-card h3, .unlock-card p { margin: 0; }
+    .unlock-card p { margin-top: 8px; color: rgba(255,255,255,.7); line-height: 1.5; }
+    .dark-side .status-card, .dark-side .side-menu a { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.12); color: #fff; box-shadow: none; }
+    .dark-side .status-card p, .dark-side .subject-card small { color: rgba(255,255,255,.68); }
+    @media (max-width: 1050px) { .planet-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) {
+      .space-map { display: grid; gap: 10px; min-height: auto; padding: 12px; }
+      .space-map .route-line { display: none; }
+      .space-map .node { position: static; width: 100%; min-height: 72px; transform: none; }
+      .unlock-card { position: static; width: auto; }
+    }
+  </style>
+</head>
+<body class="sample-page dark-space starfield">
+  <div class="sample-shell planet-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Planet Path</span></span>
+      </a>
+      <nav class="nav" aria-label="main navigation">
+        <a class="active" href="#">학습</a>
+        <a href="#">분석</a>
+        <a href="#">커뮤니티</a>
+        <a href="#">마이페이지</a>
+        <button type="button">설정</button>
+      </nav>
+    </header>
+
+    <main class="planet-layout">
+      <aside class="sidebar dark-side" aria-label="Learning sidebar">
+        <section class="subject-card">
+          <small>Subject Switcher</small>
+          <strong>JAVA 입문</strong>
+          <span>Mission path 2 / 5</span>
+          <div class="progress"><i style="width:68%"></i></div>
+        </section>
+        <nav class="side-menu">
+          <a class="active" href="#">과목선택 <span>JAVA</span></a>
+          <a href="#">로드맵 <span>현재</span></a>
+          <a href="#">진행률 <span>68%</span></a>
+          <a href="#">랭킹 <span>15위</span></a>
+        </nav>
+        <section class="status-card">
+          <h3>Nova Guide</h3>
+          <p>반복문 mission을 완료하면 배열 node와 gate 조건이 함께 갱신됩니다.</p>
+        </section>
+        <section class="status-card">
+          <h3>Signal</h3>
+          <p>추천 복습: 조건문 내부 반복문 흐름</p>
+        </section>
+      </aside>
+
+      <section class="planet-main" aria-label="Planet roadmap">
+        <article class="mission-card">
+          <div>
+            <h1>현재 궤도: 반복문</h1>
+            <p>오늘의 mission을 완료하면 coding test gate까지 12% 남습니다.</p>
+          </div>
+          <a class="btn primary" href="#">이어서 학습하기</a>
+        </article>
+        <div class="space-map">
+          <div class="route-line"></div>
+          <div class="node completed" style="left:7%; top:45%">JAVA 입문</div>
+          <div class="node completed" style="left:24%; top:28%">변수와 자료형</div>
+          <div class="node completed" style="left:42%; top:48%">조건문</div>
+          <div class="node current" style="left:58%; top:23%">반복문</div>
+          <div class="node locked" style="left:66%; top:58%">배열</div>
+          <div class="node gate" style="left:82%; top:38%">Gate 80%</div>
+          <aside class="unlock-card">
+            <h3>Gate Status</h3>
+            <p>진행률 80% 달성 시 `코딩테스트 응시`가 primary CTA로 전환됩니다. 현재는 조건 안내만 표시합니다.</p>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

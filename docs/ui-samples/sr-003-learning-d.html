@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-003 D - Minimal Path</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    :root {
+      --path-ink: #111827;
+      --path-muted: #64748b;
+      --path-line: #e2e8f0;
+      --path-soft: #f8fafc;
+      --path-blue: #2563eb;
+      --path-blue-dark: #1d4ed8;
+      --path-violet: #6d5dfc;
+    }
+
+    body {
+      background: var(--path-soft);
+    }
+
+    .path-page {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 80% 16%, rgba(37, 99, 235, 0.08), transparent 30%),
+        linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .path-shell .brand-mark {
+      background: #111827;
+      box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.08);
+    }
+
+    .path-shell .brand-mark::after {
+      border-color: rgba(37, 99, 235, 0.62);
+      border-left-color: transparent;
+      border-right-color: transparent;
+    }
+
+    .path-shell .nav .active {
+      background: rgba(37, 99, 235, 0.09);
+      color: var(--path-blue-dark);
+    }
+
+    .path-layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr) 320px;
+      gap: 16px;
+      min-height: calc(100vh - 112px);
+      padding-top: 16px;
+    }
+
+    .path-panel {
+      border: 1px solid var(--path-line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+    }
+
+    .path-sidebar {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .path-subject {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--path-line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .path-subject small,
+    .path-menu span,
+    .path-card p,
+    .path-task span {
+      color: var(--path-muted);
+    }
+
+    .path-subject strong {
+      font-size: 22px;
+    }
+
+    .path-progress {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e8eef8;
+    }
+
+    .path-progress i {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--path-blue);
+    }
+
+    .path-menu {
+      display: grid;
+      gap: 6px;
+    }
+
+    .path-menu a {
+      display: flex;
+      justify-content: space-between;
+      border-radius: 8px;
+      padding: 11px 12px;
+      color: var(--path-ink);
+      font-weight: 900;
+    }
+
+    .path-menu .active {
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--path-blue-dark);
+    }
+
+    .path-main {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .path-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .path-hero h1,
+    .path-hero p {
+      margin: 0;
+    }
+
+    .path-hero h1 {
+      margin-bottom: 6px;
+      font-size: clamp(28px, 3vw, 44px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .path-hero p {
+      color: var(--path-muted);
+      line-height: 1.55;
+    }
+
+    .lesson-path {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+    }
+
+    .path-row {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      border: 1px solid var(--path-line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+    }
+
+    .path-node {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      border: 2px solid var(--path-line);
+      border-radius: 50%;
+      color: var(--path-muted);
+      font-weight: 900;
+    }
+
+    .path-row.done .path-node {
+      border-color: var(--path-blue);
+      background: var(--path-blue);
+      color: #fff;
+    }
+
+    .path-row.current {
+      border-color: rgba(37, 99, 235, 0.45);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
+    .path-row.current .path-node {
+      border-color: var(--path-blue);
+      color: var(--path-blue-dark);
+    }
+
+    .path-row.gate .path-node {
+      border-color: var(--path-violet);
+      color: var(--path-violet);
+    }
+
+    .path-row h2,
+    .path-row p {
+      margin: 0;
+    }
+
+    .path-row h2 {
+      margin-bottom: 4px;
+      font-size: 18px;
+    }
+
+    .path-row p {
+      color: var(--path-muted);
+      line-height: 1.45;
+    }
+
+    .path-pill {
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--path-blue-dark);
+      font-size: 12px;
+      font-weight: 900;
+      padding: 7px 10px;
+      white-space: nowrap;
+    }
+
+    .path-status {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .path-card {
+      display: grid;
+      gap: 9px;
+      border: 1px solid var(--path-line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .path-card h3,
+    .path-card p {
+      margin: 0;
+    }
+
+    .path-task {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid var(--path-line);
+      padding-top: 10px;
+      font-weight: 900;
+    }
+
+    @media (max-width: 1120px) {
+      .path-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .path-hero,
+      .path-row {
+        grid-template-columns: 1fr;
+      }
+
+      .path-row .path-pill {
+        width: fit-content;
+      }
+    }
+  </style>
+</head>
+<body class="sample-page path-page">
+  <div class="sample-shell path-shell">
+    <header class="topbar path-panel" style="padding:0 18px">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Minimal Path</span></span>
+      </a>
+      <nav class="nav" aria-label="main navigation">
+        <a class="active" href="#">학습</a>
+        <a href="#">분석</a>
+        <a href="#">커뮤니티</a>
+        <a href="#">마이페이지</a>
+        <button type="button">설정</button>
+      </nav>
+    </header>
+
+    <main class="path-layout">
+      <aside class="path-sidebar path-panel" aria-label="Learning sidebar">
+        <section class="path-subject">
+          <small>현재 과목</small>
+          <strong>JAVA 입문</strong>
+          <span>Level 2 · 진행률 68%</span>
+          <div class="path-progress"><i style="width:68%"></i></div>
+        </section>
+        <nav class="path-menu">
+          <a class="active" href="#">학습 경로 <span>현재</span></a>
+          <a href="#">오답 복습 <span>5</span></a>
+          <a href="#">랭킹 <span>15위</span></a>
+          <a href="#">과목 변경 <span>3</span></a>
+        </nav>
+      </aside>
+
+      <section class="path-main">
+        <article class="path-hero path-panel">
+          <div>
+            <h1>다음 미션: 반복문</h1>
+            <p>짧은 개념, 10문항, 즉시 feedback. 완료하면 test gate까지 12% 남습니다.</p>
+          </div>
+          <a class="btn minimal" href="#">이어서 학습하기</a>
+        </article>
+
+        <section class="lesson-path path-panel" aria-label="Learning path">
+          <article class="path-row done">
+            <div class="path-node">1</div>
+            <div><h2>JAVA 입문</h2><p>기초 문법과 실행 흐름을 확인했습니다.</p></div>
+            <span class="path-pill">복습 가능</span>
+          </article>
+          <article class="path-row done">
+            <div class="path-node">2</div>
+            <div><h2>변수와 자료형</h2><p>타입, 변수 선언, 간단한 출력 문제를 완료했습니다.</p></div>
+            <span class="path-pill">완료</span>
+          </article>
+          <article class="path-row current">
+            <div class="path-node">3</div>
+            <div><h2>반복문</h2><p>for, while, break, continue를 짧은 문제 loop로 학습합니다.</p></div>
+            <span class="path-pill">오늘의 미션</span>
+          </article>
+          <article class="path-row">
+            <div class="path-node">4</div>
+            <div><h2>배열</h2><p>반복문 mission 완료 후 unlock됩니다.</p></div>
+            <span class="path-pill">잠김</span>
+          </article>
+          <article class="path-row gate">
+            <div class="path-node">G</div>
+            <div><h2>Coding Test Gate</h2><p>진행률 80% 달성 시 `코딩테스트 응시` CTA가 활성화됩니다.</p></div>
+            <span class="path-pill">68 / 80%</span>
+          </article>
+        </section>
+      </section>
+
+      <aside class="path-status path-panel" aria-label="Status panel">
+        <article class="path-card">
+          <h3>3일 연속 학습 중</h3>
+          <p>출석은 랭킹 점수에 반영되지 않습니다.</p>
+        </article>
+        <article class="path-card">
+          <h3>오늘의 Quest</h3>
+          <p>조건문 문제 10개 중 6개 완료</p>
+          <div class="path-progress"><i style="width:60%"></i></div>
+          <div class="path-task"><span>남은 문제</span><strong>4개</strong></div>
+        </article>
+        <article class="path-card">
+          <h3>AI Signal Preview</h3>
+          <p>약점: 중첩 반복문. 추천 복습: 조건문 + 반복문 조합</p>
+          <a class="btn ghost" href="#">분석 자세히 보기</a>
+        </article>
+      </aside>
+    </main>
+  </div>
+</body>
+</html>
