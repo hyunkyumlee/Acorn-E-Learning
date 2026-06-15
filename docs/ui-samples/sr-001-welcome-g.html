@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-001 G - Glacier Orbit</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    body.glacier-page {
+      --point: #8ee6ff;
+      --point-2: #d8f5ff;
+      --point-3: #86a8ff;
+      --paper: #f7fbff;
+      --muted-space: rgba(247, 251, 255, .7);
+      background:
+        radial-gradient(circle at 70% 18%, rgba(142, 230, 255, .18), transparent 30%),
+        radial-gradient(circle at 20% 82%, rgba(134, 168, 255, .16), transparent 24%),
+        linear-gradient(140deg, #07101e 0%, #131d36 56%, #07121f 100%);
+      color: var(--paper);
+    }
+
+    .glacier-shell { position: relative; z-index: 1; }
+    .glacier-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(390px, .98fr); gap: 46px; align-items: center; min-height: calc(100vh - 124px); padding: 34px 4vw 46px; }
+    .glacier-copy { display: grid; gap: 24px; max-width: 760px; }
+    .glacier-title { margin: 0; font-size: clamp(46px, 6vw, 86px); line-height: .98; letter-spacing: 0; }
+    .glacier-copy p { margin: 0; color: var(--muted-space); font-size: clamp(17px, 2vw, 22px); line-height: 1.6; word-break: keep-all; }
+    .glacier-primary { border-color: rgba(142,230,255,.75); background: var(--point); color: #041820; box-shadow: 0 16px 30px rgba(142,230,255,.18); }
+    .glacier-login { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 420px; }
+    .glacier-login .btn { border-color: rgba(255,255,255,.24); color: var(--muted-space); box-shadow: none; }
+
+    .glacier-visual { position: relative; min-height: 560px; }
+    .glacier-glass {
+      position: absolute;
+      inset: 30px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(216,245,255,.18), transparent 34%),
+        linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.035));
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 30px 70px rgba(0,0,0,.28);
+    }
+
+    .glacier-planet {
+      position: absolute;
+      left: 50%;
+      top: 148px;
+      width: 222px;
+      height: 222px;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      background:
+        radial-gradient(circle at 32% 28%, white 0 10%, transparent 11%),
+        linear-gradient(135deg, var(--point-2), var(--point), var(--point-3));
+      box-shadow: inset -24px -30px 42px rgba(0,0,0,.2), 0 0 44px rgba(142,230,255,.22);
+      animation: glacierFloat 5.8s ease-in-out infinite;
+    }
+
+    .glacier-lens {
+      position: absolute;
+      inset: 110px 70px;
+      border: 2px solid rgba(216,245,255,.28);
+      border-top-color: rgba(142,230,255,.6);
+      border-radius: 50%;
+      transform: rotate(12deg);
+      animation: glacierLens 8s ease-in-out infinite alternate;
+    }
+
+    .glacier-shard {
+      position: absolute;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(216,245,255,.62), transparent);
+      height: 3px;
+      animation: glacierStreak 4s ease-in-out infinite;
+    }
+    .glacier-shard.s1 { left: 62px; top: 116px; width: 148px; }
+    .glacier-shard.s2 { right: 64px; bottom: 132px; width: 190px; animation-delay: 1.2s; }
+    .glacier-shard.s3 { left: 118px; bottom: 86px; width: 118px; animation-delay: 2s; }
+
+    .glacier-guide {
+      position: absolute;
+      right: 28px;
+      top: 76px;
+      width: min(270px, 48%);
+      border: 1px solid rgba(142,230,255,.24);
+      border-radius: 8px;
+      background: rgba(5,13,28,.84);
+      padding: 16px;
+      backdrop-filter: blur(12px);
+    }
+    .glacier-guide strong { display: block; margin-bottom: 6px; color: var(--point); }
+    .glacier-guide span { color: var(--muted-space); font-size: 14px; line-height: 1.5; }
+
+    @keyframes glacierFloat { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -16px); } }
+    @keyframes glacierLens { from { transform: rotate(8deg) scale(.98); } to { transform: rotate(18deg) scale(1.03); } }
+    @keyframes glacierStreak { 0%, 100% { opacity: .26; transform: translateX(-8px); } 50% { opacity: .78; transform: translateX(12px); } }
+
+    @media (max-width: 980px) { .glacier-layout { grid-template-columns: 1fr; } .glacier-visual { min-height: 520px; } }
+    @media (max-width: 640px) { .glacier-layout { padding-inline: 0; } .glacier-login { grid-template-columns: 1fr; } .glacier-glass { inset: 18px 0; } .glacier-guide { width: min(250px, 70%); } }
+  </style>
+</head>
+<body class="sample-page glacier-page starfield">
+  <div class="sample-shell glacier-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html"><span class="brand-mark"></span><span class="brand-title"><strong>Knowva</strong><span>Glacier Orbit</span></span></a>
+      <nav class="nav" aria-label="welcome navigation"><a class="active" href="#">웰컴</a><a href="#">튜토리얼</a><a href="#">로그인</a></nav>
+    </header>
+    <main class="glacier-layout">
+      <section class="glacier-copy">
+        <span class="eyebrow"><i class="dot"></i> 차분한 첫 진입</span>
+        <h1 class="glacier-title">학습 궤도를<br>맑은 빛으로<br>정렬하세요.</h1>
+        <p>차가운 cyan 계열로 부담을 낮춘 버전입니다. 정보 밀도를 줄이고, 얇은 렌즈와 움직이는 빛줄기로 첫 화면의 UI 감각을 살렸습니다.</p>
+        <div class="btn-row"><a class="btn glacier-primary" href="#">튜토리얼 시작</a><a class="btn dark" href="#">바로 로그인하기</a></div>
+        <div class="glacier-login"><a class="btn ghost" href="#">Google로 계속</a><a class="btn ghost" href="#">Kakao로 계속</a></div>
+      </section>
+      <section class="glacier-visual" aria-label="Knowva glacier orbit visual">
+        <div class="glacier-glass"></div><div class="glacier-lens"></div><div class="glacier-planet"></div><div class="glacier-shard s1"></div><div class="glacier-shard s2"></div><div class="glacier-shard s3"></div>
+        <aside class="glacier-guide"><strong>Nova Guide</strong><span>복습 node와 다음 mission을 조용히 띄워주는 보조 UI입니다.</span></aside>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

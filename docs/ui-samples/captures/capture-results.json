@@ -1,0 +1,72 @@
+[
+  {
+    "name": "sr-001-e-ion-launch",
+    "file": "sr-001-welcome-e.html",
+    "output": "/Users/hyunkyumlee/Documents/Acorn-E-Learning/docs/ui-samples/captures/sr-001-e-ion-launch.png",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "title": "SR-001 E - Ion Launch",
+      "width": 1440,
+      "height": 960,
+      "overflowX": 0,
+      "overflowY": 0
+    }
+  },
+  {
+    "name": "sr-001-f-solar-bloom",
+    "file": "sr-001-welcome-f.html",
+    "output": "/Users/hyunkyumlee/Documents/Acorn-E-Learning/docs/ui-samples/captures/sr-001-f-solar-bloom.png",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "title": "SR-001 F - Solar Bloom",
+      "width": 1440,
+      "height": 960,
+      "overflowX": 0,
+      "overflowY": 0
+    }
+  },
+  {
+    "name": "sr-001-g-glacier-orbit",
+    "file": "sr-001-welcome-g.html",
+    "output": "/Users/hyunkyumlee/Documents/Acorn-E-Learning/docs/ui-samples/captures/sr-001-g-glacier-orbit.png",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "title": "SR-001 G - Glacier Orbit",
+      "width": 1440,
+      "height": 960,
+      "overflowX": 0,
+      "overflowY": 0
+    }
+  },
+  {
+    "name": "sr-001-h-mint-nebula",
+    "file": "sr-001-welcome-h.html",
+    "output": "/Users/hyunkyumlee/Documents/Acorn-E-Learning/docs/ui-samples/captures/sr-001-h-mint-nebula.png",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "title": "SR-001 H - Mint Nebula",
+      "width": 1440,
+      "height": 960,
+      "overflowX": 0,
+      "overflowY": 0
+    }
+  },
+  {
+    "name": "sr-001-i-cobalt-pulse",
+    "file": "sr-001-welcome-i.html",
+    "output": "/Users/hyunkyumlee/Documents/Acorn-E-Learning/docs/ui-samples/captures/sr-001-i-cobalt-pulse.png",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "title": "SR-001 I - Cobalt Pulse",
+      "width": 1440,
+      "height": 960,
+      "overflowX": 0,
+      "overflowY": 0
+    }
+  }
+]
