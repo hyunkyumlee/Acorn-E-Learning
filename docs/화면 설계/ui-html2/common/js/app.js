@@ -2,6 +2,7 @@
   const body = document.body;
   const basePath = normalizeBase(body.dataset.basePath || "./");
   const screenId = body.dataset.screen || "index";
+  const forcedTheme = ["dark", "light"].includes(body.dataset.forceTheme) ? body.dataset.forceTheme : "";
 
   const routes = [
     ["sr-001", "SR-001", "웰컴/튜토리얼", "screens/welcome/index.html", "welcome", "비로그인 소개, 튜토리얼, 가입/로그인 유도"],
@@ -11,18 +12,46 @@
     ["sr-004", "SR-004", "초기 설정", "screens/learning/onboarding.html", "learning", "언어, 목표, 시작점 선택"],
     ["sr-005", "SR-005", "이론 학습", "screens/learning/curriculum.html", "learning", "짧은 개념, 예시 코드, 바로 풀기"],
     ["sr-006", "SR-006", "일반 문제풀이", "screens/learning/practice.html", "learning", "short loop, 즉시 피드백, AI 미사용"],
-    ["sr-007", "SR-007", "오답 복습", "screens/learning/review.html", "learning", "복습 mission, 반복 오답, 해설"],
+    ["sr-007", "SR-007", "오답 복습", "screens/learning/review.html", "learning", "오답 복습 요약, 다시 풀기, 반복 오답"],
+    ["sr-007-list", "SR-007", "오답 목록", "screens/learning/review-list.html", "learning", "오답 목록 3열 카드, 문제 내용 확인"],
     ["sr-008", "SR-008", "코딩테스트", "screens/exam/coding-test.html", "learning", "좌우 2분할, 3문항 일괄 제출, AI 채점"],
     ["sr-009", "SR-009", "AI 분석", "screens/analysis/index.html", "analysis", "기본 분석과 premium 분석 분리"],
     ["sr-010", "SR-010", "커뮤니티 홈", "screens/community/index.html", "community", "자유게시판 진입, 인기글, 커뮤니티 프로필"],
     ["sr-010-board", "SR-010", "게시판 글 목록", "screens/community/board.html", "community", "언어별 게시판, 전체/자유/질문/공부 일지 필터"],
+    ["sr-010-detail", "SR-010", "게시글 상세", "screens/community/detail.html", "community", "본문, 댓글, 대댓글, 신고"],
     ["sr-010-write", "SR-010", "게시글 작성", "screens/community/write.html", "community", "게시판 안에서 진입하는 글쓰기 전용 화면"],
+    ["sr-010-edit", "SR-010", "게시글 수정", "screens/community/edit.html", "community", "작성 후 수정 화면"],
     ["sr-010-profile", "SR-010", "커뮤니티 프로필", "screens/community/profile.html", "community", "나의 블로그형 커뮤니티 프로필"],
-    ["sr-011", "SR-011", "결제", "screens/payment/index.html", "analysis", "더미 결제, 결제 상태, 분석 접근"],
+    ["sr-011", "SR-011", "결제 선택", "screens/payment/index.html", "analysis", "Premium 결제 수단 선택"],
+    ["sr-011-card", "SR-011", "신용카드 결제", "screens/payment/card.html", "analysis", "카드 정보 입력, 주문 정보"],
+    ["sr-011-bank", "SR-011", "무통장 입금", "screens/payment/bank.html", "analysis", "계좌 안내, 입금자 정보"],
+    ["sr-011-complete", "SR-011", "결제 완료", "screens/payment/complete.html", "analysis", "결제 완료 후 홈 이동"],
+    ["sr-011-recommend", "SR-011", "콘텐츠 추천", "screens/payment/recommendations.html", "analysis", "과목 영상, 기사, 개발 콘텐츠 추천"],
     ["sr-012", "SR-012", "마이페이지", "screens/mypage/index.html", "mypage", "학습/커뮤니티 활동 요약"],
-    ["sr-013", "SR-013", "관리자", "screens/admin/dashboard.html", "admin", "관리자 홈, 통계, 운영 관리"],
+    ["sr-013", "SR-013", "관리자 홈", "screens/admin/dashboard.html", "admin", "운영 요약, 빠른 이동, 최근 항목"],
+    ["sr-013-login", "SR-013", "관리자 로그인", "screens/admin/login.html", "admin", "ROLE_ADMIN 로그인"],
+    ["sr-013-stats", "SR-013", "관리자 통계", "screens/admin/stats.html", "admin", "필터, 통계 카드, 그래프, 테이블"],
+    ["sr-013-courses", "SR-013", "과목/커리큘럼 관리", "screens/admin/courses.html", "admin", "과목, 커리큘럼, 활성화 관리"],
+    ["sr-013-theory", "SR-013", "이론 자료 관리", "screens/admin/theory.html", "admin", "이론 자료 CRUD"],
+    ["sr-013-problems", "SR-013", "일반 문제 관리", "screens/admin/problems.html", "admin", "문제, 정답, 해설, 난이도 관리"],
+    ["sr-013-users", "SR-013", "사용자 관리", "screens/admin/users.html", "admin", "사용자 상태와 권한 관리"],
+    ["sr-013-community", "SR-013", "커뮤니티 관리", "screens/admin/community.html", "admin", "게시글/댓글 운영 관리"],
+    ["sr-013-reports", "SR-013", "신고 관리", "screens/admin/reports.html", "admin", "신고 처리와 조치 기록"],
+    ["sr-013-notices", "SR-013", "공지사항 관리", "screens/admin/notices.html", "admin", "공지 등록, 수정, 공개 상태"],
     ["sr-014", "SR-014", "랭킹", "screens/ranking/index.html", "learning", "출석 제외 통합 랭킹"],
-    ["sr-015", "SR-015", "설정", "screens/settings/index.html", "settings", "회원 정보, 보안, 소셜, 시스템, 결제"]
+    ["sr-015", "SR-015", "설정", "screens/settings/index.html", "settings", "독립 설정 홈"],
+    ["sr-015-profile", "SR-015", "회원 정보", "screens/settings/profile.html", "settings", "닉네임, 이메일, 가입일, 학습 언어"],
+    ["sr-015-security", "SR-015", "이메일/비밀번호", "screens/settings/security.html", "settings", "로그인 이메일과 비밀번호 변경"],
+    ["sr-015-social", "SR-015", "연동된 소셜 계정", "screens/settings/social.html", "settings", "Google/Kakao/Naver 연결 상태"],
+    ["sr-015-system", "SR-015", "시스템 설정", "screens/settings/system.html", "settings", "알림, 테마, 접근성"],
+    ["sr-015-payment", "SR-015", "결제 정보", "screens/settings/payment.html", "settings", "Premium 이용권과 결제 내역"],
+    ["sample-learning-main", "EX-001", "학습 메인 예시", "screens/samples/learning-main.html", "learning", "AI티 제거 예시 · 학습 화면"],
+    ["sample-community-board", "EX-002", "커뮤니티 게시판 예시", "screens/samples/community-board.html", "community", "AI티 제거 예시 · 커뮤니티"],
+    ["sample-settings-index", "EX-003", "설정 예시", "screens/samples/settings-index.html", "settings", "AI티 제거 예시 · 설정"],
+    ["sample-admin-stats", "EX-004", "관리자 통계 예시", "screens/samples/admin-stats.html", "admin", "AI티 제거 예시 · 관리자 통계"],
+    ["sample-dark-orbital-ink", "EX-D1", "다크 샘플 A", "screens/samples/dark/orbital-ink.html", "learning", "Ion Cyan 우주 다크 샘플 · 기본안"],
+    ["sample-dark-deep-observatory", "EX-D2", "다크 샘플 B", "screens/samples/dark/deep-observatory.html", "learning", "Ion Cyan 우주 다크 샘플 · 깊은 배경"],
+    ["sample-dark-moon-dust", "EX-D3", "다크 샘플 C", "screens/samples/dark/moon-dust.html", "learning", "Ion Cyan 우주 다크 샘플 · 차분한 배경"]
   ].map(([id, sr, title, path, menu, desc]) => ({ id, sr, title, path, menu, desc }));
 
   const topNav = [
@@ -51,6 +80,7 @@
   }
 
   function readStoredTheme() {
+    if (forcedTheme) return forcedTheme;
     try {
       return localStorage.getItem("knowva-ui-theme") === "dark" ? "dark" : "light";
     } catch {
@@ -834,33 +864,7 @@ score > 60  // 60점 제외</pre>
     },
 
     "sr-015"() {
-      return shell("settings", `
-        <section class="settings-overlay-demo">
-          <div class="dimmed-quiz">
-            <div class="quiz-top"><span class="close-link">×</span><strong>3 / 10</strong>${progress(30)}</div>
-            <h2>다음 중 GoF 디자인 패턴에 대한 설명으로 옳지 않은 것은?</h2>
-            <div class="choice-list">
-              ${choiceRow("A", "Singleton 패턴은 클래스의 인스턴스가 오직 하나만 생성되도록 보장한다.")}
-              ${choiceRow("B", "Factory Method 패턴은 객체 생성을 서브 클래스에 위임한다.")}
-              ${choiceRow("C", "Observer 패턴은 상태 변화가 관련 객체들에게 전파되도록 한다.")}
-            </div>
-          </div>
-          <div class="settings-dialog">
-            <aside class="settings-menu">
-              <a href="${href("screens/learning/practice.html")}" class="close-link">×</a>
-              <h2>설정</h2>
-              ${list([["회원 정보", "닉네임, 관심 과목, 목표"], ["이메일/비밀번호", "인증 정보 관리"], ["소셜 계정", "Google/Kakao 연동"], ["시스템", "테마, 알림, 접근성"], ["결제 정보", "더미 결제 상태"], ["로그아웃", "현재 세션 종료"]])}
-            </aside>
-            ${tabs("settings", [
-              { id: "profile", label: "회원 정보", html: `<div class="settings-summary"><strong>nova_learner</strong><span>Java backend · 하루 20분 목표 · Level 12</span><span class="badge">프로필 공개</span></div><form class="form-grid"><label>닉네임<input class="field" value="nova_learner"></label><label>관심 과목<input class="field" value="Java backend"></label><label>목표<input class="field" value="하루 20분"></label><div class="button-row">${button("저장", "screens/settings/index.html", "primary")}</div></form>` },
-              { id: "security", label: "이메일/비밀번호", html: `<form class="form-grid"><label>이메일<input class="field" value="learner@k***.dev"></label><label>새 비밀번호<input class="field" type="password" value="password"></label><label>새 비밀번호 확인<input class="field" type="password" value="password"></label><div class="button-row">${button("변경", "screens/settings/index.html", "primary")}</div></form>` },
-              { id: "social", label: "소셜 계정", html: `<div class="two-col">${card("Google", "연동됨 · c***@gmail.com", "Connected")}${card("Kakao", "연동 가능", "Available", button("연동", "screens/settings/index.html"))}</div>` },
-              { id: "system", label: "시스템 설정", html: `<div class="three-col">${card("테마", "헤더의 모드 전환과 저장된 사용자 선호를 화면 전체에 적용한다.", "Theme")}${card("알림", "mission, gate unlock, 분석 완료 알림.", "Notification")}${card("접근성", "reduced motion, focus ring, label 유지.", "A11y")}</div>` },
-              { id: "payment", label: "결제 정보", html: `${card("Premium 상태", "더미 결제 완료. 실제 PG 결제 없음.", "Dummy paid", button("결제 화면", "screens/payment/index.html", "primary"))}` },
-              { id: "logout", label: "로그아웃", html: `${card("로그아웃", "현재 세션을 종료하고 로그인 화면으로 이동한다.", "Session", button("로그아웃", "screens/auth/login.html", "warn"))}` }
-            ])}
-          </div>
-        </section>`, { showTopbar: false });
+      return settingsProfilePage();
     }
   };
 
@@ -913,6 +917,961 @@ score > 60  // 60점 제외</pre>
     </div>`;
   }
 
+  function figmaAction(label, path, tone = "") {
+    const className = tone === "primary" ? "button primary" : tone === "danger" ? "button warn" : "button";
+    return `<a class="${className}" href="${href(path)}">${label}</a>`;
+  }
+
+  function figmaHeader(title = "헤더 부분 입니다.") {
+    return `<div class="figma-header-bar"><span class="tag">Knowva</span><strong>${title}</strong></div>`;
+  }
+
+  function reviewCard(title, lead, rows, action) {
+    return `<article class="figma-review-card">
+      <h2>${title}</h2>
+      <p>${lead}</p>
+      <div class="figma-review-box">${rows.map((row) => `<span>· ${row}</span>`).join("")}</div>
+      ${action}
+    </article>`;
+  }
+
+  function reviewSummaryPage() {
+    return shell("learning", `
+      <section class="figma-review-screen">
+        <header class="figma-review-head">
+          <div><h1>오답 복습</h1><p>틀린 문제를 확인하고 복습을 시작하세요.</p></div>
+          ${figmaAction("끝내기", "screens/learning/main.html")}
+        </header>
+        <div class="figma-review-grid">
+          ${reviewCard("오답 목록 확인", "최근에 틀린 문제를 한눈에 확인합니다.", ["GoF 디자인 패턴 - Singleton", "REST API 상태 코드", "자료구조 - 해시 테이블"], figmaAction("오답 목록 보기", "screens/learning/review-list.html"))}
+          ${reviewCard("다시 풀기", "틀린 문제를 다시 풀어 실력을 키웁니다.", ["복습 대기 6문제", "오늘 복습 완료 2문제", "평균 정답률 68%"], figmaAction("다시 풀기 시작", "screens/learning/practice.html"))}
+          ${reviewCard("해설 확인", "틀린 문제의 해설을 바로 확인합니다.", ["Strategy 패턴 해설", "HTTP 404 vs 500", "해시 충돌 처리 방법"], figmaAction("해설 모아보기", "screens/learning/review-list.html"))}
+          ${reviewCard("반복 오답 표시", "여러 번 틀린 문제를 우선 복습합니다.", ["반복 오답 3문제", "Observer 패턴 (3회)", "JPA 연관관계 (2회)"], figmaAction("반복 오답 풀기", "screens/learning/practice.html"))}
+        </div>
+      </section>`, { showTopbar: false });
+  }
+
+  function reviewListPage() {
+    const cards = [
+      ["GoF 디자인 패턴 - Singleton", "Singleton 패턴의 정의를 빈칸에 작성하세요.", "객관식"],
+      ["REST API 상태 코드", "404와 500의 차이를 설명하세요.", "서술형"],
+      ["자료구조 - 해시 테이블", "충돌 처리 방식을 고르세요.", "객관식"],
+      ["SQL JOIN", "LEFT JOIN 결과를 예측하세요.", "코드 결과"],
+      ["JPA 연관관계", "N+1 발생 조건을 찾으세요.", "개념"],
+      ["CSS 선택자", "우선순위가 높은 선택자를 고르세요.", "객관식"],
+      ["Python 반복문", "출력 결과를 예측하세요.", "코드 결과"],
+      ["Java 예외 처리", "checked exception을 구분하세요.", "개념"],
+      ["HTML form", "label과 input 연결을 확인하세요.", "접근성"]
+    ];
+
+    return shell("learning", `
+      <section class="figma-review-screen">
+        <header class="figma-review-head">
+          <div><h1>오답 복습</h1><p>틀린 문제를 확인하고 복습을 시작하세요.</p></div>
+          ${figmaAction("끝내기", "screens/learning/main.html")}
+        </header>
+        <article class="figma-review-list-panel">
+          <h2>오답 목록 확인</h2>
+          <p>최근에 틀린 문제를 한눈에 확인합니다.</p>
+          <div class="figma-wrong-grid">
+            ${cards.map(([meta, title, type], index) => `<a class="figma-wrong-card" href="${href("screens/learning/practice.html")}">
+              <span>· ${meta}</span>
+              <strong>${title}</strong>
+              <em>${type}</em>
+              <small>${index + 1}번 오답</small>
+            </a>`).join("")}
+          </div>
+          ${figmaAction("뒤로 가기", "screens/learning/review.html")}
+        </article>
+      </section>`, { showTopbar: false });
+  }
+
+  const figmaCourses = [
+    ["java", "JAVA"],
+    ["sql", "SQL"],
+    ["python", "Python"],
+    ["web", "HTML CSS"]
+  ];
+
+  const boardKinds = [
+    ["free", "자유 게시판"],
+    ["question", "질문 게시판"],
+    ["study-log", "공부 일지"]
+  ];
+
+  function figmaCourseRail(active = "java") {
+    return `<aside class="figma-course-rail">
+      <a class="hamburger" href="${href("screens/community/index.html")}" aria-label="커뮤니티 홈"><span></span><span></span><span></span></a>
+      ${figmaCourses.map(([id, label]) => `<a class="figma-course-pill${activeClass(id === active)}" href="${href("screens/community/board.html")}">${label}</a>`).join("")}
+    </aside>`;
+  }
+
+  function figmaBoardTabs(active = "free") {
+    return `<nav class="figma-board-tabs" aria-label="게시판 종류">
+      ${boardKinds.map(([id, label]) => `<a class="${activeClass(id === active)}" href="${href("screens/community/board.html#")}${id}">${label}</a>`).join("")}
+    </nav>`;
+  }
+
+  function figmaPostList() {
+    const posts = [
+      ["조건문 edge case 정리", "김자바", "방금 전", "댓글 12", "48"],
+      ["SQL JOIN 시각화 자료", "signal.sql", "10분 전", "댓글 8", "33"],
+      ["오늘 학습 일지", "nova_learner", "22분 전", "댓글 5", "17"],
+      ["반복문 문제 풀이 팁", "loop.dev", "1시간 전", "댓글 3", "14"]
+    ];
+
+    return `<div class="post-list">
+      ${posts.map(([title, author, time, replies, likes]) => `<a class="post-row community-post-row" href="${href("screens/community/detail.html")}">
+        <strong>${title}</strong>
+        <span>${author} · ${time} · ${replies} · 좋아요 ${likes}</span>
+      </a>`).join("")}
+    </div>`;
+  }
+
+  function figmaHotPanel() {
+    return `<aside class="panel figma-hot-panel">
+      <span class="tag">HOT</span>
+      <a href="${href("screens/community/detail.html")}">Java 컬렉션 정리</a>
+      <a href="${href("screens/community/detail.html")}">면접 질문 복습</a>
+      <a href="${href("screens/community/detail.html")}">공부 일지 공유</a>
+    </aside>`;
+  }
+
+  function communityFigmaShell(content, activeCourse = "java", title = "자유게시판", lead = "학습 중 떠오른 이야기와 공부 기록을 자유롭게 나눕니다.") {
+    return shell("community", `
+      ${pageHero("SR-010 · 커뮤니티", title, lead)}
+      <section class="community-layout figma-community-page">
+        ${communityRail(activeCourse)}
+        <main class="community-board figma-community-main">
+          ${content}
+        </main>
+      </section>`);
+  }
+
+  function communityHomePage() {
+    return communityFigmaShell(`
+      <section class="figma-board-stage">
+        <div class="search-strip">
+          <input class="field" value="검색어를 입력하세요" aria-label="커뮤니티 검색">
+          ${figmaAction("글쓰기", "screens/community/write.html", "primary")}
+        </div>
+        ${communityFilters("free")}
+        <div class="board-grid figma-board-grid">
+          <article class="panel figma-board-panel">
+            <h2>자유 게시판</h2>
+            <p>학습 중 떠오른 이야기와 공부 기록을 자유롭게 나눕니다.</p>
+            ${figmaPostList()}
+          </article>
+          ${figmaHotPanel()}
+        </div>
+      </section>`);
+  }
+
+  function communityBoardPage() {
+    return communityFigmaShell(`
+      <section class="figma-board-stage">
+        <div class="search-strip">
+          <input class="field" value="검색어를 입력하세요" aria-label="게시판 검색">
+          ${figmaAction("글쓰기", "screens/community/write.html", "primary")}
+        </div>
+        ${communityFilters("free")}
+        <div class="board-grid figma-board-grid">
+          <article class="panel figma-board-panel wide">
+            <div class="figma-board-title-row">
+              <div><span class="tag">Java</span><h2>자유 게시판</h2><p>목록에서 글을 선택하면 댓글과 신고가 가능한 상세 화면으로 이동합니다.</p></div>
+              ${figmaAction("내 프로필", "screens/community/profile.html")}
+            </div>
+            ${figmaPostList()}
+          </article>
+          ${figmaHotPanel()}
+        </div>
+      </section>`);
+  }
+
+  function communityDetailPage() {
+    return communityFigmaShell(`
+      <section class="figma-detail-stage">
+        <article class="panel figma-post-detail">
+          <div class="figma-post-detail-head">
+            <div><span class="tag">자유 게시판</span><h2>조건문 edge case 정리</h2><p>nova_learner · 2026.06.16 · 조회 128</p></div>
+            <div class="figma-action-stack">${figmaAction("수정", "screens/community/edit.html")}${figmaAction("신고", "screens/admin/reports.html", "danger")}</div>
+          </div>
+          <div class="figma-post-body">
+            오늘 조건문 문제를 풀면서 null, empty string, boundary value를 나눠서 생각해야 한다는 걸 정리했습니다. 같은 유형을 풀 때 테스트 케이스를 먼저 적으면 실수가 줄었습니다.
+          </div>
+          <div class="figma-post-actions">${figmaAction("좋아요", "screens/community/detail.html")}${figmaAction("스크랩", "screens/community/detail.html")}${figmaAction("댓글 달기", "screens/community/detail.html#comments", "primary")}</div>
+        </article>
+        <section id="comments" class="panel figma-comment-panel">
+          <h2>댓글</h2>
+          <div class="figma-comment"><strong>signal.sql</strong><p>boundary case를 따로 적어둔 부분이 좋네요.</p><a href="${href("screens/community/detail.html")}">대댓글</a></div>
+          <div class="figma-comment nested"><strong>nova_learner</strong><p>다음 글에는 테스트 케이스 표도 같이 올릴게요.</p><a href="${href("screens/community/detail.html")}">신고</a></div>
+          <form class="figma-comment-write">
+            <input class="field" value="댓글을 입력하세요" aria-label="댓글 입력">
+            <button class="button primary" type="button">작성</button>
+          </form>
+        </section>
+      </section>`, "java", "게시글 상세", "본문, 댓글, 대댓글, 신고 action을 한 화면에서 확인합니다.");
+  }
+
+  function communityWritePage(mode = "write") {
+    const isEdit = mode === "edit";
+    return communityFigmaShell(`
+      <section class="figma-write-stage">
+        <article class="panel figma-write-panel">
+          <div class="figma-board-title-row">
+            <div><h2>${isEdit ? "글 수정" : "글 작성"}</h2><p>JAVA 자유 게시판에 게시할 내용을 작성합니다.</p></div>
+            ${figmaAction("목록", "screens/community/board.html")}
+          </div>
+          <form class="figma-form-grid">
+            <label>작성자<input class="field" value="nova_learner"></label>
+            <label>게시판<select class="field"><option>자유 게시판</option><option>질문 게시판</option><option>공부 일지</option></select></label>
+            <label class="span-2">제목<input class="field" value="${isEdit ? "조건문 edge case 정리" : "오늘의 Java 학습 일지"}"></label>
+            <label class="span-2">내용<textarea class="field">${isEdit ? "조건문 문제를 풀면서 boundary case를 정리했습니다." : "학습한 내용과 질문을 정리합니다."}</textarea></label>
+          </form>
+          <div class="figma-post-actions">${figmaAction(isEdit ? "수정" : "등록", "screens/community/detail.html", "primary")}${figmaAction("취소", "screens/community/board.html")}</div>
+        </article>
+      </section>`, "java", isEdit ? "글 수정" : "글 작성", "선택한 언어/게시판 context를 유지한 채 게시글을 작성합니다.");
+  }
+
+  function communityProfilePage() {
+    return communityFigmaShell(`
+      <section class="figma-profile-stage">
+        <article class="panel figma-profile-card">
+          <span class="avatar large"></span>
+          <h2>nova_learner.log</h2>
+          <p>Java backend 학습 기록과 질문 답변을 모아둔 커뮤니티 프로필</p>
+          <div class="figma-profile-metrics">${metric("12", "작성 글")}${metric("7", "스크랩")}${metric("31", "받은 좋아요")}</div>
+        </article>
+        <article class="panel figma-board-panel">
+          <h2>내가 작성한 글</h2>
+          ${figmaPostList()}
+        </article>
+      </section>`, "java", "나의 커뮤니티 프로필", "커뮤니티 활동만 모아서 보여주는 개인 학습 로그입니다.");
+  }
+
+  function paymentStep(step) {
+    return `<div class="figma-payment-step"><strong>${step}</strong><span></span></div>`;
+  }
+
+  function orderPanel() {
+    return `<aside class="figma-order-panel">
+      <h2>상품 정보</h2>
+      <dl>
+        <div><dt>주문 번호</dt><dd>KNV-20260616-001</dd></div>
+        <div><dt>주문 일시</dt><dd>2026.06.16</dd></div>
+        <div><dt>상품명</dt><dd>상세 분석 이용권</dd></div>
+        <div><dt>결제 금액</dt><dd>9,900원</dd></div>
+      </dl>
+    </aside>`;
+  }
+
+  function paymentShell(content, step = "1 / 2") {
+    return shell("analysis", `<section class="figma-payment-page">${paymentStep(step)}${content}</section>`, { showTopbar: false });
+  }
+
+  function paymentChoicePage() {
+    return paymentShell(`
+      <header class="figma-payment-head"><h1>결제 진행</h1><p>Premium 상세 분석 이용권 결제 수단을 선택합니다.</p></header>
+      <section class="figma-payment-choice">
+        <article class="figma-method-card">
+          <span>VISA</span>
+          <h2>신용카드 결제</h2>
+          <p>카드 정보를 입력하고 결제를 완료합니다.</p>
+          ${figmaAction("신용카드", "screens/payment/card.html", "primary")}
+        </article>
+        <article class="figma-method-card">
+          <span>BANK</span>
+          <h2>무통장 입금</h2>
+          <p>입금자명과 계좌 정보를 확인합니다.</p>
+          ${figmaAction("무통장 입금", "screens/payment/bank.html")}
+        </article>
+        ${orderPanel()}
+      </section>`);
+  }
+
+  function paymentCardPage() {
+    return paymentShell(`
+      <header class="figma-payment-head"><h1>결제 진행</h1><p>신용카드 정보를 입력합니다.</p></header>
+      <section class="figma-payment-layout">
+        <form class="figma-payment-form">
+          <div class="figma-method-row">${figmaAction("VISA", "screens/payment/card.html", "primary")}${figmaAction("무통장 입금", "screens/payment/bank.html")}</div>
+          <div class="figma-form-grid">
+            <label>성<input class="field" value="Lee"></label>
+            <label>이름<input class="field" value="Jeongha"></label>
+            <label class="span-2">카드 번호<input class="field" value="4242 4242 4242 4242"></label>
+            <label>생년 월일<input class="field" value="2000.01.01"></label>
+            <label>CVC<input class="field" value="123"></label>
+          </div>
+          ${figmaAction("결제하기", "screens/payment/complete.html", "primary")}
+        </form>
+        ${orderPanel()}
+      </section>`);
+  }
+
+  function paymentBankPage() {
+    return paymentShell(`
+      <header class="figma-payment-head"><h1>결제 진행</h1><p>무통장 입금 정보를 확인합니다.</p></header>
+      <section class="figma-payment-layout">
+        <form class="figma-payment-form">
+          <div class="figma-method-row">${figmaAction("신용카드", "screens/payment/card.html")}${figmaAction("무통장 입금", "screens/payment/bank.html", "primary")}</div>
+          <div class="figma-form-grid">
+            <label>입금자명<input class="field" value="이정하"></label>
+            <label>입금 금액<input class="field" value="9,900원"></label>
+            <label class="span-2">입금 계좌<input class="field" value="국민 123456-01-987654 KNOWVA"></label>
+          </div>
+          ${figmaAction("결제하기", "screens/payment/complete.html", "primary")}
+        </form>
+        ${orderPanel()}
+      </section>`);
+  }
+
+  function paymentCompletePage() {
+    return paymentShell(`
+      <section class="figma-payment-complete">
+        <h1>결제가 완료 되었습니다!</h1>
+        <p>상세 분석 이용권이 활성화되었습니다.</p>
+        <div class="figma-complete-mark">OK</div>
+        ${figmaAction("홈으로", "screens/analysis/index.html", "primary")}
+      </section>`, "2 / 2");
+  }
+
+  function recommendPage() {
+    const resourceColumn = (title, rows) => `<article class="figma-resource-column"><h2>${title}</h2>${rows.map((row) => `<a href="${href("screens/payment/recommendations.html")}"><span></span><strong>${row}</strong><small>추천 콘텐츠</small></a>`).join("")}</article>`;
+    return shell("analysis", `
+      <section class="figma-resource-page">
+        ${figmaCourseRail("java")}
+        <main>
+          ${figmaHeader("과목 콘텐츠 추천")}
+          <div class="figma-resource-grid">
+            ${resourceColumn("JAVA 영상 추천", ["객체지향 기초", "Spring MVC 흐름", "예외 처리 전략"])}
+            ${resourceColumn("기사 추천", ["개발자 학습 루틴", "백엔드 테스트 전략", "API 설계 사례"])}
+            ${resourceColumn("개발 콘텐츠 추천", ["공식 문서 읽기", "오픈소스 코드 보기", "미니 프로젝트"])}
+          </div>
+        </main>
+      </section>`, { showTopbar: false });
+  }
+
+  const adminNavItems = [
+    ["sr-013", "관리자 홈", "screens/admin/dashboard.html"],
+    ["sr-013-stats", "통계", "screens/admin/stats.html"],
+    ["sr-013-courses", "과목·커리큘럼 관리", "screens/admin/courses.html"],
+    ["sr-013-theory", "이론 자료 관리", "screens/admin/theory.html"],
+    ["sr-013-problems", "일반 문제 관리", "screens/admin/problems.html"],
+    ["sr-013-users", "사용자 관리", "screens/admin/users.html"],
+    ["sr-013-community", "커뮤니티 관리", "screens/admin/community.html"],
+    ["sr-013-reports", "신고 관리", "screens/admin/reports.html"],
+    ["sr-013-notices", "공지사항 관리", "screens/admin/notices.html"]
+  ];
+
+  function adminShell(active, title, content) {
+    return shell("admin", `
+      <section class="figma-admin-page">
+        <aside class="figma-admin-sidebar">
+          <strong>KNOWVA 관리자</strong>
+          <nav>${adminNavItems.map(([id, label, path]) => `<a class="${activeClass(id === active)}" href="${href(path)}">${label}</a>`).join("")}</nav>
+          <a class="figma-admin-logout" href="${href("screens/auth/login.html")}">로그아웃</a>
+        </aside>
+        <main class="figma-admin-main">
+          <header class="figma-admin-top"><h1>${title}</h1><span>관리자 계정 | 오늘 날짜 | 알림</span></header>
+          ${content}
+        </main>
+      </section>`, { showTopbar: false });
+  }
+
+  function adminMetricCards(items) {
+    return `<section class="figma-admin-metrics">${items.map(([label, value, sub]) => `<article><span>${label}</span><strong>${value}</strong><small>${sub}</small></article>`).join("")}</section>`;
+  }
+
+  function adminBars(labels) {
+    return `<div class="figma-admin-chart">${labels.map((label, index) => `<i style="height:${38 + (index * 13) % 48}%"><span>${label}</span></i>`).join("")}</div>`;
+  }
+
+  function adminTable(headers, rows) {
+    return `<div class="figma-admin-table"><table><thead><tr>${headers.map((head) => `<th>${head}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+
+  function adminHomePage() {
+    return adminShell("sr-013", "관리자 홈", `
+      ${adminMetricCards([["전체 사용자 수", "2,847", "12% 지난달 대비"], ["오늘 학습량", "153", "8% 어제 대비"], ["오늘 문제풀이 수", "1,024", "15% 어제 대비"], ["신고 대기 수", "5", "처리 대기 중"]])}
+      <section class="figma-admin-two">
+        <article><h2>일별 사용자 접속량</h2>${adminBars(["6/9", "6/10", "6/11", "6/12", "6/13", "6/14", "6/15"])}</article>
+        <article><h2>과목별 학습 완료 수</h2>${adminBars(["Java", "Python", "SQL", "HTML/CSS", "JS", "자료구조"])}</article>
+      </section>
+      <section class="figma-admin-quick">
+        ${figmaAction("문제 등록", "screens/admin/problems.html", "primary")}
+        ${figmaAction("이론 자료 등록", "screens/admin/theory.html")}
+        ${figmaAction("신고 확인", "screens/admin/reports.html")}
+        ${figmaAction("공지 작성", "screens/admin/notices.html")}
+      </section>
+      <section class="figma-admin-two">
+        ${adminTable(["ID", "내용 요약", "처리 상태", "일시"], [["#R001", "Java 게시글 부적절한 내용", "처리 완료", "06/15"], ["#R002", "욕설 댓글 신고", "검토 중", "06/14"], ["#R003", "광고성 게시글 신고", "대기", "06/13"]])}
+        ${adminTable(["ID", "제목", "상태", "작성일"], [["#N001", "KNOWVA 이용약관 변경 안내", "공개", "06/15"], ["#N002", "6월 시스템 점검 안내", "공개", "06/10"], ["#N003", "신규 과목 업데이트 안내", "공개", "06/05"]])}
+      </section>`);
+  }
+
+  function adminStatsPage() {
+    return adminShell("sr-013-stats", "통계", `
+      <section class="figma-admin-filters"><input class="field" value="일별 / 월별"><input class="field" value="과목별 선택"><input class="field" value="기간 선택"></section>
+      ${adminMetricCards([["가입자 수", "0", ""], ["활성 사용자 수", "0", ""], ["학습 완료 수", "0", ""], ["문제풀이 수", "0", ""], ["시험 응시 수", "0", ""]])}
+      <section class="figma-admin-three">
+        <article>일별 사용량 그래프</article><article>과목별 학습량 그래프</article><article>문제풀이 / 시험 점수 추이</article>
+      </section>
+      <h2 class="figma-admin-section-title">통계 테이블</h2>
+      ${adminTable(["날짜", "과목", "학습 수", "문제풀이 수", "시험 응시 수", "평균 점수"], [["2026-06-12", "Java", "150", "320", "45", "78.5"], ["2026-06-11", "Python", "132", "290", "38", "81.2"], ["2026-06-10", "SQL", "98", "210", "52", "74.0"], ["2026-06-09", "HTML/CSS", "175", "380", "61", "82.7"]])}
+      <div class="figma-pagination"><span>&lt;</span><b>1</b><span>2</span><span>3</span><span>...</span><span>10</span><span>&gt;</span></div>`);
+  }
+
+  function adminManagePage(active, title, config) {
+    return adminShell(active, title, `
+      <section class="figma-admin-filters">${config.filters.map((item) => `<input class="field" value="${item}">`).join("")}${figmaAction(config.cta, config.path, "primary")}</section>
+      ${adminTable(config.headers, config.rows)}
+      <section class="figma-admin-form">
+        <h2>${config.formTitle}</h2>
+        <div class="figma-form-grid">
+          ${config.fields.map((field, index) => `<label class="${index === 1 ? "span-2" : ""}">${field}<input class="field" value=""></label>`).join("")}
+          <label class="span-2">상세 내용<textarea class="field"></textarea></label>
+        </div>
+        <div class="figma-post-actions">${figmaAction("저장", config.path, "primary")}${figmaAction("취소", config.path)}${figmaAction("삭제", config.path, "danger")}</div>
+      </section>`);
+  }
+
+  function adminLoginPage() {
+    return shell("admin", `
+      <section class="figma-admin-login">
+        <form>
+          <h1>KNOWVA 관리자 로그인</h1>
+          <label>관리자 이메일<input class="field" value="admin@knowva.local"></label>
+          <label>비밀번호<input class="field" type="password" value="password"></label>
+          ${figmaAction("로그인", "screens/admin/dashboard.html", "primary")}
+        </form>
+      </section>`, { showTopbar: false });
+  }
+
+  const adminConfigs = {
+    "sr-013-courses": ["과목·커리큘럼 관리", { path: "screens/admin/courses.html", cta: "+ 과목 등록", filters: ["과목명", "활성화 상태"], headers: ["ID", "과목", "커리큘럼 수", "활성화", "관리"], rows: [["#C001", "Java", "12", "활성", "수정"], ["#C002", "SQL", "8", "활성", "수정"], ["#C003", "Python", "9", "비활성", "수정"]], formTitle: "과목 / 커리큘럼 등록 폼", fields: ["과목명", "커리큘럼명", "정렬 순서", "활성화 상태"] }],
+    "sr-013-theory": ["이론 자료 관리", { path: "screens/admin/theory.html", cta: "+ 자료 등록", filters: ["과목", "커리큘럼", "활성화 상태"], headers: ["자료 ID", "과목", "제목", "상태", "관리"], rows: [["#T001", "Java", "조건문 개념", "활성", "수정"], ["#T002", "SQL", "JOIN 기초", "활성", "수정"], ["#T003", "HTML/CSS", "Flexbox", "비활성", "수정"]], formTitle: "이론 자료 등록 / 수정 폼", fields: ["과목", "제목", "노출 순서", "활성화 상태"] }],
+    "sr-013-problems": ["일반 학습 문제 관리", { path: "screens/admin/problems.html", cta: "+ 문제 등록", filters: ["과목", "커리큘럼", "문제 유형", "난이도", "활성화 상태"], headers: ["문제 ID", "과목", "커리큘럼", "유형", "문제 내용 요약", "난이도", "활성화", "관리"], rows: [["#001", "Java", "변수와 자료형", "객관식", "정수형 변수 선언 키워드", "하", "활성", "수정"], ["#002", "Java", "조건문", "빈칸", "if 문 조건식", "중", "활성", "수정"], ["#003", "Python", "반복문", "코드 결과", "출력 결과 예측", "중", "활성", "수정"]], formTitle: "문제 등록 / 수정 폼", fields: ["문제 유형 선택", "문제 내용 입력", "선택지 입력 영역", "정답 입력", "난이도 선택"] }],
+    "sr-013-users": ["사용자 관리", { path: "screens/admin/users.html", cta: "사용자 검색", filters: ["이메일", "권한", "상태"], headers: ["사용자 ID", "닉네임", "이메일", "권한", "상태", "가입일", "관리"], rows: [["#U001", "nova_learner", "jeongha@example.com", "USER", "활성", "2026.06.01", "상세"], ["#U002", "orbit.dev", "orbit@example.com", "PREMIUM", "활성", "2026.05.18", "상세"]], formTitle: "사용자 상태 변경", fields: ["사용자", "권한", "상태", "메모"] }],
+    "sr-013-community": ["커뮤니티 관리", { path: "screens/admin/community.html", cta: "게시글 검색", filters: ["게시판", "작성자", "상태"], headers: ["게시글 ID", "게시판", "제목", "작성자", "댓글", "상태", "관리"], rows: [["#P001", "자유", "조건문 edge case", "nova_learner", "12", "공개", "상세"], ["#P002", "공부 일지", "SQL JOIN 정리", "signal.sql", "8", "공개", "상세"]], formTitle: "게시글 운영 처리", fields: ["게시글", "상태", "처리 사유", "관리자 메모"] }],
+    "sr-013-reports": ["신고 관리", { path: "screens/admin/reports.html", cta: "신고 검색", filters: ["신고 유형", "처리 상태", "기간"], headers: ["신고 ID", "대상", "유형", "내용 요약", "처리 상태", "일시", "관리"], rows: [["#R001", "게시글", "부적절한 내용", "욕설 포함", "검토 중", "06/15", "처리"], ["#R002", "댓글", "광고", "외부 링크 반복", "대기", "06/14", "처리"]], formTitle: "신고 처리 폼", fields: ["신고 대상", "처리 상태", "조치 유형", "처리 사유"] }],
+    "sr-013-notices": ["공지사항 관리", { path: "screens/admin/notices.html", cta: "+ 공지 작성", filters: ["공개 상태", "기간"], headers: ["공지 ID", "제목", "상태", "작성일", "관리"], rows: [["#N001", "KNOWVA 이용약관 변경 안내", "공개", "06/15", "수정"], ["#N002", "6월 시스템 점검 안내", "공개", "06/10", "수정"], ["#N003", "신규 과목 업데이트 안내", "공개", "06/05", "수정"]], formTitle: "공지사항 등록 / 수정 폼", fields: ["제목", "공개 상태", "게시 시작일", "게시 종료일"] }]
+  };
+
+  const settingsNavItems = [
+    ["sr-015-profile", "회원 정보", "screens/settings/profile.html"],
+    ["sr-015-security", "이메일 / 비밀번호", "screens/settings/security.html"],
+    ["sr-015-social", "연동된 소셜 계정", "screens/settings/social.html"],
+    ["sr-015-system", "시스템 설정", "screens/settings/system.html"],
+    ["sr-015-payment", "결제 정보", "screens/settings/payment.html"]
+  ];
+
+  function settingsSidebar(active) {
+    return `<aside class="figma-settings-sidebar">
+      <h1>설정</h1>
+      <nav>${settingsNavItems.map(([id, label, path]) => `<a class="${activeClass(id === active)}" href="${href(path)}">${label}</a>`).join("")}</nav>
+    </aside>`;
+  }
+
+  function settingsPage(active, title, lead, content) {
+    return shell("settings", `
+      <section class="figma-settings-page">
+        <a class="figma-logout" href="${href("screens/auth/login.html")}">로그아웃</a>
+        ${settingsSidebar(active)}
+        <main class="figma-settings-main">
+          <article class="figma-settings-panel">
+            <h1>${title}</h1>
+            <p>${lead}</p>
+            ${content}
+          </article>
+        </main>
+      </section>`, { showTopbar: false });
+  }
+
+  function settingsField(label, value) {
+    return `<div class="figma-setting-row"><strong>${label}</strong><span>${value}</span></div>`;
+  }
+
+  function settingsModalPage() {
+    return settingsProfilePage();
+  }
+
+  function settingsProfilePage() {
+    return settingsPage("sr-015-profile", "회원 정보", "프로필과 기본 계정 정보를 확인하고 수정합니다.", `<section class="figma-settings-box">${settingsField("닉네임", "이정하")}${settingsField("이메일", "jeongha@example.com")}${settingsField("가입일", "2026.06.01")}${settingsField("학습 언어", "Java, HTML, Spring")}${figmaAction("저장", "screens/settings/profile.html", "primary")}</section>`);
+  }
+
+  function settingsSecurityPage() {
+    return settingsPage("sr-015-security", "이메일 / 비밀번호", "로그인에 사용하는 이메일과 비밀번호를 관리합니다.", `<section class="figma-settings-box">${settingsField("이메일", "jeongha@example.com")}${settingsField("비밀번호", "••••••••••")}${figmaAction("비밀번호 변경", "screens/settings/security.html", "primary")}</section>`);
+  }
+
+  function settingsSocialPage() {
+    return settingsPage("sr-015-social", "연동된 소셜 계정", "외부 계정 연결 상태를 확인합니다.", `<section class="figma-social-grid">${card("Google", "jeongha@gmail.com 계정이 연결되어 있습니다.", "연동됨")}${card("Kakao", "kakao_jeongha 계정이 연결되어 있습니다.", "연동됨")}${card("Naver", "연동 가능한 상태입니다.", "미연동", figmaAction("연동", "screens/settings/social.html"))}</section>`);
+  }
+
+  function settingsSystemPage() {
+    return settingsPage("sr-015-system", "시스템 설정", "알림, 화면 모드, 접근성 옵션을 관리합니다.", `<section class="figma-settings-box">${settingsField("학습 알림", "켜짐")}${settingsField("테마", "시스템 설정 따름")}${settingsField("모션 줄이기", "꺼짐")}${figmaAction("저장", "screens/settings/system.html", "primary")}</section>`);
+  }
+
+  function settingsPaymentPage() {
+    return settingsPage("sr-015-payment", "결제 정보", "결제 내역과 이용 중인 서비스를 확인합니다.", `<section class="figma-settings-box"><div class="figma-payment-plan"><strong>상세 분석 이용권</strong><span>결제일 2026.06.05 · 9,900원 · 더미 결제</span>${figmaAction("결제 내역", "screens/payment/complete.html")}</div><div class="figma-payment-history"><span>2026.06.05</span><strong>상세 분석 이용권</strong><b>9,900원</b></div><div class="figma-payment-history"><span>2026.05.12</span><strong>상세 분석 이용권</strong><b>9,900원</b></div></section>`);
+  }
+
+  const sampleRoutes = [
+    ["sample-learning-main", "학습", "screens/samples/learning-main.html"],
+    ["sample-community-board", "커뮤니티", "screens/samples/community-board.html"],
+    ["sample-settings-index", "설정", "screens/samples/settings-index.html"],
+    ["sample-admin-stats", "관리자", "screens/samples/admin-stats.html"]
+  ];
+
+  const sampleDarkRoutes = [
+    ["sample-dark-orbital-ink", "A balanced cyan", "screens/samples/dark/orbital-ink.html"],
+    ["sample-dark-deep-observatory", "B deep cyan", "screens/samples/dark/deep-observatory.html"],
+    ["sample-dark-moon-dust", "C quiet cyan", "screens/samples/dark/moon-dust.html"]
+  ];
+
+  function sampleSwitcher(active) {
+    return `<nav class="sample-switcher" aria-label="예시 화면 이동">
+      <span>Design refresh samples</span>
+      ${sampleRoutes.map(([id, label, path]) => `<a class="${activeClass(id === active)}" href="${href(path)}">${label}</a>`).join("")}
+    </nav>`;
+  }
+
+  function sampleDarkSwitcher(active) {
+    return `<nav class="sample-switcher sample-dark-switcher" aria-label="다크 샘플 이동">
+      <span>Ion Cyan dark samples</span>
+      ${sampleDarkRoutes.map(([id, label, path]) => `<a class="${activeClass(id === active)}" href="${href(path)}">${label}</a>`).join("")}
+    </nav>`;
+  }
+
+  function sampleTag(label, tone = "") {
+    return `<span class="sample-tag ${tone}">${label}</span>`;
+  }
+
+  function sampleKpi(label, value, change = "") {
+    return `<article class="sample-kpi"><span>${label}</span><strong>${value}</strong>${change ? `<small>${change}</small>` : ""}</article>`;
+  }
+
+  function sampleBars(values, labels) {
+    return `<div class="sample-bars">${values.map((value, index) => `<i style="height:${value}%"><span>${labels[index]}</span></i>`).join("")}</div>`;
+  }
+
+  function sampleMiniChart(values) {
+    return `<div class="sample-mini-chart" aria-hidden="true">${values.map((value) => `<i style="height:${value}%"></i>`).join("")}</div>`;
+  }
+
+  function sampleDarkSwatches(swatches) {
+    return `<div class="sample-dark-swatches" aria-label="palette">
+      ${swatches.map(([label, tone]) => `<span style="--swatch:${tone}"><i></i>${label}</span>`).join("")}
+    </div>`;
+  }
+
+  function sampleLearningMainPage() {
+    const lessons = [
+      ["완료", "Java 입문", "개념 4개 · 문제 10/10", "done"],
+      ["완료", "변수와 자료형", "정답률 92% · 오답 1개", "done"],
+      ["진행 중", "조건문", "오늘 3문제 진행 · 7문제 남음", "active"],
+      ["대기", "반복문", "조건문 80% 완료 시 열림", "locked"],
+      ["잠김", "배열", "반복문 완료 후 추천", "muted"]
+    ];
+
+    return shell("learning", `
+      <section class="sample-page sample-learning">
+        ${sampleSwitcher("sample-learning-main")}
+        <div class="sample-learning-layout">
+          <aside class="sample-side-panel">
+            <div class="sample-profile-line"><span class="sample-avatar">NL</span><div><strong>nova_learner</strong><small>Java backend track</small></div></div>
+            <div class="sample-side-section">
+              <span class="sample-eyebrow">Current course</span>
+              <h2>Java 기초</h2>
+              ${progressLine("조건문 단원", 68, "68%")}
+              ${progressLine("시험 gate", 72, "7 / 10")}
+            </div>
+            <div class="sample-course-list">
+              <a class="is-active" href="${href("screens/samples/learning-main.html")}"><strong>Java</strong><span>오늘 계속 학습</span></a>
+              <a href="${href("screens/learning/main.html")}"><strong>SQL</strong><span>다음 추천</span></a>
+              <a href="${href("screens/learning/main.html")}"><strong>Python</strong><span>기초 준비</span></a>
+            </div>
+          </aside>
+
+          <main class="sample-workspace">
+            <header class="sample-section-head">
+              <div>
+                ${sampleTag("학습 메인 예시", "active")}
+                <h1>오늘은 조건문을 끝내고 반복문 gate를 연다</h1>
+                <p>색은 CTA와 진행 상태에만 남기고, 나머지는 실제 학습 상태가 먼저 보이도록 밀도를 높인 예시다.</p>
+              </div>
+              <a class="button primary" href="${href("screens/learning/curriculum.html")}">학습 시작</a>
+            </header>
+
+            <section class="sample-mission-card">
+              <div>
+                <span class="sample-eyebrow">Today mission</span>
+                <h2>조건문 문제 7개 마저 풀기</h2>
+                <p>완료하면 반복문 이론과 문제풀이가 열린다.</p>
+              </div>
+              <div class="sample-mission-meter"><strong>7</strong><span>문제 남음</span></div>
+            </section>
+
+            <section class="sample-lesson-list" aria-label="학습 로드맵">
+              ${lessons.map(([state, title, meta, tone]) => `<article class="sample-lesson-row ${tone}">
+                <span class="sample-node"></span>
+                <div><strong>${title}</strong><small>${meta}</small></div>
+                ${sampleTag(state, tone)}
+              </article>`).join("")}
+            </section>
+          </main>
+
+          <aside class="sample-insight-panel">
+            <article>
+              <span class="sample-eyebrow">Learning signal</span>
+              <h2>정답률은 안정적, 속도는 느림</h2>
+              <p>조건 분기 문제에서 평균 풀이 시간이 18% 길다.</p>
+              ${sampleMiniChart([42, 48, 55, 61, 58, 64, 72])}
+            </article>
+            <article>
+              <h3>다음 행동</h3>
+              <ul>
+                <li>조건문 edge case 3문제</li>
+                <li>비교 연산자 오답 1개 복습</li>
+                <li>반복문 gate까지 7문제</li>
+              </ul>
+            </article>
+          </aside>
+        </div>
+      </section>`);
+  }
+
+  function sampleCommunityBoardPage() {
+    const threads = [
+      ["질문", "조건문 edge case 정리", "답변 대기 · 댓글 12 · 좋아요 48", "nova_learner", "12분 전"],
+      ["공부 일지", "SQL JOIN 시각화 자료", "스크랩 21 · 댓글 8 · 좋아요 33", "signal.sql", "28분 전"],
+      ["자유", "오늘 학습 일지", "Java 반복문 복습 · 댓글 5", "loop.dev", "1시간 전"],
+      ["공부 일지", "반복문 문제 풀이 팁", "해결됨 · 스크랩 14", "orbit.dev", "2시간 전"],
+      ["질문", "Scanner 입력 예외 처리", "답변 2 · 채택 완료", "java.seed", "어제"]
+    ];
+
+    return shell("community", `
+      <section class="sample-page sample-community">
+        ${sampleSwitcher("sample-community-board")}
+        <div class="sample-community-layout">
+          <aside class="sample-side-panel">
+            <h1>커뮤니티</h1>
+            <nav class="sample-nav-list" aria-label="게시판">
+              <a class="is-active" href="${href("screens/samples/community-board.html")}"><strong>Java</strong><span>자유 · 질문 · 공부 일지</span></a>
+              <a href="${href("screens/community/board.html")}"><strong>SQL</strong><span>JOIN · 튜닝 · 일지</span></a>
+              <a href="${href("screens/community/board.html")}"><strong>HTML/CSS/JS</strong><span>레이아웃 · 접근성</span></a>
+              <a href="${href("screens/community/board.html")}"><strong>Python</strong><span>문법 · 자동화</span></a>
+            </nav>
+            <article class="sample-compact-card">
+              <strong>내 활동</strong>
+              <span>작성 12 · 스크랩 7 · 좋아요 31</span>
+              <a class="button" href="${href("screens/community/profile.html")}">프로필</a>
+            </article>
+          </aside>
+
+          <main class="sample-feed-panel">
+            <header class="sample-feed-head">
+              <div>
+                ${sampleTag("Java", "active")}
+                <h1>Java 게시판</h1>
+                <p>검색, 필터, 상태, 참여 수를 첫 화면에서 바로 확인한다.</p>
+              </div>
+              <a class="button primary" href="${href("screens/community/write.html")}">글쓰기</a>
+            </header>
+            <div class="sample-toolbar">
+              <input class="field" value="조건문, 반복문, Scanner" aria-label="게시글 검색">
+              <button class="button" type="button">검색</button>
+              <button class="button" type="button">최신순</button>
+            </div>
+            <nav class="sample-filter-row" aria-label="게시글 필터">
+              ${sampleTag("전체", "active")}
+              ${sampleTag("자유")}
+              ${sampleTag("질문")}
+              ${sampleTag("공부 일지")}
+              ${sampleTag("답변 대기")}
+            </nav>
+            <section class="sample-thread-list">
+              ${threads.map(([kind, title, meta, author, time]) => `<a class="sample-thread-row" href="${href("screens/community/detail.html")}">
+                ${sampleTag(kind, kind === "질문" ? "amber" : kind === "공부 일지" ? "green" : "")}
+                <div><strong>${title}</strong><span>${meta}</span></div>
+                <small>${author}<br>${time}</small>
+              </a>`).join("")}
+            </section>
+          </main>
+
+          <aside class="sample-hot-panel">
+            <h2>Hot</h2>
+            ${["Java 컬렉션 정리", "면접 질문 복습", "공부 일지 공유"].map((item) => `<a href="${href("screens/community/detail.html")}">${item}</a>`).join("")}
+            <div class="sample-divider"></div>
+            <h2>이번 주 답변자</h2>
+            ${list([["orbit.dev", "채택 18"], ["signal.sql", "채택 12"], ["loop.dev", "채택 9"]])}
+          </aside>
+        </div>
+      </section>`);
+  }
+
+  function sampleSettingsIndexPage() {
+    const rows = [
+      ["닉네임", "이정하", "공개 프로필에 표시", "변경"],
+      ["이메일", "jeongha@example.com", "로그인 및 알림 수신", "확인됨"],
+      ["학습 언어", "Java, SQL", "추천 roadmap 기준", "관리"],
+      ["비밀번호", "마지막 변경 2026.06.01", "보안 설정", "변경"],
+      ["소셜 계정", "Google, Kakao 연결됨", "간편 로그인", "관리"],
+      ["Premium", "상세 분석 이용권 활성", "2026.07.05 갱신 예정", "결제"]
+    ];
+
+    return shell("settings", `
+      <section class="sample-page sample-settings">
+        ${sampleSwitcher("sample-settings-index")}
+        <div class="sample-settings-layout">
+          <aside class="sample-side-panel">
+            <h1>설정</h1>
+            <nav class="sample-nav-list" aria-label="설정 메뉴">
+              <a class="is-active" href="${href("screens/samples/settings-index.html")}">계정 정보</a>
+              <a href="${href("screens/settings/security.html")}">이메일 / 비밀번호</a>
+              <a href="${href("screens/settings/social.html")}">소셜 계정</a>
+              <a href="${href("screens/settings/system.html")}">시스템 설정</a>
+              <a href="${href("screens/settings/payment.html")}">결제 정보</a>
+            </nav>
+            <a class="sample-quiet-link" href="${href("screens/auth/login.html")}">로그아웃</a>
+          </aside>
+
+          <main class="sample-settings-main">
+            <header class="sample-section-head compact">
+              <div>
+                ${sampleTag("설정 예시")}
+                <h1>계정 정보</h1>
+                <p>큰 form card 대신 실제 설정처럼 row, 상태, inline action을 중심으로 재구성했다.</p>
+              </div>
+              <span class="sample-save-state">마지막 저장 09:30</span>
+            </header>
+            <section class="sample-settings-list">
+              ${rows.map(([label, value, meta, action]) => `<article class="sample-setting-row">
+                <div><strong>${label}</strong><span>${meta}</span></div>
+                <p>${value}</p>
+                <button class="button" type="button">${action}</button>
+              </article>`).join("")}
+            </section>
+            <section class="sample-danger-zone">
+              <div><strong>회원 탈퇴</strong><span>탈퇴 전 학습 기록 보관/삭제 정책을 안내한다.</span></div>
+              <button class="button warn" type="button">탈퇴 요청</button>
+            </section>
+          </main>
+        </div>
+      </section>`, { showTopbar: false });
+  }
+
+  function sampleAdminStatsPage() {
+    const tableRows = [
+      ["2026-06-16", "Java", "184", "412", "58", "81.4"],
+      ["2026-06-15", "Java", "171", "386", "52", "79.8"],
+      ["2026-06-14", "SQL", "132", "301", "41", "83.2"],
+      ["2026-06-13", "Python", "119", "244", "35", "77.6"],
+      ["2026-06-12", "HTML/CSS", "156", "328", "46", "80.1"]
+    ];
+
+    return shell("admin", `
+      <section class="sample-page sample-admin">
+        ${sampleSwitcher("sample-admin-stats")}
+        <div class="sample-admin-layout">
+          <aside class="sample-side-panel sample-admin-nav">
+            <strong>KNOWVA 관리자</strong>
+            <nav class="sample-nav-list" aria-label="관리자 메뉴">
+              <a href="${href("screens/admin/dashboard.html")}">관리자 홈</a>
+              <a class="is-active" href="${href("screens/samples/admin-stats.html")}">통계</a>
+              <a href="${href("screens/admin/courses.html")}">과목 관리</a>
+              <a href="${href("screens/admin/problems.html")}">문제 관리</a>
+              <a href="${href("screens/admin/reports.html")}">신고 관리</a>
+            </nav>
+          </aside>
+          <main class="sample-admin-main">
+            <header class="sample-section-head compact">
+              <div>
+                ${sampleTag("관리자 통계 예시", "active")}
+                <h1>학습 운영 통계</h1>
+                <p>placeholder 0과 빈 그래프 대신 기간, 지표, 추세, 갱신 시각을 보이게 만든 예시다.</p>
+              </div>
+              <span class="sample-save-state">09:30 updated</span>
+            </header>
+            <section class="sample-admin-filters">
+              <button class="button primary" type="button">최근 7일</button>
+              <button class="button" type="button">과목: 전체</button>
+              <button class="button" type="button">CSV Export</button>
+            </section>
+            <section class="sample-admin-kpis">
+              ${sampleKpi("가입자 수", "2,847", "+12% MoM")}
+              ${sampleKpi("활성 사용자", "842", "+6% WoW")}
+              ${sampleKpi("학습 완료", "1,284", "오늘 184")}
+              ${sampleKpi("문제풀이", "2,931", "정답률 79.8%")}
+            </section>
+            <section class="sample-admin-charts">
+              <article><h2>일별 사용량</h2>${sampleBars([42, 55, 48, 72, 64, 81, 76], ["6/10", "6/11", "6/12", "6/13", "6/14", "6/15", "6/16"])}</article>
+              <article><h2>과목별 학습량</h2>${sampleBars([82, 44, 61, 38], ["Java", "SQL", "Python", "Web"])}</article>
+              <article><h2>시험 점수 추이</h2>${sampleMiniChart([48, 56, 62, 59, 68, 74, 82])}<p>평균 점수 81.4 · 전주 대비 +3.2</p></article>
+            </section>
+            ${adminTable(["날짜", "과목", "학습 수", "문제풀이 수", "시험 응시 수", "평균 점수"], tableRows)}
+          </main>
+        </div>
+      </section>`, { showTopbar: false });
+  }
+
+  const sampleDarkOptions = {
+    "sample-dark-orbital-ink": {
+      id: "sample-dark-orbital-ink",
+      className: "orbital-ink",
+      label: "A안 · 추천",
+      title: "Balanced Ion Dark",
+      subtitle: "Ion Cyan을 대표색으로 쓰고 green과 amber는 상태 보조에만 둔 기본 다크 톤.",
+      principle: "CTA와 활성 상태는 cyan, 완료/진행은 green, 퀘스트/주의는 amber로 제한해서 우주 배경이 네온처럼 보이지 않게 한다.",
+      accent: "Ion Cyan + role accents",
+      swatches: [["Space", "#0b0d12"], ["Panel", "#171b22"], ["Ion Cyan", "#22b8c8"], ["Progress", "#58b947"], ["Quest", "#f2b84b"]]
+    },
+    "sample-dark-deep-observatory": {
+      id: "sample-dark-deep-observatory",
+      className: "deep-observatory",
+      label: "B안",
+      title: "Deep Ion Space",
+      subtitle: "더 깊은 남색 블랙 배경 위에 Ion Cyan을 낮은 채도로 올린 집중형 톤.",
+      principle: "배경 대비는 높이되 accent는 세 역할로만 제한한다. 과목/메뉴 구분은 색보다 구조와 밀도로 먼저 읽히게 둔다.",
+      accent: "Ion Cyan + role accents",
+      swatches: [["Night", "#0a0f19"], ["Panel", "#161b26"], ["Ion Cyan", "#22b8c8"], ["Progress", "#58b947"], ["Quest", "#f2b84b"]]
+    },
+    "sample-dark-moon-dust": {
+      id: "sample-dark-moon-dust",
+      className: "moon-dust",
+      label: "C안",
+      title: "Quiet Ion Space",
+      subtitle: "채도를 가장 낮춘 charcoal 배경에 Ion Cyan CTA만 또렷하게 둔 차분한 톤.",
+      principle: "장시간 학습 화면에서 시각 피로를 줄이고, 상태 색은 완료와 퀘스트처럼 의미가 있는 곳에만 둔다.",
+      accent: "Ion Cyan + role accents",
+      swatches: [["Dust", "#101014"], ["Panel", "#1d1b22"], ["Ion Cyan", "#22b8c8"], ["Progress", "#58b947"], ["Quest", "#f2b84b"]]
+    }
+  };
+
+  function sampleDarkOptionPage(id) {
+    const option = sampleDarkOptions[id];
+
+    return shell("learning", `
+      <section class="sample-page sample-dark-page sample-dark-theme ${option.className}">
+        ${sampleDarkSwitcher(id)}
+        <header class="sample-dark-hero">
+          <div>
+            ${sampleTag(option.label, "dark")}
+            <h1>${option.title}</h1>
+            <p>${option.subtitle}</p>
+          </div>
+          <aside class="sample-dark-token-card">
+            <strong>${option.accent} palette</strong>
+            ${sampleDarkSwatches(option.swatches)}
+          </aside>
+        </header>
+
+        <div class="sample-dark-layout">
+          <aside class="sample-dark-panel sample-dark-side">
+            <div class="sample-profile-line">
+              <span class="sample-avatar">KV</span>
+              <div><strong>knowva_dark</strong><small>Java backend track</small></div>
+            </div>
+            <div class="sample-side-section">
+              <span class="sample-eyebrow">Current course</span>
+              <h2>Java 조건문</h2>
+              ${progressLine("오늘 학습", 68, "68%")}
+              ${progressLine("시험 gate", 72, "7 / 10")}
+            </div>
+            <div class="sample-dark-orbit-map" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+          </aside>
+
+          <main class="sample-dark-panel sample-dark-main">
+            <header class="sample-section-head compact">
+              <div>
+                ${sampleTag("오늘 학습", "active")}
+                <h2>조건문을 끝내고 반복문 gate 열기</h2>
+                <p>${option.principle}</p>
+              </div>
+              <a class="button primary" href="${href("screens/learning/curriculum.html")}">학습 시작</a>
+            </header>
+
+            <section class="sample-dark-mission">
+              <div>
+                <span class="sample-eyebrow">Mission</span>
+                <h3>조건문 문제 7개</h3>
+                <p>완료하면 반복문 이론과 문제풀이가 열린다.</p>
+              </div>
+              <div class="sample-mission-meter"><strong>7</strong><span>문제 남음</span></div>
+            </section>
+
+            <section class="sample-lesson-list" aria-label="학습 로드맵">
+              <article class="sample-lesson-row done"><span class="sample-node"></span><div><strong>Java 입문</strong><small>개념 4개 · 문제 10/10</small></div>${sampleTag("완료", "done")}</article>
+              <article class="sample-lesson-row active"><span class="sample-node"></span><div><strong>조건문</strong><small>오늘 3문제 진행 · 7문제 남음</small></div>${sampleTag("진행 중", "active")}</article>
+              <article class="sample-lesson-row locked"><span class="sample-node"></span><div><strong>반복문</strong><small>조건문 80% 완료 시 열림</small></div>${sampleTag("대기", "muted")}</article>
+            </section>
+          </main>
+
+          <aside class="sample-dark-panel sample-dark-right">
+            <article>
+              <span class="sample-eyebrow">Signal</span>
+              <h2>속도는 느리고 정답률은 안정적</h2>
+              ${sampleMiniChart([42, 48, 55, 61, 58, 64, 72])}
+            </article>
+            <article class="sample-dark-community-row">
+              ${sampleTag("질문", "active")}
+              <div><strong>조건문 edge case 정리</strong><small>댓글 12 · 좋아요 48 · 12분 전</small></div>
+            </article>
+            <article class="sample-setting-row">
+              <div><strong>테마</strong><span>다크 샘플 고정</span></div>
+              <p>${option.title}</p>
+              <button class="button" type="button">보기</button>
+            </article>
+            <article class="sample-kpi">
+              <span>오늘 완료</span>
+              <strong>184</strong>
+              <small>평균 점수 81.4</small>
+            </article>
+          </aside>
+        </div>
+      </section>`);
+  }
+
+  Object.assign(pages, {
+    "sr-007": reviewSummaryPage,
+    "sr-007-list": reviewListPage,
+    "sr-010": communityHomePage,
+    "sr-010-board": communityBoardPage,
+    "sr-010-detail": communityDetailPage,
+    "sr-010-write": () => communityWritePage("write"),
+    "sr-010-edit": () => communityWritePage("edit"),
+    "sr-010-profile": communityProfilePage,
+    "sr-011": paymentChoicePage,
+    "sr-011-card": paymentCardPage,
+    "sr-011-bank": paymentBankPage,
+    "sr-011-complete": paymentCompletePage,
+    "sr-011-recommend": recommendPage,
+    "sr-013": adminHomePage,
+    "sr-013-login": adminLoginPage,
+    "sr-013-stats": adminStatsPage,
+    "sr-013-courses": () => adminManagePage("sr-013-courses", adminConfigs["sr-013-courses"][0], adminConfigs["sr-013-courses"][1]),
+    "sr-013-theory": () => adminManagePage("sr-013-theory", adminConfigs["sr-013-theory"][0], adminConfigs["sr-013-theory"][1]),
+    "sr-013-problems": () => adminManagePage("sr-013-problems", adminConfigs["sr-013-problems"][0], adminConfigs["sr-013-problems"][1]),
+    "sr-013-users": () => adminManagePage("sr-013-users", adminConfigs["sr-013-users"][0], adminConfigs["sr-013-users"][1]),
+    "sr-013-community": () => adminManagePage("sr-013-community", adminConfigs["sr-013-community"][0], adminConfigs["sr-013-community"][1]),
+    "sr-013-reports": () => adminManagePage("sr-013-reports", adminConfigs["sr-013-reports"][0], adminConfigs["sr-013-reports"][1]),
+    "sr-013-notices": () => adminManagePage("sr-013-notices", adminConfigs["sr-013-notices"][0], adminConfigs["sr-013-notices"][1]),
+    "sr-015": settingsModalPage,
+    "sr-015-profile": settingsProfilePage,
+    "sr-015-security": settingsSecurityPage,
+    "sr-015-social": settingsSocialPage,
+    "sr-015-system": settingsSystemPage,
+    "sr-015-payment": settingsPaymentPage,
+    "sample-learning-main": sampleLearningMainPage,
+    "sample-community-board": sampleCommunityBoardPage,
+    "sample-settings-index": sampleSettingsIndexPage,
+    "sample-admin-stats": sampleAdminStatsPage,
+    "sample-dark-orbital-ink": () => sampleDarkOptionPage("sample-dark-orbital-ink"),
+    "sample-dark-deep-observatory": () => sampleDarkOptionPage("sample-dark-deep-observatory"),
+    "sample-dark-moon-dust": () => sampleDarkOptionPage("sample-dark-moon-dust")
+  });
+
   function initTabs() {
     document.querySelectorAll("[data-tab-scope]").forEach((scope) => {
       scope.querySelectorAll("[data-tab]").forEach((tab) => {
@@ -935,6 +1894,12 @@ score > 60  // 60점 제외</pre>
 
   function initTheme() {
     applyTheme(readStoredTheme());
+    if (forcedTheme) {
+      document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+        button.disabled = true;
+      });
+      return;
+    }
     document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
       button.addEventListener("click", () => {
         const nextTheme = body.classList.contains("theme-dark") ? "light" : "dark";
@@ -944,11 +1909,19 @@ score > 60  // 60점 제외</pre>
     });
   }
 
+  function initFieldNames() {
+    document.querySelectorAll("input, select, textarea").forEach((field, index) => {
+      if (!field.id) field.id = `${screenId}-field-${index + 1}`;
+      if (!field.name) field.name = field.id;
+    });
+  }
+
   function render() {
     const app = document.getElementById("app");
     const renderer = pages[screenId] || pages.index;
     app.innerHTML = renderer();
     document.title = screenId === "index" ? "Knowva UI Route Index" : `${route.sr} ${route.title} · Knowva UI HTML2`;
+    initFieldNames();
     initTheme();
     initTabs();
   }
