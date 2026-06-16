@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alien UFO Animation Sample</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --ink: #17262b;
+      --muted: #5f7378;
+      --line: #cce2df;
+      --panel: rgba(255, 255, 255, 0.86);
+      --teal: #17b7c2;
+      --teal-dark: #08798a;
+      --lime: #9bdd42;
+      --orange: #ff9f38;
+      --violet: #5663c8;
+      --paper: #f7fbfa;
+      --shadow: 0 22px 60px rgba(28, 67, 73, 0.18);
+      --radius: 8px;
+      --font: "Pretendard", "SUIT", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--font);
+      letter-spacing: 0;
+      background:
+        radial-gradient(circle at 14% 20%, rgba(155, 221, 66, 0.18), transparent 24%),
+        radial-gradient(circle at 84% 18%, rgba(255, 159, 56, 0.18), transparent 22%),
+        radial-gradient(circle at 78% 82%, rgba(86, 99, 200, 0.14), transparent 26%),
+        linear-gradient(135deg, #f3fbf7 0%, #e9f6f4 54%, #f8fbf1 100%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .sample-shell {
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 58px;
+      margin: 0 auto;
+      max-width: 1180px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 34% 28%, #fff 0 8%, transparent 9%),
+        linear-gradient(135deg, var(--lime), var(--teal));
+      box-shadow: 0 0 0 7px rgba(23, 183, 194, 0.12);
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 9px -7px;
+      border: 2px solid rgba(86, 99, 200, 0.72);
+      border-left-color: transparent;
+      border-right-color: transparent;
+      border-radius: 50%;
+      transform: rotate(-23deg);
+    }
+
+    .brand-title {
+      display: grid;
+      gap: 2px;
+    }
+
+    .brand-title strong {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .brand-title span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--teal-dark);
+      font-size: 14px;
+      font-weight: 900;
+      padding: 0 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(360px, 0.86fr) minmax(0, 1.14fr);
+      gap: 34px;
+      align-items: center;
+      min-height: calc(100vh - 86px);
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 0 34px;
+    }
+
+    .panel {
+      border: 1px solid rgba(204, 226, 223, 0.9);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .stage {
+      position: relative;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      min-height: 540px;
+      overflow: hidden;
+      padding: 28px;
+      background:
+        linear-gradient(45deg, rgba(194, 221, 217, 0.42) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(194, 221, 217, 0.42) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(194, 221, 217, 0.42) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(194, 221, 217, 0.42) 75%),
+        #f9fffd;
+      background-position: 0 0, 0 16px, 16px -16px, -16px 0;
+      background-size: 32px 32px;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 84px;
+      width: min(72%, 520px);
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(46, 86, 88, 0.14);
+      filter: blur(5px);
+      transform: translateX(-50%);
+    }
+
+    .mascot-video {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: min(82vw, 460px);
+      aspect-ratio: 1;
+      object-fit: contain;
+      filter: drop-shadow(0 22px 34px rgba(23, 82, 90, 0.22));
+    }
+
+    .stage-tag {
+      position: absolute;
+      left: 22px;
+      top: 22px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(23, 183, 194, 0.24);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--teal-dark);
+      font-size: 13px;
+      font-weight: 900;
+      padding: 8px 12px;
+    }
+
+    .stage-tag::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--lime);
+      box-shadow: 0 0 0 5px rgba(155, 221, 66, 0.18);
+    }
+
+    .control-panel {
+      display: grid;
+      gap: 22px;
+      padding: 28px;
+    }
+
+    .sample-title {
+      display: grid;
+      gap: 12px;
+    }
+
+    .sample-title h1 {
+      margin: 0;
+      font-size: clamp(38px, 5vw, 66px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .sample-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mode-button {
+      display: grid;
+      gap: 8px;
+      min-height: 118px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      padding: 16px;
+      text-align: left;
+      box-shadow: none;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .mode-button strong {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .mode-button span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .mode-button[aria-pressed="true"] {
+      border-color: rgba(23, 183, 194, 0.84);
+      box-shadow: 0 14px 32px rgba(23, 183, 194, 0.18);
+      transform: translateY(-2px);
+    }
+
+    .mode-button.idle[aria-pressed="true"] {
+      background: linear-gradient(135deg, #ffffff, #effbf5);
+    }
+
+    .mode-button.booster[aria-pressed="true"] {
+      background: linear-gradient(135deg, #fffdf8, #fff2e6);
+      border-color: rgba(255, 159, 56, 0.84);
+      box-shadow: 0 14px 32px rgba(255, 159, 56, 0.16);
+    }
+
+    .asset-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .asset-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      border-top: 1px solid rgba(204, 226, 223, 0.8);
+      padding-top: 10px;
+    }
+
+    .asset-list code {
+      color: var(--teal-dark);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      text-align: right;
+      word-break: break-all;
+    }
+
+    .preview-strip {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .preview-item {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.68);
+      padding: 10px;
+    }
+
+    .preview-item img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: contain;
+    }
+
+    .preview-item span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    @media (max-width: 920px) {
+      .sample-shell {
+        padding: 18px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .stage {
+        min-height: 440px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .mode-grid,
+      .preview-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .stage {
+        min-height: 360px;
+        padding: 18px;
+      }
+
+      .mascot-video {
+        width: min(88vw, 330px);
+      }
+
+      .asset-list li {
+        display: grid;
+      }
+
+      .asset-list code {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sample-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html" aria-label="Knowva UI samples">
+        <span class="brand-mark"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Alien UFO animation</span></span>
+      </a>
+      <a class="back-link" href="./index.html">샘플 목록</a>
+    </header>
+
+    <main class="layout">
+      <section class="stage panel" aria-label="Alien UFO animation stage">
+        <span class="stage-tag" id="mode-label">idle loop</span>
+        <video class="mascot-video" id="mascot-video" autoplay loop muted playsinline poster="./assets/rive/alien-ufo/exports/alien-ufo-poster.png">
+          <source src="./assets/rive/alien-ufo/exports/alien-ufo-idle.webm" type="video/webm">
+          <img src="./assets/rive/alien-ufo/exports/alien-ufo-poster.png" alt="Alien UFO mascot">
+        </video>
+      </section>
+
+      <section class="control-panel panel" aria-label="Animation controls">
+        <div class="sample-title">
+          <h1>Alien UFO</h1>
+          <p>둥실둥실 idle과 booster 이동 상태를 같은 mascot asset으로 전환하는 HTML fallback sample.</p>
+        </div>
+
+        <div class="mode-grid" role="group" aria-label="Animation mode">
+          <button class="mode-button idle" type="button" data-mode="idle" aria-pressed="true">
+            <strong>둥실둥실</strong>
+            <span>위아래로 가볍게 떠 있는 기본 상태</span>
+          </button>
+          <button class="mode-button booster" type="button" data-mode="booster" aria-pressed="false">
+            <strong>부스터</strong>
+            <span>불꽃과 trail이 강해지는 이동 상태</span>
+          </button>
+        </div>
+
+        <div class="preview-strip" aria-label="Poster preview">
+          <div class="preview-item">
+            <img src="./assets/rive/alien-ufo/exports/alien-ufo-poster.png" alt="Alien UFO idle poster">
+            <span>idle poster</span>
+          </div>
+          <div class="preview-item">
+            <img src="./assets/rive/alien-ufo/exports/alien-ufo-booster-poster.png" alt="Alien UFO booster poster">
+            <span>booster poster</span>
+          </div>
+        </div>
+
+        <ul class="asset-list" aria-label="Loaded animation assets">
+          <li><span>idle</span><code>assets/rive/alien-ufo/exports/alien-ufo-idle.webm</code></li>
+          <li><span>booster</span><code>assets/rive/alien-ufo/exports/alien-ufo-booster.webm</code></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const modes = {
+      idle: {
+        label: "idle loop",
+        poster: "./assets/rive/alien-ufo/exports/alien-ufo-poster.png",
+        source: "./assets/rive/alien-ufo/exports/alien-ufo-idle.webm",
+      },
+      booster: {
+        label: "booster loop",
+        poster: "./assets/rive/alien-ufo/exports/alien-ufo-booster-poster.png",
+        source: "./assets/rive/alien-ufo/exports/alien-ufo-booster.webm",
+      },
+    };
+
+    const video = document.getElementById("mascot-video");
+    const source = video.querySelector("source");
+    const label = document.getElementById("mode-label");
+    const buttons = Array.from(document.querySelectorAll("[data-mode]"));
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function playCurrentVideo() {
+      if (reduceMotion.matches) {
+        video.pause();
+        video.currentTime = 0;
+        video.dataset.playback = "poster";
+        return;
+      }
+
+      const playRequest = video.play();
+      if (playRequest) {
+        playRequest.catch(() => {
+          video.dataset.playback = "poster";
+        });
+      }
+    }
+
+    function setMode(modeName) {
+      const mode = modes[modeName];
+      if (!mode) return;
+
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === modeName));
+      });
+      label.textContent = mode.label;
+      video.poster = mode.poster;
+      source.src = mode.source;
+      video.load();
+      video.addEventListener("loadeddata", playCurrentVideo, { once: true });
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    video.addEventListener("loadeddata", playCurrentVideo, { once: true });
+  </script>
+</body>
+</html>

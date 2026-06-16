@@ -8,26 +8,33 @@
   --kv-color-space-ink: #06131f;
   --kv-color-paper: #f7fcff;
   --kv-color-paper-ice: #eefaff;
-  --kv-color-paper-blue: #eaf7ff;
+  --kv-color-paper-blue: #eef8fa;
   --kv-color-ink: #06131f;
   --kv-color-muted: rgba(6, 19, 31, 0.68);
   --kv-color-muted-strong: rgba(6, 19, 31, 0.58);
   --kv-color-surface: rgba(255, 255, 255, 0.86);
   --kv-color-surface-solid: #ffffff;
-  --kv-color-line: rgba(0, 229, 255, 0.22);
+  --kv-color-line: rgba(6, 19, 31, 0.12);
 
-  --kv-color-ion-cyan: #00e5ff;
-  --kv-color-ion-lime: #b6ff4d;
-  --kv-color-ion-blue: #4f7cff;
-  --kv-color-cta-text: #00161a;
-  --kv-color-cyan-text: #006578;
-  --kv-color-guide-text: #007588;
+  --kv-color-business: #22b8c8;
+  --kv-color-business-dark: #128c99;
+  --kv-color-business-soft: #e3f6f8;
+  --kv-color-progress: #58b947;
+  --kv-color-progress-dark: #3f8f32;
+  --kv-color-quest: #f2b84b;
+  --kv-color-quest-dark: #a86f12;
+  --kv-color-ion-cyan: var(--kv-color-business);
+  --kv-color-ion-lime: var(--kv-color-progress);
+  --kv-color-ion-blue: var(--kv-color-quest);
+  --kv-color-cta-text: #062f36;
+  --kv-color-cyan-text: #0d6f7c;
+  --kv-color-guide-text: #0d6f7c;
 
   --kv-radius-sm: 8px;
   --kv-radius-pill: 999px;
-  --kv-shadow-surface: 0 30px 70px rgba(0, 74, 94, 0.14);
+  --kv-shadow-surface: 0 30px 70px rgba(10, 79, 91, 0.1);
   --kv-shadow-card: 0 18px 38px rgba(6, 19, 31, 0.12);
-  --kv-shadow-cta: 0 18px 34px rgba(0, 229, 255, 0.24);
+  --kv-shadow-cta: 0 4px 0 var(--kv-color-business-dark), 0 14px 26px rgba(34, 184, 200, 0.16);
   --kv-blur-panel: blur(14px);
 
   --kv-space-1: 4px;
@@ -55,8 +62,8 @@
   font-family: var(--kv-font-sans);
   letter-spacing: 0;
   background:
-    radial-gradient(circle at 72% 18%, rgba(0, 229, 255, 0.24), transparent 30%),
-    radial-gradient(circle at 16% 82%, rgba(182, 255, 77, 0.28), transparent 24%),
+    radial-gradient(circle at 72% 18%, rgba(34, 184, 200, 0.09), transparent 28%),
+    radial-gradient(circle at 16% 82%, rgba(88, 185, 71, 0.055), transparent 24%),
     linear-gradient(135deg, #ffffff 0%, var(--kv-color-paper) 46%, var(--kv-color-paper-blue) 100%);
 }
 
@@ -92,15 +99,15 @@
   background:
     radial-gradient(circle at 35% 32%, #ffffff 0 8%, transparent 9%),
     radial-gradient(circle at 58% 62%, rgba(255, 255, 255, 0.7) 0 7%, transparent 8%),
-    linear-gradient(135deg, var(--kv-color-ion-lime), var(--kv-color-ion-cyan));
-  box-shadow: 0 0 0 7px rgba(0, 229, 255, 0.1);
+    var(--kv-color-business);
+  box-shadow: inset 0 -6px 0 var(--kv-color-business-dark), 0 0 0 7px rgba(34, 184, 200, 0.1);
 }
 
 .kv-brand-mark::after {
   content: "";
   position: absolute;
   inset: 9px -7px;
-  border: 2px solid rgba(79, 124, 255, 0.65);
+  border: 2px solid rgba(34, 184, 200, 0.48);
   border-left-color: transparent;
   border-right-color: transparent;
   border-radius: 50%;
@@ -143,7 +150,7 @@
 }
 
 .kv-nav .is-active {
-  background: rgba(0, 229, 255, 0.14);
+  background: rgba(34, 184, 200, 0.12);
   color: var(--kv-color-space-ink);
 }
 
@@ -167,9 +174,9 @@
   align-items: center;
   gap: var(--kv-space-2);
   width: fit-content;
-  border: 1px solid rgba(0, 229, 255, 0.32);
+  border: 1px solid rgba(34, 184, 200, 0.28);
   border-radius: var(--kv-radius-pill);
-  background: rgba(0, 229, 255, 0.12);
+  background: rgba(34, 184, 200, 0.1);
   color: var(--kv-color-cyan-text);
   font-size: 13px;
   font-weight: 900;
@@ -237,17 +244,17 @@
 
 .kv-button:hover {
   transform: translateY(-1px);
-  border-color: rgba(0, 229, 255, 0.54);
+  border-color: rgba(34, 184, 200, 0.48);
 }
 
 .kv-button:focus-visible {
-  outline: 3px solid rgba(182, 255, 77, 0.8);
+  outline: 3px solid rgba(34, 184, 200, 0.65);
   outline-offset: 3px;
 }
 
 .kv-button-primary {
-  border-color: rgba(0, 143, 160, 0.32);
-  background: var(--kv-color-ion-cyan);
+  border-color: var(--kv-color-business-dark);
+  background: var(--kv-color-business);
   color: var(--kv-color-cta-text);
   box-shadow: var(--kv-shadow-cta);
 }
@@ -270,9 +277,8 @@
   border: 1px solid var(--kv-color-line);
   border-radius: var(--kv-radius-sm);
   background:
-    radial-gradient(circle at 58% 42%, rgba(0, 229, 255, 0.2), transparent 36%),
-    radial-gradient(circle at 28% 72%, rgba(182, 255, 77, 0.28), transparent 28%),
-    linear-gradient(140deg, rgba(255, 255, 255, 0.96), rgba(234, 247, 255, 0.72));
+    radial-gradient(circle at 58% 42%, rgba(34, 184, 200, 0.1), transparent 34%),
+    linear-gradient(140deg, rgba(255, 255, 255, 0.96), rgba(239, 249, 251, 0.78));
   box-shadow: var(--kv-shadow-surface);
   backdrop-filter: var(--kv-blur-panel);
 }
@@ -280,9 +286,9 @@
 .kv-orbit {
   position: absolute;
   inset: 122px 58px;
-  border: 2px solid rgba(0, 229, 255, 0.26);
-  border-left-color: rgba(182, 255, 77, 0.9);
-  border-right-color: rgba(79, 124, 255, 0.52);
+  border: 2px solid rgba(34, 184, 200, 0.24);
+  border-left-color: rgba(34, 184, 200, 0.58);
+  border-right-color: rgba(242, 184, 75, 0.34);
   border-radius: 50%;
   transform: rotate(-18deg);
   animation: kv-ion-tilt 8s ease-in-out infinite alternate;
@@ -298,10 +304,10 @@
   transform: translateX(-50%);
   background:
     radial-gradient(circle at 35% 30%, #ffffff 0 9%, transparent 10%),
-    linear-gradient(135deg, var(--kv-color-ion-lime), var(--kv-color-ion-cyan), var(--kv-color-ion-blue));
+    var(--kv-color-business);
   box-shadow:
     inset -22px -28px 40px rgba(6, 19, 31, 0.22),
-    0 22px 56px rgba(0, 229, 255, 0.26);
+    0 20px 42px rgba(34, 184, 200, 0.16);
   animation: kv-ion-float 5.4s ease-in-out infinite;
 }
 
@@ -310,8 +316,8 @@
   width: 74px;
   height: 74px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ffffff, var(--kv-color-ion-lime));
-  box-shadow: 0 16px 32px rgba(182, 255, 77, 0.26);
+  background: var(--kv-color-business-soft);
+  box-shadow: 0 14px 26px rgba(10, 79, 91, 0.1);
 }
 
 .kv-moon-one {
@@ -325,7 +331,7 @@
   bottom: 92px;
   width: 98px;
   height: 98px;
-  background: linear-gradient(135deg, #ffffff, var(--kv-color-ion-blue));
+  background: var(--kv-color-business-soft);
   animation: kv-ion-drift 7s ease-in-out infinite reverse;
 }
 
@@ -334,7 +340,7 @@
   right: 28px;
   top: 72px;
   width: min(278px, 50%);
-  border: 1px solid rgba(0, 229, 255, 0.28);
+  border: 1px solid rgba(34, 184, 200, 0.24);
   border-radius: var(--kv-radius-sm);
   background: var(--kv-color-surface);
   padding: var(--kv-space-4);
