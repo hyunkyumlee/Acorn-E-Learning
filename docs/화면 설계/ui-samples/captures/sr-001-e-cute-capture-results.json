@@ -1,0 +1,86 @@
+[
+  {
+    "name": "sr-001-e-cute-a-ion-buddy",
+    "file": "sr-001-welcome-e-cute-a.html",
+    "viewport": "desktop",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "overflowX": 0,
+      "overflowY": 0,
+      "horizontalOutliers": [],
+      "tinyText": 0,
+      "heroTitle": "코딩 여정을\n푸른 이온 궤도로."
+    }
+  },
+  {
+    "name": "sr-001-e-cute-b-bubble-pod",
+    "file": "sr-001-welcome-e-cute-b.html",
+    "viewport": "desktop",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "overflowX": 0,
+      "overflowY": 0,
+      "horizontalOutliers": [],
+      "tinyText": 0,
+      "heroTitle": "코딩 여정을\n버블 포드로."
+    }
+  },
+  {
+    "name": "sr-001-e-cute-c-star-hug",
+    "file": "sr-001-welcome-e-cute-c.html",
+    "viewport": "desktop",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "overflowX": 0,
+      "overflowY": 0,
+      "horizontalOutliers": [],
+      "tinyText": 0,
+      "heroTitle": "코딩 여정을\n작은 별과 함께."
+    }
+  },
+  {
+    "name": "sr-001-e-cute-a-ion-buddy",
+    "file": "sr-001-welcome-e-cute-a.html",
+    "viewport": "mobile",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "overflowX": 0,
+      "overflowY": 401,
+      "horizontalOutliers": [],
+      "tinyText": 0,
+      "heroTitle": "코딩 여정을\n푸른 이온 궤도로."
+    }
+  },
+  {
+    "name": "sr-001-e-cute-b-bubble-pod",
+    "file": "sr-001-welcome-e-cute-b.html",
+    "viewport": "mobile",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "overflowX": 0,
+      "overflowY": 401,
+      "horizontalOutliers": [],
+      "tinyText": 0,
+      "heroTitle": "코딩 여정을\n버블 포드로."
+    }
+  },
+  {
+    "name": "sr-001-e-cute-c-star-hug",
+    "file": "sr-001-welcome-e-cute-c.html",
+    "viewport": "mobile",
+    "messages": [],
+    "errors": [],
+    "metrics": {
+      "overflowX": 0,
+      "overflowY": 401,
+      "horizontalOutliers": [],
+      "tinyText": 0,
+      "heroTitle": "코딩 여정을\n작은 별과 함께."
+    }
+  }
+]

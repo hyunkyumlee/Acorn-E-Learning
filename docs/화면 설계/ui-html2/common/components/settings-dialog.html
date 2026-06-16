@@ -1,0 +1,21 @@
+<section class="settings-dialog" xmlns:th="http://www.thymeleaf.org">
+  <aside class="settings-menu">
+    <a href="../../screens/learning/practice.html" th:href="@{/learning/practice}" class="close-link">×</a>
+    <h2>설정</h2>
+    <div class="list">
+      <div class="list-row"><div><strong>회원 정보</strong><p>닉네임, 관심 과목, 목표</p></div></div>
+      <div class="list-row"><div><strong>이메일/비밀번호</strong><p>인증 정보 관리</p></div></div>
+      <div class="list-row"><div><strong>시스템</strong><p>테마, 알림, 접근성</p></div></div>
+    </div>
+  </aside>
+  <section class="panel">
+    <div class="tabs" role="tablist">
+      <button class="tab is-active" type="button">회원 정보</button>
+      <button class="tab" type="button">시스템 설정</button>
+    </div>
+    <form class="form-grid">
+      <label>닉네임<input class="field" value="nova_learner"></label>
+      <label>관심 과목<input class="field" value="Java backend"></label>
+    </form>
+  </section>
+</section>

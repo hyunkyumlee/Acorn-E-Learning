@@ -1,0 +1,238 @@
+{
+  "generatedAt": "2026-06-15T11:47:28.658Z",
+  "base": "http://127.0.0.1:4174/ui-html2",
+  "expected": {
+    "entryDistinct": true,
+    "welcomeDistinct": true,
+    "desktopSampleLayout": true,
+    "mobileCollapsed": true,
+    "socialPresent": true,
+    "socialLinksOk": true,
+    "noOverflow": true,
+    "noRuntimeErrors": true,
+    "nonBlank": true
+  },
+  "pass": true,
+  "errors": [],
+  "socialLinkChecks": [
+    {
+      "provider": "google",
+      "href": "../../screens/auth/login.html#google",
+      "status": 200
+    },
+    {
+      "provider": "kakao",
+      "href": "../../screens/auth/login.html#kakao",
+      "status": 200
+    }
+  ],
+  "captures": [
+    {
+      "name": "entry",
+      "relUrl": "index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "viewportName": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "status": 200,
+      "screenshot": ".sisyphus/ulw-entry-welcome-social-qa/evidence/entry-desktop-light.png",
+      "title": "Knowva UI Route Index",
+      "screen": "index",
+      "hasEntryLabel": true,
+      "hasWelcomeLabel": true,
+      "h1": "Knowva screen route index",
+      "social": [],
+      "overflowX": 0,
+      "appChildren": 1,
+      "rootTextLength": 986,
+      "layout": null
+    },
+    {
+      "name": "welcome",
+      "relUrl": "screens/welcome/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "viewportName": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "light",
+      "status": 200,
+      "screenshot": ".sisyphus/ulw-entry-welcome-social-qa/evidence/welcome-desktop-light.png",
+      "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+      "screen": "sr-001",
+      "hasEntryLabel": false,
+      "hasWelcomeLabel": true,
+      "h1": "Knowva",
+      "social": [
+        {
+          "provider": "google",
+          "text": "Google로 계속",
+          "href": "../../screens/auth/login.html#google",
+          "absoluteHref": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#google",
+          "visible": true
+        },
+        {
+          "provider": "kakao",
+          "text": "Kakao로 계속",
+          "href": "../../screens/auth/login.html#kakao",
+          "absoluteHref": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#kakao",
+          "visible": true
+        }
+      ],
+      "overflowX": 0,
+      "appChildren": 1,
+      "rootTextLength": 504,
+      "layout": {
+        "display": "grid",
+        "gridTemplateColumns": "684.406px 657.594px",
+        "textAlign": "left",
+        "copyLeft": 20,
+        "visualLeft": 762,
+        "visualWidth": 658,
+        "visualHeight": 560
+      }
+    },
+    {
+      "name": "welcome",
+      "relUrl": "screens/welcome/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "viewportName": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "theme": "dark",
+      "status": 200,
+      "screenshot": ".sisyphus/ulw-entry-welcome-social-qa/evidence/welcome-desktop-dark.png",
+      "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+      "screen": "sr-001",
+      "hasEntryLabel": false,
+      "hasWelcomeLabel": true,
+      "h1": "Knowva",
+      "social": [
+        {
+          "provider": "google",
+          "text": "Google로 계속",
+          "href": "../../screens/auth/login.html#google",
+          "absoluteHref": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#google",
+          "visible": true
+        },
+        {
+          "provider": "kakao",
+          "text": "Kakao로 계속",
+          "href": "../../screens/auth/login.html#kakao",
+          "absoluteHref": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#kakao",
+          "visible": true
+        }
+      ],
+      "overflowX": 0,
+      "appChildren": 1,
+      "rootTextLength": 504,
+      "layout": {
+        "display": "grid",
+        "gridTemplateColumns": "684.406px 657.594px",
+        "textAlign": "left",
+        "copyLeft": 20,
+        "visualLeft": 762,
+        "visualWidth": 658,
+        "visualHeight": 560
+      }
+    },
+    {
+      "name": "welcome",
+      "relUrl": "screens/welcome/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "viewportName": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "theme": "light",
+      "status": 200,
+      "screenshot": ".sisyphus/ulw-entry-welcome-social-qa/evidence/welcome-mobile-light.png",
+      "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+      "screen": "sr-001",
+      "hasEntryLabel": false,
+      "hasWelcomeLabel": true,
+      "h1": "Knowva",
+      "social": [
+        {
+          "provider": "google",
+          "text": "Google로 계속",
+          "href": "../../screens/auth/login.html#google",
+          "absoluteHref": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#google",
+          "visible": true
+        },
+        {
+          "provider": "kakao",
+          "text": "Kakao로 계속",
+          "href": "../../screens/auth/login.html#kakao",
+          "absoluteHref": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#kakao",
+          "visible": true
+        }
+      ],
+      "overflowX": 0,
+      "appChildren": 1,
+      "rootTextLength": 504,
+      "layout": {
+        "display": "grid",
+        "gridTemplateColumns": "366px",
+        "textAlign": "center",
+        "copyLeft": 12,
+        "visualLeft": 12,
+        "visualWidth": 366,
+        "visualHeight": 310
+      }
+    },
+    {
+      "name": "welcome",
+      "relUrl": "screens/welcome/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "viewportName": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "theme": "dark",
+      "status": 200,
+      "screenshot": ".sisyphus/ulw-entry-welcome-social-qa/evidence/welcome-mobile-dark.png",
+      "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+      "screen": "sr-001",
+      "hasEntryLabel": false,
+      "hasWelcomeLabel": true,
+      "h1": "Knowva",
+      "social": [
+        {
+          "provider": "google",
+          "text": "Google로 계속",
+          "href": "../../screens/auth/login.html#google",
+          "absoluteHref": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#google",
+          "visible": true
+        },
+        {
+          "provider": "kakao",
+          "text": "Kakao로 계속",
+          "href": "../../screens/auth/login.html#kakao",
+          "absoluteHref": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#kakao",
+          "visible": true
+        }
+      ],
+      "overflowX": 0,
+      "appChildren": 1,
+      "rootTextLength": 504,
+      "layout": {
+        "display": "grid",
+        "gridTemplateColumns": "366px",
+        "textAlign": "center",
+        "copyLeft": 12,
+        "visualLeft": 12,
+        "visualWidth": 366,
+        "visualHeight": 310
+      }
+    }
+  ]
+}

@@ -1,0 +1,5184 @@
+{
+  "generatedAt": "2026-06-15T11:47:55.337Z",
+  "baseUrl": "http://127.0.0.1:4174/ui-html2",
+  "counts": {
+    "screenHtml": 19,
+    "componentHtml": 7
+  },
+  "pages": [
+    {
+      "relativePath": "screens/admin/dashboard.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/admin/dashboard.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_admin_dashboard_html__desktop__light.png",
+      "title": "SR-013 관리자 · Knowva UI HTML2",
+      "activeScreen": "sr-013",
+      "rootTextLength": 516,
+      "height": 1307,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/admin/dashboard.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/admin/dashboard.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_admin_dashboard_html__desktop__dark.png",
+      "title": "SR-013 관리자 · Knowva UI HTML2",
+      "activeScreen": "sr-013",
+      "rootTextLength": 516,
+      "height": 1307,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "div.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "div.table-card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "section.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_analysis_index_html__desktop__light.png",
+      "title": "SR-009 AI 분석 · Knowva UI HTML2",
+      "activeScreen": "sr-009",
+      "rootTextLength": 458,
+      "height": 1305,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "더미 결제",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+          "raw": "../../screens/payment/index.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_analysis_index_html__desktop__dark.png",
+      "title": "SR-009 AI 분석 · Knowva UI HTML2",
+      "activeScreen": "sr-009",
+      "rootTextLength": 458,
+      "height": 1305,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "section.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "더미 결제",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+          "raw": "../../screens/payment/index.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/auth/login.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_auth_login_html__desktop__light.png",
+      "title": "SR-002 로그인 · Knowva UI HTML2",
+      "activeScreen": "sr-002-login",
+      "rootTextLength": 247,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "학습 메인으로",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "회원가입",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/auth/login.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_auth_login_html__desktop__dark.png",
+      "title": "SR-002 로그인 · Knowva UI HTML2",
+      "activeScreen": "sr-002-login",
+      "rootTextLength": 247,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "div.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "학습 메인으로",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "회원가입",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/auth/signup.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_auth_signup_html__desktop__light.png",
+      "title": "SR-002 회원가입 · Knowva UI HTML2",
+      "activeScreen": "sr-002-signup",
+      "rootTextLength": 264,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "초기 설정으로 이동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/onboarding.html",
+          "raw": "../../screens/learning/onboarding.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/auth/signup.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_auth_signup_html__desktop__dark.png",
+      "title": "SR-002 회원가입 · Knowva UI HTML2",
+      "activeScreen": "sr-002-signup",
+      "rootTextLength": 264,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "div.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "초기 설정으로 이동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/onboarding.html",
+          "raw": "../../screens/learning/onboarding.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/community/board.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_board_html__desktop__light.png",
+      "title": "SR-010 게시판 글 목록 · Knowva UI HTML2",
+      "activeScreen": "sr-010-board",
+      "rootTextLength": 569,
+      "height": 1233,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "글쓰기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+          "raw": "../../screens/community/write.html"
+        },
+        {
+          "text": "Java\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "SQL\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#sql",
+          "raw": "../../screens/community/board.html#sql"
+        },
+        {
+          "text": "HTML/CSS/JS\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#web",
+          "raw": "../../screens/community/board.html#web"
+        },
+        {
+          "text": "Python\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#python",
+          "raw": "../../screens/community/board.html#python"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        },
+        {
+          "text": "글쓰기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+          "raw": "../../screens/community/write.html"
+        },
+        {
+          "text": "전체",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#all",
+          "raw": "../../screens/community/board.html#all"
+        },
+        {
+          "text": "자유",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "질문",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#question",
+          "raw": "../../screens/community/board.html#question"
+        },
+        {
+          "text": "정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#info",
+          "raw": "../../screens/community/board.html#info"
+        },
+        {
+          "text": "조건문 edge case 정리\n질문 · 댓글 12 · 좋아요 48 · 스크랩 9",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "SQL JOIN 시각화 자료\n정보 · 댓글 8 · 좋아요 33 · 스크랩 21",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "반복문 문제 풀이 팁\n정보 · 댓글 3 · 스크랩 14",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/board.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_board_html__desktop__dark.png",
+      "title": "SR-010 게시판 글 목록 · Knowva UI HTML2",
+      "activeScreen": "sr-010-board",
+      "rootTextLength": 569,
+      "height": 1233,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "aside.community-rail",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "main.community-board",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "글쓰기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+          "raw": "../../screens/community/write.html"
+        },
+        {
+          "text": "Java\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "SQL\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#sql",
+          "raw": "../../screens/community/board.html#sql"
+        },
+        {
+          "text": "HTML/CSS/JS\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#web",
+          "raw": "../../screens/community/board.html#web"
+        },
+        {
+          "text": "Python\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#python",
+          "raw": "../../screens/community/board.html#python"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        },
+        {
+          "text": "글쓰기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+          "raw": "../../screens/community/write.html"
+        },
+        {
+          "text": "전체",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#all",
+          "raw": "../../screens/community/board.html#all"
+        },
+        {
+          "text": "자유",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "질문",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#question",
+          "raw": "../../screens/community/board.html#question"
+        },
+        {
+          "text": "정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#info",
+          "raw": "../../screens/community/board.html#info"
+        },
+        {
+          "text": "조건문 edge case 정리\n질문 · 댓글 12 · 좋아요 48 · 스크랩 9",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "SQL JOIN 시각화 자료\n정보 · 댓글 8 · 좋아요 33 · 스크랩 21",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "반복문 문제 풀이 팁\n정보 · 댓글 3 · 스크랩 14",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/board.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "viewport": "mobile",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_board_html__mobile__light.png",
+      "title": "SR-010 게시판 글 목록 · Knowva UI HTML2",
+      "activeScreen": "sr-010-board",
+      "rootTextLength": 569,
+      "height": 2144,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "글쓰기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+          "raw": "../../screens/community/write.html"
+        },
+        {
+          "text": "Java\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "SQL\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#sql",
+          "raw": "../../screens/community/board.html#sql"
+        },
+        {
+          "text": "HTML/CSS/JS\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#web",
+          "raw": "../../screens/community/board.html#web"
+        },
+        {
+          "text": "Python\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#python",
+          "raw": "../../screens/community/board.html#python"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        },
+        {
+          "text": "글쓰기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+          "raw": "../../screens/community/write.html"
+        },
+        {
+          "text": "전체",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#all",
+          "raw": "../../screens/community/board.html#all"
+        },
+        {
+          "text": "자유",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "질문",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#question",
+          "raw": "../../screens/community/board.html#question"
+        },
+        {
+          "text": "정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#info",
+          "raw": "../../screens/community/board.html#info"
+        },
+        {
+          "text": "조건문 edge case 정리\n질문 · 댓글 12 · 좋아요 48 · 스크랩 9",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "SQL JOIN 시각화 자료\n정보 · 댓글 8 · 좋아요 33 · 스크랩 21",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "반복문 문제 풀이 팁\n정보 · 댓글 3 · 스크랩 14",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/board.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "viewport": "mobile",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_board_html__mobile__dark.png",
+      "title": "SR-010 게시판 글 목록 · Knowva UI HTML2",
+      "activeScreen": "sr-010-board",
+      "rootTextLength": 569,
+      "height": 2144,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "aside.community-rail",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "main.community-board",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "글쓰기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+          "raw": "../../screens/community/write.html"
+        },
+        {
+          "text": "Java\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "SQL\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#sql",
+          "raw": "../../screens/community/board.html#sql"
+        },
+        {
+          "text": "HTML/CSS/JS\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#web",
+          "raw": "../../screens/community/board.html#web"
+        },
+        {
+          "text": "Python\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#python",
+          "raw": "../../screens/community/board.html#python"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        },
+        {
+          "text": "글쓰기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+          "raw": "../../screens/community/write.html"
+        },
+        {
+          "text": "전체",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#all",
+          "raw": "../../screens/community/board.html#all"
+        },
+        {
+          "text": "자유",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "질문",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#question",
+          "raw": "../../screens/community/board.html#question"
+        },
+        {
+          "text": "정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#info",
+          "raw": "../../screens/community/board.html#info"
+        },
+        {
+          "text": "조건문 edge case 정리\n질문 · 댓글 12 · 좋아요 48 · 스크랩 9",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "SQL JOIN 시각화 자료\n정보 · 댓글 8 · 좋아요 33 · 스크랩 21",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "반복문 문제 풀이 팁\n정보 · 댓글 3 · 스크랩 14",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_index_html__desktop__light.png",
+      "title": "SR-010 커뮤니티 홈 · Knowva UI HTML2",
+      "activeScreen": "sr-010",
+      "rootTextLength": 538,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Java\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "SQL\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#sql",
+          "raw": "../../screens/community/board.html#sql"
+        },
+        {
+          "text": "HTML/CSS/JS\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#web",
+          "raw": "../../screens/community/board.html#web"
+        },
+        {
+          "text": "Python\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#python",
+          "raw": "../../screens/community/board.html#python"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        },
+        {
+          "text": "전체",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#all",
+          "raw": "../../screens/community/board.html#all"
+        },
+        {
+          "text": "자유",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "질문",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#question",
+          "raw": "../../screens/community/board.html#question"
+        },
+        {
+          "text": "정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#info",
+          "raw": "../../screens/community/board.html#info"
+        },
+        {
+          "text": "조건문 edge case 정리\n질문 · 댓글 12 · 좋아요 48 · 스크랩 9",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "SQL JOIN 시각화 자료\n정보 · 댓글 8 · 좋아요 33 · 스크랩 21",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "반복문 문제 풀이 팁\n정보 · 댓글 3 · 스크랩 14",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "Java 게시판으로 이동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_index_html__desktop__dark.png",
+      "title": "SR-010 커뮤니티 홈 · Knowva UI HTML2",
+      "activeScreen": "sr-010",
+      "rootTextLength": 538,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "aside.community-rail",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "main.community-board",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Java\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "SQL\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#sql",
+          "raw": "../../screens/community/board.html#sql"
+        },
+        {
+          "text": "HTML/CSS/JS\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#web",
+          "raw": "../../screens/community/board.html#web"
+        },
+        {
+          "text": "Python\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#python",
+          "raw": "../../screens/community/board.html#python"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        },
+        {
+          "text": "전체",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#all",
+          "raw": "../../screens/community/board.html#all"
+        },
+        {
+          "text": "자유",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "질문",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#question",
+          "raw": "../../screens/community/board.html#question"
+        },
+        {
+          "text": "정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#info",
+          "raw": "../../screens/community/board.html#info"
+        },
+        {
+          "text": "조건문 edge case 정리\n질문 · 댓글 12 · 좋아요 48 · 스크랩 9",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "SQL JOIN 시각화 자료\n정보 · 댓글 8 · 좋아요 33 · 스크랩 21",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "반복문 문제 풀이 팁\n정보 · 댓글 3 · 스크랩 14",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "Java 게시판으로 이동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "viewport": "mobile",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_index_html__mobile__light.png",
+      "title": "SR-010 커뮤니티 홈 · Knowva UI HTML2",
+      "activeScreen": "sr-010",
+      "rootTextLength": 538,
+      "height": 2045,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Java\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "SQL\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#sql",
+          "raw": "../../screens/community/board.html#sql"
+        },
+        {
+          "text": "HTML/CSS/JS\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#web",
+          "raw": "../../screens/community/board.html#web"
+        },
+        {
+          "text": "Python\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#python",
+          "raw": "../../screens/community/board.html#python"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        },
+        {
+          "text": "전체",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#all",
+          "raw": "../../screens/community/board.html#all"
+        },
+        {
+          "text": "자유",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "질문",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#question",
+          "raw": "../../screens/community/board.html#question"
+        },
+        {
+          "text": "정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#info",
+          "raw": "../../screens/community/board.html#info"
+        },
+        {
+          "text": "조건문 edge case 정리\n질문 · 댓글 12 · 좋아요 48 · 스크랩 9",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "SQL JOIN 시각화 자료\n정보 · 댓글 8 · 좋아요 33 · 스크랩 21",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "반복문 문제 풀이 팁\n정보 · 댓글 3 · 스크랩 14",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "Java 게시판으로 이동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "viewport": "mobile",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_index_html__mobile__dark.png",
+      "title": "SR-010 커뮤니티 홈 · Knowva UI HTML2",
+      "activeScreen": "sr-010",
+      "rootTextLength": 538,
+      "height": 2045,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "aside.community-rail",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "main.community-board",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Java\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "SQL\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#sql",
+          "raw": "../../screens/community/board.html#sql"
+        },
+        {
+          "text": "HTML/CSS/JS\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#web",
+          "raw": "../../screens/community/board.html#web"
+        },
+        {
+          "text": "Python\n자유 · 질문 · 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#python",
+          "raw": "../../screens/community/board.html#python"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        },
+        {
+          "text": "전체",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#all",
+          "raw": "../../screens/community/board.html#all"
+        },
+        {
+          "text": "자유",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "질문",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#question",
+          "raw": "../../screens/community/board.html#question"
+        },
+        {
+          "text": "정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#info",
+          "raw": "../../screens/community/board.html#info"
+        },
+        {
+          "text": "조건문 edge case 정리\n질문 · 댓글 12 · 좋아요 48 · 스크랩 9",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "SQL JOIN 시각화 자료\n정보 · 댓글 8 · 좋아요 33 · 스크랩 21",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "반복문 문제 풀이 팁\n정보 · 댓글 3 · 스크랩 14",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "Java 게시판으로 이동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "내 커뮤니티 프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/profile.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_profile_html__desktop__light.png",
+      "title": "SR-010 커뮤니티 프로필 · Knowva UI HTML2",
+      "activeScreen": "sr-010-profile",
+      "rootTextLength": 410,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Java 게시판으로 이동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17 · 공개",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "조건문 복습 질문\n질문 · 답변 2 · 해결됨",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오답 복습 기록\n자유 · 비공개 · 수정 가능",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/profile.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_profile_html__desktop__dark.png",
+      "title": "SR-010 커뮤니티 프로필 · Knowva UI HTML2",
+      "activeScreen": "sr-010-profile",
+      "rootTextLength": 410,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "main.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Java 게시판으로 이동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#java",
+          "raw": "../../screens/community/board.html#java"
+        },
+        {
+          "text": "오늘 학습 일지\n자유 · 댓글 5 · 좋아요 17 · 공개",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "조건문 복습 질문\n질문 · 답변 2 · 해결됨",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        },
+        {
+          "text": "오답 복습 기록\n자유 · 비공개 · 수정 가능",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#detail",
+          "raw": "../../screens/community/board.html#detail"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/write.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_write_html__desktop__light.png",
+      "title": "SR-010 게시글 작성 · Knowva UI HTML2",
+      "activeScreen": "sr-010-write",
+      "rootTextLength": 225,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "글 목록으로",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "등록",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "취소",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/community/write.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_community_write_html__desktop__dark.png",
+      "title": "SR-010 게시글 작성 · Knowva UI HTML2",
+      "activeScreen": "sr-010-write",
+      "rootTextLength": 225,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "form.panel.form-grid",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "글 목록으로",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "등록",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        },
+        {
+          "text": "취소",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html#free",
+          "raw": "../../screens/community/board.html#free"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/exam/coding-test.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/exam/coding-test.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_exam_coding_test_html__desktop__light.png",
+      "title": "SR-008 코딩테스트 · Knowva UI HTML2",
+      "activeScreen": "sr-008",
+      "rootTextLength": 330,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "분석 결과 보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "일반 문제풀이",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "결과 분석으로",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/exam/coding-test.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/exam/coding-test.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_exam_coding_test_html__desktop__dark.png",
+      "title": "SR-008 코딩테스트 · Knowva UI HTML2",
+      "activeScreen": "sr-008",
+      "rootTextLength": 330,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "분석 결과 보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "일반 문제풀이",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "결과 분석으로",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/learning/curriculum.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_curriculum_html__desktop__light.png",
+      "title": "SR-005 이론 학습 · Knowva UI HTML2",
+      "activeScreen": "sr-005",
+      "rootTextLength": 484,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "바로 문제 풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "학습 내용 저장",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+          "raw": "../../screens/learning/curriculum.html"
+        },
+        {
+          "text": "다음 단원",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/learning/curriculum.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_curriculum_html__desktop__dark.png",
+      "title": "SR-005 이론 학습 · Knowva UI HTML2",
+      "activeScreen": "sr-005",
+      "rootTextLength": 484,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "바로 문제 풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "학습 내용 저장",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+          "raw": "../../screens/learning/curriculum.html"
+        },
+        {
+          "text": "다음 단원",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_main_html__desktop__light.png",
+      "title": "SR-003 학습 메인 · Knowva UI HTML2",
+      "activeScreen": "sr-003",
+      "rootTextLength": 423,
+      "height": 1150,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Knowva",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "JAVA\n현재 학습 중",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "CSS\n다음 추천 과목",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "SQL\n기초 진행 중",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "리더보드\n통합 15위",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/ranking/index.html",
+          "raw": "../../screens/ranking/index.html"
+        },
+        {
+          "text": "학습 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+          "raw": "../../screens/learning/curriculum.html"
+        },
+        {
+          "text": "이전 단원 문제풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "오답 복습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+          "raw": "../../screens/learning/review.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_main_html__desktop__dark.png",
+      "title": "SR-003 학습 메인 · Knowva UI HTML2",
+      "activeScreen": "sr-003",
+      "rootTextLength": 423,
+      "height": 1150,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.roadmap-board",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.status-panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.status-panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Knowva",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "JAVA\n현재 학습 중",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "CSS\n다음 추천 과목",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "SQL\n기초 진행 중",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "리더보드\n통합 15위",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/ranking/index.html",
+          "raw": "../../screens/ranking/index.html"
+        },
+        {
+          "text": "학습 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+          "raw": "../../screens/learning/curriculum.html"
+        },
+        {
+          "text": "이전 단원 문제풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "오답 복습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+          "raw": "../../screens/learning/review.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "viewport": "mobile",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_main_html__mobile__light.png",
+      "title": "SR-003 학습 메인 · Knowva UI HTML2",
+      "activeScreen": "sr-003",
+      "rootTextLength": 423,
+      "height": 2889,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Knowva",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "JAVA\n현재 학습 중",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "CSS\n다음 추천 과목",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "SQL\n기초 진행 중",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "리더보드\n통합 15위",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/ranking/index.html",
+          "raw": "../../screens/ranking/index.html"
+        },
+        {
+          "text": "학습 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+          "raw": "../../screens/learning/curriculum.html"
+        },
+        {
+          "text": "이전 단원 문제풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "오답 복습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+          "raw": "../../screens/learning/review.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "viewport": "mobile",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_main_html__mobile__dark.png",
+      "title": "SR-003 학습 메인 · Knowva UI HTML2",
+      "activeScreen": "sr-003",
+      "rootTextLength": 423,
+      "height": 2889,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.roadmap-board",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.status-panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.status-panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "Knowva",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "JAVA\n현재 학습 중",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "CSS\n다음 추천 과목",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "SQL\n기초 진행 중",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "리더보드\n통합 15위",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/ranking/index.html",
+          "raw": "../../screens/ranking/index.html"
+        },
+        {
+          "text": "학습 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+          "raw": "../../screens/learning/curriculum.html"
+        },
+        {
+          "text": "이전 단원 문제풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "오답 복습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+          "raw": "../../screens/learning/review.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/learning/onboarding.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/onboarding.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_onboarding_html__desktop__light.png",
+      "title": "SR-004 초기 설정 · Knowva UI HTML2",
+      "activeScreen": "sr-004",
+      "rootTextLength": 320,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "학습 메인으로",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "결과 적용",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/learning/onboarding.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/onboarding.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_onboarding_html__desktop__dark.png",
+      "title": "SR-004 초기 설정 · Knowva UI HTML2",
+      "activeScreen": "sr-004",
+      "rootTextLength": 320,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "section.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "학습 메인으로",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "결과 적용",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/learning/practice.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_practice_html__desktop__light.png",
+      "title": "SR-006 일반 문제풀이 · Knowva UI HTML2",
+      "activeScreen": "sr-006",
+      "rootTextLength": 375,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "다음 문제",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "해설 보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+          "raw": "../../screens/learning/review.html"
+        },
+        {
+          "text": "다시 풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "오답 복습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+          "raw": "../../screens/learning/review.html"
+        },
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "다음 단원",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+          "raw": "../../screens/learning/curriculum.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/learning/practice.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_practice_html__desktop__dark.png",
+      "title": "SR-006 일반 문제풀이 · Knowva UI HTML2",
+      "activeScreen": "sr-006",
+      "rootTextLength": 375,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "다음 문제",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "해설 보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+          "raw": "../../screens/learning/review.html"
+        },
+        {
+          "text": "다시 풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "오답 복습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+          "raw": "../../screens/learning/review.html"
+        },
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "다음 단원",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+          "raw": "../../screens/learning/curriculum.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/learning/review.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_review_html__desktop__light.png",
+      "title": "SR-007 오답 복습 · Knowva UI HTML2",
+      "activeScreen": "sr-007",
+      "rootTextLength": 308,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "다시 풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/learning/review.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_learning_review_html__desktop__dark.png",
+      "title": "SR-007 오답 복습 · Knowva UI HTML2",
+      "activeScreen": "sr-007",
+      "rootTextLength": 308,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "div.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "div.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "다시 풀기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "학습 메인",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_mypage_index_html__desktop__light.png",
+      "title": "SR-012 마이페이지 · Knowva UI HTML2",
+      "activeScreen": "sr-012",
+      "rootTextLength": 568,
+      "height": 2307,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "프로필 편집",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "전체보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "전체보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/exam/coding-test.html",
+          "raw": "../../screens/exam/coding-test.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+          "raw": "../../screens/community/board.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+          "raw": "../../screens/community/board.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_mypage_index_html__desktop__dark.png",
+      "title": "SR-012 마이페이지 · Knowva UI HTML2",
+      "activeScreen": "sr-012",
+      "rootTextLength": 568,
+      "height": 2307,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.mypage-profile-panel",
+          "background": "rgba(18, 31, 50, 0.94)",
+          "border": "rgba(147, 171, 201, 0.3)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "프로필 편집",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "전체보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "전체보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/exam/coding-test.html",
+          "raw": "../../screens/exam/coding-test.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+          "raw": "../../screens/community/board.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+          "raw": "../../screens/community/board.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "viewport": "mobile",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_mypage_index_html__mobile__light.png",
+      "title": "SR-012 마이페이지 · Knowva UI HTML2",
+      "activeScreen": "sr-012",
+      "rootTextLength": 568,
+      "height": 3505,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "프로필 편집",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "전체보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "전체보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/exam/coding-test.html",
+          "raw": "../../screens/exam/coding-test.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+          "raw": "../../screens/community/board.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+          "raw": "../../screens/community/board.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "viewport": "mobile",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_mypage_index_html__mobile__dark.png",
+      "title": "SR-012 마이페이지 · Knowva UI HTML2",
+      "activeScreen": "sr-012",
+      "rootTextLength": 568,
+      "height": 3505,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.mypage-profile-panel",
+          "background": "rgba(18, 31, 50, 0.94)",
+          "border": "rgba(147, 171, 201, 0.3)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "프로필 편집",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "전체보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "전체보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/exam/coding-test.html",
+          "raw": "../../screens/exam/coding-test.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+          "raw": "../../screens/community/board.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+          "raw": "../../screens/community/board.html"
+        },
+        {
+          "text": "보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+          "raw": "../../screens/community/profile.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/payment/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_payment_index_html__desktop__light.png",
+      "title": "SR-011 결제 · Knowva UI HTML2",
+      "activeScreen": "sr-011",
+      "rootTextLength": 394,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "더미 결제 완료",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html#complete",
+          "raw": "../../screens/payment/index.html#complete"
+        },
+        {
+          "text": "분석으로 돌아가기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "Premium 분석 보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "설정 결제 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/payment/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_payment_index_html__desktop__dark.png",
+      "title": "SR-011 결제 · Knowva UI HTML2",
+      "activeScreen": "sr-011",
+      "rootTextLength": 394,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "더미 결제 완료",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html#complete",
+          "raw": "../../screens/payment/index.html#complete"
+        },
+        {
+          "text": "분석으로 돌아가기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "Premium 분석 보기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "설정 결제 정보",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/ranking/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/ranking/index.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_ranking_index_html__desktop__light.png",
+      "title": "SR-014 랭킹 · Knowva UI HTML2",
+      "activeScreen": "sr-014",
+      "rootTextLength": 312,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/ranking/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/ranking/index.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_ranking_index_html__desktop__dark.png",
+      "title": "SR-014 랭킹 · Knowva UI HTML2",
+      "activeScreen": "sr-014",
+      "rootTextLength": 312,
+      "height": 1100,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "section.page-hero.compact",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "section.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "div.table-card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "로고",
+          "href": "http://127.0.0.1:4174/ui-html2/index.html",
+          "raw": "../../index.html"
+        },
+        {
+          "text": "학습",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+          "raw": "../../screens/learning/main.html"
+        },
+        {
+          "text": "분석",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+          "raw": "../../screens/analysis/index.html"
+        },
+        {
+          "text": "커뮤니티",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+          "raw": "../../screens/community/index.html"
+        },
+        {
+          "text": "마이페이지",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        },
+        {
+          "text": "⚙",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "프로필",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+          "raw": "../../screens/mypage/index.html"
+        }
+      ],
+      "images": [
+        {
+          "className": "topbar-export-reference",
+          "src": "http://127.0.0.1:4174/figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "raw": "../../../figma%20export/%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%A1/%E1%84%92%E1%85%A6%E1%84%83%E1%85%A5.png",
+          "complete": true,
+          "naturalWidth": 5760,
+          "naturalHeight": 521
+        }
+      ]
+    },
+    {
+      "relativePath": "screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_settings_index_html__desktop__light.png",
+      "title": "SR-015 설정 · Knowva UI HTML2",
+      "activeScreen": "sr-015",
+      "rootTextLength": 406,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "저장",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "변경",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "연동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "결제 화면",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+          "raw": "../../screens/payment/index.html"
+        },
+        {
+          "text": "로그아웃",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+          "raw": "../../screens/auth/login.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_settings_index_html__desktop__dark.png",
+      "title": "SR-015 설정 · Knowva UI HTML2",
+      "activeScreen": "sr-015",
+      "rootTextLength": 406,
+      "height": 1120,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "div.settings-dialog",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "section.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "저장",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "변경",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "연동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "결제 화면",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+          "raw": "../../screens/payment/index.html"
+        },
+        {
+          "text": "로그아웃",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+          "raw": "../../screens/auth/login.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "viewport": "mobile",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_settings_index_html__mobile__light.png",
+      "title": "SR-015 설정 · Knowva UI HTML2",
+      "activeScreen": "sr-015",
+      "rootTextLength": 406,
+      "height": 2060,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "저장",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "변경",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "연동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "결제 화면",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+          "raw": "../../screens/payment/index.html"
+        },
+        {
+          "text": "로그아웃",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+          "raw": "../../screens/auth/login.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "viewport": "mobile",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_settings_index_html__mobile__dark.png",
+      "title": "SR-015 설정 · Knowva UI HTML2",
+      "activeScreen": "sr-015",
+      "rootTextLength": 406,
+      "height": 2060,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "div.settings-dialog",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "section.panel",
+          "background": "rgba(18, 31, 50, 0.93)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "×",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+          "raw": "../../screens/learning/practice.html"
+        },
+        {
+          "text": "저장",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "변경",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "연동",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+          "raw": "../../screens/settings/index.html"
+        },
+        {
+          "text": "결제 화면",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+          "raw": "../../screens/payment/index.html"
+        },
+        {
+          "text": "로그아웃",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+          "raw": "../../screens/auth/login.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/welcome/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "viewport": "desktop",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_welcome_index_html__desktop__light.png",
+      "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+      "activeScreen": "sr-001",
+      "rootTextLength": 504,
+      "height": 1141,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "튜토리얼 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html#tutorial",
+          "raw": "../../screens/welcome/index.html#tutorial"
+        },
+        {
+          "text": "바로 로그인하기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+          "raw": "../../screens/auth/login.html"
+        },
+        {
+          "text": "회원가입",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        },
+        {
+          "text": "Google로 계속",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#google",
+          "raw": "../../screens/auth/login.html#google"
+        },
+        {
+          "text": "Kakao로 계속",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#kakao",
+          "raw": "../../screens/auth/login.html#kakao"
+        },
+        {
+          "text": "가입하고 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/welcome/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "viewport": "desktop",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_welcome_index_html__desktop__dark.png",
+      "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+      "activeScreen": "sr-001",
+      "rootTextLength": 504,
+      "height": 1141,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "튜토리얼 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html#tutorial",
+          "raw": "../../screens/welcome/index.html#tutorial"
+        },
+        {
+          "text": "바로 로그인하기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+          "raw": "../../screens/auth/login.html"
+        },
+        {
+          "text": "회원가입",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        },
+        {
+          "text": "Google로 계속",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#google",
+          "raw": "../../screens/auth/login.html#google"
+        },
+        {
+          "text": "Kakao로 계속",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#kakao",
+          "raw": "../../screens/auth/login.html#kakao"
+        },
+        {
+          "text": "가입하고 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/welcome/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "viewport": "mobile",
+      "theme": "light",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_welcome_index_html__mobile__light.png",
+      "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+      "activeScreen": "sr-001",
+      "rootTextLength": 504,
+      "height": 1895,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [],
+      "links": [
+        {
+          "text": "튜토리얼 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html#tutorial",
+          "raw": "../../screens/welcome/index.html#tutorial"
+        },
+        {
+          "text": "바로 로그인하기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+          "raw": "../../screens/auth/login.html"
+        },
+        {
+          "text": "회원가입",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        },
+        {
+          "text": "Google로 계속",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#google",
+          "raw": "../../screens/auth/login.html#google"
+        },
+        {
+          "text": "Kakao로 계속",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#kakao",
+          "raw": "../../screens/auth/login.html#kakao"
+        },
+        {
+          "text": "가입하고 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        }
+      ],
+      "images": []
+    },
+    {
+      "relativePath": "screens/welcome/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "viewport": "mobile",
+      "theme": "dark",
+      "httpStatus": 200,
+      "screenshot": ".sisyphus/ulw-ui-html2-qa/evidence/screenshots/screens_welcome_index_html__mobile__dark.png",
+      "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+      "activeScreen": "sr-001",
+      "rootTextLength": 504,
+      "height": 1895,
+      "overflowX": 0,
+      "clippedCount": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "darkSurfaceSample": [
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        },
+        {
+          "selector": "article.card",
+          "background": "rgba(29, 45, 68, 0.94)",
+          "border": "rgba(147, 171, 201, 0.28)",
+          "bodyBackground": "rgb(7, 11, 22)"
+        }
+      ],
+      "links": [
+        {
+          "text": "튜토리얼 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html#tutorial",
+          "raw": "../../screens/welcome/index.html#tutorial"
+        },
+        {
+          "text": "바로 로그인하기",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+          "raw": "../../screens/auth/login.html"
+        },
+        {
+          "text": "회원가입",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        },
+        {
+          "text": "Google로 계속",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#google",
+          "raw": "../../screens/auth/login.html#google"
+        },
+        {
+          "text": "Kakao로 계속",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html#kakao",
+          "raw": "../../screens/auth/login.html#kakao"
+        },
+        {
+          "text": "가입하고 시작",
+          "href": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+          "raw": "../../screens/auth/signup.html"
+        }
+      ],
+      "images": []
+    }
+  ],
+  "linkChecks": [
+    {
+      "source": "screens/admin/dashboard.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/admin/dashboard.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/admin/dashboard.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/admin/dashboard.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/admin/dashboard.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/admin/dashboard.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/analysis/index.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/analysis/index.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/analysis/index.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/analysis/index.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/analysis/index.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/analysis/index.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/analysis/index.html",
+      "text": "더미 결제",
+      "raw": "../../screens/payment/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/auth/login.html",
+      "text": "학습 메인으로",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/auth/login.html",
+      "text": "회원가입",
+      "raw": "../../screens/auth/signup.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+      "status": 200
+    },
+    {
+      "source": "screens/auth/signup.html",
+      "text": "초기 설정으로 이동",
+      "raw": "../../screens/learning/onboarding.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/onboarding.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "글쓰기",
+      "raw": "../../screens/community/write.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/write.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "Java\n자유 · 질문 · 정보",
+      "raw": "../../screens/community/board.html#java",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/board.html",
+      "text": "내 커뮤니티 프로필",
+      "raw": "../../screens/community/profile.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/index.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/index.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/index.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/index.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/index.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/index.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/index.html",
+      "text": "Java\n자유 · 질문 · 정보",
+      "raw": "../../screens/community/board.html#java",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/index.html",
+      "text": "내 커뮤니티 프로필",
+      "raw": "../../screens/community/profile.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/profile.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/profile.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/profile.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/profile.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/profile.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/profile.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/profile.html",
+      "text": "Java 게시판으로 이동",
+      "raw": "../../screens/community/board.html#java",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/write.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/write.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/write.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/write.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/write.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/write.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/community/write.html",
+      "text": "글 목록으로",
+      "raw": "../../screens/community/board.html#free",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "status": 200
+    },
+    {
+      "source": "screens/exam/coding-test.html",
+      "text": "분석 결과 보기",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/exam/coding-test.html",
+      "text": "학습 메인",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/exam/coding-test.html",
+      "text": "일반 문제풀이",
+      "raw": "../../screens/learning/practice.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/curriculum.html",
+      "text": "학습 메인",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/curriculum.html",
+      "text": "바로 문제 풀기",
+      "raw": "../../screens/learning/practice.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/curriculum.html",
+      "text": "학습 내용 저장",
+      "raw": "../../screens/learning/curriculum.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "리더보드\n통합 15위",
+      "raw": "../../screens/ranking/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/ranking/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "학습 시작",
+      "raw": "../../screens/learning/curriculum.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "이전 단원 문제풀기",
+      "raw": "../../screens/learning/practice.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/main.html",
+      "text": "오답 복습",
+      "raw": "../../screens/learning/review.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/onboarding.html",
+      "text": "학습 메인으로",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/practice.html",
+      "text": "학습 메인",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/practice.html",
+      "text": "다음 문제",
+      "raw": "../../screens/learning/practice.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/practice.html",
+      "text": "해설 보기",
+      "raw": "../../screens/learning/review.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/review.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/practice.html",
+      "text": "다음 단원",
+      "raw": "../../screens/learning/curriculum.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/curriculum.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/review.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/review.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/review.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/review.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/review.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/review.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/learning/review.html",
+      "text": "다시 풀기",
+      "raw": "../../screens/learning/practice.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "전체보기",
+      "raw": "../../screens/exam/coding-test.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/exam/coding-test.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "보기",
+      "raw": "../../screens/community/board.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/board.html",
+      "status": 200
+    },
+    {
+      "source": "screens/mypage/index.html",
+      "text": "보기",
+      "raw": "../../screens/community/profile.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/profile.html",
+      "status": 200
+    },
+    {
+      "source": "screens/payment/index.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/payment/index.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/payment/index.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/payment/index.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/payment/index.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/payment/index.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/payment/index.html",
+      "text": "더미 결제 완료",
+      "raw": "../../screens/payment/index.html#complete",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/ranking/index.html",
+      "text": "로고",
+      "raw": "../../index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/ranking/index.html",
+      "text": "학습",
+      "raw": "../../screens/learning/main.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/main.html",
+      "status": 200
+    },
+    {
+      "source": "screens/ranking/index.html",
+      "text": "분석",
+      "raw": "../../screens/analysis/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/analysis/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/ranking/index.html",
+      "text": "커뮤니티",
+      "raw": "../../screens/community/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/community/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/ranking/index.html",
+      "text": "마이페이지",
+      "raw": "../../screens/mypage/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/mypage/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/ranking/index.html",
+      "text": "⚙",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/settings/index.html",
+      "text": "×",
+      "raw": "../../screens/learning/practice.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/learning/practice.html",
+      "status": 200
+    },
+    {
+      "source": "screens/settings/index.html",
+      "text": "저장",
+      "raw": "../../screens/settings/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/settings/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/settings/index.html",
+      "text": "결제 화면",
+      "raw": "../../screens/payment/index.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/payment/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/settings/index.html",
+      "text": "로그아웃",
+      "raw": "../../screens/auth/login.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+      "status": 200
+    },
+    {
+      "source": "screens/welcome/index.html",
+      "text": "튜토리얼 시작",
+      "raw": "../../screens/welcome/index.html#tutorial",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+      "status": 200
+    },
+    {
+      "source": "screens/welcome/index.html",
+      "text": "바로 로그인하기",
+      "raw": "../../screens/auth/login.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/auth/login.html",
+      "status": 200
+    },
+    {
+      "source": "screens/welcome/index.html",
+      "text": "회원가입",
+      "raw": "../../screens/auth/signup.html",
+      "url": "http://127.0.0.1:4174/ui-html2/screens/auth/signup.html",
+      "status": 200
+    }
+  ],
+  "failures": []
+}

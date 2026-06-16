@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Knowva Rive Mascot Bridge</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    body.rive-bridge-page {
+      background:
+        radial-gradient(circle at 18% 16%, rgba(28, 176, 246, 0.2), transparent 28%),
+        radial-gradient(circle at 82% 24%, rgba(182, 255, 77, 0.16), transparent 26%),
+        linear-gradient(135deg, #070a18 0%, #111833 54%, #06131f 100%);
+      color: #f7fcff;
+    }
+
+    .rive-bridge-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(420px, 1.08fr);
+      gap: 36px;
+      min-height: calc(100vh - 124px);
+      align-items: center;
+      padding: 34px 4vw 46px;
+    }
+
+    .rive-bridge-copy {
+      display: grid;
+      gap: 18px;
+      max-width: 700px;
+    }
+
+    .rive-bridge-copy h1 {
+      margin: 0;
+      font-size: clamp(44px, 5.6vw, 78px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .rive-bridge-copy p {
+      margin: 0;
+      color: rgba(247, 252, 255, 0.72);
+      font-size: 18px;
+      line-height: 1.65;
+      word-break: keep-all;
+    }
+
+    .rive-contract-list {
+      display: grid;
+      gap: 10px;
+      margin: 8px 0 0;
+      padding: 0;
+      list-style: none;
+      color: rgba(247, 252, 255, 0.78);
+      font-weight: 800;
+    }
+
+    .rive-contract-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 10px 0;
+    }
+
+    .rive-contract-list code {
+      color: #b6ff4d;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+    }
+
+    .rive-stage-panel {
+      display: grid;
+      gap: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 52% 42%, rgba(0, 229, 255, 0.16), transparent 34%),
+        linear-gradient(140deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
+      padding: 20px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(16px);
+    }
+
+    .rive-canvas-wrap {
+      position: relative;
+      min-height: 420px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 50% 46%, rgba(182, 255, 77, 0.16), transparent 30%),
+        rgba(3, 10, 24, 0.72);
+    }
+
+    #mascot-rive-canvas {
+      display: block;
+      width: 100%;
+      height: 420px;
+    }
+
+    .rive-status {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      max-width: calc(100% - 36px);
+      border: 1px solid rgba(0, 229, 255, 0.22);
+      border-radius: 8px;
+      background: rgba(4, 12, 28, 0.84);
+      color: rgba(247, 252, 255, 0.8);
+      padding: 11px 13px;
+      font-size: 13px;
+      font-weight: 800;
+      backdrop-filter: blur(12px);
+    }
+
+    .rive-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .rive-controls .btn {
+      min-height: 42px;
+      border-color: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.1);
+      color: #f7fcff;
+      box-shadow: none;
+    }
+
+    .rive-controls .btn.primary {
+      border-color: rgba(182, 255, 77, 0.72);
+      background: #b6ff4d;
+      color: #102000;
+    }
+
+    @media (max-width: 920px) {
+      .rive-bridge-layout {
+        grid-template-columns: 1fr;
+        padding-inline: 0;
+      }
+
+      .rive-canvas-wrap,
+      #mascot-rive-canvas {
+        min-height: 340px;
+        height: 340px;
+      }
+    }
+  </style>
+</head>
+<body class="sample-page rive-bridge-page">
+  <div class="sample-shell">
+    <header class="topbar app-panel" style="padding: 0 18px;">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Rive Mascot Bridge</span></span>
+      </a>
+      <nav class="nav" aria-label="main navigation">
+        <a class="active" href="#">Rive</a>
+        <a href="./sr-003-learning-a.html">학습 화면</a>
+        <a href="./sr-001-welcome-e-cute-a.html">Ion Buddy</a>
+      </nav>
+    </header>
+
+    <main class="rive-bridge-layout">
+      <section class="rive-bridge-copy" aria-labelledby="rive-title">
+        <span class="eyebrow"><i class="dot"></i> Runtime bridge, not CSS motion</span>
+        <h1 id="rive-title">Mascot은 Rive asset으로 분리</h1>
+        <p>이 화면은 Rive WASM runtime이 실제 `.riv` 파일을 canvas에 렌더링하는 integration sample입니다. 현재는 smoke test용 placeholder가 뜨고, Rive Editor에서 export한 `knowva-mascot.riv`는 query parameter로 바로 검증할 수 있습니다.</p>
+        <ul class="rive-contract-list" aria-label="Rive asset contract">
+          <li><span>asset path</span><code>assets/rive/knowva-mascot.riv</code></li>
+          <li><span>artboard</span><code>Mascot</code></li>
+          <li><span>state machine</span><code>MascotState</code></li>
+          <li><span>fallback</span><code>knowva-mascot-placeholder.riv</code></li>
+        </ul>
+      </section>
+
+      <section class="rive-stage-panel" aria-label="Rive mascot preview">
+        <div class="rive-canvas-wrap">
+          <canvas id="mascot-rive-canvas" width="760" height="520"></canvas>
+          <div class="rive-status" id="rive-status">Rive runtime 초기화 중</div>
+        </div>
+        <div class="rive-controls" aria-label="Rive playback controls">
+          <button class="btn primary" type="button" id="rive-play">재생</button>
+          <button class="btn" type="button" id="rive-pause">정지</button>
+          <button class="btn" type="button" id="rive-reset">다시 시작</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/@rive-app/webgl2@2.38.1"></script>
+  <script>
+    const productionAsset = "./assets/rive/knowva-mascot.riv";
+    const placeholderAsset = "./assets/rive/knowva-mascot-placeholder.riv";
+    const placeholderStateMachine = "bumpy";
+    const params = new URLSearchParams(window.location.search);
+    const statusNode = document.getElementById("rive-status");
+    const canvasNode = document.getElementById("mascot-rive-canvas");
+    let riveInstance = null;
+    let activeStateMachine = placeholderStateMachine;
+
+    function setStatus(message) {
+      statusNode.textContent = message;
+    }
+
+    function resizeRive() {
+      if (riveInstance) {
+        riveInstance.resizeDrawingSurfaceToCanvas();
+      }
+    }
+
+    function loadRive(src, stateMachines, label) {
+      activeStateMachine = stateMachines;
+      riveInstance = new rive.Rive({
+        src,
+        canvas: canvasNode,
+        autoplay: true,
+        autoBind: false,
+        stateMachines,
+        onLoad: () => {
+          resizeRive();
+          setStatus(label + " loaded");
+        },
+      });
+    }
+
+    function boot() {
+      const customAsset = params.get("src");
+      const customStateMachine = params.get("stateMachine");
+      if (customAsset) {
+        loadRive(customAsset, customStateMachine || "MascotState", "custom mascot");
+        return;
+      }
+
+      loadRive(placeholderAsset, placeholderStateMachine, "runtime placeholder");
+    }
+
+    document.getElementById("rive-play").addEventListener("click", () => {
+      riveInstance?.play();
+      setStatus("playing");
+    });
+
+    document.getElementById("rive-pause").addEventListener("click", () => {
+      riveInstance?.pause();
+      setStatus("paused");
+    });
+
+    document.getElementById("rive-reset").addEventListener("click", () => {
+      riveInstance?.reset({ stateMachines: activeStateMachine, autoplay: true });
+      setStatus("restarted");
+    });
+
+    window.addEventListener("resize", resizeRive);
+    boot();
+  </script>
+</body>
+</html>

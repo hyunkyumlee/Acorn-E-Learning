@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-003 A - Mission Control</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .mascot-status-card {
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .mascot-video {
+      width: 104px;
+      height: 104px;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 16px rgba(17, 25, 54, 0.16));
+    }
+
+    .mascot-copy {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .mascot-copy h3,
+    .mascot-copy p {
+      margin: 0;
+    }
+
+    .mascot-copy p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .mascot-state-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    @media (max-width: 1100px) {
+      .mascot-status-card {
+        grid-template-columns: 88px minmax(0, 1fr);
+      }
+
+      .mascot-video {
+        width: 88px;
+        height: 88px;
+      }
+    }
+  </style>
+</head>
+<body class="sample-page space-bg">
+  <div class="sample-shell">
+    <header class="topbar app-panel" style="padding: 0 18px;">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Mission Control</span></span>
+      </a>
+      <nav class="nav" aria-label="main navigation">
+        <a class="active" href="#">학습</a>
+        <a href="#">분석</a>
+        <a href="#">커뮤니티</a>
+        <a href="#">마이페이지</a>
+        <button type="button" aria-label="설정">설정</button>
+      </nav>
+    </header>
+
+    <main class="mission-layout">
+      <aside class="sidebar app-panel" aria-label="Learning sidebar">
+        <section class="subject-card">
+          <small>현재 과목</small>
+          <strong>JAVA 입문</strong>
+          <span>Level 2 · 진행률 68%</span>
+          <div class="progress"><i style="width:68%"></i></div>
+        </section>
+        <nav class="side-menu" aria-label="learning dashboard">
+          <a class="active" href="#">과목선택 <span>3</span></a>
+          <a href="#">로드맵 <span>2/5</span></a>
+          <a href="#">진행률 <span>68%</span></a>
+          <a href="#">오답노트 <span>5</span></a>
+          <a href="#">리더보드 <span>15위</span></a>
+        </nav>
+        <section class="status-card">
+          <h3>랭킹 기준</h3>
+          <p>문제풀이, 시험 점수, 일일 학습 횟수를 합산합니다.</p>
+          <span class="badge yellow">출석은 랭킹 점수 제외</span>
+        </section>
+      </aside>
+
+      <section class="roadmap-area app-panel" aria-label="Roadmap canvas">
+        <article class="mission-card">
+          <div>
+            <h1>오늘의 목표: 반복문</h1>
+            <p>10문항 · 예상 7분 · +20 XP · 현재 node에서 이어서 학습합니다.</p>
+          </div>
+          <a class="btn primary" href="#">오늘의 미션 시작</a>
+        </article>
+        <div class="roadmap">
+          <div class="route-line"></div>
+          <div class="node completed" style="left:10%; top:58%">JAVA 입문</div>
+          <div class="node completed" style="left:28%; top:38%">변수와 자료형</div>
+          <div class="node completed" style="left:46%; top:52%">조건문</div>
+          <div class="node current" style="left:62%; top:30%">반복문</div>
+          <div class="node locked" style="left:72%; top:62%">배열</div>
+          <div class="node gate" style="right:8%; top:42%">Test Gate</div>
+        </div>
+      </section>
+
+      <aside class="status-panel app-panel" aria-label="Status panel">
+        <article class="status-card mascot-status-card">
+          <video class="mascot-video" autoplay loop muted playsinline poster="./assets/rive/exports/knowva-mascot-poster.png" aria-label="Nova buddy idle animation">
+            <source src="./assets/rive/exports/knowva-mascot-idle.webm" type="video/webm">
+            <img src="./assets/rive/exports/knowva-mascot-poster.png" alt="Nova buddy">
+          </video>
+          <div class="mascot-copy">
+            <h3>Nova Buddy</h3>
+            <p>오늘 미션을 끝내면 반복문 node가 완료됩니다.</p>
+            <div class="mascot-state-row">
+              <span class="badge green">idle</span>
+              <span class="badge yellow">success ready</span>
+            </div>
+          </div>
+        </article>
+        <article class="status-card">
+          <h3>3일 연속 학습 중</h3>
+          <p>출석은 마이페이지 calendar와 streak 메시지에만 반영됩니다.</p>
+        </article>
+        <article class="status-card">
+          <h3>Quest Progress</h3>
+          <p>조건문 문제 10개 중 6개 완료</p>
+          <div class="progress"><i style="width:60%"></i></div>
+          <div class="badge-row"><span class="badge green">+12 XP</span><span class="badge">4문제 남음</span></div>
+        </article>
+        <article class="status-card">
+          <h3>Coding Test Gate</h3>
+          <p>진행률 80% 달성 시 코딩테스트 unlock</p>
+          <div class="progress"><i style="width:68%"></i></div>
+          <a class="btn ghost" href="#">조건 보기</a>
+        </article>
+        <article class="status-card">
+          <h3>Signal Preview</h3>
+          <p>약점: 중첩 반복문. 추천 복습 단원: 조건문 + 반복문 조합</p>
+          <a class="btn ghost" href="#">분석 자세히 보기</a>
+        </article>
+      </aside>
+    </main>
+  </div>
+  <script>
+    const mascotVideo = document.querySelector(".mascot-video");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function playMascotVideo() {
+      if (!mascotVideo || reduceMotion.matches) {
+        return;
+      }
+
+      const playRequest = mascotVideo.play();
+      if (playRequest) {
+        playRequest.catch(() => {
+          mascotVideo.setAttribute("data-playback", "poster");
+        });
+      }
+    }
+
+    if (mascotVideo) {
+      if (mascotVideo.readyState >= 2) {
+        playMascotVideo();
+      } else {
+        mascotVideo.addEventListener("loadeddata", playMascotVideo, { once: true });
+      }
+    }
+  </script>
+</body>
+</html>

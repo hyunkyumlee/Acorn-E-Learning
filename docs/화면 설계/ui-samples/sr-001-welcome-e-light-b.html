@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-001 E Light B - Orbit Console</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    body.ion-light-b {
+      --space-deep: #070a18;
+      --space-mid: #111833;
+      --space-ink: #06131f;
+      --ion-cyan: #00e5ff;
+      --ion-lime: #b6ff4d;
+      --ion-blue: #4f7cff;
+      --paper: #f7fcff;
+      --ink: #06131f;
+      --muted: rgba(6, 19, 31, 0.66);
+      background:
+        linear-gradient(90deg, rgba(0, 229, 255, 0.09) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(79, 124, 255, 0.07) 1px, transparent 1px),
+        radial-gradient(circle at 80% 22%, rgba(0, 229, 255, 0.2), transparent 26%),
+        radial-gradient(circle at 18% 76%, rgba(182, 255, 77, 0.24), transparent 26%),
+        #f7fcff;
+      background-size: 44px 44px, 44px 44px, auto, auto, auto;
+      color: var(--ink);
+    }
+
+    .console-shell .brand-title span,
+    .console-shell .nav {
+      color: rgba(6, 19, 31, 0.58);
+    }
+
+    .console-shell .nav .active {
+      background: rgba(182, 255, 77, 0.38);
+      color: var(--space-ink);
+    }
+
+    .console-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(420px, 1.08fr);
+      gap: 44px;
+      align-items: center;
+      min-height: calc(100vh - 124px);
+      padding: 34px 4vw 46px;
+    }
+
+    .console-copy {
+      display: grid;
+      gap: 24px;
+      max-width: 720px;
+    }
+
+    .console-copy .eyebrow {
+      border-color: rgba(182, 255, 77, 0.62);
+      background: rgba(182, 255, 77, 0.28);
+      color: #325800;
+    }
+
+    .console-title {
+      margin: 0;
+      color: var(--space-ink);
+      font-size: clamp(46px, 6vw, 82px);
+      line-height: 1;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .console-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 21px);
+      line-height: 1.62;
+      word-break: keep-all;
+    }
+
+    .console-primary {
+      border-color: rgba(0, 143, 160, 0.32);
+      background: var(--ion-cyan);
+      color: #00161a;
+      box-shadow: 0 18px 34px rgba(0, 229, 255, 0.24);
+    }
+
+    .console-secondary {
+      border-color: rgba(6, 19, 31, 0.14);
+      background: #ffffff;
+      color: var(--space-ink);
+      box-shadow: 0 14px 28px rgba(6, 19, 31, 0.08);
+    }
+
+    .console-visual {
+      position: relative;
+      min-height: 560px;
+    }
+
+    .console-panel {
+      position: absolute;
+      inset: 28px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+      border: 1px solid rgba(6, 19, 31, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 30px 74px rgba(6, 19, 31, 0.14);
+      padding: 22px;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+    }
+
+    .console-panel::before {
+      content: "";
+      position: absolute;
+      inset: -140px -120px auto auto;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.24), transparent 68%);
+    }
+
+    .console-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto auto -150px -110px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(182, 255, 77, 0.28), transparent 68%);
+    }
+
+    .console-head,
+    .console-foot,
+    .mission-list {
+      position: relative;
+      z-index: 1;
+    }
+
+    .console-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .console-head strong {
+      display: block;
+      color: var(--space-ink);
+      font-size: 19px;
+      line-height: 1.2;
+    }
+
+    .console-head span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .status-chip {
+      border-radius: 999px;
+      background: var(--space-ink);
+      color: var(--paper);
+      font-size: 12px;
+      font-weight: 900;
+      padding: 8px 10px;
+      white-space: nowrap;
+    }
+
+    .mission-list {
+      display: grid;
+      gap: 14px;
+      align-content: center;
+    }
+
+    .mission-row {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      border: 1px solid rgba(6, 19, 31, 0.08);
+      border-radius: 8px;
+      background: rgba(247, 252, 255, 0.76);
+      padding: 14px;
+      box-shadow: 0 12px 30px rgba(6, 19, 31, 0.07);
+    }
+
+    .mission-node {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--ion-lime), var(--ion-cyan));
+      box-shadow: 0 10px 20px rgba(0, 229, 255, 0.22);
+    }
+
+    .mission-row:nth-child(2) .mission-node {
+      background: linear-gradient(135deg, var(--ion-cyan), var(--ion-blue));
+    }
+
+    .mission-row:nth-child(3) .mission-node {
+      background: var(--space-ink);
+    }
+
+    .mission-row strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--space-ink);
+      font-size: 15px;
+    }
+
+    .mission-row span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .mission-tag {
+      border-radius: 999px;
+      background: rgba(0, 229, 255, 0.14);
+      color: #006578;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 8px 10px;
+      white-space: nowrap;
+    }
+
+    .console-foot {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      border-top: 1px solid rgba(6, 19, 31, 0.08);
+      padding-top: 16px;
+    }
+
+    .progress {
+      overflow: hidden;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(6, 19, 31, 0.08);
+    }
+
+    .progress i {
+      display: block;
+      width: 72%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--ion-cyan), var(--ion-lime));
+    }
+
+    .console-foot strong {
+      color: var(--space-ink);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 980px) {
+      .console-layout { grid-template-columns: 1fr; }
+      .console-visual { min-height: 560px; }
+    }
+
+    @media (max-width: 640px) {
+      body.ion-light-b { background-size: 32px 32px, 32px 32px, auto, auto, auto; }
+      .console-layout { padding-inline: 0; }
+      .console-panel { inset: 18px 0; padding: 18px; }
+      .mission-row { grid-template-columns: 40px minmax(0, 1fr); }
+      .mission-tag { grid-column: 2; width: fit-content; }
+      .console-foot { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="sample-page ion-light-b">
+  <div class="sample-shell console-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html" aria-label="Knowva samples"><span class="brand-mark"></span><span class="brand-title"><strong>Knowva</strong><span>Orbit Console</span></span></a>
+      <nav class="nav" aria-label="welcome navigation"><a class="active" href="#">웰컴</a><a href="#">튜토리얼</a><a href="#">로그인</a></nav>
+    </header>
+    <main class="console-layout">
+      <section class="console-copy">
+        <span class="eyebrow"><i class="dot"></i> 밝은 학습 콘솔</span>
+        <h1 class="console-title">오늘의 미션을<br>바로 시작하게.</h1>
+        <p>light mode에서는 우주 배경을 전면에 깔기보다, 흰 panel과 선명한 cyan/lime signal로 학습 흐름을 빠르게 읽게 만듭니다.</p>
+        <div class="btn-row"><a class="btn console-primary" href="#">튜토리얼 시작</a><a class="btn console-secondary" href="#">학습 콘솔 보기</a></div>
+      </section>
+      <section class="console-visual" aria-label="Knowva light learning console">
+        <div class="console-panel">
+          <div class="console-head">
+            <div><strong>Mission Preview</strong><span>로그인 전 체험 흐름</span></div>
+            <span class="status-chip">72% READY</span>
+          </div>
+          <div class="mission-list">
+            <div class="mission-row"><i class="mission-node"></i><div><strong>튜토리얼 시작</strong><span>첫 mission에서 editor와 test gate를 짧게 체험합니다.</span></div><span class="mission-tag">START</span></div>
+            <div class="mission-row"><i class="mission-node"></i><div><strong>학습 궤도 확인</strong><span>진행률, 다음 문제, streak signal을 한 화면에서 확인합니다.</span></div><span class="mission-tag">ORBIT</span></div>
+            <div class="mission-row"><i class="mission-node"></i><div><strong>기록 저장</strong><span>로그인 후 mission, ranking, review 상태를 저장합니다.</span></div><span class="mission-tag">SAVE</span></div>
+          </div>
+          <div class="console-foot">
+            <div class="progress" aria-label="mission readiness"><i></i></div>
+            <strong>Ion path active</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

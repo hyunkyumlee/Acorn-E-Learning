@@ -1,0 +1,19 @@
+<section class="quiz-frame" xmlns:th="http://www.thymeleaf.org">
+  <div class="quiz-top">
+    <a class="close-link" href="../../screens/learning/main.html" th:href="@{/learning}">×</a>
+    <strong>3 / 10</strong>
+    <div class="progress"><span style="width:30%"></span></div>
+  </div>
+  <article class="quiz-question">
+    <h2>문제 제목</h2>
+    <div class="choice-list">
+      <button class="choice-row" type="button"><b>A</b><span>선택지</span></button>
+      <button class="choice-row selected" type="button"><b>B</b><span>선택된 선택지</span></button>
+    </div>
+  </article>
+  <div class="quiz-bottom">
+    <button class="button" type="button">건너뛰기</button>
+    <p>건너뛰기 누르면 오답 처리됩니다</p>
+    <button class="button primary" type="button">확인</button>
+  </div>
+</section>
