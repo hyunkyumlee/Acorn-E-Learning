@@ -15,7 +15,7 @@
     ["sr-008", "SR-008", "코딩테스트", "screens/exam/coding-test.html", "learning", "좌우 2분할, 3문항 일괄 제출, AI 채점"],
     ["sr-009", "SR-009", "AI 분석", "screens/analysis/index.html", "analysis", "기본 분석과 premium 분석 분리"],
     ["sr-010", "SR-010", "커뮤니티 홈", "screens/community/index.html", "community", "자유게시판 진입, 인기글, 커뮤니티 프로필"],
-    ["sr-010-board", "SR-010", "게시판 글 목록", "screens/community/board.html", "community", "언어별 게시판, 전체/자유/질문/정보 필터"],
+    ["sr-010-board", "SR-010", "게시판 글 목록", "screens/community/board.html", "community", "언어별 게시판, 전체/자유/질문/공부 일지 필터"],
     ["sr-010-write", "SR-010", "게시글 작성", "screens/community/write.html", "community", "게시판 안에서 진입하는 글쓰기 전용 화면"],
     ["sr-010-profile", "SR-010", "커뮤니티 프로필", "screens/community/profile.html", "community", "나의 블로그형 커뮤니티 프로필"],
     ["sr-011", "SR-011", "결제", "screens/payment/index.html", "analysis", "더미 결제, 결제 상태, 분석 접근"],
@@ -87,12 +87,17 @@
     return `
       <header class="topbar" data-export-source="docs/figma export/사용자/헤더.png">
         <img class="topbar-export-reference" src="${headerExportSrc}" alt="" aria-hidden="true" loading="eager">
-        <a class="brand header-logo" href="${href("index.html")}" aria-label="Knowva UI index">로고</a>
+        <a class="brand header-logo" href="${href("index.html")}" aria-label="Knowva UI index">
+          <span class="brand-mark" aria-hidden="true">K</span>
+          <span class="brand-copy"><strong>Knowva</strong><small>Learning Orbit</small></span>
+        </a>
         <nav class="topbar-nav" aria-label="main navigation">${links}</nav>
         <div class="topbar-actions">
           <button class="header-icon theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환"><span class="theme-icon" aria-hidden="true"></span></button>
           <a class="header-icon settings-icon${activeClass(activeMenu === "settings")}" href="${href("screens/settings/index.html")}" aria-label="설정"><span aria-hidden="true">⚙</span></a>
-          <a class="profile-pill${activeClass(activeMenu === "mypage")}" href="${href("screens/mypage/index.html")}">프로필</a>
+          <a class="profile-pill${activeClass(activeMenu === "mypage")}" href="${href("screens/mypage/index.html")}" aria-label="마이페이지">
+            <span class="profile-dot" aria-hidden="true">NL</span><span class="profile-label">프로필</span>
+          </a>
         </div>
       </header>`;
   }
@@ -185,7 +190,7 @@
       ["all", "전체"],
       ["free", "자유"],
       ["question", "질문"],
-      ["info", "정보"]
+      ["study-log", "공부 일지"]
     ];
     return `<nav class="community-filters" aria-label="게시판 필터">${filters.map(([id, label]) =>
       `<a class="badge${activeClass(id === active)}" href="${href(`screens/community/board.html#${id}`)}">${label}</a>`
@@ -194,10 +199,10 @@
 
   function communityRail(active = "java") {
     const languages = [
-      ["java", "Java", "자유 · 질문 · 정보"],
-      ["sql", "SQL", "자유 · 질문 · 정보"],
-      ["web", "HTML/CSS/JS", "자유 · 질문 · 정보"],
-      ["python", "Python", "자유 · 질문 · 정보"]
+      ["java", "Java", "자유 · 질문 · 공부 일지"],
+      ["sql", "SQL", "자유 · 질문 · 공부 일지"],
+      ["web", "HTML/CSS/JS", "자유 · 질문 · 공부 일지"],
+      ["python", "Python", "자유 · 질문 · 공부 일지"]
     ];
     return `<aside class="community-rail">
       <h2>게시판</h2>
@@ -221,9 +226,9 @@
         ]
       : [
           ["조건문 edge case 정리", "질문 · 댓글 12 · 좋아요 48 · 스크랩 9"],
-          ["SQL JOIN 시각화 자료", "정보 · 댓글 8 · 좋아요 33 · 스크랩 21"],
+          ["SQL JOIN 시각화 자료", "공부 일지 · 댓글 8 · 좋아요 33 · 스크랩 21"],
           ["오늘 학습 일지", "자유 · 댓글 5 · 좋아요 17"],
-          ["반복문 문제 풀이 팁", "정보 · 댓글 3 · 스크랩 14"]
+          ["반복문 문제 풀이 팁", "공부 일지 · 댓글 3 · 스크랩 14"]
         ];
     return `<div class="post-list">${rows.map(([title, meta]) => `<a class="post-row" href="${href("screens/community/board.html#detail")}"><strong>${title}</strong><span>${meta}</span></a>`).join("")}</div>`;
   }
@@ -559,7 +564,7 @@ score > 60  // 60점 제외</pre>
                   ${button("내 커뮤니티 프로필", "screens/community/profile.html")}
                 </div>
                 <h2>인기 작성자</h2>
-                ${list([["orbit.dev", "Java 답변 18개 · 좋아요 420"], ["signal.sql", "SQL 정보글 12개 · 스크랩 88"]])}
+                ${list([["orbit.dev", "Java 답변 18개 · 좋아요 420"], ["signal.sql", "SQL 공부 일지 12개 · 스크랩 88"]])}
               </article>
             </section>
           </main>
@@ -568,7 +573,7 @@ score > 60  // 60점 제외</pre>
 
     "sr-010-board"() {
       return shell("community", `
-        ${pageHero("SR-010 · Java 게시판", "게시판을 선택하면 글 목록 화면으로 이동", "전체/자유/질문/정보는 이 화면 안에서 글 목록 필터처럼 동작한다.", button("글쓰기", "screens/community/write.html", "primary"))}
+        ${pageHero("SR-010 · Java 게시판", "게시판을 선택하면 글 목록 화면으로 이동", "전체/자유/질문/공부 일지는 이 화면 안에서 글 목록 필터처럼 동작한다.", button("글쓰기", "screens/community/write.html", "primary"))}
         <section class="community-layout">
           ${communityRail("java")}
           <main class="community-board">
@@ -601,7 +606,7 @@ score > 60  // 60점 제외</pre>
             ${button("글 목록으로", "screens/community/board.html#free")}
           </aside>
           <form class="panel form-grid">
-            <label>게시판<select class="field"><option>Java · 자유 게시판</option><option>Java · 질문 게시판</option><option>Java · 정보 게시판</option></select></label>
+            <label>게시판<select class="field"><option>Java · 자유 게시판</option><option>Java · 질문 게시판</option><option>Java · 공부 일지 게시판</option></select></label>
             <label>제목<input class="field" value="조건문 학습 기록 공유"></label>
             <label>내용<textarea class="field">오늘 조건문 문제를 풀면서 헷갈렸던 부분과 해결 과정을 정리합니다.</textarea></label>
             <div class="button-row">${button("등록", "screens/community/board.html#free", "primary")}${button("취소", "screens/community/board.html#free")}</div>
