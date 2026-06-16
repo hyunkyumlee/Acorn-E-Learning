@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SR-001 E Light A - Daylight Orbit</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    body.ion-light-a {
+      --space-deep: #070a18;
+      --space-mid: #111833;
+      --space-ink: #06131f;
+      --ion-cyan: #00e5ff;
+      --ion-lime: #b6ff4d;
+      --ion-blue: #4f7cff;
+      --paper: #f7fcff;
+      --paper-2: #eefaff;
+      --ink: #06131f;
+      --muted: rgba(6, 19, 31, 0.68);
+      background:
+        radial-gradient(circle at 72% 18%, rgba(0, 229, 255, 0.24), transparent 30%),
+        radial-gradient(circle at 16% 82%, rgba(182, 255, 77, 0.28), transparent 24%),
+        linear-gradient(135deg, #ffffff 0%, var(--paper) 46%, #eaf7ff 100%);
+      color: var(--ink);
+    }
+
+    .light-shell {
+      position: relative;
+      z-index: 1;
+    }
+
+    .light-shell .brand-title span,
+    .light-shell .nav {
+      color: rgba(6, 19, 31, 0.58);
+    }
+
+    .light-shell .nav .active {
+      background: rgba(0, 229, 255, 0.14);
+      color: var(--space-ink);
+    }
+
+    .light-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(390px, 0.98fr);
+      gap: 46px;
+      align-items: center;
+      min-height: calc(100vh - 124px);
+      padding: 34px 4vw 46px;
+    }
+
+    .light-copy {
+      display: grid;
+      gap: 24px;
+      max-width: 760px;
+    }
+
+    .light-copy .eyebrow {
+      border-color: rgba(0, 229, 255, 0.32);
+      background: rgba(0, 229, 255, 0.12);
+      color: #006578;
+    }
+
+    .light-title {
+      margin: 0;
+      color: var(--space-ink);
+      font-size: clamp(46px, 6vw, 86px);
+      line-height: 0.98;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .light-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 22px);
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+
+    .light-primary {
+      border-color: rgba(0, 143, 160, 0.32);
+      background: var(--ion-cyan);
+      color: #00161a;
+      box-shadow: 0 18px 34px rgba(0, 229, 255, 0.24);
+    }
+
+    .light-secondary {
+      border-color: rgba(6, 19, 31, 0.12);
+      background: #ffffff;
+      color: var(--space-ink);
+      box-shadow: 0 14px 28px rgba(6, 19, 31, 0.08);
+    }
+
+    .light-login {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 420px;
+    }
+
+    .light-login .btn {
+      border-color: rgba(6, 19, 31, 0.12);
+      color: rgba(6, 19, 31, 0.68);
+      box-shadow: none;
+    }
+
+    .light-visual {
+      position: relative;
+      min-height: 560px;
+    }
+
+    .light-stage {
+      position: absolute;
+      inset: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 229, 255, 0.22);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 58% 42%, rgba(0, 229, 255, 0.2), transparent 36%),
+        radial-gradient(circle at 28% 72%, rgba(182, 255, 77, 0.28), transparent 28%),
+        linear-gradient(140deg, rgba(255, 255, 255, 0.96), rgba(234, 247, 255, 0.72));
+      box-shadow: 0 30px 70px rgba(0, 74, 94, 0.14);
+      backdrop-filter: blur(14px);
+    }
+
+    .light-orbit {
+      position: absolute;
+      inset: 122px 58px;
+      border: 2px solid rgba(0, 229, 255, 0.26);
+      border-left-color: rgba(182, 255, 77, 0.9);
+      border-right-color: rgba(79, 124, 255, 0.52);
+      border-radius: 50%;
+      transform: rotate(-18deg);
+      animation: lightOrbit 8s ease-in-out infinite alternate;
+    }
+
+    .light-planet {
+      position: absolute;
+      top: 150px;
+      left: 50%;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      background:
+        radial-gradient(circle at 35% 30%, #ffffff 0 9%, transparent 10%),
+        linear-gradient(135deg, var(--ion-lime), var(--ion-cyan), var(--ion-blue));
+      box-shadow: inset -22px -28px 40px rgba(6, 19, 31, 0.22), 0 22px 56px rgba(0, 229, 255, 0.26);
+      animation: lightFloat 5.4s ease-in-out infinite;
+    }
+
+    .light-moon {
+      position: absolute;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffffff, var(--ion-lime));
+      box-shadow: 0 16px 32px rgba(182, 255, 77, 0.26);
+    }
+
+    .light-moon.one {
+      left: 74px;
+      top: 86px;
+      animation: lightDrift 6.2s ease-in-out infinite;
+    }
+
+    .light-moon.two {
+      right: 82px;
+      bottom: 92px;
+      width: 98px;
+      height: 98px;
+      background: linear-gradient(135deg, #ffffff, var(--ion-blue));
+      animation: lightDrift 7s ease-in-out infinite reverse;
+    }
+
+    .light-guide {
+      position: absolute;
+      right: 28px;
+      top: 72px;
+      width: min(278px, 50%);
+      border: 1px solid rgba(0, 229, 255, 0.28);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.84);
+      padding: 16px;
+      box-shadow: 0 18px 38px rgba(6, 19, 31, 0.12);
+      backdrop-filter: blur(12px);
+    }
+
+    .light-guide strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #007588;
+    }
+
+    .light-guide span {
+      color: rgba(6, 19, 31, 0.66);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    @keyframes lightFloat {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, -18px); }
+    }
+
+    @keyframes lightDrift {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(18px); }
+    }
+
+    @keyframes lightOrbit {
+      from { transform: rotate(-20deg) scale(0.98); }
+      to { transform: rotate(-10deg) scale(1.03); }
+    }
+
+    @media (max-width: 980px) {
+      .light-layout { grid-template-columns: 1fr; }
+      .light-visual { min-height: 520px; }
+    }
+
+    @media (max-width: 640px) {
+      .light-layout { padding-inline: 0; }
+      .light-login { grid-template-columns: 1fr; }
+      .light-stage { inset: 18px 0; }
+      .light-guide { width: min(250px, 72%); }
+    }
+  </style>
+</head>
+<body class="sample-page ion-light-a">
+  <div class="sample-shell light-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html" aria-label="Knowva samples"><span class="brand-mark"></span><span class="brand-title"><strong>Knowva</strong><span>Daylight Orbit</span></span></a>
+      <nav class="nav" aria-label="welcome navigation"><a class="active" href="#">웰컴</a><a href="#">튜토리얼</a><a href="#">로그인</a></nav>
+    </header>
+    <main class="light-layout">
+      <section class="light-copy">
+        <span class="eyebrow"><i class="dot"></i> 밝은 학습 궤도</span>
+        <h1 class="light-title">코딩 여정을<br>환한 궤도로.</h1>
+        <p>dark space의 무게를 덜고, Knowva의 cyan/lime business color를 밝은 paper surface 위에서 더 선명하게 보여주는 웰컴 화면입니다.</p>
+        <div class="btn-row"><a class="btn light-primary" href="#">튜토리얼 시작</a><a class="btn light-secondary" href="#">바로 로그인하기</a></div>
+        <div class="light-login" aria-label="social login options"><a class="btn ghost" href="#">Google로 계속</a><a class="btn ghost" href="#">Kakao로 계속</a></div>
+      </section>
+      <section class="light-visual" aria-label="Knowva daylight orbit visual">
+        <div class="light-stage"></div><div class="light-orbit"></div><div class="light-planet"></div><div class="light-moon one"></div><div class="light-moon two"></div>
+        <aside class="light-guide"><strong>Nova Guide</strong><span>오늘의 mission과 test gate를 밝은 panel 위에서 먼저 보여줍니다.</span></aside>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

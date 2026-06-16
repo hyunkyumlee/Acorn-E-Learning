@@ -1,0 +1,26 @@
+<section class="learning-console" xmlns:th="http://www.thymeleaf.org">
+  <aside class="course-rail">
+    <a class="brand-block" href="../../index.html" th:href="@{/}">
+      <span class="brand-mark"></span>
+      <strong>Knowva</strong>
+    </a>
+    <div class="rail-group">
+      <span class="rail-title">과목 선택</span>
+      <a class="course-button is-active" href="../../screens/learning/main.html" th:href="@{/learning}"><strong>JAVA</strong><span>현재 학습 중</span></a>
+      <a class="course-button" href="../../screens/learning/main.html" th:href="@{/learning}"><strong>CSS</strong><span>다음 추천 과목</span></a>
+    </div>
+  </aside>
+  <section class="roadmap-board">
+    <div class="mission-banner">오늘의 목표: 반복문</div>
+    <div class="roadmap-map">
+      <div class="road-node"><span class="planet done"></span><div><strong>JAVA 입문</strong><p>완료</p></div><span class="badge">완료</span></div>
+      <div class="road-node"><span class="planet current"></span><div><strong>조건문</strong><p>일반 문제 3/10</p></div><span class="badge">현재</span></div>
+    </div>
+  </section>
+  <aside class="status-stack">
+    <article class="status-panel">
+      <h2>단원 진행 현황</h2>
+      <div class="progress-line"><div><strong>[문제풀이]</strong><span>3 / 10</span></div><div class="progress"><span style="width:30%"></span></div></div>
+    </article>
+  </aside>
+</section>

@@ -1,0 +1,203 @@
+{
+  "generatedAt": "2026-06-15T11:29:02.941Z",
+  "base": "http://127.0.0.1:4174/ui-html2",
+  "errors": [],
+  "entry": {
+    "name": "entry",
+    "url": "http://127.0.0.1:4174/ui-html2/index.html",
+    "status": 200,
+    "screenshot": ".sisyphus/ulw-entry-welcome-social-qa/evidence/before-entry-desktop.png",
+    "title": "Knowva UI HTML2",
+    "screen": "index",
+    "h1": "Spring Boot 개발용 UI route 모음",
+    "lead": "Figma의 SR-001~SR-015 화면 의도와 Notion의 화면 설계, 요구사항 명세서, 디자인 명세를 합쳐 정적 HTML route로 나눴다. 비즈니스/캐릭터 asset은 제외하고, Daylight Orbit light/dark visual system을 공통 적용했다.",
+    "hasEntryLabel": false,
+    "hasWelcomeLabel": true,
+    "socialCount": 0,
+    "socialLabels": [],
+    "links": [
+      {
+        "text": "로고",
+        "href": "./index.html",
+        "social": null
+      },
+      {
+        "text": "학습",
+        "href": "./screens/learning/main.html",
+        "social": null
+      },
+      {
+        "text": "분석",
+        "href": "./screens/analysis/index.html",
+        "social": null
+      },
+      {
+        "text": "커뮤니티",
+        "href": "./screens/community/index.html",
+        "social": null
+      },
+      {
+        "text": "마이페이지",
+        "href": "./screens/mypage/index.html",
+        "social": null
+      },
+      {
+        "text": "⚙",
+        "href": "./screens/settings/index.html",
+        "social": null
+      },
+      {
+        "text": "프로필",
+        "href": "./screens/mypage/index.html",
+        "social": null
+      },
+      {
+        "text": "학습 메인 보기",
+        "href": "./screens/learning/main.html",
+        "social": null
+      },
+      {
+        "text": "설정 섹션 보기",
+        "href": "./screens/settings/index.html",
+        "social": null
+      },
+      {
+        "text": "SR-001\n웰컴/튜토리얼\n비로그인 소개, 튜토리얼, 가입/로그인 유도",
+        "href": "./screens/welcome/index.html",
+        "social": null
+      },
+      {
+        "text": "SR-002\n로그인\n이메일/소셜 로그인, 상태 유지 안내",
+        "href": "./screens/auth/login.html",
+        "social": null
+      },
+      {
+        "text": "SR-002\n회원가입\n가입, 관심 과목, 목표 설정",
+        "href": "./screens/auth/signup.html",
+        "social": null
+      },
+      {
+        "text": "SR-003\n학습 메인\nMission Control Roadmap",
+        "href": "./screens/learning/main.html",
+        "social": null
+      },
+      {
+        "text": "SR-004\n초기 설정\n언어, 목표, 시작점 선택",
+        "href": "./screens/learning/onboarding.html",
+        "social": null
+      },
+      {
+        "text": "SR-005\n이론 학습\n짧은 개념, 예시 코드, 바로 풀기",
+        "href": "./screens/learning/curriculum.html",
+        "social": null
+      },
+      {
+        "text": "SR-006\n일반 문제풀이\nshort loop, 즉시 피드백, AI 미사용",
+        "href": "./screens/learning/practice.html",
+        "social": null
+      },
+      {
+        "text": "SR-007\n오답 복습\n복습 mission, 반복 오답, 해설",
+        "href": "./screens/learning/review.html",
+        "social": null
+      },
+      {
+        "text": "SR-008\n코딩테스트\n좌우 2분할, 3문항 일괄 제출, AI 채점",
+        "href": "./screens/exam/coding-test.html",
+        "social": null
+      },
+      {
+        "text": "SR-009\nAI 분석\n기본 분석과 premium 분석 분리",
+        "href": "./screens/analysis/index.html",
+        "social": null
+      },
+      {
+        "text": "SR-010\n커뮤니티 홈\n자유게시판 진입, 인기글, 커뮤니티 프로필",
+        "href": "./screens/community/index.html",
+        "social": null
+      },
+      {
+        "text": "SR-010\n게시판 글 목록\n언어별 게시판, 전체/자유/질문/정보 필터",
+        "href": "./screens/community/board.html",
+        "social": null
+      },
+      {
+        "text": "SR-010\n게시글 작성\n게시판 안에서 진입하는 글쓰기 전용 화면",
+        "href": "./screens/community/write.html",
+        "social": null
+      },
+      {
+        "text": "SR-010\n커뮤니티 프로필\n나의 블로그형 커뮤니티 프로필",
+        "href": "./screens/community/profile.html",
+        "social": null
+      },
+      {
+        "text": "SR-011\n결제\n더미 결제, 결제 상태, 분석 접근",
+        "href": "./screens/payment/index.html",
+        "social": null
+      },
+      {
+        "text": "SR-012\n마이페이지\n학습/커뮤니티 활동 요약",
+        "href": "./screens/mypage/index.html",
+        "social": null
+      },
+      {
+        "text": "SR-013\n관리자\n관리자 홈, 통계, 운영 관리",
+        "href": "./screens/admin/dashboard.html",
+        "social": null
+      },
+      {
+        "text": "SR-014\n랭킹\n출석 제외 통합 랭킹",
+        "href": "./screens/ranking/index.html",
+        "social": null
+      },
+      {
+        "text": "SR-015\n설정\n회원 정보, 보안, 소셜, 시스템, 결제",
+        "href": "./screens/settings/index.html",
+        "social": null
+      }
+    ]
+  },
+  "welcome": {
+    "name": "welcome",
+    "url": "http://127.0.0.1:4174/ui-html2/screens/welcome/index.html",
+    "status": 200,
+    "screenshot": ".sisyphus/ulw-entry-welcome-social-qa/evidence/before-welcome-desktop.png",
+    "title": "SR-001 웰컴/튜토리얼 · Knowva UI HTML2",
+    "screen": "sr-001",
+    "h1": "Knowva",
+    "lead": "처음 방문한 사용자는 튜토리얼과 서비스 소개만 확인하고, 학습 기록이 필요한 기능은 가입/로그인 후 시작한다.",
+    "hasEntryLabel": false,
+    "hasWelcomeLabel": true,
+    "socialCount": 0,
+    "socialLabels": [],
+    "links": [
+      {
+        "text": "튜토리얼 시작",
+        "href": "../../screens/welcome/index.html#tutorial",
+        "social": null
+      },
+      {
+        "text": "바로 로그인하기",
+        "href": "../../screens/auth/login.html",
+        "social": null
+      },
+      {
+        "text": "회원가입",
+        "href": "../../screens/auth/signup.html",
+        "social": null
+      },
+      {
+        "text": "가입하고 시작",
+        "href": "../../screens/auth/signup.html",
+        "social": null
+      }
+    ]
+  },
+  "expected": {
+    "entryDistinct": false,
+    "welcomeDistinct": true,
+    "socialPresent": false
+  },
+  "pass": false
+}

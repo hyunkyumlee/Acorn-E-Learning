@@ -1,0 +1,81 @@
+{
+  "outDir": "/Users/hyunkyumlee/Documents/Acorn-E-Learning/docs/ui-samples/captures",
+  "results": [
+    {
+      "name": "sr-001-e-light-a-daylight-orbit",
+      "file": "sr-001-welcome-e-light-a.html",
+      "viewport": "desktop",
+      "messages": [],
+      "errors": [],
+      "metrics": {
+        "overflowX": 0,
+        "overflowY": 0,
+        "horizontalOutliers": [],
+        "tinyText": 0,
+        "heroTitle": "코딩 여정을\n환한 궤도로."
+      }
+    },
+    {
+      "name": "sr-001-e-light-b-orbit-console",
+      "file": "sr-001-welcome-e-light-b.html",
+      "viewport": "desktop",
+      "messages": [],
+      "errors": [],
+      "metrics": {
+        "overflowX": 0,
+        "overflowY": 0,
+        "horizontalOutliers": [],
+        "tinyText": 0,
+        "heroTitle": "오늘의 미션을\n바로 시작하게."
+      }
+    },
+    {
+      "name": "sr-001-e-light-a-daylight-orbit",
+      "file": "sr-001-welcome-e-light-a.html",
+      "viewport": "mobile",
+      "messages": [],
+      "errors": [],
+      "metrics": {
+        "overflowX": 0,
+        "overflowY": 401,
+        "horizontalOutliers": [],
+        "tinyText": 0,
+        "heroTitle": "코딩 여정을\n환한 궤도로."
+      }
+    },
+    {
+      "name": "sr-001-e-light-b-orbit-console",
+      "file": "sr-001-welcome-e-light-b.html",
+      "viewport": "mobile",
+      "messages": [],
+      "errors": [],
+      "metrics": {
+        "overflowX": 0,
+        "overflowY": 314,
+        "horizontalOutliers": [],
+        "tinyText": 0,
+        "heroTitle": "오늘의 미션을\n바로 시작하게."
+      }
+    }
+  ],
+  "indexResult": {
+    "title": "Knowva 샘플 UI 18종",
+    "cardCount": 18,
+    "lightLinks": [
+      "./sr-001-welcome-e-light-a.html",
+      "./sr-001-welcome-e-light-b.html"
+    ],
+    "statuses": [
+      {
+        "href": "./sr-001-welcome-e-light-a.html",
+        "status": 200,
+        "ok": true
+      },
+      {
+        "href": "./sr-001-welcome-e-light-b.html",
+        "status": 200,
+        "ok": true
+      }
+    ]
+  }
+}

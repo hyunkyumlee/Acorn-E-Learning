@@ -1,0 +1,14 @@
+<aside class="community-rail" xmlns:th="http://www.thymeleaf.org">
+  <h2>게시판</h2>
+  <nav class="community-nav" aria-label="언어별 게시판">
+    <a class="community-nav-item is-active" href="../../screens/community/board.html#java" th:href="@{/community/board(language='java')}"><strong>Java</strong><span>자유 · 질문 · 정보</span></a>
+    <a class="community-nav-item" href="../../screens/community/board.html#sql" th:href="@{/community/board(language='sql')}"><strong>SQL</strong><span>자유 · 질문 · 정보</span></a>
+    <a class="community-nav-item" href="../../screens/community/board.html#web" th:href="@{/community/board(language='web')}"><strong>HTML/CSS/JS</strong><span>자유 · 질문 · 정보</span></a>
+    <a class="community-nav-item" href="../../screens/community/board.html#python" th:href="@{/community/board(language='python')}"><strong>Python</strong><span>자유 · 질문 · 정보</span></a>
+  </nav>
+  <article class="community-profile-mini">
+    <span class="avatar"></span>
+    <div><strong>nova_learner</strong><p>작성 글 12 · 스크랩 7 · 좋아요 31</p></div>
+    <a class="button" href="../../screens/community/profile.html" th:href="@{/community/profile/me}">내 커뮤니티 프로필</a>
+  </article>
+</aside>
