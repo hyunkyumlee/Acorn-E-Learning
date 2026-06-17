@@ -9,17 +9,17 @@
     ["sr-002-login", "SR-002", "로그인", "screens/auth/login.html", "auth", "이메일/소셜 로그인, 상태 유지 안내"],
     ["sr-002-signup", "SR-002", "회원가입", "screens/auth/signup.html", "auth", "가입, 관심 과목, 목표 설정"],
     ["sr-003", "SR-003", "학습 메인", "screens/learning/main.html", "learning", "Mission Control Roadmap"],
-    ["sr-004", "SR-004", "초기 설정", "screens/learning/onboarding.html", "learning", "언어, 목표, 시작점 선택"],
+    ["sr-004", "SR-004", "초기 설정", "screens/learning/onboarding.html", "learning", "언어, 목표, 시작점, 8문항 레벨 테스트"],
     ["sr-005", "SR-005", "이론 학습", "screens/learning/curriculum.html", "learning", "짧은 개념, 예시 코드, 바로 풀기"],
     ["sr-006", "SR-006", "일반 문제풀이", "screens/learning/practice.html", "learning", "short loop, 즉시 피드백, AI 미사용"],
     ["sr-007", "SR-007", "오답 복습", "screens/learning/review.html", "learning", "오답 복습 요약, 다시 풀기, 반복 오답"],
     ["sr-007-list", "SR-007", "오답 목록", "screens/learning/review-list.html", "learning", "오답 목록 3열 카드, 문제 내용 확인"],
-    ["sr-008", "SR-008", "코딩테스트", "screens/exam/coding-test.html", "learning", "좌우 2분할, 3문항 일괄 제출, AI 채점"],
-    ["sr-009", "SR-009", "AI 분석", "screens/analysis/index.html", "analysis", "기본 분석과 premium 분석 분리"],
+    ["sr-008", "SR-008", "코딩테스트", "screens/exam/coding-test.html", "learning", "좌우 2분할, 3문항 일괄 제출, AI 대기/실패/결과"],
+    ["sr-009", "SR-009", "AI 분석", "screens/analysis/index.html", "analysis", "기본, 구매유도, premium, 분석 실패 상태"],
     ["sr-010", "SR-010", "커뮤니티 홈", "screens/community/index.html", "community", "자유게시판 진입, 인기글, 커뮤니티 프로필"],
     ["sr-010-board", "SR-010", "게시판 글 목록", "screens/community/board.html", "community", "언어별 게시판, 전체/자유/질문/공부 일지 필터"],
     ["sr-010-detail", "SR-010", "게시글 상세", "screens/community/detail.html", "community", "본문, 댓글, 대댓글, 신고"],
-    ["sr-010-write", "SR-010", "게시글 작성", "screens/community/write.html", "community", "게시판 안에서 진입하는 글쓰기 전용 화면"],
+    ["sr-010-write", "SR-010", "게시글 작성", "screens/community/write.html", "community", "게시판 안에서 진입하는 글쓰기/첨부 화면"],
     ["sr-010-edit", "SR-010", "게시글 수정", "screens/community/edit.html", "community", "작성 후 수정 화면"],
     ["sr-010-profile", "SR-010", "커뮤니티 프로필", "screens/community/profile.html", "community", "나의 블로그형 커뮤니티 프로필"],
     ["sr-011", "SR-011", "결제 선택", "screens/payment/index.html", "analysis", "Premium 결제 수단 선택"],
@@ -40,9 +40,9 @@
     ["sr-013-notices", "SR-013", "공지사항 관리", "screens/admin/notices.html", "admin", "공지 등록, 수정, 공개 상태"],
     ["sr-014", "SR-014", "랭킹", "screens/ranking/index.html", "learning", "출석 제외 통합 랭킹"],
     ["sr-015", "SR-015", "설정", "screens/settings/index.html", "settings", "독립 설정 홈"],
-    ["sr-015-profile", "SR-015", "회원 정보", "screens/settings/profile.html", "settings", "닉네임, 이메일, 가입일, 학습 언어"],
+    ["sr-015-profile", "SR-015", "회원 정보", "screens/settings/profile.html", "settings", "닉네임, 이메일, 가입일, 학습 언어, 탈퇴 진입"],
     ["sr-015-security", "SR-015", "이메일/비밀번호", "screens/settings/security.html", "settings", "로그인 이메일과 비밀번호 변경"],
-    ["sr-015-social", "SR-015", "연동된 소셜 계정", "screens/settings/social.html", "settings", "Google/Kakao/Naver 연결 상태"],
+    ["sr-015-social", "SR-015", "연동된 소셜 계정", "screens/settings/social.html", "settings", "Google/Kakao 연결 상태"],
     ["sr-015-system", "SR-015", "시스템 설정", "screens/settings/system.html", "settings", "알림, 테마, 접근성"],
     ["sr-015-payment", "SR-015", "결제 정보", "screens/settings/payment.html", "settings", "Premium 이용권과 결제 내역"],
     ["sample-learning-main", "EX-001", "학습 메인 예시", "screens/samples/learning-main.html", "learning", "AI티 제거 예시 · 학습 화면"],
@@ -215,6 +215,32 @@
     return `<div class="list">${rows.map((row) => `<div class="list-row"><div><strong>${row[0]}</strong><p>${row[1]}</p></div>${row[2] || ""}</div>`).join("")}</div>`;
   }
 
+  function srsCoverageTable() {
+    const rows = [
+      ["SRS-AUTH", "SR-001, SR-002, SR-012, SR-015", "웰컴/로그인/회원가입/마이페이지/설정 route와 탈퇴 진입 UI"],
+      ["SRS-LEARN-SETUP", "SR-004", "과목 선택, 기초 시작, 8문항 레벨 테스트, 결과 적용 상태"],
+      ["SRS-LEARN-CORE", "SR-003~SR-007, SR-014", "로드맵, 이론, 문제풀이 상태, 오답 목록, 랭킹 진입"],
+      ["SRS-AI-EXAM", "SR-008", "응시 가능/잠김/제출/AI 대기/AI 실패/결과 상태"],
+      ["SRS-AI-ANALYSIS", "SR-009", "무료 요약, Premium 유도, Premium 상세, 분석 실패 상태"],
+      ["SRS-COMMUNITY", "SR-010, SR-012, SR-013", "home/board/detail/write/edit/profile, 댓글/신고/첨부 진입"],
+      ["SRS-PAYMENT", "SR-011, SR-015", "결제 선택/card/bank/complete, 결제 정보, 추천 확장 route"],
+      ["SRS-ADMIN", "SR-013", "admin login/dashboard/stats/content/user/community/report/notice"]
+    ];
+
+    return `<section class="panel">
+      <div class="board-toolbar">
+        <div><span class="tag">SRS Coverage</span><h2>SRS 기준 UI 커버리지 점검</h2></div>
+        ${button("SRS 기준 첫 화면", "screens/welcome/index.html", "primary")}
+      </div>
+      <div class="table-card">
+        <table class="table">
+          <thead><tr><th>SRS Package</th><th>화면 범위</th><th>UI 확인 포인트</th></tr></thead>
+          <tbody>${rows.map((row) => `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
+    </section>`;
+  }
+
   function communityFilters(active = "free") {
     const filters = [
       ["all", "전체"],
@@ -290,30 +316,56 @@
             </div>
           </div>
         </section>
+        ${srsCoverageTable()}
         <section class="index-grid">${cards}</section>`, { noSidebar: true });
     },
 
     "sr-001"() {
       return shell("welcome", `
-        <section class="welcome-start welcome-launch">
-          <div class="welcome-copy">
-            <span class="tag">SR-001 · Welcome</span>
-            <h1>Knowva</h1>
-            <p>처음 방문한 사용자는 튜토리얼과 서비스 소개만 확인하고, 학습 기록이 필요한 기능은 가입/로그인 후 시작한다.</p>
-            <div class="button-row">
-              ${button("튜토리얼 시작", "screens/welcome/index.html#tutorial", "primary")}
-              ${button("바로 로그인하기", "screens/auth/login.html")}
-              ${button("회원가입", "screens/auth/signup.html", "ghost")}
+        <section class="welcome-page" aria-label="Knowva welcome">
+          <header class="welcome-topbar">
+            <a class="welcome-brand" href="${href("screens/welcome/index.html")}" aria-label="Knowva welcome home">
+              <span class="brand-mark" aria-hidden="true"></span>
+              <span class="brand-copy"><strong>Knowva</strong><small>Ion Launch</small></span>
+            </a>
+            <nav class="welcome-nav" aria-label="welcome navigation">
+              <a class="is-active" href="${href("screens/welcome/index.html")}">웰컴</a>
+              <a href="${href("screens/welcome/index.html#tutorial")}">튜토리얼</a>
+              <a href="${href("screens/auth/login.html")}">로그인</a>
+            </nav>
+            <button class="welcome-theme-button" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
+              <span class="theme-icon" aria-hidden="true"></span>
+            </button>
+          </header>
+          <div class="welcome-start welcome-launch">
+            <div class="welcome-copy">
+              <span class="tag"><i class="dot"></i> SR-001 · 빛나는 학습 궤도</span>
+              <h1>코딩 여정을<br>푸른 이온 궤도로.</h1>
+              <p>첫 방문자는 긴 설명보다 mission 흐름을 먼저 본다. 튜토리얼로 학습 궤도를 확인하고, 기록 저장이 필요한 순간 가입 또는 로그인으로 이어진다.</p>
+              <div class="button-row">
+                ${button("튜토리얼 시작", "screens/welcome/index.html#tutorial", "primary")}
+                ${button("바로 로그인하기", "screens/auth/login.html")}
+                ${button("회원가입", "screens/auth/signup.html", "ghost")}
+              </div>
+              <div class="social-login-row" aria-label="소셜 로그인">
+                <a class="button social-login google" href="${href("screens/auth/login.html#google")}" data-social-login="google">Google로 계속</a>
+                <a class="button social-login kakao" href="${href("screens/auth/login.html#kakao")}" data-social-login="kakao">Kakao로 계속</a>
+              </div>
             </div>
-            <div class="social-login-row" aria-label="소셜 로그인">
-              <a class="button social-login google" href="${href("screens/auth/login.html#google")}" data-social-login="google">Google로 계속</a>
-              <a class="button social-login kakao" href="${href("screens/auth/login.html#kakao")}" data-social-login="kakao">Kakao로 계속</a>
+            <div class="welcome-visual" aria-label="Knowva ion launch visual">
+              <div class="welcome-orbit">
+                <div class="welcome-comet" aria-hidden="true"></div>
+                <div class="big-planet"></div>
+                <div class="orbit"></div>
+                <div class="orbit orbit-alt"></div>
+              </div>
+              <div class="welcome-moon one"></div>
+              <div class="welcome-moon two"></div>
+              <aside class="welcome-guide">
+                <strong>Nova Guide</strong>
+                <span>오늘의 mission, test gate, 기록 저장 조건을 짧게 보여주고 다음 화면으로 보낸다.</span>
+              </aside>
             </div>
-          </div>
-          <div class="welcome-visual" aria-label="Knowva welcome visual">
-            <div class="welcome-orbit"><div class="big-planet"></div><div class="orbit"></div></div>
-            <div class="welcome-moon one"></div>
-            <div class="welcome-moon two"></div>
           </div>
         </section>
         <section id="tutorial" class="three-col">
@@ -443,7 +495,7 @@
         </section>
         ${tabs("level-test", [
           { id: "start", label: "기초 시작", html: `<div class="decision-panel">${card("기초부터 시작", "레벨 테스트 없이 Java 입문 node부터 시작한다.", "Recommended", button("학습 메인으로", "screens/learning/main.html", "primary"))}${progressLine("초기 roadmap", 0, "0 / 10")}</div>` },
-          { id: "test", label: "레벨 테스트", html: `<div class="test-preview"><div>${stepCard("Q1", "객관식", "문법 이해도 확인", "current")}${stepCard("Q2", "코드 결과 예측", "실행 흐름 확인")}${stepCard("Q3", "마지막 문제", "결과 산정")}</div>${card("결과 적용", "초기 level, 추천 단원, gate 조건을 계산하고 SR-003으로 이동한다. AI는 사용하지 않는다.", "Result", button("결과 적용", "screens/learning/main.html", "primary"))}</div>` }
+          { id: "test", label: "레벨 테스트", html: `<div class="test-preview"><div>${Array.from({ length: 8 }, (_, index) => stepCard(`Q${index + 1}`, index % 2 === 0 ? "객관식" : "코드 결과 예측", index === 0 ? "현재 문항" : "레벨 배치용 문항", index === 0 ? "current" : "")).join("")}</div>${card("결과 적용", "8문항 완료 후 초기 level, 추천 단원, gate 조건을 계산하고 SR-003으로 이동한다. AI는 사용하지 않는다.", "Result", button("결과 적용", "screens/learning/main.html", "primary"))}</div>` }
         ])}`, { showTopbar: false });
     },
 
@@ -537,7 +589,9 @@ score > 60  // 60점 제외</pre>
           { id: "ready", label: "응시 가능", html: examPane("응시 조건 달성", "Java Level 2 gate가 열렸다. 3문항을 모두 푼 뒤 제출한다.", true) },
           { id: "locked", label: "응시 조건 미달", html: card("진행률 80% 달성 시 unlock", "현재 68%. 추천 복습과 일반 문제풀이를 먼저 완료해야 한다.", "Gate locked", button("일반 문제풀이", "screens/learning/practice.html", "primary")) },
           { id: "submit", label: "제출", html: examPane("제출 전 확인", "3문항 답안이 모두 작성되었다. 제출 후 AI 채점 대기 상태로 전환된다.", true, "일괄 제출") },
-          { id: "waiting", label: "AI 채점 대기", html: card("AI 채점 중", "빈 화면 대신 처리 중 상태, 예상 대기 시간, 실패 시 재시도 안내를 제공한다.", "NFR-005", button("결과 분석으로", "screens/analysis/index.html", "primary")) }
+          { id: "waiting", label: "AI 채점 대기", html: card("AI 채점 중", "빈 화면 대신 처리 중 상태, 예상 대기 시간, 실패 시 재시도 안내를 제공한다.", "NFR-005", button("결과 분석으로", "screens/analysis/index.html", "primary")) },
+          { id: "failure", label: "AI 실패", html: `<div class="feedback-screen danger"><strong>AI 채점 실패</strong><p>오류 안내, 재시도, 학습 메인 복귀 진입점을 한 화면에 둔다. 답안 입력 화면은 유지된 상태로 돌아간다.</p><div class="button-row">${button("채점 재시도", "screens/exam/coding-test.html#retry", "primary")}${button("학습 메인", "screens/learning/main.html")}</div></div>` },
+          { id: "result", label: "결과", html: `<div class="feedback-screen complete"><strong>시험 결과</strong><p>3문항 채점 결과, 통과/재시도 안내, 분석 리포트 진입점을 보여준다.</p><div class="result-metrics">${statTile("정답", "2 / 3", "lime")}${statTile("상태", "통과")}${statTile("다음", "AI 분석")}</div><div class="button-row">${button("AI 분석 보기", "screens/analysis/index.html", "primary")}${button("다시 응시", "screens/exam/coding-test.html")}</div></div>` }
         ])}`, { showTopbar: false });
     },
 
@@ -568,7 +622,8 @@ score > 60  // 60점 제외</pre>
         ${tabs("analysis", [
           { id: "free", label: "기본", html: `<div class="locked-preview"><div class="preview-card"><h3>AI 종합분석</h3><p>분석 그래프, 강점, 취약점, 오답 분석은 premium에서 열린다.</p></div><div class="preview-card"><h3>AI 추천 로드맵</h3><p>다음 학습 단원과 복습 순서를 제안한다.</p></div></div>` },
           { id: "upsell", label: "구매 유도", html: `<div class="premium-cta"><strong>Premium 보기</strong><p>문항별 채점 근거, 취약점, 추천 roadmap을 더미 결제 후 확인한다.</p>${button("더미 결제", "screens/payment/index.html", "primary")}</div>` },
-          { id: "premium", label: "Premium", html: `<div class="three-col">${card("오답 유형", "경계값 판단 누락 42%, 조건 순서 오류 28%.", "Detail")}${card("다음 학습", "반복문 전 조건문 복습 mission 1회 권장.", "Recommendation")}${card("AI 고지", "AI 판단 기반 분석이며 최종 평가는 학습/시험 기록과 함께 봐야 한다.", "Notice")}</div>` }
+          { id: "premium", label: "Premium", html: `<div class="three-col">${card("오답 유형", "경계값 판단 누락 42%, 조건 순서 오류 28%.", "Detail")}${card("다음 학습", "반복문 전 조건문 복습 mission 1회 권장.", "Recommendation")}${card("AI 고지", "AI 판단 기반 분석이며 최종 평가는 학습/시험 기록과 함께 봐야 한다.", "Notice")}</div>` },
+          { id: "failure", label: "분석 실패", html: `<div class="feedback-screen danger"><strong>AI 분석 생성 실패</strong><p>빈 화면 대신 재시도, 무료 요약 복귀, 결제 상태 확인 진입점을 제공한다.</p><div class="button-row">${button("분석 재시도", "screens/analysis/index.html#retry", "primary")}${button("기본 분석 보기", "screens/analysis/index.html")}${button("결제 정보", "screens/settings/payment.html")}</div></div>` }
         ])}`);
     },
 
@@ -1127,6 +1182,7 @@ score > 60  // 60점 제외</pre>
             <label>게시판<select class="field"><option>자유 게시판</option><option>질문 게시판</option><option>공부 일지</option></select></label>
             <label class="span-2">제목<input class="field" value="${isEdit ? "조건문 edge case 정리" : "오늘의 Java 학습 일지"}"></label>
             <label class="span-2">내용<textarea class="field">${isEdit ? "조건문 문제를 풀면서 boundary case를 정리했습니다." : "학습한 내용과 질문을 정리합니다."}</textarea></label>
+            <label class="span-2">첨부 파일<input class="field" type="file" aria-label="첨부 파일"></label>
           </form>
           <div class="figma-post-actions">${figmaAction(isEdit ? "수정" : "등록", "screens/community/detail.html", "primary")}${figmaAction("취소", "screens/community/board.html")}</div>
         </article>
@@ -1229,9 +1285,13 @@ score > 60  // 60점 제외</pre>
     return paymentShell(`
       <section class="figma-payment-complete">
         <h1>결제가 완료 되었습니다!</h1>
-        <p>상세 분석 이용권이 활성화되었습니다.</p>
+        <p>상세 분석 이용권이 활성화되었습니다. 실제 PG 호출 없이 결제 완료 상태와 분석 진입점만 확인합니다.</p>
         <div class="figma-complete-mark">OK</div>
-        ${figmaAction("홈으로", "screens/analysis/index.html", "primary")}
+        <div class="figma-payment-history"><span>완료 상태</span><strong>Premium 상세 분석 접근 가능</strong><b>dummy</b></div>
+        <div class="button-row">
+          ${figmaAction("AI 분석 보기", "screens/analysis/index.html", "primary")}
+          ${figmaAction("추천 콘텐츠", "screens/payment/recommendations.html")}
+        </div>
       </section>`, "2 / 2");
   }
 
@@ -1340,9 +1400,13 @@ score > 60  // 60점 제외</pre>
       <section class="figma-admin-login">
         <form>
           <h1>KNOWVA 관리자 로그인</h1>
+          <p>관리자 전용 화면 진입 전 ROLE_ADMIN 계정 확인 상태를 보여줍니다.</p>
           <label>관리자 이메일<input class="field" value="admin@knowva.local"></label>
           <label>비밀번호<input class="field" type="password" value="password"></label>
-          ${figmaAction("로그인", "screens/admin/dashboard.html", "primary")}
+          <div class="button-row">
+            ${figmaAction("로그인", "screens/admin/dashboard.html", "primary")}
+            ${figmaAction("사용자 로그인", "screens/auth/login.html")}
+          </div>
         </form>
       </section>`, { showTopbar: false });
   }
@@ -1351,7 +1415,7 @@ score > 60  // 60점 제외</pre>
     "sr-013-courses": ["과목·커리큘럼 관리", { path: "screens/admin/courses.html", cta: "+ 과목 등록", filters: ["과목명", "활성화 상태"], headers: ["ID", "과목", "커리큘럼 수", "활성화", "관리"], rows: [["#C001", "Java", "12", "활성", "수정"], ["#C002", "SQL", "8", "활성", "수정"], ["#C003", "Python", "9", "비활성", "수정"]], formTitle: "과목 / 커리큘럼 등록 폼", fields: ["과목명", "커리큘럼명", "정렬 순서", "활성화 상태"] }],
     "sr-013-theory": ["이론 자료 관리", { path: "screens/admin/theory.html", cta: "+ 자료 등록", filters: ["과목", "커리큘럼", "활성화 상태"], headers: ["자료 ID", "과목", "제목", "상태", "관리"], rows: [["#T001", "Java", "조건문 개념", "활성", "수정"], ["#T002", "SQL", "JOIN 기초", "활성", "수정"], ["#T003", "HTML/CSS", "Flexbox", "비활성", "수정"]], formTitle: "이론 자료 등록 / 수정 폼", fields: ["과목", "제목", "노출 순서", "활성화 상태"] }],
     "sr-013-problems": ["일반 학습 문제 관리", { path: "screens/admin/problems.html", cta: "+ 문제 등록", filters: ["과목", "커리큘럼", "문제 유형", "난이도", "활성화 상태"], headers: ["문제 ID", "과목", "커리큘럼", "유형", "문제 내용 요약", "난이도", "활성화", "관리"], rows: [["#001", "Java", "변수와 자료형", "객관식", "정수형 변수 선언 키워드", "하", "활성", "수정"], ["#002", "Java", "조건문", "빈칸", "if 문 조건식", "중", "활성", "수정"], ["#003", "Python", "반복문", "코드 결과", "출력 결과 예측", "중", "활성", "수정"]], formTitle: "문제 등록 / 수정 폼", fields: ["문제 유형 선택", "문제 내용 입력", "선택지 입력 영역", "정답 입력", "난이도 선택"] }],
-    "sr-013-users": ["사용자 관리", { path: "screens/admin/users.html", cta: "사용자 검색", filters: ["이메일", "권한", "상태"], headers: ["사용자 ID", "닉네임", "이메일", "권한", "상태", "가입일", "관리"], rows: [["#U001", "nova_learner", "jeongha@example.com", "USER", "활성", "2026.06.01", "상세"], ["#U002", "orbit.dev", "orbit@example.com", "PREMIUM", "활성", "2026.05.18", "상세"]], formTitle: "사용자 상태 변경", fields: ["사용자", "권한", "상태", "메모"] }],
+    "sr-013-users": ["사용자 관리", { path: "screens/admin/users.html", cta: "사용자 검색", filters: ["이메일", "권한", "상태"], headers: ["사용자 ID", "닉네임", "이메일", "권한", "상태", "가입일", "관리"], rows: [["#U001", "nova_learner", "jeongha@example.com", "USER", "활성", "2026.06.01", "상세"], ["#U002", "orbit.dev", "orbit@example.com", "USER", "활성 · Premium", "2026.05.18", "상세"]], formTitle: "사용자 상태 변경", fields: ["사용자", "권한", "상태", "메모"] }],
     "sr-013-community": ["커뮤니티 관리", { path: "screens/admin/community.html", cta: "게시글 검색", filters: ["게시판", "작성자", "상태"], headers: ["게시글 ID", "게시판", "제목", "작성자", "댓글", "상태", "관리"], rows: [["#P001", "자유", "조건문 edge case", "nova_learner", "12", "공개", "상세"], ["#P002", "공부 일지", "SQL JOIN 정리", "signal.sql", "8", "공개", "상세"]], formTitle: "게시글 운영 처리", fields: ["게시글", "상태", "처리 사유", "관리자 메모"] }],
     "sr-013-reports": ["신고 관리", { path: "screens/admin/reports.html", cta: "신고 검색", filters: ["신고 유형", "처리 상태", "기간"], headers: ["신고 ID", "대상", "유형", "내용 요약", "처리 상태", "일시", "관리"], rows: [["#R001", "게시글", "부적절한 내용", "욕설 포함", "검토 중", "06/15", "처리"], ["#R002", "댓글", "광고", "외부 링크 반복", "대기", "06/14", "처리"]], formTitle: "신고 처리 폼", fields: ["신고 대상", "처리 상태", "조치 유형", "처리 사유"] }],
     "sr-013-notices": ["공지사항 관리", { path: "screens/admin/notices.html", cta: "+ 공지 작성", filters: ["공개 상태", "기간"], headers: ["공지 ID", "제목", "상태", "작성일", "관리"], rows: [["#N001", "KNOWVA 이용약관 변경 안내", "공개", "06/15", "수정"], ["#N002", "6월 시스템 점검 안내", "공개", "06/10", "수정"], ["#N003", "신규 과목 업데이트 안내", "공개", "06/05", "수정"]], formTitle: "공지사항 등록 / 수정 폼", fields: ["제목", "공개 상태", "게시 시작일", "게시 종료일"] }]
@@ -1396,7 +1460,7 @@ score > 60  // 60점 제외</pre>
   }
 
   function settingsProfilePage() {
-    return settingsPage("sr-015-profile", "회원 정보", "프로필과 기본 계정 정보를 확인하고 수정합니다.", `<section class="figma-settings-box">${settingsField("닉네임", "이정하")}${settingsField("이메일", "jeongha@example.com")}${settingsField("가입일", "2026.06.01")}${settingsField("학습 언어", "Java, HTML, Spring")}${figmaAction("저장", "screens/settings/profile.html", "primary")}</section>`);
+    return settingsPage("sr-015-profile", "회원 정보", "프로필과 기본 계정 정보를 확인하고 수정합니다.", `<section class="figma-settings-box">${settingsField("닉네임", "이정하")}${settingsField("이메일", "jeongha@example.com")}${settingsField("가입일", "2026.06.01")}${settingsField("학습 언어", "Java, HTML, Spring")}${figmaAction("저장", "screens/settings/profile.html", "primary")}<div class="figma-payment-plan"><strong>회원 탈퇴</strong><span>탈퇴 요청 전 학습 기록 보관/마스킹 안내를 확인합니다.</span>${figmaAction("탈퇴 요청", "screens/settings/profile.html#withdrawal", "danger")}</div></section>`);
   }
 
   function settingsSecurityPage() {
@@ -1404,7 +1468,7 @@ score > 60  // 60점 제외</pre>
   }
 
   function settingsSocialPage() {
-    return settingsPage("sr-015-social", "연동된 소셜 계정", "외부 계정 연결 상태를 확인합니다.", `<section class="figma-social-grid">${card("Google", "jeongha@gmail.com 계정이 연결되어 있습니다.", "연동됨")}${card("Kakao", "kakao_jeongha 계정이 연결되어 있습니다.", "연동됨")}${card("Naver", "연동 가능한 상태입니다.", "미연동", figmaAction("연동", "screens/settings/social.html"))}</section>`);
+    return settingsPage("sr-015-social", "연동된 소셜 계정", "외부 계정 연결 상태를 확인합니다.", `<section class="figma-social-grid">${card("Google", "jeongha@gmail.com 계정이 연결되어 있습니다.", "연동됨")}${card("Kakao", "kakao_jeongha 계정이 연결되어 있습니다.", "연동됨")}</section>`);
   }
 
   function settingsSystemPage() {
