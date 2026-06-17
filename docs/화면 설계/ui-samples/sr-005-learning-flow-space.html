@@ -1,0 +1,1247 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Knowva Learning Flow - Quiet Orbit</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --bg-deep: #222c3d;
+      --surface: #ffffff;
+      --surface-soft: #eef5f3;
+      --ink: #1d2430;
+      --muted: #6b7280;
+      --line: #d8dee8;
+      --teal: #2c9f9a;
+      --teal-dark: #1f7471;
+      --amber: #c6892e;
+      --amber-soft: #fff1d6;
+      --green: #5d9a45;
+      --red: #b45a65;
+      --violet: #7567b8;
+      --shadow: 0 16px 34px rgba(29, 36, 48, 0.11);
+      --radius: 8px;
+      --font: "Pretendard", "SUIT", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      background:
+        linear-gradient(135deg, rgba(44, 159, 154, 0.08), transparent 34%),
+        linear-gradient(180deg, #fbfcff 0%, var(--bg) 100%);
+      color: var(--ink);
+      font-family: var(--font);
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+      max-width: 1480px;
+      min-height: calc(100vh - 40px);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 16px;
+      min-height: 72px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 10px 24px rgba(29, 36, 48, 0.06);
+      padding: 12px 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand img {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius);
+      object-fit: cover;
+      background: #dff1ee;
+      box-shadow: 0 8px 18px rgba(44, 159, 154, 0.18);
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 21px;
+      line-height: 1.1;
+    }
+
+    .brand span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .nav button,
+    .screen-tabs button,
+    .subject-list button,
+    .chip-button {
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .nav button {
+      min-height: 42px;
+      padding: 0 14px;
+      white-space: nowrap;
+    }
+
+    .nav button.active {
+      border-color: rgba(44, 159, 154, 0.26);
+      background: rgba(44, 159, 154, 0.1);
+      color: var(--teal-dark);
+    }
+
+    .profile {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .profile strong {
+      color: var(--ink);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr) 330px;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 10px 24px rgba(29, 36, 48, 0.06);
+    }
+
+    .sidebar,
+    .rightbar {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .subject-hero {
+      display: grid;
+      gap: 12px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(44, 159, 154, 0.2), rgba(198, 137, 46, 0.08)),
+        #f8fbfb;
+      padding: 14px;
+    }
+
+    .subject-hero small,
+    .stat small,
+    .card-sub,
+    .lesson-meta,
+    .question-meta,
+    .review-meta,
+    .mini-copy {
+      color: var(--muted);
+    }
+
+    .subject-hero h1,
+    .subject-hero p,
+    .card h2,
+    .card h3,
+    .card p,
+    .stat strong,
+    .review-item h3,
+    .review-item p {
+      margin: 0;
+    }
+
+    .subject-hero h1 {
+      font-size: 26px;
+      line-height: 1.15;
+    }
+
+    .subject-hero p {
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .progress {
+      overflow: hidden;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(29, 36, 48, 0.09);
+    }
+
+    .progress i {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--teal), var(--green));
+    }
+
+    .subject-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .subject-list button {
+      display: grid;
+      gap: 4px;
+      width: 100%;
+      min-height: 62px;
+      border-color: var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 10px;
+      text-align: left;
+    }
+
+    .subject-list button span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .subject-list button.active {
+      border-color: rgba(44, 159, 154, 0.45);
+      background: var(--surface-soft);
+    }
+
+    .screen-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .screen-tabs button {
+      min-height: 48px;
+      background: #f7f9fc;
+      color: var(--muted);
+    }
+
+    .screen-tabs button.active {
+      border-color: rgba(34, 44, 61, 0.2);
+      background: var(--bg-deep);
+      color: #fff;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .stage {
+      min-height: 0;
+      padding: 16px;
+    }
+
+    .screen {
+      display: none;
+      height: 100%;
+    }
+
+    .screen.active {
+      display: grid;
+    }
+
+    .dashboard-grid {
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 16px;
+    }
+
+    .main-stack,
+    .side-stack {
+      display: grid;
+      align-content: start;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .mission-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      background:
+        linear-gradient(135deg, rgba(34, 44, 61, 0.96), rgba(31, 116, 113, 0.9)),
+        var(--bg-deep);
+      color: #fff;
+    }
+
+    .mission-card p {
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.5;
+    }
+
+    .mission-card h2 {
+      margin-bottom: 8px;
+      font-size: clamp(27px, 4vw, 48px);
+      line-height: 1.08;
+      word-break: keep-all;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      font-weight: 900;
+      padding: 0 16px;
+      white-space: nowrap;
+    }
+
+    .btn.primary {
+      border-color: var(--teal-dark);
+      background: var(--teal);
+      color: #fff;
+      box-shadow: 0 12px 22px rgba(44, 159, 154, 0.22);
+    }
+
+    .btn.dark {
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.56;
+    }
+
+    .roadmap {
+      display: grid;
+      gap: 10px;
+    }
+
+    .module-row {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 12px;
+    }
+
+    .module-index {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius);
+      background: #edf1f7;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .module-row.done .module-index {
+      background: rgba(93, 154, 69, 0.15);
+      color: var(--green);
+    }
+
+    .module-row.current {
+      border-color: rgba(44, 159, 154, 0.48);
+      background: var(--surface-soft);
+    }
+
+    .module-row.current .module-index {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .module-row.locked {
+      opacity: 0.62;
+    }
+
+    .module-row h3,
+    .module-row p {
+      margin: 0;
+    }
+
+    .module-row h3 {
+      margin-bottom: 3px;
+      font-size: 17px;
+    }
+
+    .module-row p {
+      color: var(--muted);
+      line-height: 1.35;
+      word-break: keep-all;
+    }
+
+    .pill {
+      border-radius: 999px;
+      background: rgba(44, 159, 154, 0.1);
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 900;
+      padding: 7px 10px;
+      white-space: nowrap;
+    }
+
+    .pill.amber {
+      background: var(--amber-soft);
+      color: #7a5217;
+    }
+
+    .pill.red {
+      background: rgba(180, 90, 101, 0.12);
+      color: var(--red);
+    }
+
+    .pill.dark {
+      background: rgba(34, 44, 61, 0.08);
+      color: var(--bg-deep);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 12px;
+    }
+
+    .stat strong {
+      font-size: 24px;
+    }
+
+    .coach {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .coach img {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius);
+      object-fit: cover;
+      background: #dff1ee;
+    }
+
+    .mini-copy {
+      line-height: 1.45;
+      word-break: keep-all;
+    }
+
+    .lesson-screen {
+      align-content: stretch;
+    }
+
+    .reader {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100%;
+      overflow: hidden;
+    }
+
+    .reader-header,
+    .quiz-header {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .lesson-count,
+    .question-count {
+      color: var(--muted);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .reader-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .lesson-article {
+      display: grid;
+      align-content: start;
+      gap: 18px;
+      min-height: 0;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: clamp(18px, 3vw, 32px);
+    }
+
+    .lesson-article h2 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: 1.12;
+      word-break: keep-all;
+    }
+
+    .lesson-article p {
+      max-width: 860px;
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.65;
+      word-break: keep-all;
+    }
+
+    .code-block {
+      overflow: auto;
+      border: 1px solid #cfd6df;
+      border-radius: var(--radius);
+      background: #f8fafc;
+      padding: 18px;
+      color: #1f2937;
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 18px;
+      line-height: 1.7;
+      white-space: nowrap;
+    }
+
+    .code-key {
+      color: #3b5ccc;
+      font-weight: 900;
+    }
+
+    .code-num {
+      color: #c44747;
+      font-weight: 900;
+    }
+
+    .code-str {
+      color: #2e7d32;
+      font-weight: 900;
+    }
+
+    .note-panel {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .note-card {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 14px;
+    }
+
+    .note-card textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .reader-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .quiz-screen {
+      align-content: stretch;
+    }
+
+    .quiz-shell {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100%;
+    }
+
+    .question-card {
+      display: grid;
+      align-content: start;
+      gap: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 34px);
+    }
+
+    .question-card h2 {
+      max-width: 920px;
+      margin: 0;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.18;
+      word-break: keep-all;
+    }
+
+    .answers {
+      display: grid;
+      gap: 12px;
+      max-width: 1060px;
+      margin: 0 auto;
+      width: min(100%, 1060px);
+    }
+
+    .answer {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      min-height: 64px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 12px 16px;
+      text-align: left;
+      box-shadow: 0 8px 18px rgba(29, 36, 48, 0.05);
+    }
+
+    .answer b {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius);
+      background: #edf1f7;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .answer.selected {
+      border-color: rgba(44, 159, 154, 0.55);
+      background: var(--surface-soft);
+    }
+
+    .answer.correct {
+      border-color: rgba(93, 154, 69, 0.55);
+      background: rgba(93, 154, 69, 0.1);
+    }
+
+    .answer.wrong {
+      border-color: rgba(180, 90, 101, 0.55);
+      background: rgba(180, 90, 101, 0.1);
+    }
+
+    .feedback {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      min-height: 82px;
+      border-radius: var(--radius);
+      background: #edf1f7;
+      padding: 16px;
+    }
+
+    .feedback.show {
+      display: flex;
+    }
+
+    .feedback strong {
+      font-size: 24px;
+    }
+
+    .feedback p {
+      margin: 4px 0 0;
+      color: var(--muted);
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .review-screen {
+      align-content: stretch;
+    }
+
+    .review-layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 16px;
+      min-height: 100%;
+    }
+
+    .review-list,
+    .review-detail {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .review-item {
+      display: grid;
+      gap: 7px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 14px;
+      color: var(--ink);
+      text-align: left;
+    }
+
+    .review-item.active {
+      border-color: rgba(44, 159, 154, 0.52);
+      background: var(--surface-soft);
+    }
+
+    .review-item h3 {
+      font-size: 17px;
+    }
+
+    .review-detail .card {
+      box-shadow: none;
+    }
+
+    .analysis-bars {
+      display: grid;
+      gap: 10px;
+    }
+
+    .analysis-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr) 54px;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 5;
+      display: none;
+      transform: translateX(-50%);
+      border: 1px solid rgba(44, 159, 154, 0.32);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+      color: var(--teal-dark);
+      font-weight: 900;
+      padding: 12px 16px;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    @media (max-width: 1180px) {
+      .topbar,
+      .layout,
+      .dashboard-grid,
+      .reader-body,
+      .review-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        justify-content: flex-start;
+        overflow: auto;
+      }
+
+      .profile {
+        justify-content: flex-start;
+      }
+
+      .screen-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        padding: 10px;
+      }
+
+      .shell {
+        min-height: calc(100vh - 20px);
+      }
+
+      .topbar,
+      .sidebar,
+      .rightbar,
+      .stage {
+        padding: 10px;
+      }
+
+      .mission-card,
+      .module-row,
+      .reader-header,
+      .quiz-header,
+      .analysis-row {
+        grid-template-columns: 1fr;
+      }
+
+      .module-row .pill,
+      .reader-footer,
+      .quiz-actions,
+      .feedback {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .screen-tabs {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .lesson-article h2,
+      .question-card h2 {
+        font-size: 30px;
+      }
+
+      .lesson-article p {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="./index.html">
+          <img src="./assets/rive/exports/knowva-mascot-poster.png" alt="Knowva mascot">
+          <span><strong>Knowva</strong><span>Quiet Orbit Lab</span></span>
+        </a>
+        <nav class="nav" aria-label="main navigation">
+          <button type="button" class="active">학습</button>
+          <button type="button">분석</button>
+          <button type="button">커뮤니티</button>
+          <button type="button">마이페이지</button>
+        </nav>
+        <div class="profile"><span>오늘 18분</span><strong>홍길동</strong></div>
+      </header>
+
+      <main class="layout">
+        <aside class="sidebar panel" aria-label="subject navigation">
+          <section class="subject-hero">
+            <small>현재 궤도</small>
+            <h1>JAVA 입문</h1>
+            <p>반복문 미션을 완료하면 배열 단원이 열립니다.</p>
+            <div class="progress" aria-label="course progress"><i style="width: 68%"></i></div>
+          </section>
+
+          <section class="subject-list" aria-label="subject selector">
+            <button type="button" class="active" data-subject="JAVA 입문"><strong>JAVA 입문</strong><span>진행률 68%</span></button>
+            <button type="button" data-subject="Spring MVC"><strong>Spring MVC</strong><span>진행률 34%</span></button>
+            <button type="button" data-subject="SQL 기본"><strong>SQL 기본</strong><span>진행률 51%</span></button>
+          </section>
+        </aside>
+
+        <section class="workspace panel">
+          <nav class="screen-tabs" aria-label="prototype screens">
+            <button type="button" class="active" data-screen="dashboard">학습 메인</button>
+            <button type="button" data-screen="lesson">이론 학습</button>
+            <button type="button" data-screen="quiz">문제풀이</button>
+            <button type="button" data-screen="review">오답 복습</button>
+          </nav>
+
+          <div class="stage">
+            <section class="screen dashboard-grid active" data-view="dashboard" aria-label="learning dashboard">
+              <div class="main-stack">
+                <article class="card mission-card">
+                  <div>
+                    <h2>오늘의 목표: 반복문</h2>
+                    <p>개념 3장, 문제 10개, 예상 12분. 다음 gate까지 7문제 남았습니다.</p>
+                  </div>
+                  <button type="button" class="btn dark" data-go="lesson">이어서 학습하기</button>
+                </article>
+
+                <section class="roadmap" aria-label="course roadmap">
+                  <article class="module-row done">
+                    <div class="module-index">1</div>
+                    <div><h3>JAVA 입문</h3><p>실행 흐름과 기본 문법을 정리했습니다.</p></div>
+                    <span class="pill">완료</span>
+                  </article>
+                  <article class="module-row done">
+                    <div class="module-index">2</div>
+                    <div><h3>변수와 자료형</h3><p>값 저장, 타입 변환, 문자열 조합 문제를 풀었습니다.</p></div>
+                    <span class="pill">복습 가능</span>
+                  </article>
+                  <article class="module-row current">
+                    <div class="module-index">3</div>
+                    <div><h3>반복문</h3><p>for, while, break, continue를 짧은 문제 루프로 학습합니다.</p></div>
+                    <span class="pill amber">오늘 미션</span>
+                  </article>
+                  <article class="module-row locked">
+                    <div class="module-index">4</div>
+                    <div><h3>배열</h3><p>반복문 미션 완료 후 활성화됩니다.</p></div>
+                    <span class="pill dark">잠김</span>
+                  </article>
+                </section>
+              </div>
+
+              <aside class="side-stack">
+                <article class="card coach">
+                  <img src="./assets/rive/exports/knowva-mascot-poster.png" alt="Nova buddy">
+                  <div>
+                    <h3>Nova Buddy</h3>
+                    <p class="mini-copy">오늘은 속도보다 정확도입니다. 오답 2개만 줄이면 gate 조건에 가까워집니다.</p>
+                  </div>
+                </article>
+                <section class="stat-grid" aria-label="learning stats">
+                  <div class="stat"><small>단원 진행</small><strong>68%</strong><div class="progress"><i style="width: 68%"></i></div></div>
+                  <div class="stat"><small>문제풀이</small><strong>3/10</strong><div class="progress"><i style="width: 30%"></i></div></div>
+                  <div class="stat"><small>내 순위</small><strong>15위</strong><span class="pill">Java 8위</span></div>
+                  <div class="stat"><small>연속 학습</small><strong>3일</strong><span class="pill amber">출석 유지</span></div>
+                </section>
+                <article class="card">
+                  <h3>Gate 조건</h3>
+                  <p class="mini-copy">학습 80%, 문제 정답률 70% 이상이면 coding test gate가 열립니다.</p>
+                </article>
+              </aside>
+            </section>
+
+            <section class="screen lesson-screen" data-view="lesson" aria-label="theory learning">
+              <div class="reader">
+                <header class="reader-header">
+                  <button type="button" class="btn" data-go="dashboard">학습 메인</button>
+                  <div class="progress" aria-label="lesson progress"><i style="width: 33%"></i></div>
+                  <span class="lesson-count">1 / 3</span>
+                </header>
+
+                <div class="reader-body">
+                  <article class="lesson-article">
+                    <p class="lesson-meta">개념 학습 · JAVA 반복문</p>
+                    <h2>반복문은 같은 작업을 조건에 맞춰 반복하는 구조입니다.</h2>
+                    <p>반복문을 쓰면 같은 코드를 여러 번 작성하지 않고, 조건이 참인 동안 같은 흐름을 유지할 수 있습니다.</p>
+                    <div class="code-block" aria-label="java code example">
+                      <span class="code-key">for</span> (<span class="code-key">int</span> i = <span class="code-num">1</span>; i &lt;= <span class="code-num">3</span>; i++) {<br>
+                      &nbsp;&nbsp;System.out.println(<br>
+                      &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-str">"orbit "</span> + i<br>
+                      &nbsp;&nbsp;);<br>
+                      }
+                    </div>
+                    <p>핵심은 시작값, 반복 조건, 증가 규칙입니다. 이 세 가지를 읽으면 반복이 몇 번 실행되는지 예측할 수 있습니다.</p>
+                  </article>
+
+                  <aside class="note-panel">
+                    <section class="note-card">
+                      <strong>학습 메모</strong>
+                      <textarea id="lessonNote">for문은 횟수가 정해진 반복에 적합하다.</textarea>
+                      <button type="button" class="btn" id="saveNote">저장</button>
+                    </section>
+                    <section class="note-card">
+                      <strong>다음 카드</strong>
+                      <p class="mini-copy">while문은 조건 중심 반복에 적합합니다.</p>
+                    </section>
+                  </aside>
+                </div>
+
+                <footer class="reader-footer">
+                  <button type="button" class="btn">이전</button>
+                  <button type="button" class="btn primary" data-go="quiz">문제로 확인</button>
+                </footer>
+              </div>
+            </section>
+
+            <section class="screen quiz-screen" data-view="quiz" aria-label="practice quiz">
+              <div class="quiz-shell">
+                <header class="quiz-header">
+                  <button type="button" class="btn" data-go="lesson">이론 보기</button>
+                  <div class="progress" aria-label="quiz progress"><i style="width: 30%"></i></div>
+                  <span class="question-count">3 / 10</span>
+                </header>
+
+                <article class="question-card">
+                  <p class="question-meta">이론 문제 · GoF 디자인 패턴</p>
+                  <h2>다음 중 GoF 디자인 패턴에 대한 설명으로 옳지 않은 것은?</h2>
+                  <div class="answers" id="answers">
+                    <button type="button" class="answer" data-correct="false"><b>A</b><span>Singleton 패턴은 클래스의 인스턴스가 오직 하나만 생성되도록 보장한다.</span></button>
+                    <button type="button" class="answer" data-correct="false"><b>B</b><span>Factory Method 패턴은 객체 생성을 서브 클래스에 위임한다.</span></button>
+                    <button type="button" class="answer" data-correct="false"><b>C</b><span>Observer 패턴은 한 객체의 상태 변화가 관련 객체들에게 자동으로 전파되도록 한다.</span></button>
+                    <button type="button" class="answer" data-correct="true"><b>D</b><span>Strategy 패턴은 알고리즘을 정의하고 런타임에 교체될 수 없도록 고정한다.</span></button>
+                  </div>
+                  <div class="feedback" id="feedback">
+                    <div>
+                      <strong id="feedbackTitle">정답입니다</strong>
+                      <p id="feedbackCopy">Strategy 패턴은 알고리즘을 교체 가능하게 캡슐화합니다.</p>
+                    </div>
+                    <button type="button" class="btn primary" data-go="review">오답 복습 보기</button>
+                  </div>
+                </article>
+
+                <footer class="quiz-actions">
+                  <button type="button" class="btn">건너뛰기</button>
+                  <button type="button" class="btn primary" id="checkAnswer" disabled>확인</button>
+                </footer>
+              </div>
+            </section>
+
+            <section class="screen review-screen" data-view="review" aria-label="wrong answer review">
+              <div class="review-layout">
+                <aside class="review-list" aria-label="wrong answer list">
+                  <article class="card">
+                    <h2>오답 복습</h2>
+                    <p class="review-meta">틀린 문제를 확인하고 다시 풀 문제를 고릅니다.</p>
+                  </article>
+                  <button type="button" class="review-item active" data-topic="Strategy 패턴">
+                    <h3>Strategy 패턴 해설</h3>
+                    <p>3회 오답 · 디자인 패턴</p>
+                  </button>
+                  <button type="button" class="review-item" data-topic="HTTP 404 vs 500">
+                    <h3>HTTP 404 vs 500</h3>
+                    <p>2회 오답 · REST API</p>
+                  </button>
+                  <button type="button" class="review-item" data-topic="해시 충돌">
+                    <h3>해시 충돌 처리</h3>
+                    <p>2회 오답 · 자료구조</p>
+                  </button>
+                </aside>
+
+                <section class="review-detail">
+                  <article class="card">
+                    <span class="pill red">반복 오답</span>
+                    <h2 id="reviewTitle">Strategy 패턴 해설</h2>
+                    <p class="mini-copy" id="reviewCopy">Strategy 패턴은 알고리즘을 객체로 분리하고 필요할 때 교체할 수 있게 만듭니다. 문제의 표현은 “교체될 수 없도록 고정한다”였기 때문에 오답입니다.</p>
+                  </article>
+                  <article class="card">
+                    <h3>약점 분석</h3>
+                    <div class="analysis-bars">
+                      <div class="analysis-row"><span>개념 recall</span><div class="progress"><i style="width: 58%"></i></div><strong>58%</strong></div>
+                      <div class="analysis-row"><span>문장 판별</span><div class="progress"><i style="width: 42%"></i></div><strong>42%</strong></div>
+                      <div class="analysis-row"><span>재풀이 정확도</span><div class="progress"><i style="width: 68%"></i></div><strong>68%</strong></div>
+                    </div>
+                  </article>
+                  <article class="card">
+                    <h3>다시 풀기 queue</h3>
+                    <p class="mini-copy">반복 오답 3문제, 오늘 복습 완료 2문제, 평균 정답률 68%</p>
+                    <button type="button" class="btn primary" data-go="quiz">다시 풀기 시작</button>
+                  </article>
+                </section>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <aside class="rightbar panel" aria-label="learning status">
+          <article class="card">
+            <h3>오늘의 흐름</h3>
+            <p class="mini-copy">개념을 짧게 확인하고 바로 문제로 넘어갑니다.</p>
+          </article>
+          <article class="card">
+            <h3>과목 진행률</h3>
+            <div class="progress"><i style="width: 68%"></i></div>
+            <p class="mini-copy">시험 gate까지 12% 남았습니다.</p>
+          </article>
+          <article class="card">
+            <h3>다음 추천</h3>
+            <p class="mini-copy">반복문 개념 카드 2장, 문제풀이 7문제, 오답 복습 1세트</p>
+          </article>
+          <article class="card">
+            <h3>순위</h3>
+            <p class="mini-copy">통합 15위 · Java 8위 · 알고리즘 12위</p>
+          </article>
+        </aside>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">저장했습니다.</div>
+
+  <script>
+    const screenButtons = [...document.querySelectorAll("[data-screen]")];
+    const screens = [...document.querySelectorAll("[data-view]")];
+    const goButtons = [...document.querySelectorAll("[data-go]")];
+    const subjectButtons = [...document.querySelectorAll("[data-subject]")];
+    const answers = [...document.querySelectorAll(".answer")];
+    const checkAnswer = document.querySelector("#checkAnswer");
+    const feedback = document.querySelector("#feedback");
+    const feedbackTitle = document.querySelector("#feedbackTitle");
+    const feedbackCopy = document.querySelector("#feedbackCopy");
+    const saveNote = document.querySelector("#saveNote");
+    const toast = document.querySelector("#toast");
+    const reviewItems = [...document.querySelectorAll(".review-item")];
+    const reviewTitle = document.querySelector("#reviewTitle");
+    const reviewCopy = document.querySelector("#reviewCopy");
+    let selectedAnswer = null;
+
+    function showScreen(name) {
+      screenButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.screen === name);
+      });
+      screens.forEach((screen) => {
+        screen.classList.toggle("active", screen.dataset.view === name);
+      });
+    }
+
+    function readInitialScreen() {
+      const requested = new URLSearchParams(window.location.search).get("screen");
+      return screenButtons.some((button) => button.dataset.screen === requested)
+        ? requested
+        : "dashboard";
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    screenButtons.forEach((button) => {
+      button.addEventListener("click", () => showScreen(button.dataset.screen));
+    });
+
+    goButtons.forEach((button) => {
+      button.addEventListener("click", () => showScreen(button.dataset.go));
+    });
+
+    subjectButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        subjectButtons.forEach((item) => {
+          item.classList.remove("active");
+        });
+        button.classList.add("active");
+        showToast(`${button.dataset.subject} 과목을 선택했습니다.`);
+      });
+    });
+
+    answers.forEach((answer) => {
+      answer.addEventListener("click", () => {
+        answers.forEach((item) => {
+          item.classList.remove("selected", "correct", "wrong");
+        });
+        answer.classList.add("selected");
+        selectedAnswer = answer;
+        checkAnswer.disabled = false;
+        feedback.classList.remove("show");
+      });
+    });
+
+    checkAnswer.addEventListener("click", () => {
+      if (!selectedAnswer) {
+        return;
+      }
+      const isCorrect = selectedAnswer.dataset.correct === "true";
+      selectedAnswer.classList.add(isCorrect ? "correct" : "wrong");
+      answers.find((answer) => answer.dataset.correct === "true").classList.add("correct");
+      feedbackTitle.textContent = isCorrect ? "정답입니다." : "다시 확인해볼 문제입니다.";
+      feedbackCopy.textContent = isCorrect
+        ? "Strategy 패턴은 알고리즘을 교체 가능하게 캡슐화합니다."
+        : "Strategy 패턴은 런타임 교체가 가능한 구조라서 D가 옳지 않은 설명입니다.";
+      feedback.classList.add("show");
+      checkAnswer.disabled = true;
+    });
+
+    saveNote.addEventListener("click", () => showToast("학습 메모를 저장했습니다."));
+
+    const reviewContent = {
+      "Strategy 패턴": "Strategy 패턴은 알고리즘을 객체로 분리하고 필요할 때 교체할 수 있게 만듭니다. 문제의 표현은 “교체될 수 없도록 고정한다”였기 때문에 오답입니다.",
+      "HTTP 404 vs 500": "404는 요청한 리소스를 찾을 수 없다는 뜻이고, 500은 서버 내부 오류입니다. 클라이언트 입력 문제와 서버 처리 문제를 분리해서 봐야 합니다.",
+      "해시 충돌": "서로 다른 key가 같은 hash 위치를 가리킬 수 있습니다. chaining이나 open addressing으로 충돌을 처리합니다."
+    };
+
+    reviewItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        reviewItems.forEach((entry) => {
+          entry.classList.remove("active");
+        });
+        item.classList.add("active");
+        reviewTitle.textContent = item.dataset.topic;
+        reviewCopy.textContent = reviewContent[item.dataset.topic];
+      });
+    });
+
+    showScreen(readInitialScreen());
+  </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EX-Q1 학습 샘플 · Knowva UI HTML2</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="./quiet-dark.css">
+</head>
+<body class="kv-theme ui-prototype quiet-dark" data-theme="knowva-quiet-dark" data-screen="sample-quiet-learning">
+  <div class="qd-shell">
+    <aside class="qd-sidebar" aria-label="학습 탐색">
+      <a class="qd-brand" href="./quiet-learning.html">
+        <span class="qd-brand-mark">K</span>
+        <span><strong>Knowva</strong><span>Java workspace</span></span>
+      </a>
+
+      <nav class="qd-nav" aria-label="주 메뉴">
+        <a class="is-active" href="./quiet-learning.html"><span>학습</span><strong>오늘</strong></a>
+        <a href="./quiet-analysis.html"><span>분석</span><strong>리포트</strong></a>
+        <a href="./community-board.html"><span>커뮤니티</span></a>
+        <a href="./settings-index.html"><span>설정</span></a>
+      </nav>
+
+      <section class="qd-side-group" aria-label="과목">
+        <span class="qd-side-label">Courses</span>
+        <div class="qd-course-list">
+          <a class="is-active" href="./quiet-learning.html"><span>Java</span><strong>68%</strong></a>
+          <a href="./quiet-learning.html"><span>SQL</span><strong>12%</strong></a>
+          <a href="./quiet-learning.html"><span>Python</span><strong>0%</strong></a>
+        </div>
+      </section>
+
+      <a class="qd-quiet-link" href="./learning-main.html"><span>기존 샘플</span><strong>EX-001</strong></a>
+    </aside>
+
+    <main class="qd-main">
+      <header class="qd-topbar">
+        <div class="qd-breadcrumb">학습 / Java / 조건문</div>
+        <div class="qd-actions">
+          <input class="qd-input" type="search" value="조건문, 비교 연산자" aria-label="학습 검색">
+          <a class="qd-button ghost" href="../../screens/learning/review.html">오답</a>
+          <a class="qd-button primary" href="../../screens/learning/curriculum.html">학습 시작</a>
+        </div>
+      </header>
+
+      <section class="qd-page-head">
+        <div>
+          <h1>Java 조건문</h1>
+          <p>오늘은 조건식 해석과 분기 흐름을 정리하고 반복문 진입 조건을 채운다.</p>
+        </div>
+        <div class="qd-avatar-line">
+          <span class="qd-avatar">NL</span>
+          <span class="qd-avatar-copy"><strong>nova_learner</strong><span>최근 저장 09:30</span></span>
+        </div>
+      </section>
+
+      <section class="qd-stat-grid" aria-label="학습 요약">
+        <article class="qd-stat"><span>현재 단원</span><strong>3 / 10</strong><small>조건문 진행 중</small></article>
+        <article class="qd-stat"><span>정답률</span><strong>81%</strong><small>최근 20문항 기준</small></article>
+        <article class="qd-stat"><span>Gate</span><strong>7문제</strong><small>반복문까지 남음</small></article>
+        <article class="qd-stat"><span>복습 큐</span><strong>4개</strong><small>비교 연산자 중심</small></article>
+      </section>
+
+      <div class="qd-grid">
+        <div class="qd-stack">
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <div>
+                <h2><span>Continue</span><br>조건문 문제 7개</h2>
+                <p>완료하면 반복문 이론과 문제풀이가 열린다.</p>
+              </div>
+              <span class="qd-badge active">진행 중</span>
+            </div>
+            <div class="qd-progress"><span style="width:68%"></span></div>
+          </section>
+
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <div>
+                <h2>학습 흐름</h2>
+                <p>완료 단원과 현재 단원을 이어서 확인한다.</p>
+              </div>
+            </div>
+            <article class="qd-row">
+              <span class="qd-dot good"></span>
+              <div><strong>Java 입문</strong><p>개념 4개 · 문제 10/10</p></div>
+              <span class="qd-badge good">완료</span>
+            </article>
+            <article class="qd-row">
+              <span class="qd-dot good"></span>
+              <div><strong>변수와 자료형</strong><p>오답 1개 · 복습 가능</p></div>
+              <span class="qd-badge good">완료</span>
+            </article>
+            <article class="qd-row">
+              <span class="qd-dot active"></span>
+              <div><strong>조건문</strong><p>일반 문제 3/10 · 오늘 이어서 풀기</p></div>
+              <span class="qd-badge active">현재</span>
+            </article>
+            <article class="qd-row">
+              <span class="qd-dot warn"></span>
+              <div><strong>반복문</strong><p>조건문 80% 완료 시 열림</p></div>
+              <span class="qd-badge warn">잠김</span>
+            </article>
+          </section>
+
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <div>
+                <h2>현재 개념</h2>
+                <p>조건식은 true 또는 false로 평가되고, 실행 블록은 첫 번째 일치 조건에서 결정된다.</p>
+              </div>
+            </div>
+            <pre class="qd-code"><code>int score = 84;
+
+if (score >= 90) {
+  System.out.println("A");
+} else if (score >= 80) {
+  System.out.println("B");
+} else {
+  System.out.println("retry");
+}</code></pre>
+          </section>
+        </div>
+
+        <aside class="qd-stack" aria-label="학습 보조">
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <h2>오늘 할 일</h2>
+            </div>
+            <ul class="qd-task-list">
+              <li><input type="checkbox" checked aria-label="완료"><span>조건문 이론 저장</span></li>
+              <li><input type="checkbox" aria-label="미완료"><span>edge case 3문제 풀기</span></li>
+              <li><input type="checkbox" aria-label="미완료"><span>비교 연산자 오답 복습</span></li>
+              <li><input type="checkbox" aria-label="미완료"><span>반복문 gate 조건 확인</span></li>
+            </ul>
+          </section>
+
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <h2>오답 큐</h2>
+              <span class="qd-badge warn">4</span>
+            </div>
+            <div class="qd-feed">
+              <article class="qd-feed-item"><strong>비교 연산자 우선순위</strong><p>최근 2회 반복 오답</p></article>
+              <article class="qd-feed-item"><strong>else if 실행 순서</strong><p>풀이 시간 평균보다 18% 김</p></article>
+              <article class="qd-feed-item"><strong>boolean 반환식</strong><p>힌트 사용 1회</p></article>
+            </div>
+          </section>
+
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <h2>최근 활동</h2>
+            </div>
+            <div class="qd-feed">
+              <article class="qd-feed-item"><strong>09:30</strong><p>조건문 이론 저장</p></article>
+              <article class="qd-feed-item"><strong>09:12</strong><p>자료형 문제 10/10 완료</p></article>
+              <article class="qd-feed-item"><strong>어제</strong><p>Java 입문 단원 완료</p></article>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

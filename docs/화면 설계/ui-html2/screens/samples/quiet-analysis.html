@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EX-Q2 분석 샘플 · Knowva UI HTML2</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="./quiet-dark.css">
+</head>
+<body class="kv-theme ui-prototype quiet-dark" data-theme="knowva-quiet-dark" data-screen="sample-quiet-analysis">
+  <div class="qd-shell">
+    <aside class="qd-sidebar" aria-label="분석 탐색">
+      <a class="qd-brand" href="./quiet-learning.html">
+        <span class="qd-brand-mark">K</span>
+        <span><strong>Knowva</strong><span>Java workspace</span></span>
+      </a>
+
+      <nav class="qd-nav" aria-label="주 메뉴">
+        <a href="./quiet-learning.html"><span>학습</span><strong>오늘</strong></a>
+        <a class="is-active" href="./quiet-analysis.html"><span>분석</span><strong>리포트</strong></a>
+        <a href="./community-board.html"><span>커뮤니티</span></a>
+        <a href="./settings-index.html"><span>설정</span></a>
+      </nav>
+
+      <section class="qd-side-group" aria-label="리포트 범위">
+        <span class="qd-side-label">Reports</span>
+        <div class="qd-course-list">
+          <a class="is-active" href="./quiet-analysis.html"><span>Java</span><strong>7일</strong></a>
+          <a href="./quiet-analysis.html"><span>SQL</span><strong>준비</strong></a>
+          <a href="./quiet-analysis.html"><span>시험</span><strong>Gate</strong></a>
+        </div>
+      </section>
+
+      <a class="qd-quiet-link" href="../../screens/analysis/index.html"><span>기존 분석</span><strong>SR-009</strong></a>
+    </aside>
+
+    <main class="qd-main">
+      <header class="qd-topbar">
+        <div class="qd-breadcrumb">분석 / Java / 최근 7일</div>
+        <div class="qd-filters">
+          <select class="qd-select" aria-label="기간">
+            <option>최근 7일</option>
+            <option>최근 30일</option>
+          </select>
+          <select class="qd-select" aria-label="과목">
+            <option>Java</option>
+            <option>SQL</option>
+          </select>
+          <a class="qd-button primary" href="../../screens/payment/index.html">상세 분석</a>
+        </div>
+      </header>
+
+      <section class="qd-page-head">
+        <div>
+          <h1>학습 분석 리포트</h1>
+          <p>정답률, 풀이 시간, 반복 오답을 묶어서 다음 학습 순서를 정한다.</p>
+        </div>
+        <span class="qd-badge active">09:30 updated</span>
+      </section>
+
+      <section class="qd-stat-grid" aria-label="분석 요약">
+        <article class="qd-stat"><span>정답률</span><strong>81.4%</strong><small>전주 대비 +3.2</small></article>
+        <article class="qd-stat"><span>평균 풀이</span><strong>4m 18s</strong><small>조건문에서 지연</small></article>
+        <article class="qd-stat"><span>반복 오답</span><strong>4개</strong><small>2개는 우선순위</small></article>
+        <article class="qd-stat"><span>추천 순서</span><strong>3단계</strong><small>복습 → 문제 → gate</small></article>
+      </section>
+
+      <div class="qd-grid">
+        <div class="qd-stack">
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <div>
+                <h2>단원별 신호</h2>
+                <p>정답률이 낮거나 풀이 시간이 긴 단원을 먼저 확인한다.</p>
+              </div>
+              <span class="qd-badge">문제 42개</span>
+            </div>
+            <div class="qd-chart" aria-label="단원별 정답률 막대 그래프">
+              <i class="good" style="height:86%"><span>입문</span></i>
+              <i class="good" style="height:82%"><span>자료형</span></i>
+              <i class="active" style="height:68%"><span>조건</span></i>
+              <i class="warn" style="height:42%"><span>반복</span></i>
+              <i style="height:24%"><span>배열</span></i>
+              <i style="height:18%"><span>메서드</span></i>
+              <i style="height:12%"><span>클래스</span></i>
+              <i style="height:8%"><span>예외</span></i>
+            </div>
+          </section>
+
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <div>
+                <h2>취약 항목</h2>
+                <p>복습 우선순위는 오답 반복 횟수와 풀이 시간을 같이 본다.</p>
+              </div>
+            </div>
+            <div class="qd-table" role="table" aria-label="취약 항목">
+              <div class="qd-table-row header" role="row">
+                <span>항목</span><span>정답률</span><span>시간</span><span>상태</span>
+              </div>
+              <div class="qd-table-row" role="row">
+                <strong>else if 실행 순서</strong><span>62%</span><span>5m 12s</span><span class="qd-badge warn">복습</span>
+              </div>
+              <div class="qd-table-row" role="row">
+                <strong>비교 연산자</strong><span>67%</span><span>4m 48s</span><span class="qd-badge warn">복습</span>
+              </div>
+              <div class="qd-table-row" role="row">
+                <strong>boolean 반환식</strong><span>74%</span><span>3m 50s</span><span class="qd-badge active">문제</span>
+              </div>
+              <div class="qd-table-row" role="row">
+                <strong>Scanner 입력 분기</strong><span>79%</span><span>3m 36s</span><span class="qd-badge">관찰</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="qd-insight-grid" aria-label="추천 학습">
+            <article class="qd-callout"><strong>1. 오답 복습</strong><p>비교 연산자와 실행 순서 문제 4개를 먼저 푼다.</p></article>
+            <article class="qd-callout"><strong>2. 조건문 7문제</strong><p>정답률 80%를 넘기면 반복문 gate가 열린다.</p></article>
+            <article class="qd-callout"><strong>3. 반복문 예습</strong><p>잠금 해제 후 while / for 차이를 먼저 확인한다.</p></article>
+          </section>
+        </div>
+
+        <aside class="qd-stack" aria-label="분석 보조">
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <h2>주요 판단</h2>
+              <span class="qd-badge active">3</span>
+            </div>
+            <div class="qd-feed">
+              <article class="qd-feed-item"><strong>속도 지연</strong><p>조건문 문제에서 평균보다 18% 오래 걸린다.</p></article>
+              <article class="qd-feed-item"><strong>오답 반복</strong><p>같은 비교 연산자 유형이 2회 반복됐다.</p></article>
+              <article class="qd-feed-item"><strong>진입 조건</strong><p>반복문 gate까지 7문제가 남았다.</p></article>
+            </div>
+          </section>
+
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <h2>활동 로그</h2>
+            </div>
+            <div class="qd-feed">
+              <article class="qd-feed-item"><strong>09:30</strong><p>분석 결과 갱신</p></article>
+              <article class="qd-feed-item"><strong>09:12</strong><p>자료형 10문항 완료</p></article>
+              <article class="qd-feed-item"><strong>어제</strong><p>오답 복습 3문항 해결</p></article>
+            </div>
+          </section>
+
+          <section class="qd-panel">
+            <div class="qd-panel-head">
+              <h2>결제 상태</h2>
+              <span class="qd-badge good">Premium</span>
+            </div>
+            <p class="qd-muted">문항별 채점 근거와 취약점 리포트를 확인할 수 있다.</p>
+            <div class="qd-button-row" style="margin-top:14px">
+              <a class="qd-button" href="../../screens/analysis/index.html">기존 화면</a>
+              <a class="qd-button primary" href="../../screens/learning/review.html">복습 시작</a>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

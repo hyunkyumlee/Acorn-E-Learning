@@ -18,6 +18,11 @@
 | `exports/alien-ufo-booster-sprite.png` | booster sprite strip |
 | `exports/alien-ufo-booster-poster.png` | booster poster frame |
 | `alien-ufo-qa-capture.png` | browser playback QA capture |
+| `variations/alien-ufo-expression-sheet.png` | expression variation preview |
+| `variations/alien-ufo-direction-sheet.png` | direction variation preview |
+| `variations/expressions/*.svg` | individual expression SVG assets |
+| `variations/directions/*.svg` | individual direction SVG assets |
+| `variations/alien-ufo-variation-guide.md` | variation usage guide |
 
 ## Rive Handoff
 
