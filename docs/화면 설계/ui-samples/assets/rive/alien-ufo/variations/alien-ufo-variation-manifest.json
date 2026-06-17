@@ -1,0 +1,109 @@
+{
+  "source": "alien-ufo-source.svg",
+  "expressionSheet": "variations/alien-ufo-expression-sheet.png",
+  "directionSheet": "variations/alien-ufo-direction-sheet.png",
+  "expressions": [
+    {
+      "id": "neutral",
+      "label": "Neutral",
+      "file": "variations/expressions/alien-ufo-expression-neutral.svg"
+    },
+    {
+      "id": "happy",
+      "label": "Happy",
+      "file": "variations/expressions/alien-ufo-expression-happy.svg"
+    },
+    {
+      "id": "joy",
+      "label": "Joy",
+      "file": "variations/expressions/alien-ufo-expression-joy.svg"
+    },
+    {
+      "id": "surprised",
+      "label": "Surprised",
+      "file": "variations/expressions/alien-ufo-expression-surprised.svg"
+    },
+    {
+      "id": "sad",
+      "label": "Sad",
+      "file": "variations/expressions/alien-ufo-expression-sad.svg"
+    },
+    {
+      "id": "determined",
+      "label": "Determined",
+      "file": "variations/expressions/alien-ufo-expression-determined.svg"
+    },
+    {
+      "id": "wink",
+      "label": "Wink",
+      "file": "variations/expressions/alien-ufo-expression-wink.svg"
+    },
+    {
+      "id": "thinking",
+      "label": "Thinking",
+      "file": "variations/expressions/alien-ufo-expression-thinking.svg"
+    },
+    {
+      "id": "sleepy",
+      "label": "Sleepy",
+      "file": "variations/expressions/alien-ufo-expression-sleepy.svg"
+    },
+    {
+      "id": "confused",
+      "label": "Confused",
+      "file": "variations/expressions/alien-ufo-expression-confused.svg"
+    },
+    {
+      "id": "success",
+      "label": "Success",
+      "file": "variations/expressions/alien-ufo-expression-success.svg"
+    },
+    {
+      "id": "talking",
+      "label": "Talking",
+      "file": "variations/expressions/alien-ufo-expression-talking.svg"
+    }
+  ],
+  "directions": [
+    {
+      "id": "front",
+      "label": "Front",
+      "file": "variations/directions/alien-ufo-direction-front.svg"
+    },
+    {
+      "id": "frontRight",
+      "label": "Front right",
+      "file": "variations/directions/alien-ufo-direction-front-right.svg"
+    },
+    {
+      "id": "right",
+      "label": "Right",
+      "file": "variations/directions/alien-ufo-direction-right.svg"
+    },
+    {
+      "id": "backRight",
+      "label": "Back right",
+      "file": "variations/directions/alien-ufo-direction-back-right.svg"
+    },
+    {
+      "id": "back",
+      "label": "Back",
+      "file": "variations/directions/alien-ufo-direction-back.svg"
+    },
+    {
+      "id": "backLeft",
+      "label": "Back left",
+      "file": "variations/directions/alien-ufo-direction-back-left.svg"
+    },
+    {
+      "id": "left",
+      "label": "Left",
+      "file": "variations/directions/alien-ufo-direction-left.svg"
+    },
+    {
+      "id": "frontLeft",
+      "label": "Front left",
+      "file": "variations/directions/alien-ufo-direction-front-left.svg"
+    }
+  ]
+}

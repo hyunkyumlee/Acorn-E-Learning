@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Alien UFO direction Front left</title>
+  <desc id="desc">Alien UFO mascot direction Front left variation, based on the same source proportions.</desc>
+  <defs>
+    <linearGradient id="ufoTopGradient" x1="108" y1="238" x2="408" y2="368" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.54" stop-color="#f5fbfa"/>
+      <stop offset="1" stop-color="#d7eeee"/>
+    </linearGradient>
+    <linearGradient id="ufoSideGradient" x1="64" y1="330" x2="448" y2="392" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1aa0ad"/>
+      <stop offset="0.46" stop-color="#23bac0"/>
+      <stop offset="1" stop-color="#137f91"/>
+    </linearGradient>
+    <linearGradient id="rimGradient" x1="150" y1="245" x2="362" y2="302" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6871c9"/>
+      <stop offset="0.58" stop-color="#45539f"/>
+      <stop offset="1" stop-color="#2e3f84"/>
+    </linearGradient>
+    <radialGradient id="domeGradient" cx="36%" cy="22%" r="78%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="0.42" stop-color="#bde8ff" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#8ec9ef" stop-opacity="0.14"/>
+    </radialGradient>
+    <linearGradient id="alienSkin" x1="190" y1="96" x2="320" y2="282" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#b8df5e"/>
+      <stop offset="0.52" stop-color="#8dca3f"/>
+      <stop offset="1" stop-color="#61a938"/>
+    </linearGradient>
+    <linearGradient id="alienDarkSkin" x1="168" y1="246" x2="324" y2="326" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#85cf3d"/>
+      <stop offset="1" stop-color="#5fa638"/>
+    </linearGradient>
+    <radialGradient id="eyeGradient" cx="32%" cy="28%" r="72%">
+      <stop offset="0" stop-color="#36519b"/>
+      <stop offset="0.38" stop-color="#13225a"/>
+      <stop offset="1" stop-color="#07112d"/>
+    </radialGradient>
+    <radialGradient id="orangeLight" cx="35%" cy="28%" r="76%">
+      <stop offset="0" stop-color="#fff8bd"/>
+      <stop offset="0.34" stop-color="#ffcc45"/>
+      <stop offset="1" stop-color="#f37a2d"/>
+    </radialGradient>
+    <radialGradient id="flameGradient" cx="50%" cy="18%" r="82%">
+      <stop offset="0" stop-color="#fff1a2"/>
+      <stop offset="0.35" stop-color="#ffa243"/>
+      <stop offset="1" stop-color="#ff7b54" stop-opacity="0.14"/>
+    </radialGradient>
+    <filter id="softDrop" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#16333c" flood-opacity="0.18"/>
+    </filter>
+    <filter id="domeBlur" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="0.28"/>
+    </filter>
+  </defs>
+
+  <g id="shadow" opacity="0.22">
+    <ellipse cx="256" cy="428" rx="166" ry="30" fill="#173138"/>
+  </g>
+
+  <g id="mascot" filter="url(#softDrop)">
+    <g id="boost-trails" opacity="0.5">
+      <path d="M92 390 L80 410" stroke="#9fd7db" stroke-width="3" stroke-linecap="round"/>
+      <path d="M408 388 L426 404" stroke="#9fd7db" stroke-width="3" stroke-linecap="round"/>
+      <path d="M254 410 L254 436" stroke="#9fd7db" stroke-width="3" stroke-linecap="round"/>
+      <path d="M174 400 L166 421" stroke="#9fd7db" stroke-width="3" stroke-linecap="round"/>
+      <path d="M338 400 L348 421" stroke="#9fd7db" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <g id="flames">
+      <g id="left-booster-flame">
+        <path d="M118 357 C93 378 94 411 119 423 C147 407 148 374 118 357 Z" fill="url(#flameGradient)" opacity="0.9"/>
+        <path d="M119 369 C105 386 107 404 121 413 C137 401 137 382 119 369 Z" fill="#ffd36b" opacity="0.78"/>
+      </g>
+      <g id="center-booster-flame">
+        <path d="M256 368 C222 396 224 442 257 460 C293 440 293 397 256 368 Z" fill="url(#flameGradient)" opacity="0.92"/>
+        <path d="M257 385 C237 405 239 430 258 444 C280 426 279 405 257 385 Z" fill="#ffd36b" opacity="0.78"/>
+      </g>
+      <g id="right-booster-flame">
+        <path d="M394 357 C369 378 370 411 395 423 C423 407 424 374 394 357 Z" fill="url(#flameGradient)" opacity="0.9"/>
+        <path d="M395 369 C381 386 383 404 397 413 C413 401 413 382 395 369 Z" fill="#ffd36b" opacity="0.78"/>
+      </g>
+    </g>
+
+    <g id="thrusters">
+      <ellipse cx="119" cy="361" rx="29" ry="20" fill="#383e91"/>
+      <ellipse cx="256" cy="376" rx="36" ry="22" fill="#393d8f"/>
+      <ellipse cx="394" cy="361" rx="29" ry="20" fill="#383e91"/>
+      <ellipse cx="119" cy="353" rx="22" ry="9" fill="#5660b6" opacity="0.52"/>
+      <ellipse cx="256" cy="367" rx="26" ry="10" fill="#5660b6" opacity="0.52"/>
+      <ellipse cx="394" cy="353" rx="22" ry="9" fill="#5660b6" opacity="0.52"/>
+    </g>
+
+    <g id="ufo-body">
+      <path d="M64 312 C94 270 159 246 256 246 C353 246 418 270 448 312 C424 372 353 402 256 402 C159 402 88 372 64 312 Z" fill="url(#ufoSideGradient)"/>
+      <path d="M82 292 C116 254 176 235 256 235 C336 235 396 254 430 292 C401 335 337 358 256 358 C175 358 111 335 82 292 Z" fill="url(#ufoTopGradient)"/>
+      <path d="M64 312 C97 345 161 363 256 363 C351 363 415 345 448 312 C432 373 354 405 256 405 C158 405 80 373 64 312 Z" fill="#159aa8" opacity="0.5"/>
+      <path d="M77 305 C111 336 172 352 256 352 C340 352 401 336 435 305" fill="none" stroke="#ffffff" stroke-opacity="0.34" stroke-width="5" stroke-linecap="round"/>
+    </g>
+
+    <g id="dome-back" transform="translate(-4.760000000000001 0)">
+      <ellipse cx="256" cy="183" rx="117" ry="126" fill="url(#domeGradient)" stroke="#a7cdea" stroke-width="5"/>
+      <ellipse cx="256" cy="183" rx="126" ry="135" fill="none" stroke="#afd7f3" stroke-width="4" opacity="0.5"/>
+    </g>
+
+    <g id="alien" transform="translate(-17 0) rotate(1.5 256 198) translate(256 198) scale(0.96 1) translate(-256 -198)">
+      <g id="left-ear">
+        <path d="M186 176 C154 154 139 171 145 205 C153 242 180 235 198 204 Z" fill="#83c946"/>
+        <path d="M165 184 C158 195 161 214 176 221" fill="none" stroke="#69ad3b" stroke-width="8" stroke-linecap="round"/>
+      </g>
+      <g id="right-ear">
+        <path d="M326 176 C358 154 373 171 367 205 C359 242 332 235 314 204 Z" fill="#83c946"/>
+        <path d="M347 184 C354 195 351 214 336 221" fill="none" stroke="#69ad3b" stroke-width="8" stroke-linecap="round"/>
+      </g>
+
+      <g id="left-antenna">
+        <path d="M258 112 C258 97 259 84 259 69" fill="none" stroke="#79bd3d" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="259" cy="61" r="13" fill="#88cb45"/>
+        <circle cx="254" cy="56" r="5" fill="#dff4a2" opacity="0.9"/>
+      </g>
+
+      <g id="body">
+        <path d="M173 202 C173 136 210 101 256 101 C302 101 339 136 339 202 C339 262 306 294 256 294 C206 294 173 262 173 202 Z" fill="url(#alienSkin)"/>
+        <path d="M189 247 C203 225 226 214 256 214 C286 214 309 225 323 247 C325 291 299 314 256 314 C213 314 187 291 189 247 Z" fill="url(#alienDarkSkin)"/>
+        <path d="M198 147 C214 124 236 113 260 113" fill="none" stroke="#c6ea77" stroke-width="18" stroke-linecap="round" opacity="0.36"/>
+        <ellipse cx="221" cy="124" rx="12" ry="7" fill="#e7f6b7" opacity="0.6" transform="rotate(-32 221 124)"/>
+        <ellipse cx="301" cy="244" rx="9" ry="4" fill="#5d9f35" opacity="0.36"/>
+      </g>
+
+      <g id="left-eye">
+        <ellipse id="left-eye-white" cx="223" cy="178" rx="11" ry="16" fill="url(#eyeGradient)"/>
+        <ellipse id="left-pupil" cx="221" cy="180" rx="7" ry="11" fill="#081231" opacity="0.62"/>
+        <circle cx="216" cy="171" r="4" fill="#ffffff" opacity="0.92"/>
+      </g>
+      <g id="right-eye">
+        <ellipse id="right-eye-white" cx="292" cy="178" rx="11" ry="16" fill="url(#eyeGradient)"/>
+        <ellipse id="right-pupil" cx="290" cy="180" rx="7" ry="11" fill="#081231" opacity="0.62"/>
+        <circle cx="285" cy="171" r="4" fill="#ffffff" opacity="0.92"/>
+      </g>
+
+      <g id="mouth">
+        <path d="M242 201 C247 214 266 214 271 201" fill="none" stroke="#13212e" stroke-width="5" stroke-linecap="round"/>
+      </g>
+
+      <g id="cheeks" opacity="0.86">
+        <ellipse cx="205" cy="201" rx="15" ry="10" fill="#8ecf4a" opacity="0.72"/>
+        <ellipse cx="310" cy="201" rx="15" ry="10" fill="#8ecf4a" opacity="0.72"/>
+      </g>
+    </g>
+
+    <g id="cockpit-rim">
+      <ellipse cx="256" cy="268" rx="121" ry="34" fill="url(#rimGradient)"/>
+      <ellipse cx="256" cy="257" rx="101" ry="20" fill="#232d71" opacity="0.42"/>
+      <path d="M149 270 C178 293 333 293 363 270" fill="none" stroke="#7985dc" stroke-width="8" stroke-linecap="round" opacity="0.44"/>
+    </g>
+
+    <g id="left-arm">
+      <path d="M205 260 C182 265 169 277 167 293 C171 306 191 303 207 286 C214 274 214 264 205 260 Z" fill="#83c946"/>
+      <path d="M187 283 C194 285 200 286 205 286" fill="none" stroke="#609f37" stroke-width="5" stroke-linecap="round" opacity="0.45"/>
+    </g>
+    <g id="right-arm">
+      <path d="M308 260 C331 265 344 277 346 293 C342 306 322 303 306 286 C299 274 299 264 308 260 Z" fill="#83c946"/>
+      <path d="M326 283 C319 285 313 286 308 286" fill="none" stroke="#609f37" stroke-width="5" stroke-linecap="round" opacity="0.45"/>
+    </g>
+
+    <g id="star-badge">
+      <ellipse cx="159" cy="313" rx="18" ry="14" fill="#e17b2d" opacity="0.52"/>
+      <ellipse cx="155" cy="309" rx="13" ry="10" fill="url(#orangeLight)"/>
+      <ellipse cx="221" cy="335" rx="19" ry="15" fill="#e17b2d" opacity="0.54"/>
+      <ellipse cx="217" cy="331" rx="13" ry="11" fill="url(#orangeLight)"/>
+      <ellipse cx="287" cy="335" rx="19" ry="15" fill="#e17b2d" opacity="0.54"/>
+      <ellipse cx="283" cy="331" rx="13" ry="11" fill="url(#orangeLight)"/>
+      <ellipse cx="354" cy="316" rx="18" ry="14" fill="#e17b2d" opacity="0.52"/>
+      <ellipse cx="350" cy="312" rx="13" ry="10" fill="url(#orangeLight)"/>
+      <circle cx="213" cy="324" r="5" fill="#ffffff" opacity="0.76"/>
+      <circle cx="279" cy="324" r="5" fill="#ffffff" opacity="0.76"/>
+      <circle cx="346" cy="305" r="4" fill="#ffffff" opacity="0.76"/>
+      <circle cx="151" cy="302" r="4" fill="#ffffff" opacity="0.76"/>
+    </g>
+
+    <g id="dome-front" filter="url(#domeBlur)" transform="translate(-3.06 0)">
+      <path d="M174 181 C180 108 216 69 273 62" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" opacity="0.38"/>
+      <ellipse cx="204" cy="112" rx="12" ry="7" fill="#ffffff" opacity="0.42" transform="rotate(-32 204 112)"/>
+      <path d="M340 99 C374 142 380 205 352 252" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.25"/>
+    </g>
+  </g>
+</svg>
