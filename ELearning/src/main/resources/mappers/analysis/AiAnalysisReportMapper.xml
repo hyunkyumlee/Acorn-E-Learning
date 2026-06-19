@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.analysis.mapper.AiAnalysisReportMapper">
+    <!-- TODO resultMap 구현 예시입니다.
+      <resultMap id="AiAnalysisReportResultMap" type="com.acorn.elearning.analysis.model.AiAnalysisReport">
+          <id property="id" column="id" />
+          <result property="..." column="..." />
+      </resultMap>
+    -->
+    <!-- TODO findById 구현 예시입니다.
+      <select id="findById" parameterType="long" resultMap="AiAnalysisReportResultMap">
+          SELECT /* DDL column list */
+          FROM ai_analysis_reports
+          WHERE id = #{id}
+      </select>
+    -->
+    <!-- TODO findAll 구현 예시입니다.
+      <select id="findAll" resultMap="AiAnalysisReportResultMap">
+          SELECT /* DDL column list */
+          FROM ai_analysis_reports
+          ORDER BY id DESC
+      </select>
+    -->
+    <!-- TODO insert 구현 예시입니다.
+      <insert id="insert" parameterType="com.acorn.elearning.analysis.model.AiAnalysisReport" useGeneratedKeys="true" keyProperty="id">
+          INSERT INTO ai_analysis_reports (/* writable columns */)
+          VALUES (/* #{property} values */)
+      </insert>
+    -->
+    <!-- TODO update 구현 예시입니다.
+      <update id="update" parameterType="com.acorn.elearning.analysis.model.AiAnalysisReport">
+          UPDATE ai_analysis_reports
+          SET /* changed columns = #{property} */
+          WHERE id = #{id}
+      </update>
+    -->
+</mapper>

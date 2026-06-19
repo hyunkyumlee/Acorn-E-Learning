@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.learning.mapper.CurriculumNodeMapper">
+    <!-- TODO resultMap 구현 예시입니다.
+      <resultMap id="CurriculumNodeResultMap" type="com.acorn.elearning.learning.model.CurriculumNode">
+          <id property="id" column="id" />
+          <result property="..." column="..." />
+      </resultMap>
+    -->
+    <!-- TODO findById 구현 예시입니다.
+      <select id="findById" parameterType="long" resultMap="CurriculumNodeResultMap">
+          SELECT /* DDL column list */
+          FROM curriculum_nodes
+          WHERE id = #{id}
+      </select>
+    -->
+    <!-- TODO findAll 구현 예시입니다.
+      <select id="findAll" resultMap="CurriculumNodeResultMap">
+          SELECT /* DDL column list */
+          FROM curriculum_nodes
+          ORDER BY id DESC
+      </select>
+    -->
+    <!-- TODO insert 구현 예시입니다.
+      <insert id="insert" parameterType="com.acorn.elearning.learning.model.CurriculumNode" useGeneratedKeys="true" keyProperty="id">
+          INSERT INTO curriculum_nodes (/* writable columns */)
+          VALUES (/* #{property} values */)
+      </insert>
+    -->
+    <!-- TODO update 구현 예시입니다.
+      <update id="update" parameterType="com.acorn.elearning.learning.model.CurriculumNode">
+          UPDATE curriculum_nodes
+          SET /* changed columns = #{property} */
+          WHERE id = #{id}
+      </update>
+    -->
+</mapper>

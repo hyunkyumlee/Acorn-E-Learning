@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.exam.mapper.AiExamProblemMapper">
+    <!-- TODO resultMap 구현 예시입니다.
+      <resultMap id="AiExamProblemResultMap" type="com.acorn.elearning.exam.model.AiExamProblem">
+          <id property="id" column="id" />
+          <result property="..." column="..." />
+      </resultMap>
+    -->
+    <!-- TODO findById 구현 예시입니다.
+      <select id="findById" parameterType="long" resultMap="AiExamProblemResultMap">
+          SELECT /* DDL column list */
+          FROM ai_exam_problems
+          WHERE id = #{id}
+      </select>
+    -->
+    <!-- TODO findAll 구현 예시입니다.
+      <select id="findAll" resultMap="AiExamProblemResultMap">
+          SELECT /* DDL column list */
+          FROM ai_exam_problems
+          ORDER BY id DESC
+      </select>
+    -->
+    <!-- TODO insert 구현 예시입니다.
+      <insert id="insert" parameterType="com.acorn.elearning.exam.model.AiExamProblem" useGeneratedKeys="true" keyProperty="id">
+          INSERT INTO ai_exam_problems (/* writable columns */)
+          VALUES (/* #{property} values */)
+      </insert>
+    -->
+    <!-- TODO update 구현 예시입니다.
+      <update id="update" parameterType="com.acorn.elearning.exam.model.AiExamProblem">
+          UPDATE ai_exam_problems
+          SET /* changed columns = #{property} */
+          WHERE id = #{id}
+      </update>
+    -->
+</mapper>

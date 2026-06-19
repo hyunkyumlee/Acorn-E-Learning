@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.community.mapper.CommunityPostMapper">
+    <!-- TODO resultMap 구현 예시입니다.
+      <resultMap id="CommunityPostResultMap" type="com.acorn.elearning.community.model.CommunityPost">
+          <id property="id" column="id" />
+          <result property="..." column="..." />
+      </resultMap>
+    -->
+    <!-- TODO findById 구현 예시입니다.
+      <select id="findById" parameterType="long" resultMap="CommunityPostResultMap">
+          SELECT /* DDL column list */
+          FROM community_posts
+          WHERE id = #{id}
+      </select>
+    -->
+    <!-- TODO findAll 구현 예시입니다.
+      <select id="findAll" resultMap="CommunityPostResultMap">
+          SELECT /* DDL column list */
+          FROM community_posts
+          ORDER BY id DESC
+      </select>
+    -->
+    <!-- TODO insert 구현 예시입니다.
+      <insert id="insert" parameterType="com.acorn.elearning.community.model.CommunityPost" useGeneratedKeys="true" keyProperty="id">
+          INSERT INTO community_posts (/* writable columns */)
+          VALUES (/* #{property} values */)
+      </insert>
+    -->
+    <!-- TODO update 구현 예시입니다.
+      <update id="update" parameterType="com.acorn.elearning.community.model.CommunityPost">
+          UPDATE community_posts
+          SET /* changed columns = #{property} */
+          WHERE id = #{id}
+      </update>
+    -->
+</mapper>
