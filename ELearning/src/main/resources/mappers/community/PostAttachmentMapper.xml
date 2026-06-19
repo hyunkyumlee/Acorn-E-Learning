@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.community.mapper.PostAttachmentMapper">
+    <!-- TODO resultMap 구현 예시입니다.
+      <resultMap id="PostAttachmentResultMap" type="com.acorn.elearning.community.model.PostAttachment">
+          <id property="id" column="id" />
+          <result property="..." column="..." />
+      </resultMap>
+    -->
+    <!-- TODO findById 구현 예시입니다.
+      <select id="findById" parameterType="long" resultMap="PostAttachmentResultMap">
+          SELECT /* DDL column list */
+          FROM post_attachments
+          WHERE id = #{id}
+      </select>
+    -->
+    <!-- TODO findAll 구현 예시입니다.
+      <select id="findAll" resultMap="PostAttachmentResultMap">
+          SELECT /* DDL column list */
+          FROM post_attachments
+          ORDER BY id DESC
+      </select>
+    -->
+    <!-- TODO insert 구현 예시입니다.
+      <insert id="insert" parameterType="com.acorn.elearning.community.model.PostAttachment" useGeneratedKeys="true" keyProperty="id">
+          INSERT INTO post_attachments (/* writable columns */)
+          VALUES (/* #{property} values */)
+      </insert>
+    -->
+    <!-- TODO update 구현 예시입니다.
+      <update id="update" parameterType="com.acorn.elearning.community.model.PostAttachment">
+          UPDATE post_attachments
+          SET /* changed columns = #{property} */
+          WHERE id = #{id}
+      </update>
+    -->
+</mapper>

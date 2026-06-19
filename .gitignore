@@ -33,6 +33,7 @@ logs/
 *.env
 .env
 .env.*
+!.env.example
 application-local.yml
 application-local.yaml
 application-local.properties
@@ -54,3 +55,7 @@ hs_err_pid*
 replay_pid*
 /.omo
 /.lazyweb
+/outputs
+docs/design-qa.md
+ELearning/AGENTS.md
+ELearning/SKELETON_PROMPT.md

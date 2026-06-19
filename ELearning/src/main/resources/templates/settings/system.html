@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>시스템 설정 | Knowva</title>
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/settings.css}">
+</head>
+<body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="page-shell settings-screen">
+    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>시스템 설정</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
+    <section class="panel"><h2>Route contract</h2><p>View name: <code>settings/system</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p><form method="post"><input type="hidden" name="_csrf" value="TODO-CSRF"><input type="hidden" name="idempotencyToken" value="TODO-IDEMPOTENCY"><button class="button primary" type="submit">Submit</button></form></section>
+  </main>
+</body>
+</html>
