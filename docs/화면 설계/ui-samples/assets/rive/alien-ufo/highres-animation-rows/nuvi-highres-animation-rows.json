@@ -1,0 +1,543 @@
+{
+  "name": "Nuvi High-Resolution Animation Rows",
+  "cell": {
+    "width": 512,
+    "height": 512
+  },
+  "columns": 8,
+  "rows": [
+    {
+      "id": "idle",
+      "label": "Idle",
+      "index": 0,
+      "frames": 6,
+      "sourceRow": 0,
+      "rowPng": "rows/nuvi-idle.png",
+      "rowWebp": "rows/nuvi-idle.webp",
+      "note": "subtle breathing/blink loop",
+      "extraction": {
+        "source_size": [
+          1706,
+          922
+        ],
+        "key": "#EA0BCF",
+        "scale": 1.3274074074074074
+      },
+      "postprocess": {
+        "reExtractedFromDecoded": true,
+        "segmentation": "magenta-key x-projection spans",
+        "xPivotLocked": true,
+        "targetHeight": 410,
+        "scale": 1.3311688311688312,
+        "spans": [
+          [
+            27,
+            286
+          ],
+          [
+            303,
+            561
+          ],
+          [
+            586,
+            844
+          ],
+          [
+            862,
+            1121
+          ],
+          [
+            1138,
+            1396
+          ],
+          [
+            1413,
+            1672
+          ]
+        ],
+        "targetOffsetsPx": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "id": "move-right",
+      "label": "Move Right",
+      "index": 1,
+      "frames": 8,
+      "sourceRow": 1,
+      "rowPng": "rows/nuvi-move-right.png",
+      "rowWebp": "rows/nuvi-move-right.webp",
+      "note": "directional movement to the right",
+      "extraction": {
+        "source_size": [
+          1859,
+          846
+        ],
+        "key": "#F005DA",
+        "scale": 1.604776119402985
+      },
+      "postprocess": {
+        "reExtractedFromDecoded": true,
+        "segmentation": "magenta-key x-projection spans",
+        "xPivotLocked": false,
+        "targetHeight": 404,
+        "scale": 1.6224899598393574,
+        "spans": [
+          [
+            18,
+            218
+          ],
+          [
+            246,
+            448
+          ],
+          [
+            479,
+            680
+          ],
+          [
+            707,
+            904
+          ],
+          [
+            940,
+            1142
+          ],
+          [
+            1167,
+            1364
+          ],
+          [
+            1396,
+            1595
+          ],
+          [
+            1628,
+            1831
+          ]
+        ],
+        "targetOffsetsPx": [
+          [
+            -0.5,
+            7
+          ],
+          [
+            0,
+            -1
+          ],
+          [
+            -0.5,
+            0.5
+          ],
+          [
+            -2,
+            4
+          ],
+          [
+            -2,
+            7
+          ],
+          [
+            -6,
+            1
+          ],
+          [
+            -6,
+            1.5
+          ],
+          [
+            -6.5,
+            3
+          ]
+        ]
+      }
+    },
+    {
+      "id": "move-left",
+      "label": "Move Left",
+      "index": 2,
+      "frames": 8,
+      "sourceRow": 2,
+      "rowPng": "rows/nuvi-move-left.png",
+      "rowWebp": "rows/nuvi-move-left.webp",
+      "note": "mirrored directional movement to the left",
+      "extraction": {
+        "source_size": [
+          1859,
+          846
+        ],
+        "key": "#F205D9",
+        "scale": 1.604776119402985
+      },
+      "postprocess": {
+        "reExtractedFromDecoded": true,
+        "segmentation": "magenta-key x-projection spans",
+        "xPivotLocked": false,
+        "targetHeight": 404,
+        "scale": 1.6224899598393574,
+        "spans": [
+          [
+            13,
+            213
+          ],
+          [
+            248,
+            450
+          ],
+          [
+            481,
+            682
+          ],
+          [
+            722,
+            919
+          ],
+          [
+            949,
+            1151
+          ],
+          [
+            1191,
+            1388
+          ],
+          [
+            1425,
+            1624
+          ],
+          [
+            1654,
+            1857
+          ]
+        ],
+        "targetOffsetsPx": [
+          [
+            -0.5,
+            7
+          ],
+          [
+            -1,
+            -1
+          ],
+          [
+            -0.5,
+            0.5
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            7
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            6,
+            1.5
+          ],
+          [
+            6.5,
+            3
+          ]
+        ]
+      }
+    },
+    {
+      "id": "failed",
+      "label": "Failed",
+      "index": 3,
+      "frames": 8,
+      "sourceRow": 5,
+      "rowPng": "rows/nuvi-failed.png",
+      "rowWebp": "rows/nuvi-failed.webp",
+      "note": "sad/blocked reaction",
+      "extraction": {
+        "source_size": [
+          1907,
+          825
+        ],
+        "key": "#EA10CC",
+        "scale": 1.452972972972973
+      },
+      "postprocess": {
+        "reExtractedFromDecoded": true,
+        "segmentation": "magenta-key x-projection spans",
+        "xPivotLocked": true,
+        "targetHeight": 408,
+        "scale": 1.457142857142857,
+        "spans": [
+          [
+            34,
+            250
+          ],
+          [
+            267,
+            480
+          ],
+          [
+            495,
+            706
+          ],
+          [
+            726,
+            936
+          ],
+          [
+            959,
+            1170
+          ],
+          [
+            1188,
+            1398
+          ],
+          [
+            1410,
+            1622
+          ],
+          [
+            1642,
+            1854
+          ]
+        ],
+        "targetOffsetsPx": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "id": "waiting",
+      "label": "Waiting",
+      "index": 4,
+      "frames": 6,
+      "sourceRow": 6,
+      "rowPng": "rows/nuvi-waiting.png",
+      "rowWebp": "rows/nuvi-waiting.webp",
+      "note": "expectant input/approval state",
+      "extraction": {
+        "source_size": [
+          2172,
+          724
+        ],
+        "key": "#F006D7",
+        "scale": 1.1750819672131148
+      },
+      "postprocess": {
+        "reExtractedFromDecoded": true,
+        "segmentation": "magenta-key x-projection spans",
+        "xPivotLocked": true,
+        "targetHeight": 412,
+        "scale": 1.177142857142857,
+        "spans": [
+          [
+            52,
+            365
+          ],
+          [
+            405,
+            718
+          ],
+          [
+            753,
+            1066
+          ],
+          [
+            1106,
+            1417
+          ],
+          [
+            1452,
+            1765
+          ],
+          [
+            1804,
+            2117
+          ]
+        ],
+        "targetOffsetsPx": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "id": "review",
+      "label": "Review",
+      "index": 5,
+      "frames": 6,
+      "sourceRow": 8,
+      "rowPng": "rows/nuvi-review.png",
+      "rowWebp": "rows/nuvi-review.webp",
+      "note": "focused review/inspection state",
+      "extraction": {
+        "source_size": [
+          1659,
+          948
+        ],
+        "key": "#EE06CE",
+        "scale": 1.1946666666666665
+      },
+      "postprocess": {
+        "reExtractedFromDecoded": true,
+        "segmentation": "magenta-key x-projection spans",
+        "xPivotLocked": true,
+        "targetHeight": 412,
+        "scale": 1.2046783625730995,
+        "spans": [
+          [
+            43,
+            304
+          ],
+          [
+            313,
+            564
+          ],
+          [
+            577,
+            821
+          ],
+          [
+            829,
+            1069
+          ],
+          [
+            1081,
+            1330
+          ],
+          [
+            1344,
+            1606
+          ]
+        ],
+        "targetOffsetsPx": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    }
+  ],
+  "atlas": "nuvi-highres-atlas.png",
+  "source": "Derived from hatch-pet Nuvi rows 0,1,2,5,6,8; excluded rows 3,4,7 for drift.",
+  "postprocess": {
+    "rowsReExtractedFromDecoded": [
+      "idle",
+      "move-right",
+      "move-left",
+      "failed",
+      "waiting",
+      "review"
+    ],
+    "nonDirectionalXPivotLocked": [
+      "failed",
+      "idle",
+      "review",
+      "waiting"
+    ],
+    "directionalRowsMotionOffsetsPreserved": [
+      "move-left",
+      "move-right"
+    ],
+    "reason": "repair left-clipped frames, restore glass, and remove magenta chroma residue"
+  }
+}
