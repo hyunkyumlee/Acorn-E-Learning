@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alien UFO State Demo</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    body.ufo-state-page {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 248, 250, 0.98) 46%, rgba(238, 250, 255, 0.96) 100%);
+      color: var(--ink);
+    }
+
+    .ufo-state-shell {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 100dvh;
+      padding: 28px;
+    }
+
+    .ufo-state-layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.92fr) minmax(340px, 0.64fr);
+      gap: 34px;
+      align-items: center;
+      min-height: calc(100dvh - 124px);
+      padding: 28px 4vw 42px;
+    }
+
+    .ufo-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: min(68vw, 640px);
+      overflow: hidden;
+      border: 1px solid rgba(28, 176, 246, 0.18);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(238, 250, 255, 0.76)),
+        var(--soft);
+      box-shadow: var(--shadow);
+      isolation: isolate;
+    }
+
+    .ufo-stage::before {
+      content: "";
+      position: absolute;
+      inset: 26px;
+      border: 1px solid rgba(28, 176, 246, 0.12);
+      border-radius: var(--radius);
+      background-image:
+        linear-gradient(rgba(28, 176, 246, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(28, 176, 246, 0.08) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+      pointer-events: none;
+    }
+
+    .ufo-mascot {
+      position: relative;
+      z-index: 1;
+      width: min(76vw, 570px);
+      aspect-ratio: 1;
+      animation: ufo-idle-float 3.2s var(--kv-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) infinite;
+      will-change: transform;
+    }
+
+    .ufo-mascot img {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .ufo-state-expression {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0) scale(0.985);
+      transition:
+        opacity 260ms var(--kv-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+        transform 360ms var(--kv-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+      will-change: opacity, transform;
+    }
+
+    .ufo-state-base {
+      opacity: 1;
+      transition: opacity 220ms var(--kv-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+      will-change: opacity;
+    }
+
+    .ufo-mascot.is-reacting .ufo-state-base {
+      opacity: 0;
+    }
+
+    .ufo-mascot.is-reacting .ufo-state-expression {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    .ufo-shadow {
+      position: absolute;
+      z-index: 0;
+      bottom: 13%;
+      width: min(45vw, 360px);
+      height: 42px;
+      border-radius: 999px;
+      background: rgba(6, 19, 31, 0.11);
+      filter: blur(18px);
+      transform: translate3d(0, 0, 0);
+      animation: ufo-shadow-breathe 3.2s var(--kv-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) infinite;
+    }
+
+    .ufo-control-panel {
+      display: grid;
+      gap: 22px;
+      align-content: center;
+      max-width: 560px;
+    }
+
+    .ufo-control-panel h1 {
+      margin: 0;
+      color: var(--space);
+      font-size: clamp(34px, 4.4vw, 58px);
+      line-height: 1.04;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .ufo-control-panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.72;
+      word-break: keep-all;
+    }
+
+    .ufo-state-list {
+      display: grid;
+      gap: 10px;
+      margin: 4px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .ufo-state-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid rgba(208, 215, 222, 0.82);
+      padding: 10px 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .ufo-state-list code {
+      color: var(--space-2);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .ufo-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .ufo-controls .btn {
+      min-width: 96px;
+      transition:
+        transform 160ms var(--kv-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+        background 160ms var(--kv-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+        border-color 160ms var(--kv-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    }
+
+    .ufo-controls .btn:active {
+      transform: translateY(1px);
+    }
+
+    .ufo-controls .btn[aria-pressed="true"] {
+      border-color: rgba(28, 176, 246, 0.72);
+      background: rgba(28, 176, 246, 0.12);
+      color: #0c6b95;
+      box-shadow: none;
+    }
+
+    @keyframes ufo-idle-float {
+      0%,
+      100% {
+        transform: translate3d(0, -8px, 0) rotate(-0.8deg);
+      }
+      50% {
+        transform: translate3d(0, 8px, 0) rotate(0.8deg);
+      }
+    }
+
+    @keyframes ufo-shadow-breathe {
+      0%,
+      100% {
+        opacity: 0.76;
+        transform: scaleX(0.9);
+      }
+      50% {
+        opacity: 0.48;
+        transform: scaleX(1.06);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .ufo-state-shell {
+        padding: 18px;
+      }
+
+      .ufo-state-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        min-height: auto;
+        padding: 22px 0 34px;
+      }
+
+      .ufo-stage {
+        min-height: 420px;
+      }
+
+      .ufo-control-panel {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .ufo-state-shell {
+        padding: 14px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .nav {
+        display: none;
+      }
+
+      .ufo-stage {
+        min-height: 360px;
+      }
+
+      .ufo-mascot {
+        width: min(92vw, 380px);
+      }
+
+      .ufo-control-panel h1 {
+        font-size: 32px;
+      }
+
+      .ufo-controls .btn {
+        flex: 1 1 120px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ufo-mascot,
+      .ufo-shadow {
+        animation: none;
+      }
+
+      .ufo-state-base,
+      .ufo-state-expression,
+      .ufo-controls .btn {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body class="sample-page ufo-state-page">
+  <div class="ufo-state-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-title"><strong>Knowva</strong><span>Alien UFO States</span></span>
+      </a>
+      <nav class="nav" aria-label="sample navigation">
+        <a class="active" href="#">PNG States</a>
+        <a href="./rive-mascot-bridge.html">Rive Bridge</a>
+      </nav>
+    </header>
+
+    <main class="ufo-state-layout">
+      <section class="ufo-stage" aria-label="Alien UFO animation preview">
+        <div class="ufo-shadow" aria-hidden="true"></div>
+        <div class="ufo-mascot" id="ufo-mascot" aria-live="polite">
+          <img
+            class="ufo-state-base"
+            src="./assets/rive/alien-ufo/generated-states/alien-ufo-base-state.png"
+            width="1254"
+            height="1254"
+            alt="기본 상태의 초록 외계인 UFO 캐릭터">
+          <img
+            class="ufo-state-expression"
+            src="./assets/rive/alien-ufo/generated-states/alien-ufo-expression-state.png"
+            width="1254"
+            height="1254"
+            alt="활짝 웃는 표정의 초록 외계인 UFO 캐릭터">
+        </div>
+      </section>
+
+      <section class="ufo-control-panel" aria-labelledby="ufo-title">
+        <span class="eyebrow"><i class="dot"></i> PNG state pair</span>
+        <h1 id="ufo-title">기본 상태와 표정 상태를 자연스럽게 전환</h1>
+        <p>두 PNG를 같은 좌표에 겹쳐 두고 opacity만 전환한다. idle bob은 wrapper transform으로만 처리해서 캐릭터 이미지 자체는 흔들리지 않는다.</p>
+        <ul class="ufo-state-list" aria-label="generated PNG files">
+          <li><span>base</span><code>alien-ufo-base-state.png</code></li>
+          <li><span>expression</span><code>alien-ufo-expression-state.png</code></li>
+        </ul>
+        <div class="ufo-controls" aria-label="state controls">
+          <button class="btn primary" type="button" data-state="loop" aria-pressed="true">자동 루프</button>
+          <button class="btn" type="button" data-state="base" aria-pressed="false">기본</button>
+          <button class="btn" type="button" data-state="expression" aria-pressed="false">표정</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const mascot = document.getElementById("ufo-mascot");
+    const buttons = Array.from(document.querySelectorAll("[data-state]"));
+    let loopTimer = null;
+    let expressionTimer = null;
+
+    function setPressed(mode) {
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.state === mode));
+        button.classList.toggle("primary", button.dataset.state === mode);
+      });
+    }
+
+    function clearTimers() {
+      window.clearInterval(loopTimer);
+      window.clearTimeout(expressionTimer);
+      loopTimer = null;
+      expressionTimer = null;
+    }
+
+    function setReaction(active) {
+      mascot.classList.toggle("is-reacting", active);
+    }
+
+    function pulseExpression() {
+      setReaction(true);
+      window.clearTimeout(expressionTimer);
+      expressionTimer = window.setTimeout(() => setReaction(false), 1040);
+    }
+
+    function setMode(mode) {
+      clearTimers();
+      setPressed(mode);
+
+      if (mode === "base") {
+        setReaction(false);
+        return;
+      }
+
+      if (mode === "expression") {
+        setReaction(true);
+        return;
+      }
+
+      pulseExpression();
+      loopTimer = window.setInterval(pulseExpression, 3200);
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.state));
+    });
+
+    setMode("loop");
+  </script>
+</body>
+</html>
