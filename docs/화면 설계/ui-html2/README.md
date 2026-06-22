@@ -33,8 +33,8 @@ Figma `사용자` 파일, Notion `화면 설계`, `요구사항 명세서`, `디
 | SR-007 | `screens/learning/review.html`, `screens/learning/review-list.html` | 오답 복습 요약, 3열 오답 목록, 해설, 다시 풀기 |
 | SR-008 | `screens/exam/coding-test.html` | 응시 조건, split editor, 제출, AI 대기, AI 실패/재시도, 결과 |
 | SR-009 | `screens/analysis/index.html` | 기본/구매유도/Premium 분석, 분석 실패 |
-| SR-010 | `screens/community/index.html`, `screens/community/board.html`, `screens/community/detail.html`, `screens/community/write.html`, `screens/community/edit.html`, `screens/community/profile.html` | 자유/질문/공부 일지 게시판, 글 목록, 상세, 댓글/대댓글, 신고, 작성/수정, 첨부, 커뮤니티 프로필 |
-| SR-011 | `screens/payment/index.html`, `screens/payment/card.html`, `screens/payment/bank.html`, `screens/payment/complete.html`, `screens/payment/recommendations.html` | 결제 수단 선택, 신용카드, 무통장 입금, 결제 완료, 과목 콘텐츠 추천 진입 |
+| SR-010 | `screens/community/index.html`, `screens/community/board.html`, `screens/community/detail.html`, `screens/community/write.html`, `screens/community/edit.html`, `screens/community/profile.html`, `screens/community/recommendations.html` | 자유/질문/공부 일지 게시판, 글 목록, 상세, 댓글/대댓글, 신고, 작성/수정, 첨부, 커뮤니티 프로필, 과목 콘텐츠 추천 |
+| SR-011 | `screens/payment/index.html`, `screens/payment/card.html`, `screens/payment/bank.html`, `screens/payment/complete.html` | 결제 수단 선택, 신용카드, 무통장 입금, 결제 완료 |
 | SR-012 | `screens/mypage/index.html` | 출석, 시험, 저장, 좋아요, 작성 글 |
 | SR-013 | `screens/admin/login.html`, `screens/admin/dashboard.html`, `screens/admin/stats.html`, `screens/admin/courses.html`, `screens/admin/theory.html`, `screens/admin/problems.html`, `screens/admin/users.html`, `screens/admin/community.html`, `screens/admin/reports.html`, `screens/admin/notices.html` | 관리자 로그인, 홈, 통계, 학습 콘텐츠/사용자/커뮤니티/신고/공지 관리 |
 | SR-014 | `screens/ranking/index.html` | 출석 제외 통합 랭킹 |

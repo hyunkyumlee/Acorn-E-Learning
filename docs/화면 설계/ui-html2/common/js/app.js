@@ -26,7 +26,7 @@
     ["sr-011-card", "SR-011", "신용카드 결제", "screens/payment/card.html", "analysis", "카드 정보 입력, 주문 정보"],
     ["sr-011-bank", "SR-011", "무통장 입금", "screens/payment/bank.html", "analysis", "계좌 안내, 입금자 정보"],
     ["sr-011-complete", "SR-011", "결제 완료", "screens/payment/complete.html", "analysis", "결제 완료 후 홈 이동"],
-    ["sr-011-recommend", "SR-011", "콘텐츠 추천", "screens/payment/recommendations.html", "analysis", "과목 영상, 기사, 개발 콘텐츠 추천"],
+    ["sr-010-recommend", "SR-010", "콘텐츠 추천", "screens/community/recommendations.html", "community", "과목 영상, 기사, 개발 콘텐츠 추천"],
     ["sr-012", "SR-012", "마이페이지", "screens/mypage/index.html", "mypage", "학습/커뮤니티 활동 요약"],
     ["sr-013", "SR-013", "관리자 홈", "screens/admin/dashboard.html", "admin", "운영 요약, 빠른 이동, 최근 항목"],
     ["sr-013-login", "SR-013", "관리자 로그인", "screens/admin/login.html", "admin", "ROLE_ADMIN 로그인"],
@@ -1290,14 +1290,14 @@ score > 60  // 60점 제외</pre>
         <div class="figma-payment-history"><span>완료 상태</span><strong>Premium 상세 분석 접근 가능</strong><b>dummy</b></div>
         <div class="button-row">
           ${figmaAction("AI 분석 보기", "screens/analysis/index.html", "primary")}
-          ${figmaAction("추천 콘텐츠", "screens/payment/recommendations.html")}
+          ${figmaAction("마이페이지", "screens/mypage/index.html")}
         </div>
       </section>`, "2 / 2");
   }
 
   function recommendPage() {
-    const resourceColumn = (title, rows) => `<article class="figma-resource-column"><h2>${title}</h2>${rows.map((row) => `<a href="${href("screens/payment/recommendations.html")}"><span></span><strong>${row}</strong><small>추천 콘텐츠</small></a>`).join("")}</article>`;
-    return shell("analysis", `
+    const resourceColumn = (title, rows) => `<article class="figma-resource-column"><h2>${title}</h2>${rows.map((row) => `<a href="${href("screens/community/recommendations.html")}"><span></span><strong>${row}</strong><small>추천 콘텐츠</small></a>`).join("")}</article>`;
+    return shell("community", `
       <section class="figma-resource-page">
         ${figmaCourseRail("java")}
         <main>
@@ -1910,7 +1910,7 @@ score > 60  // 60점 제외</pre>
     "sr-011-card": paymentCardPage,
     "sr-011-bank": paymentBankPage,
     "sr-011-complete": paymentCompletePage,
-    "sr-011-recommend": recommendPage,
+    "sr-010-recommend": recommendPage,
     "sr-013": adminHomePage,
     "sr-013-login": adminLoginPage,
     "sr-013-stats": adminStatsPage,
