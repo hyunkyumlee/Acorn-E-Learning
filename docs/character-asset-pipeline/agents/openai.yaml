@@ -1,4 +1,0 @@
-interface:
-  display_name: "Character Asset Pipeline"
-  short_description: "Create polished mascot animation assets"
-  default_prompt: "Use $character-asset-pipeline to turn this character image into polished mascot animation assets."
