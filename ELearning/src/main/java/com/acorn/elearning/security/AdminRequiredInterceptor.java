@@ -9,12 +9,26 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class AdminRequiredInterceptor implements HandlerInterceptor {
     private final boolean enforce;
-    public AdminRequiredInterceptor(@Value("${knowva.security.enforce:false}") boolean enforce) { this.enforce = enforce; }
+
+    public AdminRequiredInterceptor(@Value("${knowva.security.enforce:false}") boolean enforce) {
+        this.enforce = enforce;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        Object user = request.getSession(false) == null ? null : request.getSession(false).getAttribute(SessionUser.SESSION_KEY);
-        if (!enforce || user instanceof SessionUser sessionUser && sessionUser.admin()) return true;
+        SessionUser sessionUser = currentUser(request);
+        if (!enforce || sessionUser != null && sessionUser.admin()) {
+            return true;
+        }
         response.sendRedirect("/error/403");
         return false;
+    }
+
+    private SessionUser currentUser(HttpServletRequest request) {
+        if (request.getSession(false) == null) {
+            return null;
+        }
+        Object user = request.getSession(false).getAttribute(SessionUser.SESSION_KEY);
+        return user instanceof SessionUser sessionUser ? sessionUser : null;
     }
 }

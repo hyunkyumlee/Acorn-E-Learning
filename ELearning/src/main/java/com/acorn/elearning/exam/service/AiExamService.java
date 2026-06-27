@@ -11,6 +11,6 @@ public class AiExamService {
         // ExamSession session = ExamSession.start(userId, grant.expiresAt());
         // examSessionMapper.insert(session);
         // return Map.of("exam", ExamSessionResponse.from(session));
-        return Map.of("action", action, "status", "SKELETON");
+        return Map.of("action", action, "provider", "openai", "status", "SKELETON");
     }
 }

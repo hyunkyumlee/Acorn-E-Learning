@@ -1,6 +1,7 @@
 package com.acorn.elearning.auth.controller;
 
 import com.acorn.elearning.common.response.ApiResponse;
+import com.acorn.elearning.security.SessionUser;
 import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,12 @@ public class AuthApiController {
         // LoginForm form = request body 또는 form binding 값으로 받으세요.
         // UserSessionResponse response = authService.login(sessionUser, form);
         // return ApiResponse.success(response);
-        return ok("AUTH-002");
+        return ApiResponse.success(Map.of(
+                "endpointId", "AUTH-002",
+                "status", "SKELETON",
+                "redirectUrlByRole", Map.of(
+                        SessionUser.ROLE_USER, "/learning",
+                        SessionUser.ROLE_ADMIN, "/admin")));
     }
 
     @PostMapping("/api/auth/logout")

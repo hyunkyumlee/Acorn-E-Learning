@@ -25,7 +25,6 @@ public class ExamController {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "exam/coding-test"; }
         // SessionUser sessionUser = currentSessionUser();
-        // aiExamService.create(sessionUser, form);
         // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
         return "redirect:/exams/coding-test";
     }
@@ -35,7 +34,6 @@ public class ExamController {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "/exams/coding-test"; }
         // SessionUser sessionUser = currentSessionUser();
-        // aiGradingService.saveAnswer(sessionUser, form, examId, aiProblemId);
         // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
         return "redirect:/exams/coding-test";
     }
@@ -45,17 +43,15 @@ public class ExamController {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "/exams/{examId}/result"; }
         // SessionUser sessionUser = currentSessionUser();
-        // aiGradingService.submit(sessionUser, form, examId);
         // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
         return "redirect:/exams/{examId}/result";
     }
 
-    @PostMapping("/exams/{examId}/retry-grading")
-    public String retryGrading(@PathVariable Long examId) {
+    @PostMapping("/exams/{examId}/retry-execution")
+    public String retryExecution(@PathVariable Long examId) {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "/exams/{examId}/result"; }
         // SessionUser sessionUser = currentSessionUser();
-        // aiGradingService.retryGrading(sessionUser, form, examId);
         // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
         return "redirect:/exams/{examId}/result";
     }

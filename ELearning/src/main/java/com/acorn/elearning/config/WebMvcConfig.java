@@ -19,8 +19,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(guestOnlyInterceptor).addPathPatterns("/login", "/signup", "/admin/login");
+        registry.addInterceptor(guestOnlyInterceptor).addPathPatterns("/login", "/signup");
         registry.addInterceptor(loginRequiredInterceptor).addPathPatterns("/learning/**", "/exams/**", "/analysis/**", "/community/**", "/payments/**", "/mypage", "/ranking", "/settings/**");
-        registry.addInterceptor(adminRequiredInterceptor).addPathPatterns("/admin/**").excludePathPatterns("/admin/login");
+        registry.addInterceptor(adminRequiredInterceptor).addPathPatterns("/admin/**");
     }
 }
