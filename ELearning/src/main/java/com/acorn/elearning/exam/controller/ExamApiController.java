@@ -43,7 +43,6 @@ public class ExamApiController {
         // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
         // SessionUser sessionUser = currentSessionUser();
         // SaveExamAnswerForm form = request body 또는 form binding 값으로 받으세요.
-        // ExamSubmitResponse response = aiGradingService.answer(sessionUser, form, examId, aiProblemId);
         // return ApiResponse.success(response);
         return ok("EXAM-004");
     }
@@ -53,17 +52,14 @@ public class ExamApiController {
         // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
         // SessionUser sessionUser = currentSessionUser();
         // ExamSubmitForm form = request body 또는 form binding 값으로 받으세요.
-        // ExamSubmitResponse response = aiGradingService.submit(sessionUser, form, examId);
         // return ApiResponse.success(response);
         return ok("EXAM-005");
     }
 
-    @PostMapping("/api/exams/{examId}/retry-grading")
-    public ApiResponse<Map<String, Object>> retry(@PathVariable Long examId) {
+    @PostMapping("/api/exams/{examId}/retry-execution")
+    public ApiResponse<Map<String, Object>> retryExecution(@PathVariable Long examId) {
         // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
         // SessionUser sessionUser = currentSessionUser();
-        // AnalysisRetryForm form = request body 또는 form binding 값으로 받으세요.
-        // ExamStatusResponse response = aiGradingService.retry(sessionUser, form, examId);
         // return ApiResponse.success(response);
         return ok("EXAM-006");
     }
@@ -72,7 +68,6 @@ public class ExamApiController {
     public ApiResponse<Map<String, Object>> result(@PathVariable Long examId) {
         // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
         // SessionUser sessionUser = currentSessionUser();
-        // ExamResultResponse response = aiGradingService.result(sessionUser, examId);
         // return ApiResponse.success(response);
         return ok("EXAM-007");
     }
@@ -81,7 +76,6 @@ public class ExamApiController {
     public ApiResponse<Map<String, Object>> status(@PathVariable Long examId) {
         // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
         // SessionUser sessionUser = currentSessionUser();
-        // ExamStatusResponse response = aiGradingService.status(sessionUser, examId);
         // return ApiResponse.success(response);
         return ok("EXAM-008");
     }

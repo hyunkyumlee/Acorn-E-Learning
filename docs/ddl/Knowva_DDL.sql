@@ -1,5 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
+  Source: Notion DB 명세 v1.4
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -16,9 +17,11 @@
   실행 기준
   - Workbench connection의 Default Schema는 비워둔다.
   - 이 script는 elearning schema를 생성한 뒤 USE elearning을 수행한다.
+  - 전체 실행 시 elearning schema 안의 기존 Knowva table을 모두 DROP TABLE IF EXISTS 후 다시 생성한다.
   - MySQL 8 기준으로 별도 CREATE SEQUENCE 객체는 만들지 않는다.
     각 table의 BIGINT UNSIGNED PK에 AUTO_INCREMENT를 지정해 sequence 역할을 처리한다.
   - FK 기본 정책은 DB 명세 기준 ON DELETE RESTRICT, ON UPDATE CASCADE다.
+  - AI 시험 정답/오답 판정은 AI 점수가 아니라 testcase 실행 결과로 저장한다.
 */
 
 SET NAMES utf8mb4;
@@ -510,7 +513,7 @@ CREATE TABLE ai_exam_problems (
   exam_id BIGINT UNSIGNED NOT NULL,
   problem_no TINYINT UNSIGNED NOT NULL,
   prompt TEXT NOT NULL,
-  grading_criteria TEXT NULL,
+  test_case_spec JSON NULL,
   ai_raw_response JSON NULL,
   status VARCHAR(30) NOT NULL DEFAULT 'GENERATED',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -526,10 +529,10 @@ CREATE TABLE exam_answers (
   exam_id BIGINT UNSIGNED NOT NULL,
   ai_problem_id BIGINT UNSIGNED NOT NULL,
   answer_text MEDIUMTEXT NOT NULL,
-  ai_score DECIMAL(5,2) NULL,
+  passed_case_count INT UNSIGNED NOT NULL DEFAULT 0,
   is_correct TINYINT(1) NOT NULL DEFAULT 0,
-  ai_feedback TEXT NULL,
-  ai_raw_result JSON NULL,
+  ai_review TEXT NULL,
+  test_case_result JSON NULL,
   submitted_at DATETIME NULL,
   graded_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -1,5 +1,6 @@
 package com.acorn.elearning.auth.service;
 
+import com.acorn.elearning.security.SessionUser;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,11 @@ public class AuthService {
         // UserCredential credential = userCredentialMapper.findByEmail(form.getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.AUTH_REQUIRED));
         // SessionUser sessionUser = sessionService.createSessionUser(credential.userId());
         // return Map.of("session", sessionUser);
-        return Map.of("action", action, "status", "SKELETON");
+        return Map.of(
+                "action", action,
+                "status", "SKELETON",
+                "redirectUrlByRole", Map.of(
+                        SessionUser.ROLE_USER, "/learning",
+                        SessionUser.ROLE_ADMIN, "/admin"));
     }
 }

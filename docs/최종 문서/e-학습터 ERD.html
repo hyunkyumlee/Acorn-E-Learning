@@ -1,0 +1,2367 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Knowva ERD</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    @page { size: A4 landscape; margin: 13mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: #111827;
+      background: #fff;
+      font-size: 12px;
+    }
+    .page {
+      page-break-after: always;
+      min-height: 180mm;
+      padding: 0;
+    }
+    h1 { font-size: 24px; margin: 0 0 8px; color: #172033; }
+    h2 { font-size: 18px; margin: 0 0 12px; color: #163653; }
+    h3 { font-size: 12px; margin: 0 0 6px; color: #163653; }
+    .source { color: #4b5f76; font-size: 13px; margin-bottom: 22px; }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .summary-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #f8fafc;
+    }
+    .summary-card strong { display: block; color: #1f4e79; font-size: 11px; margin-bottom: 5px; }
+    .summary-card span { font-size: 18px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
+    th {
+      background: #1f4e79;
+      color: #fff;
+      text-align: left;
+      font-weight: 700;
+      padding: 7px 8px;
+      border: 1px solid #d6e1ee;
+    }
+    td {
+      padding: 6px 8px;
+      border: 1px solid #d6e1ee;
+      vertical-align: top;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+    .inventory td:nth-child(3), .inventory th:nth-child(3) { width: 80px; text-align: center; }
+    .inventory td:nth-child(2) { font-family: Menlo, Consolas, monospace; font-size: 11px; }
+    .diagram-box {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px;
+      min-height: 150mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #fff;
+    }
+    .full-diagram svg {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 150mm !important;
+    }
+    .section-diagram svg {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 150mm !important;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 12px;
+      align-items: start;
+    }
+    .table-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px;
+      page-break-inside: avoid;
+    }
+    .small-table {
+      table-layout: fixed;
+    }
+    .small-table th, .small-table td { font-size: 8.4px; padding: 3px 4px; }
+    .small-table th { background: #dbeafe; color: #0f172a; }
+    .small-table th:nth-child(1), .small-table td:nth-child(1) {
+      width: 31%;
+      white-space: nowrap;
+      overflow-wrap: normal;
+    }
+    .small-table th:nth-child(2), .small-table td:nth-child(2) {
+      width: 52%;
+      font-family: Menlo, Consolas, monospace;
+      font-size: 7.8px;
+      overflow-wrap: normal;
+    }
+    .small-table th:nth-child(3), .small-table td:nth-child(3) { width: 9%; text-align: center; }
+    .small-table th:nth-child(4), .small-table td:nth-child(4) { width: 8%; text-align: center; }
+    .fk-table th, .fk-table td { font-size: 10px; padding: 4px 6px; }
+    .callout {
+      border-left: 4px solid #1f4e79;
+      background: #f8fafc;
+      padding: 14px 18px;
+      margin-top: 14px;
+      border-radius: 4px;
+    }
+    .callout h2 { margin-bottom: 8px; }
+    .callout li { margin: 5px 0; }
+    code { font-family: Menlo, Consolas, monospace; color: #0f3f66; }
+    .two-col { columns: 2; column-gap: 24px; }
+    .compact td { padding: 4px 8px; }
+    .footer-note { color: #64748b; font-size: 11px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <h1>Knowva ERD</h1>
+    <p class="source">Source: Notion DB 명세 v1.4 Mermaid ERD. HTML 원본을 Mermaid로 렌더한 뒤 HeadlessChrome으로 PDF 내보냄.</p>
+    <div class="summary">
+      <div class="summary-card"><strong>Version</strong><span>v1.4</span></div>
+      <div class="summary-card"><strong>Tables</strong><span>40</span></div>
+      <div class="summary-card"><strong>Foreign Keys</strong><span>69</span></div>
+      <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
+    </div>
+    <table class="inventory compact">
+      <thead><tr><th>Table</th><th>PK</th><th>FK Count</th></tr></thead>
+      <tbody><tr><td>users</td><td>BIGINT user_id PK</td><td>0</td></tr>
+<tr><td>subjects</td><td>BIGINT subject_id PK</td><td>0</td></tr>
+<tr><td>curriculum_nodes</td><td>BIGINT node_id PK</td><td>2</td></tr>
+<tr><td>payment_products</td><td>BIGINT product_id PK</td><td>0</td></tr>
+<tr><td>user_credentials</td><td>BIGINT credential_id PK</td><td>1</td></tr>
+<tr><td>social_accounts</td><td>BIGINT social_account_id PK</td><td>1</td></tr>
+<tr><td>user_settings</td><td>BIGINT setting_id PK</td><td>1</td></tr>
+<tr><td>user_learning_profiles</td><td>BIGINT profile_id PK</td><td>2</td></tr>
+<tr><td>lessons</td><td>BIGINT lesson_id PK</td><td>2</td></tr>
+<tr><td>lesson_bookmarks</td><td>BIGINT bookmark_id PK</td><td>2</td></tr>
+<tr><td>level_test_questions</td><td>BIGINT question_id PK</td><td>1</td></tr>
+<tr><td>level_test_choices</td><td>BIGINT choice_id PK</td><td>1</td></tr>
+<tr><td>level_test_attempts</td><td>BIGINT attempt_id PK</td><td>2</td></tr>
+<tr><td>level_test_answers</td><td>BIGINT answer_id PK</td><td>3</td></tr>
+<tr><td>learning_progress</td><td>BIGINT progress_id PK</td><td>3</td></tr>
+<tr><td>practice_set_attempts</td><td>BIGINT set_attempt_id PK</td><td>2</td></tr>
+<tr><td>attendance_records</td><td>BIGINT attendance_id PK</td><td>2</td></tr>
+<tr><td>practice_problems</td><td>BIGINT problem_id PK</td><td>3</td></tr>
+<tr><td>problem_choices</td><td>BIGINT choice_id PK</td><td>1</td></tr>
+<tr><td>practice_submissions</td><td>BIGINT submission_id PK</td><td>3</td></tr>
+<tr><td>wrong_answers</td><td>BIGINT wrong_answer_id PK</td><td>3</td></tr>
+<tr><td>score_events</td><td>BIGINT score_event_id PK</td><td>2</td></tr>
+<tr><td>ranking_scores</td><td>BIGINT ranking_id PK</td><td>2</td></tr>
+<tr><td>exam_sessions</td><td>BIGINT exam_id PK</td><td>2</td></tr>
+<tr><td>user_level_unlocks</td><td>BIGINT unlock_id PK</td><td>3</td></tr>
+<tr><td>ai_exam_problems</td><td>BIGINT ai_problem_id PK</td><td>1</td></tr>
+<tr><td>exam_answers</td><td>BIGINT answer_id PK</td><td>2</td></tr>
+<tr><td>ai_analysis_reports</td><td>BIGINT report_id PK</td><td>2</td></tr>
+<tr><td>ai_request_logs</td><td>BIGINT ai_request_log_id PK</td><td>0</td></tr>
+<tr><td>community_posts</td><td>BIGINT post_id PK</td><td>2</td></tr>
+<tr><td>post_attachments</td><td>BIGINT attachment_id PK</td><td>2</td></tr>
+<tr><td>comments</td><td>BIGINT comment_id PK</td><td>3</td></tr>
+<tr><td>post_likes</td><td>BIGINT like_id PK</td><td>2</td></tr>
+<tr><td>post_scraps</td><td>BIGINT scrap_id PK</td><td>2</td></tr>
+<tr><td>reports</td><td>BIGINT report_id PK</td><td>2</td></tr>
+<tr><td>dummy_payments</td><td>BIGINT payment_id PK</td><td>2</td></tr>
+<tr><td>premium_grants</td><td>BIGINT grant_id PK</td><td>2</td></tr>
+<tr><td>notices</td><td>BIGINT notice_id PK</td><td>1</td></tr>
+<tr><td>admin_operation_logs</td><td>BIGINT log_id PK</td><td>1</td></tr>
+<tr><td>content_recommendations</td><td>BIGINT content_id PK</td><td>1</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="page diagram-page">
+    <h2>전체 ERD</h2>
+    <div class="diagram-box full-diagram"><pre class="mermaid">erDiagram
+    users {
+        BIGINT user_id PK
+        VARCHAR email UK
+        VARCHAR nickname UK
+        VARCHAR role
+        VARCHAR status
+        VARCHAR profile_image_url
+        DATETIME last_login_at
+        DATETIME withdrawn_at
+        DATETIME created_at
+    }
+    subjects {
+        BIGINT subject_id PK
+        VARCHAR subject_code UK
+        VARCHAR subject_name
+        VARCHAR description
+        INT sort_order
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    curriculum_nodes {
+        BIGINT node_id PK
+        BIGINT subject_id FK
+        BIGINT parent_node_id FK
+        VARCHAR level_code
+        VARCHAR node_type
+        TINYINT planet_no
+        VARCHAR title
+        VARCHAR description
+        INT sort_order
+    }
+    payment_products {
+        BIGINT product_id PK
+        VARCHAR product_code UK
+        VARCHAR product_name
+        DECIMAL price
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    user_credentials {
+        BIGINT credential_id PK
+        BIGINT user_id FK
+        VARCHAR password_hash
+        DATETIME password_updated_at
+        INT failed_login_count
+        DATETIME locked_until
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    social_accounts {
+        BIGINT social_account_id PK
+        BIGINT user_id FK
+        VARCHAR provider UK
+        VARCHAR provider_user_id UK
+        VARCHAR provider_email
+        BOOLEAN is_active
+        DATETIME connected_at
+        DATETIME disconnected_at
+    }
+    user_settings {
+        BIGINT setting_id PK
+        BIGINT user_id FK
+        VARCHAR theme
+        BOOLEAN notification_enabled
+        VARCHAR accessibility_mode
+        BOOLEAN reduced_motion_enabled
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    user_learning_profiles {
+        BIGINT profile_id PK
+        BIGINT user_id FK
+        BIGINT primary_subject_id FK
+        VARCHAR learning_goal
+        VARCHAR current_level_code
+        INT total_score
+        VARCHAR grade_code
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    lessons {
+        BIGINT lesson_id PK
+        BIGINT node_id FK
+        BIGINT created_by FK
+        VARCHAR title
+        VARCHAR summary
+        MEDIUMTEXT content
+        TEXT example_code
+        INT sort_order
+        BOOLEAN is_active
+    }
+    lesson_bookmarks {
+        BIGINT bookmark_id PK
+        BIGINT user_id FK
+        BIGINT lesson_id FK
+        DATETIME created_at
+    }
+    level_test_questions {
+        BIGINT question_id PK
+        BIGINT subject_id FK
+        TINYINT question_no
+        TEXT question_text
+        VARCHAR question_type
+        TEXT explanation
+        VARCHAR difficulty_code
+        BOOLEAN is_active
+    }
+    level_test_choices {
+        BIGINT choice_id PK
+        BIGINT question_id FK
+        VARCHAR choice_label UK
+        TEXT choice_text
+        BOOLEAN is_correct
+        INT sort_order
+    }
+    level_test_attempts {
+        BIGINT attempt_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        TINYINT total_count
+        TINYINT correct_count
+        VARCHAR result_level_code
+        VARCHAR status
+        DATETIME submitted_at
+        DATETIME created_at
+    }
+    level_test_answers {
+        BIGINT answer_id PK
+        BIGINT attempt_id FK
+        BIGINT question_id FK
+        BIGINT choice_id FK
+        VARCHAR submitted_answer
+        BOOLEAN is_correct
+        DATETIME created_at
+    }
+    learning_progress {
+        BIGINT progress_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        BIGINT node_id FK
+        BOOLEAN lesson_completed
+        BOOLEAN practice_passed
+        DECIMAL progress_rate
+        DATETIME completed_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    practice_set_attempts {
+        BIGINT set_attempt_id PK
+        BIGINT user_id FK
+        BIGINT node_id FK
+        TINYINT total_count
+        TINYINT correct_count
+        VARCHAR status
+        BOOLEAN passed
+        DATETIME completed_at
+        DATETIME created_at
+    }
+    attendance_records {
+        BIGINT attendance_id PK
+        BIGINT user_id FK
+        DATE attendance_date UK
+        BIGINT qualified_set_attempt_id FK
+        INT streak_count
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    practice_problems {
+        BIGINT problem_id PK
+        BIGINT subject_id FK
+        BIGINT node_id FK
+        BIGINT created_by FK
+        VARCHAR problem_type
+        TEXT question
+        TEXT answer_text
+        VARCHAR difficulty_code
+        BOOLEAN is_active
+        DATETIME created_at
+    }
+    problem_choices {
+        BIGINT choice_id PK
+        BIGINT problem_id FK
+        VARCHAR choice_label UK
+        TEXT choice_text
+        BOOLEAN is_correct
+        INT sort_order
+    }
+    practice_submissions {
+        BIGINT submission_id PK
+        BIGINT set_attempt_id FK
+        BIGINT user_id FK
+        BIGINT problem_id FK
+        VARCHAR submission_context UK
+        TEXT submitted_answer
+        BOOLEAN is_correct
+        BOOLEAN is_skipped
+        DATETIME solved_at
+        DATETIME created_at
+    }
+    wrong_answers {
+        BIGINT wrong_answer_id PK
+        BIGINT user_id FK
+        BIGINT problem_id FK
+        BIGINT last_submission_id FK
+        INT wrong_count
+        VARCHAR review_status
+        BOOLEAN retry_bonus_awarded
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    score_events {
+        BIGINT score_event_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR idempotency_key UK
+        VARCHAR source_type
+        BIGINT source_id
+        INT score_delta
+        VARCHAR reason_code
+        DATETIME created_at
+    }
+    ranking_scores {
+        BIGINT ranking_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR scope_type UK
+        VARCHAR scope_key UK
+        VARCHAR period_type UK
+        INT score
+        INT rank_no
+        DATETIME calculated_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    exam_sessions {
+        BIGINT exam_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR level_code
+        VARCHAR status
+        VARCHAR result_status
+        TINYINT total_problem_count
+        TINYINT correct_count
+        TINYINT retry_count
+    }
+    user_level_unlocks {
+        BIGINT unlock_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR level_code UK
+        BIGINT unlocked_by_exam_id FK
+        VARCHAR unlock_source
+        DATETIME unlocked_at
+        DATETIME created_at
+    }
+    ai_exam_problems {
+        BIGINT ai_problem_id PK
+        BIGINT exam_id FK
+        TINYINT problem_no UK
+        TEXT prompt
+        JSON test_case_spec
+        JSON ai_raw_response
+        VARCHAR status
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    exam_answers {
+        BIGINT answer_id PK
+        BIGINT exam_id FK
+        BIGINT ai_problem_id FK
+        MEDIUMTEXT answer_text
+        INT passed_case_count
+        BOOLEAN is_correct
+        TEXT ai_review
+        JSON test_case_result
+        DATETIME submitted_at
+    }
+    ai_analysis_reports {
+        BIGINT report_id PK
+        BIGINT user_id FK
+        BIGINT exam_id FK
+        VARCHAR status
+        TEXT free_summary
+        JSON premium_detail
+        VARCHAR analysis_error_code
+        TINYINT retry_count
+        DATETIME created_at
+    }
+    ai_request_logs {
+        BIGINT ai_request_log_id PK
+        VARCHAR target_type
+        BIGINT target_id
+        VARCHAR request_type
+        VARCHAR status
+        TINYINT retry_no
+        JSON request_payload
+    }
+    community_posts {
+        BIGINT post_id PK
+        BIGINT writer_id FK
+        BIGINT subject_id FK
+        VARCHAR board_type
+        VARCHAR title
+        MEDIUMTEXT content
+        INT like_count
+        INT comment_count
+        INT scrap_count
+    }
+    post_attachments {
+        BIGINT attachment_id PK
+        BIGINT post_id FK
+        BIGINT uploader_id FK
+        VARCHAR stored_name UK
+        VARCHAR original_name
+        VARCHAR file_path
+        BIGINT file_size
+        DATETIME created_at
+    }
+    comments {
+        BIGINT comment_id PK
+        BIGINT post_id FK
+        BIGINT parent_comment_id FK
+        BIGINT writer_id FK
+        TEXT content
+        VARCHAR status
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+    }
+    post_likes {
+        BIGINT like_id PK
+        BIGINT post_id FK
+        BIGINT user_id FK
+        DATETIME created_at
+    }
+    post_scraps {
+        BIGINT scrap_id PK
+        BIGINT post_id FK
+        BIGINT user_id FK
+        DATETIME created_at
+    }
+    reports {
+        BIGINT report_id PK
+        BIGINT reporter_id FK
+        BIGINT handled_by FK
+        VARCHAR target_type
+        BIGINT target_id
+        VARCHAR reason_code
+        VARCHAR status
+        DATETIME handled_at
+        DATETIME created_at
+    }
+    dummy_payments {
+        BIGINT payment_id PK
+        VARCHAR order_no UK
+        BIGINT user_id FK
+        BIGINT product_id FK
+        VARCHAR payment_method
+        VARCHAR payment_status
+        DECIMAL amount
+        DATETIME paid_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    premium_grants {
+        BIGINT grant_id PK
+        BIGINT user_id FK
+        BIGINT payment_id FK
+        VARCHAR grant_type
+        VARCHAR status
+        DATETIME granted_at
+        DATETIME expires_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    notices {
+        BIGINT notice_id PK
+        BIGINT writer_id FK
+        VARCHAR title
+        MEDIUMTEXT content
+        VARCHAR status
+        DATETIME published_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    admin_operation_logs {
+        BIGINT log_id PK
+        BIGINT admin_id FK
+        VARCHAR action_type
+        VARCHAR target_type
+        BIGINT target_id
+        VARCHAR result_status
+        DATETIME created_at
+    }
+    content_recommendations {
+        BIGINT content_id PK
+        BIGINT subject_id FK
+        VARCHAR title
+        VARCHAR url
+        VARCHAR content_type
+        VARCHAR recommendation_slot
+        BOOLEAN is_active
+        DATETIME created_at
+    }
+    subjects ||--o{ curriculum_nodes : subject
+    curriculum_nodes ||--o{ curriculum_nodes : parent_node
+    users ||--o{ user_credentials : user
+    users ||--o{ social_accounts : user
+    users ||--o{ user_settings : user
+    users ||--o{ user_learning_profiles : user
+    subjects ||--o{ user_learning_profiles : primary_subject
+    curriculum_nodes ||--o{ lessons : node
+    users ||--o{ lessons : created_by
+    users ||--o{ lesson_bookmarks : user
+    lessons ||--o{ lesson_bookmarks : lesson
+    subjects ||--o{ level_test_questions : subject
+    level_test_questions ||--o{ level_test_choices : question
+    users ||--o{ level_test_attempts : user
+    subjects ||--o{ level_test_attempts : subject
+    level_test_attempts ||--o{ level_test_answers : attempt
+    level_test_questions ||--o{ level_test_answers : question
+    level_test_choices ||--o{ level_test_answers : choice
+    users ||--o{ learning_progress : user
+    subjects ||--o{ learning_progress : subject
+    curriculum_nodes ||--o{ learning_progress : node
+    users ||--o{ practice_set_attempts : user
+    curriculum_nodes ||--o{ practice_set_attempts : node
+    users ||--o{ attendance_records : user
+    practice_set_attempts ||--o{ attendance_records : qualified_set_attempt
+    subjects ||--o{ practice_problems : subject
+    curriculum_nodes ||--o{ practice_problems : node
+    users ||--o{ practice_problems : created_by
+    practice_problems ||--o{ problem_choices : problem
+    practice_set_attempts ||--o{ practice_submissions : set_attempt
+    users ||--o{ practice_submissions : user
+    practice_problems ||--o{ practice_submissions : problem
+    users ||--o{ wrong_answers : user
+    practice_problems ||--o{ wrong_answers : problem
+    practice_submissions ||--o{ wrong_answers : last_submission
+    users ||--o{ score_events : user
+    subjects ||--o{ score_events : subject
+    users ||--o{ ranking_scores : user
+    subjects ||--o{ ranking_scores : subject
+    users ||--o{ exam_sessions : user
+    subjects ||--o{ exam_sessions : subject
+    users ||--o{ user_level_unlocks : user
+    subjects ||--o{ user_level_unlocks : subject
+    exam_sessions ||--o{ user_level_unlocks : unlocked_by_exam
+    exam_sessions ||--o{ ai_exam_problems : exam
+    exam_sessions ||--o{ exam_answers : exam
+    ai_exam_problems ||--o{ exam_answers : ai_problem
+    users ||--o{ ai_analysis_reports : user
+    exam_sessions ||--o{ ai_analysis_reports : exam
+    users ||--o{ community_posts : writer
+    subjects ||--o{ community_posts : subject
+    community_posts ||--o{ post_attachments : post
+    users ||--o{ post_attachments : uploader
+    community_posts ||--o{ comments : post
+    comments ||--o{ comments : parent_comment
+    users ||--o{ comments : writer
+    community_posts ||--o{ post_likes : post
+    users ||--o{ post_likes : user
+    community_posts ||--o{ post_scraps : post
+    users ||--o{ post_scraps : user
+    users ||--o{ reports : reporter
+    users ||--o{ reports : handled_by
+    users ||--o{ dummy_payments : user
+    payment_products ||--o{ dummy_payments : product
+    users ||--o{ premium_grants : user
+    dummy_payments ||--o{ premium_grants : payment
+    users ||--o{ notices : writer
+    users ||--o{ admin_operation_logs : admin
+    subjects ||--o{ content_recommendations : subject</pre></div>
+    <p class="footer-note">전체 구조 확인용 축소 ERD. 상세 컬럼과 관계는 이후 섹션별 ERD에서 확인.</p>
+  </section>
+
+  
+            <section class="page diagram-page">
+              <h2>회원 / 인증 / 설정</h2>
+              <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
+    users {
+        BIGINT user_id PK
+        VARCHAR email UK
+        VARCHAR nickname UK
+        VARCHAR role
+        VARCHAR status
+        VARCHAR profile_image_url
+        DATETIME last_login_at
+        DATETIME withdrawn_at
+        DATETIME created_at
+    }
+    user_credentials {
+        BIGINT credential_id PK
+        BIGINT user_id FK
+        VARCHAR password_hash
+        DATETIME password_updated_at
+        INT failed_login_count
+        DATETIME locked_until
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    social_accounts {
+        BIGINT social_account_id PK
+        BIGINT user_id FK
+        VARCHAR provider UK
+        VARCHAR provider_user_id UK
+        VARCHAR provider_email
+        BOOLEAN is_active
+        DATETIME connected_at
+        DATETIME disconnected_at
+    }
+    user_settings {
+        BIGINT setting_id PK
+        BIGINT user_id FK
+        VARCHAR theme
+        BOOLEAN notification_enabled
+        VARCHAR accessibility_mode
+        BOOLEAN reduced_motion_enabled
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    user_learning_profiles {
+        BIGINT profile_id PK
+        BIGINT user_id FK
+        BIGINT primary_subject_id FK
+        VARCHAR learning_goal
+        VARCHAR current_level_code
+        INT total_score
+        VARCHAR grade_code
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    subjects {
+        BIGINT subject_id PK
+        VARCHAR subject_code UK
+        VARCHAR subject_name
+        VARCHAR description
+        INT sort_order
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    users ||--o{ user_credentials : user
+    users ||--o{ social_accounts : user
+    users ||--o{ user_settings : user
+    users ||--o{ user_learning_profiles : user
+    subjects ||--o{ user_learning_profiles : primary_subject</pre></div>
+            </section>
+            <section class="page detail-page">
+              <h2>회원 / 인증 / 설정 - 관계 / 컬럼</h2>
+              <table class="inventory fk-table">
+                <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
+                <tbody><tr><td>user_credentials</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>social_accounts</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>user_settings</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>user_learning_profiles</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>user_learning_profiles</td><td>primary_subject_id</td><td>subjects</td><td>subject_id</td></tr></tbody>
+              </table>
+              <div class="detail-grid">
+                <section class="table-card">
+                  <h3>users</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>email</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>nickname</td><td>VARCHAR(50) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>role</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ROLE_USER&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>profile_image_url</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>last_login_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>withdrawn_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>user_credentials</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>credential_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>password_hash</td><td>VARCHAR(255) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>password_updated_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>failed_login_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>locked_until</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>social_accounts</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>social_account_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>provider</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>provider_user_id</td><td>VARCHAR(191) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>provider_email</td><td>VARCHAR(255) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>connected_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>disconnected_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>user_settings</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>setting_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>theme</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;SYSTEM&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>notification_enabled</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>accessibility_mode</td><td>VARCHAR(30) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>reduced_motion_enabled</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>user_learning_profiles</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>profile_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>primary_subject_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>learning_goal</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>current_level_code</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;BRONZE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>total_score</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>grade_code</td><td>VARCHAR(30) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>subjects</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>subject_name</td><td>VARCHAR(100) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>description</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                </div>
+            </section>
+            
+            <section class="page diagram-page">
+              <h2>학습 Master / 레벨 테스트</h2>
+              <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
+    subjects {
+        BIGINT subject_id PK
+        VARCHAR subject_code UK
+        VARCHAR subject_name
+        VARCHAR description
+        INT sort_order
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    curriculum_nodes {
+        BIGINT node_id PK
+        BIGINT subject_id FK
+        BIGINT parent_node_id FK
+        VARCHAR level_code
+        VARCHAR node_type
+        TINYINT planet_no
+        VARCHAR title
+        VARCHAR description
+        INT sort_order
+    }
+    lessons {
+        BIGINT lesson_id PK
+        BIGINT node_id FK
+        BIGINT created_by FK
+        VARCHAR title
+        VARCHAR summary
+        MEDIUMTEXT content
+        TEXT example_code
+        INT sort_order
+        BOOLEAN is_active
+    }
+    lesson_bookmarks {
+        BIGINT bookmark_id PK
+        BIGINT user_id FK
+        BIGINT lesson_id FK
+        DATETIME created_at
+    }
+    level_test_questions {
+        BIGINT question_id PK
+        BIGINT subject_id FK
+        TINYINT question_no
+        TEXT question_text
+        VARCHAR question_type
+        TEXT explanation
+        VARCHAR difficulty_code
+        BOOLEAN is_active
+    }
+    level_test_choices {
+        BIGINT choice_id PK
+        BIGINT question_id FK
+        VARCHAR choice_label UK
+        TEXT choice_text
+        BOOLEAN is_correct
+        INT sort_order
+    }
+    level_test_attempts {
+        BIGINT attempt_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        TINYINT total_count
+        TINYINT correct_count
+        VARCHAR result_level_code
+        VARCHAR status
+        DATETIME submitted_at
+        DATETIME created_at
+    }
+    level_test_answers {
+        BIGINT answer_id PK
+        BIGINT attempt_id FK
+        BIGINT question_id FK
+        BIGINT choice_id FK
+        VARCHAR submitted_answer
+        BOOLEAN is_correct
+        DATETIME created_at
+    }
+    subjects ||--o{ curriculum_nodes : subject
+    curriculum_nodes ||--o{ curriculum_nodes : parent_node
+    curriculum_nodes ||--o{ lessons : node
+    lessons ||--o{ lesson_bookmarks : lesson
+    subjects ||--o{ level_test_questions : subject
+    level_test_questions ||--o{ level_test_choices : question
+    subjects ||--o{ level_test_attempts : subject
+    level_test_attempts ||--o{ level_test_answers : attempt
+    level_test_questions ||--o{ level_test_answers : question
+    level_test_choices ||--o{ level_test_answers : choice</pre></div>
+            </section>
+            <section class="page detail-page">
+              <h2>학습 Master / 레벨 테스트 - 관계 / 컬럼</h2>
+              <table class="inventory fk-table">
+                <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
+                <tbody><tr><td>curriculum_nodes</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>curriculum_nodes</td><td>parent_node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>lessons</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>lesson_bookmarks</td><td>lesson_id</td><td>lessons</td><td>lesson_id</td></tr>
+<tr><td>level_test_questions</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>level_test_choices</td><td>question_id</td><td>level_test_questions</td><td>question_id</td></tr>
+<tr><td>level_test_attempts</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>level_test_answers</td><td>attempt_id</td><td>level_test_attempts</td><td>attempt_id</td></tr>
+<tr><td>level_test_answers</td><td>question_id</td><td>level_test_questions</td><td>question_id</td></tr>
+<tr><td>level_test_answers</td><td>choice_id</td><td>level_test_choices</td><td>choice_id</td></tr></tbody>
+              </table>
+              <div class="detail-grid">
+                <section class="table-card">
+                  <h3>subjects</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>subject_name</td><td>VARCHAR(100) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>description</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>curriculum_nodes</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>parent_node_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>level_code</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>node_type</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;PLANET&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>planet_no</td><td>TINYINT UNSIGNED NULL</td><td></td><td>NULL</td></tr>
+<tr><td>title</td><td>VARCHAR(150) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>description</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>gate_condition</td><td>VARCHAR(255) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>lessons</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>lesson_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>title</td><td>VARCHAR(150) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>summary</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>content</td><td>MEDIUMTEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>example_code</td><td>TEXT NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_by</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>lesson_bookmarks</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>bookmark_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>lesson_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>level_test_questions</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>question_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>question_no</td><td>TINYINT UNSIGNED NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>question_text</td><td>TEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>question_type</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;MULTIPLE_CHOICE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>explanation</td><td>TEXT NULL</td><td></td><td>NULL</td></tr>
+<tr><td>difficulty_code</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;BRONZE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>level_test_choices</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>choice_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>question_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>choice_label</td><td>VARCHAR(10) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>choice_text</td><td>TEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>is_correct</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>level_test_attempts</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>attempt_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>total_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 8</td><td></td><td>NN</td></tr>
+<tr><td>correct_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>result_level_code</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;SUBMITTED&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>submitted_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>level_test_answers</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>answer_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>attempt_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>question_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>choice_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>submitted_answer</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>is_correct</td><td>TINYINT(1) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                </div>
+            </section>
+            
+            <section class="page diagram-page">
+              <h2>학습 기록 / 일반 문제 / 점수</h2>
+              <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
+    users {
+        BIGINT user_id PK
+        VARCHAR email UK
+        VARCHAR nickname UK
+        VARCHAR role
+        VARCHAR status
+        VARCHAR profile_image_url
+        DATETIME last_login_at
+        DATETIME withdrawn_at
+        DATETIME created_at
+    }
+    subjects {
+        BIGINT subject_id PK
+        VARCHAR subject_code UK
+        VARCHAR subject_name
+        VARCHAR description
+        INT sort_order
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    curriculum_nodes {
+        BIGINT node_id PK
+        BIGINT subject_id FK
+        BIGINT parent_node_id FK
+        VARCHAR level_code
+        VARCHAR node_type
+        TINYINT planet_no
+        VARCHAR title
+        VARCHAR description
+        INT sort_order
+    }
+    user_level_unlocks {
+        BIGINT unlock_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR level_code UK
+        BIGINT unlocked_by_exam_id FK
+        VARCHAR unlock_source
+        DATETIME unlocked_at
+        DATETIME created_at
+    }
+    learning_progress {
+        BIGINT progress_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        BIGINT node_id FK
+        BOOLEAN lesson_completed
+        BOOLEAN practice_passed
+        DECIMAL progress_rate
+        DATETIME completed_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    attendance_records {
+        BIGINT attendance_id PK
+        BIGINT user_id FK
+        DATE attendance_date UK
+        BIGINT qualified_set_attempt_id FK
+        INT streak_count
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    practice_set_attempts {
+        BIGINT set_attempt_id PK
+        BIGINT user_id FK
+        BIGINT node_id FK
+        TINYINT total_count
+        TINYINT correct_count
+        VARCHAR status
+        BOOLEAN passed
+        DATETIME completed_at
+        DATETIME created_at
+    }
+    practice_problems {
+        BIGINT problem_id PK
+        BIGINT subject_id FK
+        BIGINT node_id FK
+        BIGINT created_by FK
+        VARCHAR problem_type
+        TEXT question
+        TEXT answer_text
+        VARCHAR difficulty_code
+        BOOLEAN is_active
+        DATETIME created_at
+    }
+    problem_choices {
+        BIGINT choice_id PK
+        BIGINT problem_id FK
+        VARCHAR choice_label UK
+        TEXT choice_text
+        BOOLEAN is_correct
+        INT sort_order
+    }
+    practice_submissions {
+        BIGINT submission_id PK
+        BIGINT set_attempt_id FK
+        BIGINT user_id FK
+        BIGINT problem_id FK
+        VARCHAR submission_context UK
+        TEXT submitted_answer
+        BOOLEAN is_correct
+        BOOLEAN is_skipped
+        DATETIME solved_at
+        DATETIME created_at
+    }
+    wrong_answers {
+        BIGINT wrong_answer_id PK
+        BIGINT user_id FK
+        BIGINT problem_id FK
+        BIGINT last_submission_id FK
+        INT wrong_count
+        VARCHAR review_status
+        BOOLEAN retry_bonus_awarded
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    score_events {
+        BIGINT score_event_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR idempotency_key UK
+        VARCHAR source_type
+        BIGINT source_id
+        INT score_delta
+        VARCHAR reason_code
+        DATETIME created_at
+    }
+    ranking_scores {
+        BIGINT ranking_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR scope_type UK
+        VARCHAR scope_key UK
+        VARCHAR period_type UK
+        INT score
+        INT rank_no
+        DATETIME calculated_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    subjects ||--o{ curriculum_nodes : subject
+    curriculum_nodes ||--o{ curriculum_nodes : parent_node
+    users ||--o{ user_level_unlocks : user
+    subjects ||--o{ user_level_unlocks : subject
+    users ||--o{ learning_progress : user
+    subjects ||--o{ learning_progress : subject
+    curriculum_nodes ||--o{ learning_progress : node
+    users ||--o{ attendance_records : user
+    practice_set_attempts ||--o{ attendance_records : qualified_set_attempt
+    users ||--o{ practice_set_attempts : user
+    curriculum_nodes ||--o{ practice_set_attempts : node
+    subjects ||--o{ practice_problems : subject
+    curriculum_nodes ||--o{ practice_problems : node
+    users ||--o{ practice_problems : created_by
+    practice_problems ||--o{ problem_choices : problem
+    practice_set_attempts ||--o{ practice_submissions : set_attempt
+    users ||--o{ practice_submissions : user
+    practice_problems ||--o{ practice_submissions : problem
+    users ||--o{ wrong_answers : user
+    practice_problems ||--o{ wrong_answers : problem
+    practice_submissions ||--o{ wrong_answers : last_submission
+    users ||--o{ score_events : user
+    subjects ||--o{ score_events : subject
+    users ||--o{ ranking_scores : user
+    subjects ||--o{ ranking_scores : subject</pre></div>
+            </section>
+            <section class="page detail-page">
+              <h2>학습 기록 / 일반 문제 / 점수 - 관계 / 컬럼</h2>
+              <table class="inventory fk-table">
+                <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
+                <tbody><tr><td>curriculum_nodes</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>curriculum_nodes</td><td>parent_node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>user_level_unlocks</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>user_level_unlocks</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>learning_progress</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>learning_progress</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>learning_progress</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>attendance_records</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>attendance_records</td><td>qualified_set_attempt_id</td><td>practice_set_attempts</td><td>set_attempt_id</td></tr>
+<tr><td>practice_set_attempts</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>practice_set_attempts</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>practice_problems</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>practice_problems</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>practice_problems</td><td>created_by</td><td>users</td><td>user_id</td></tr>
+<tr><td>problem_choices</td><td>problem_id</td><td>practice_problems</td><td>problem_id</td></tr>
+<tr><td>practice_submissions</td><td>set_attempt_id</td><td>practice_set_attempts</td><td>set_attempt_id</td></tr>
+<tr><td>practice_submissions</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>practice_submissions</td><td>problem_id</td><td>practice_problems</td><td>problem_id</td></tr>
+<tr><td>wrong_answers</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>wrong_answers</td><td>problem_id</td><td>practice_problems</td><td>problem_id</td></tr>
+<tr><td>wrong_answers</td><td>last_submission_id</td><td>practice_submissions</td><td>submission_id</td></tr>
+<tr><td>score_events</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>score_events</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>ranking_scores</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>ranking_scores</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr></tbody>
+              </table>
+              <div class="detail-grid">
+                <section class="table-card">
+                  <h3>users</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>email</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>nickname</td><td>VARCHAR(50) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>role</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ROLE_USER&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>profile_image_url</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>last_login_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>withdrawn_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>subjects</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>subject_name</td><td>VARCHAR(100) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>description</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>curriculum_nodes</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>parent_node_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>level_code</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>node_type</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;PLANET&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>planet_no</td><td>TINYINT UNSIGNED NULL</td><td></td><td>NULL</td></tr>
+<tr><td>title</td><td>VARCHAR(150) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>description</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>gate_condition</td><td>VARCHAR(255) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>user_level_unlocks</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>unlock_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>level_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>unlock_source</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>unlocked_by_exam_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>unlocked_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>learning_progress</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>progress_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>lesson_completed</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>practice_passed</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>progress_rate</td><td>DECIMAL(5,2) NOT NULL DEFAULT 0.00</td><td></td><td>NN</td></tr>
+<tr><td>completed_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>attendance_records</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>attendance_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>attendance_date</td><td>DATE NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>streak_count</td><td>INT UNSIGNED NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>qualified_set_attempt_id</td><td>BIGINT UNSIGNED NULL</td><td>FK UK</td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>practice_set_attempts</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>set_attempt_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>total_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 10</td><td></td><td>NN</td></tr>
+<tr><td>correct_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;IN_PROGRESS&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>passed</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>completed_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>practice_problems</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>problem_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>problem_type</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;MULTIPLE_CHOICE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>question</td><td>TEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>answer_text</td><td>TEXT NULL</td><td></td><td>NULL</td></tr>
+<tr><td>difficulty_code</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;BRONZE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>created_by</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>problem_choices</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>choice_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>problem_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>choice_label</td><td>VARCHAR(10) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>choice_text</td><td>TEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>is_correct</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>practice_submissions</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>submission_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>set_attempt_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>problem_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>submission_context</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;PRACTICE_SET&#x27;</td><td>UK</td><td>NN</td></tr>
+<tr><td>submitted_answer</td><td>TEXT NULL</td><td></td><td>NULL</td></tr>
+<tr><td>is_correct</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_skipped</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>solved_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>wrong_answers</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>wrong_answer_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>problem_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>last_submission_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>wrong_count</td><td>INT UNSIGNED NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>review_status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;OPEN&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>retry_bonus_awarded</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>score_events</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>score_event_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>source_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>source_id</td><td>BIGINT UNSIGNED NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>score_delta</td><td>INT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>reason_code</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>idempotency_key</td><td>VARCHAR(191) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>ranking_scores</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>ranking_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>scope_type</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>scope_key</td><td>VARCHAR(100) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>period_type</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>period_key</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>score</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>rank_no</td><td>INT UNSIGNED NULL</td><td></td><td>NULL</td></tr>
+<tr><td>calculated_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                </div>
+            </section>
+            
+            <section class="page diagram-page">
+              <h2>AI 시험 / AI 분석</h2>
+              <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
+    users {
+        BIGINT user_id PK
+        VARCHAR email UK
+        VARCHAR nickname UK
+        VARCHAR role
+        VARCHAR status
+        VARCHAR profile_image_url
+        DATETIME last_login_at
+        DATETIME withdrawn_at
+        DATETIME created_at
+    }
+    subjects {
+        BIGINT subject_id PK
+        VARCHAR subject_code UK
+        VARCHAR subject_name
+        VARCHAR description
+        INT sort_order
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    exam_sessions {
+        BIGINT exam_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR level_code
+        VARCHAR status
+        VARCHAR result_status
+        TINYINT total_problem_count
+        TINYINT correct_count
+        TINYINT retry_count
+    }
+    ai_exam_problems {
+        BIGINT ai_problem_id PK
+        BIGINT exam_id FK
+        TINYINT problem_no UK
+        TEXT prompt
+        JSON test_case_spec
+        JSON ai_raw_response
+        VARCHAR status
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    exam_answers {
+        BIGINT answer_id PK
+        BIGINT exam_id FK
+        BIGINT ai_problem_id FK
+        MEDIUMTEXT answer_text
+        INT passed_case_count
+        BOOLEAN is_correct
+        TEXT ai_review
+        JSON test_case_result
+        DATETIME submitted_at
+    }
+    ai_analysis_reports {
+        BIGINT report_id PK
+        BIGINT user_id FK
+        BIGINT exam_id FK
+        VARCHAR status
+        TEXT free_summary
+        JSON premium_detail
+        VARCHAR analysis_error_code
+        TINYINT retry_count
+        DATETIME created_at
+    }
+    ai_request_logs {
+        BIGINT ai_request_log_id PK
+        VARCHAR target_type
+        BIGINT target_id
+        VARCHAR request_type
+        VARCHAR status
+        TINYINT retry_no
+        JSON request_payload
+    }
+    user_level_unlocks {
+        BIGINT unlock_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR level_code UK
+        BIGINT unlocked_by_exam_id FK
+        VARCHAR unlock_source
+        DATETIME unlocked_at
+        DATETIME created_at
+    }
+    score_events {
+        BIGINT score_event_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR idempotency_key UK
+        VARCHAR source_type
+        BIGINT source_id
+        INT score_delta
+        VARCHAR reason_code
+        DATETIME created_at
+    }
+    users ||--o{ exam_sessions : user
+    subjects ||--o{ exam_sessions : subject
+    exam_sessions ||--o{ ai_exam_problems : exam
+    exam_sessions ||--o{ exam_answers : exam
+    ai_exam_problems ||--o{ exam_answers : ai_problem
+    users ||--o{ ai_analysis_reports : user
+    exam_sessions ||--o{ ai_analysis_reports : exam
+    users ||--o{ user_level_unlocks : user
+    subjects ||--o{ user_level_unlocks : subject
+    exam_sessions ||--o{ user_level_unlocks : unlocked_by_exam
+    users ||--o{ score_events : user
+    subjects ||--o{ score_events : subject</pre></div>
+            </section>
+            <section class="page detail-page">
+              <h2>AI 시험 / AI 분석 - 관계 / 컬럼</h2>
+              <table class="inventory fk-table">
+                <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
+                <tbody><tr><td>exam_sessions</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>exam_sessions</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>ai_exam_problems</td><td>exam_id</td><td>exam_sessions</td><td>exam_id</td></tr>
+<tr><td>exam_answers</td><td>exam_id</td><td>exam_sessions</td><td>exam_id</td></tr>
+<tr><td>exam_answers</td><td>ai_problem_id</td><td>ai_exam_problems</td><td>ai_problem_id</td></tr>
+<tr><td>ai_analysis_reports</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>ai_analysis_reports</td><td>exam_id</td><td>exam_sessions</td><td>exam_id</td></tr>
+<tr><td>user_level_unlocks</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>user_level_unlocks</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>user_level_unlocks</td><td>unlocked_by_exam_id</td><td>exam_sessions</td><td>exam_id</td></tr>
+<tr><td>score_events</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>score_events</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr></tbody>
+              </table>
+              <div class="detail-grid">
+                <section class="table-card">
+                  <h3>users</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>email</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>nickname</td><td>VARCHAR(50) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>role</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ROLE_USER&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>profile_image_url</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>last_login_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>withdrawn_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>subjects</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>subject_name</td><td>VARCHAR(100) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>description</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>exam_sessions</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>exam_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>level_code</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;CREATED&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>result_status</td><td>VARCHAR(30) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>total_problem_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 3</td><td></td><td>NN</td></tr>
+<tr><td>correct_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>retry_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>started_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>submitted_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>graded_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>ai_exam_problems</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>ai_problem_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>exam_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>problem_no</td><td>TINYINT UNSIGNED NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>prompt</td><td>TEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>test_case_spec</td><td>JSON NULL</td><td></td><td>NULL</td></tr>
+<tr><td>ai_raw_response</td><td>JSON NULL</td><td></td><td>NULL</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;GENERATED&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>exam_answers</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>answer_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>exam_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>ai_problem_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>answer_text</td><td>MEDIUMTEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>passed_case_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_correct</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>ai_review</td><td>TEXT NULL</td><td></td><td>NULL</td></tr>
+<tr><td>test_case_result</td><td>JSON NULL</td><td></td><td>NULL</td></tr>
+<tr><td>submitted_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>graded_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>ai_analysis_reports</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>report_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>exam_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;PENDING&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>free_summary</td><td>TEXT NULL</td><td></td><td>NULL</td></tr>
+<tr><td>premium_detail</td><td>JSON NULL</td><td></td><td>NULL</td></tr>
+<tr><td>analysis_error_code</td><td>VARCHAR(100) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>retry_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>ai_request_logs</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>ai_request_log_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>target_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>target_id</td><td>BIGINT UNSIGNED NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>request_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>retry_no</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>request_payload</td><td>JSON NULL</td><td></td><td>NULL</td></tr>
+<tr><td>response_payload</td><td>JSON NULL</td><td></td><td>NULL</td></tr>
+<tr><td>error_code</td><td>VARCHAR(100) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>error_message</td><td>VARCHAR(1000) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>user_level_unlocks</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>unlock_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>level_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>unlock_source</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>unlocked_by_exam_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>unlocked_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>score_events</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>score_event_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>source_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>source_id</td><td>BIGINT UNSIGNED NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>score_delta</td><td>INT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>reason_code</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>idempotency_key</td><td>VARCHAR(191) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                </div>
+            </section>
+            
+            <section class="page diagram-page">
+              <h2>커뮤니티</h2>
+              <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
+    users {
+        BIGINT user_id PK
+        VARCHAR email UK
+        VARCHAR nickname UK
+        VARCHAR role
+        VARCHAR status
+        VARCHAR profile_image_url
+        DATETIME last_login_at
+        DATETIME withdrawn_at
+        DATETIME created_at
+    }
+    subjects {
+        BIGINT subject_id PK
+        VARCHAR subject_code UK
+        VARCHAR subject_name
+        VARCHAR description
+        INT sort_order
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    community_posts {
+        BIGINT post_id PK
+        BIGINT writer_id FK
+        BIGINT subject_id FK
+        VARCHAR board_type
+        VARCHAR title
+        MEDIUMTEXT content
+        INT like_count
+        INT comment_count
+        INT scrap_count
+    }
+    post_attachments {
+        BIGINT attachment_id PK
+        BIGINT post_id FK
+        BIGINT uploader_id FK
+        VARCHAR stored_name UK
+        VARCHAR original_name
+        VARCHAR file_path
+        BIGINT file_size
+        DATETIME created_at
+    }
+    comments {
+        BIGINT comment_id PK
+        BIGINT post_id FK
+        BIGINT parent_comment_id FK
+        BIGINT writer_id FK
+        TEXT content
+        VARCHAR status
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+    }
+    post_likes {
+        BIGINT like_id PK
+        BIGINT post_id FK
+        BIGINT user_id FK
+        DATETIME created_at
+    }
+    post_scraps {
+        BIGINT scrap_id PK
+        BIGINT post_id FK
+        BIGINT user_id FK
+        DATETIME created_at
+    }
+    reports {
+        BIGINT report_id PK
+        BIGINT reporter_id FK
+        BIGINT handled_by FK
+        VARCHAR target_type
+        BIGINT target_id
+        VARCHAR reason_code
+        VARCHAR status
+        DATETIME handled_at
+        DATETIME created_at
+    }
+    users ||--o{ community_posts : writer
+    subjects ||--o{ community_posts : subject
+    community_posts ||--o{ post_attachments : post
+    users ||--o{ post_attachments : uploader
+    community_posts ||--o{ comments : post
+    comments ||--o{ comments : parent_comment
+    users ||--o{ comments : writer
+    community_posts ||--o{ post_likes : post
+    users ||--o{ post_likes : user
+    community_posts ||--o{ post_scraps : post
+    users ||--o{ post_scraps : user
+    users ||--o{ reports : reporter
+    users ||--o{ reports : handled_by</pre></div>
+            </section>
+            <section class="page detail-page">
+              <h2>커뮤니티 - 관계 / 컬럼</h2>
+              <table class="inventory fk-table">
+                <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
+                <tbody><tr><td>community_posts</td><td>writer_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>community_posts</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>post_attachments</td><td>post_id</td><td>community_posts</td><td>post_id</td></tr>
+<tr><td>post_attachments</td><td>uploader_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>comments</td><td>post_id</td><td>community_posts</td><td>post_id</td></tr>
+<tr><td>comments</td><td>parent_comment_id</td><td>comments</td><td>comment_id</td></tr>
+<tr><td>comments</td><td>writer_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>post_likes</td><td>post_id</td><td>community_posts</td><td>post_id</td></tr>
+<tr><td>post_likes</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>post_scraps</td><td>post_id</td><td>community_posts</td><td>post_id</td></tr>
+<tr><td>post_scraps</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>reports</td><td>reporter_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>reports</td><td>handled_by</td><td>users</td><td>user_id</td></tr></tbody>
+              </table>
+              <div class="detail-grid">
+                <section class="table-card">
+                  <h3>users</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>email</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>nickname</td><td>VARCHAR(50) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>role</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ROLE_USER&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>profile_image_url</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>last_login_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>withdrawn_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>subjects</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>subject_name</td><td>VARCHAR(100) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>description</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>community_posts</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>post_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>writer_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>board_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>title</td><td>VARCHAR(200) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>content</td><td>MEDIUMTEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>like_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>comment_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>scrap_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr>
+<tr><td>deleted_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>post_attachments</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>attachment_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>post_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>uploader_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>original_name</td><td>VARCHAR(255) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>stored_name</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>file_path</td><td>VARCHAR(500) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>file_size</td><td>BIGINT UNSIGNED NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>comments</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>comment_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>post_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>parent_comment_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>writer_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>content</td><td>TEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr>
+<tr><td>deleted_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>post_likes</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>like_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>post_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>post_scraps</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>scrap_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>post_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>reports</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>report_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>target_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>target_id</td><td>BIGINT UNSIGNED NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>reporter_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>reason_code</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;RECEIVED&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>handled_by</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>handled_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                </div>
+            </section>
+            
+            <section class="page diagram-page">
+              <h2>결제 / Premium</h2>
+              <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
+    users {
+        BIGINT user_id PK
+        VARCHAR email UK
+        VARCHAR nickname UK
+        VARCHAR role
+        VARCHAR status
+        VARCHAR profile_image_url
+        DATETIME last_login_at
+        DATETIME withdrawn_at
+        DATETIME created_at
+    }
+    payment_products {
+        BIGINT product_id PK
+        VARCHAR product_code UK
+        VARCHAR product_name
+        DECIMAL price
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    dummy_payments {
+        BIGINT payment_id PK
+        VARCHAR order_no UK
+        BIGINT user_id FK
+        BIGINT product_id FK
+        VARCHAR payment_method
+        VARCHAR payment_status
+        DECIMAL amount
+        DATETIME paid_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    premium_grants {
+        BIGINT grant_id PK
+        BIGINT user_id FK
+        BIGINT payment_id FK
+        VARCHAR grant_type
+        VARCHAR status
+        DATETIME granted_at
+        DATETIME expires_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    users ||--o{ dummy_payments : user
+    payment_products ||--o{ dummy_payments : product
+    users ||--o{ premium_grants : user
+    dummy_payments ||--o{ premium_grants : payment</pre></div>
+            </section>
+            <section class="page detail-page">
+              <h2>결제 / Premium - 관계 / 컬럼</h2>
+              <table class="inventory fk-table">
+                <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
+                <tbody><tr><td>dummy_payments</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>dummy_payments</td><td>product_id</td><td>payment_products</td><td>product_id</td></tr>
+<tr><td>premium_grants</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>premium_grants</td><td>payment_id</td><td>dummy_payments</td><td>payment_id</td></tr></tbody>
+              </table>
+              <div class="detail-grid">
+                <section class="table-card">
+                  <h3>users</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>email</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>nickname</td><td>VARCHAR(50) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>role</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ROLE_USER&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>profile_image_url</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>last_login_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>withdrawn_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>payment_products</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>product_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>product_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>product_name</td><td>VARCHAR(100) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>price</td><td>DECIMAL(10,2) NOT NULL DEFAULT 0.00</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>dummy_payments</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>payment_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>order_no</td><td>VARCHAR(100) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>product_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>payment_method</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;DUMMY&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>payment_status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;READY&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>amount</td><td>DECIMAL(10,2) NOT NULL DEFAULT 0.00</td><td></td><td>NN</td></tr>
+<tr><td>paid_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>premium_grants</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>grant_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>payment_id</td><td>BIGINT UNSIGNED NULL</td><td>FK UK</td><td>NULL</td></tr>
+<tr><td>grant_type</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;LIFETIME&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>granted_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>expires_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                </div>
+            </section>
+            
+            <section class="page diagram-page">
+              <h2>관리자 / 공지 / 확장 콘텐츠</h2>
+              <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
+    users {
+        BIGINT user_id PK
+        VARCHAR email UK
+        VARCHAR nickname UK
+        VARCHAR role
+        VARCHAR status
+        VARCHAR profile_image_url
+        DATETIME last_login_at
+        DATETIME withdrawn_at
+        DATETIME created_at
+    }
+    subjects {
+        BIGINT subject_id PK
+        VARCHAR subject_code UK
+        VARCHAR subject_name
+        VARCHAR description
+        INT sort_order
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    notices {
+        BIGINT notice_id PK
+        BIGINT writer_id FK
+        VARCHAR title
+        MEDIUMTEXT content
+        VARCHAR status
+        DATETIME published_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    reports {
+        BIGINT report_id PK
+        BIGINT reporter_id FK
+        BIGINT handled_by FK
+        VARCHAR target_type
+        BIGINT target_id
+        VARCHAR reason_code
+        VARCHAR status
+        DATETIME handled_at
+        DATETIME created_at
+    }
+    admin_operation_logs {
+        BIGINT log_id PK
+        BIGINT admin_id FK
+        VARCHAR action_type
+        VARCHAR target_type
+        BIGINT target_id
+        VARCHAR result_status
+        DATETIME created_at
+    }
+    content_recommendations {
+        BIGINT content_id PK
+        BIGINT subject_id FK
+        VARCHAR title
+        VARCHAR url
+        VARCHAR content_type
+        VARCHAR recommendation_slot
+        BOOLEAN is_active
+        DATETIME created_at
+    }
+    users ||--o{ notices : writer
+    users ||--o{ reports : reporter
+    users ||--o{ reports : handled_by
+    users ||--o{ admin_operation_logs : admin
+    subjects ||--o{ content_recommendations : subject</pre></div>
+            </section>
+            <section class="page detail-page">
+              <h2>관리자 / 공지 / 확장 콘텐츠 - 관계 / 컬럼</h2>
+              <table class="inventory fk-table">
+                <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
+                <tbody><tr><td>notices</td><td>writer_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>reports</td><td>reporter_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>reports</td><td>handled_by</td><td>users</td><td>user_id</td></tr>
+<tr><td>admin_operation_logs</td><td>admin_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>content_recommendations</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr></tbody>
+              </table>
+              <div class="detail-grid">
+                <section class="table-card">
+                  <h3>users</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>email</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>nickname</td><td>VARCHAR(50) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>role</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ROLE_USER&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>profile_image_url</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>last_login_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>withdrawn_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>subjects</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_code</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>subject_name</td><td>VARCHAR(100) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>description</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>sort_order</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>notices</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>notice_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>writer_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>title</td><td>VARCHAR(200) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>content</td><td>MEDIUMTEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;DRAFT&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>published_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>reports</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>report_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>target_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>target_id</td><td>BIGINT UNSIGNED NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>reporter_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>reason_code</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;RECEIVED&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>handled_by</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
+<tr><td>handled_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>admin_operation_logs</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>log_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>admin_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>action_type</td><td>VARCHAR(50) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>target_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>target_id</td><td>BIGINT UNSIGNED NULL</td><td></td><td>NULL</td></tr>
+<tr><td>result_status</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+                
+                <section class="table-card">
+                  <h3>content_recommendations</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>content_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>title</td><td>VARCHAR(200) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>url</td><td>VARCHAR(500) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>content_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>recommendation_slot</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+                </div>
+            </section>
+            
+
+  <section class="page">
+    <h2>v1.4 변경 요약</h2>
+    
+      <section class="callout">
+        <h2>v1.4 AI 정책 반영</h2>
+        <ul>
+          <li><code>ai_exam_problems.test_case_spec</code>: ChatGPT API가 생성/보조한 테스트케이스 후보 저장</li>
+          <li><code>exam_answers.passed_case_count</code>, <code>test_case_result</code>: 정답/오답 판정은 테스트케이스 실행 결과로 처리</li>
+          <li><code>exam_answers.ai_review</code>: AI 해설/코드 리뷰 저장</li>
+          <li><code>ai_request_logs</code>: ChatGPT API 요청/응답/실패/재시도 payload 기록</li>
+        </ul>
+      </section>
+    
+    <table class="inventory" style="margin-top:16px">
+      <thead><tr><th>구분</th><th>반영 내용</th></tr></thead>
+      <tbody>
+        <tr><td>로그인/권한</td><td>관리자는 사용자와 같은 로그인 화면을 사용하고, 로그인 후 role에 따라 학습 또는 관리자 메인으로 이동.</td></tr>
+        <tr><td>AI Provider</td><td>로컬 LLM 미사용. ChatGPT API 호출/응답/실패/재시도 기록을 ai_request_logs에 저장.</td></tr>
+        <tr><td>AI 코딩테스트</td><td>AI는 문제 생성, 테스트케이스 생성 보조, 해설 생성, 코드 리뷰 담당. 정답/오답은 testcase 실행 결과로 판정.</td></tr>
+        <tr><td>DDL 실행</td><td>전체 실행 시 elearning schema의 Knowva table을 DROP TABLE IF EXISTS 후 다시 생성.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'base',
+      er: { useMaxWidth: true, layoutDirection: 'TB' },
+      themeVariables: {
+        primaryColor: '#f8fafc',
+        primaryTextColor: '#111827',
+        primaryBorderColor: '#9aa8b8',
+        lineColor: '#8b98a9',
+        fontFamily: 'Arial, Apple SD Gothic Neo, sans-serif',
+        fontSize: '12px'
+      }
+    });
+    (async () => {
+      try {
+        await mermaid.run({ querySelector: '.mermaid' });
+        window.__ERD_RENDER_DONE = true;
+      } catch (error) {
+        document.body.insertAdjacentHTML('afterbegin', '<pre style="color:red">' + error.stack + '</pre>');
+        window.__ERD_RENDER_ERROR = String(error && error.stack || error);
+      }
+    })();
+  </script>
+</body>
+</html>

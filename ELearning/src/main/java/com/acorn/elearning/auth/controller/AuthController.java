@@ -1,9 +1,11 @@
 package com.acorn.elearning.auth.controller;
 
+import com.acorn.elearning.security.SessionUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
 public class AuthController {
@@ -20,12 +22,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login() {
+    public String login(@SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser) {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "auth/login"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // authService.login(sessionUser, form);
         // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+        if (sessionUser != null) {
+            return "redirect:" + sessionUser.defaultRedirectPath();
+        }
         return "redirect:/learning";
     }
 
