@@ -1,1 +1,16 @@
-<header class="guest-header" th:fragment="guestHeader"><a href="/welcome">Knowva</a><a href="/login">Login</a><a href="/signup">Signup</a></header>
+<header class="guest-header" th:fragment="guestHeader">
+  <a class="brand header-logo" th:href="@{/welcome}" aria-label="Knowva 시작 화면">
+    <span class="brand-logo-frame" aria-hidden="true">
+      <img class="brand-logo brand-logo-light" th:src="@{/assets/images/icons/header_logo_light.png}" alt="">
+      <img class="brand-logo brand-logo-dark" th:src="@{/assets/images/icons/header_logo_dark.png}" alt="">
+    </span>
+  </a>
+  <nav class="guest-nav" aria-label="게스트 메뉴">
+    <a class="nav-link" th:href="@{/welcome}" data-nav-prefix="/welcome">홈</a>
+    <a class="nav-link" th:href="@{/login}" data-nav-exact="/login">로그인</a>
+    <a class="nav-link" th:href="@{/signup}" data-nav-exact="/signup">회원가입</a>
+    <button class="header-icon theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
+      <span class="theme-icon" aria-hidden="true"></span>
+    </button>
+  </nav>
+</header>
