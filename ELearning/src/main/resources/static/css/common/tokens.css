@@ -1,1 +1,49 @@
-:root { --bg:#f7f8fb; --surface:#ffffff; --text:#18202f; --muted:#667085; --line:#d9dee8; --primary:#2563eb; --accent:#0f766e; --danger:#b42318; --radius:8px; --space:16px; }
+:root {
+  --bg: #f6fbfd;
+  --surface: #ffffff;
+  --surface-soft: #eef8fb;
+  --header-bg: #f7fdff;
+  --text: #132331;
+  --muted: #607181;
+  --line: #d9e7ee;
+  --primary: #22b8c8;
+  --accent: #0a4f5b;
+  --success: #15803d;
+  --warning: #b7791f;
+  --danger: #b42318;
+  --radius: 8px;
+  --radius-pill: 999px;
+  --space: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --max-content: 1180px;
+  --header-height: 78px;
+  --focus-ring: 0 0 0 3px rgba(34, 184, 200, 0.24);
+  --shadow-soft: 0 14px 36px rgba(15, 23, 42, 0.07);
+  --shadow-elevated: 0 20px 56px rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme="knowva-ion-dark"] {
+  --bg: #0d1720;
+  --surface: #152230;
+  --surface-soft: #1d2d3b;
+  --header-bg: #101d28;
+  --text: #f5f9fc;
+  --muted: #aab8c5;
+  --line: #2e4354;
+  --primary: #64d9e6;
+  --accent: #8beaf1;
+  --success: #4ade80;
+  --warning: #facc15;
+  --danger: #fb7185;
+  --focus-ring: 0 0 0 3px rgba(100, 217, 230, 0.24);
+  --shadow-soft: 0 14px 36px rgba(0, 0, 0, 0.28);
+  --shadow-elevated: 0 20px 56px rgba(0, 0, 0, 0.38);
+}

@@ -1,3 +1,33 @@
-<nav class="topbar" th:fragment="topbar">
-  <a href="/learning">Knowva</a><a href="/analysis">Analysis</a><a href="/community">Community</a><a href="/mypage">My Page</a><a href="/settings">Settings</a>
-</nav>
+<header class="topbar" th:fragment="topbar" th:with="loginUser=${session.LOGIN_USER}">
+  <a class="brand header-logo" th:href="@{/learning}" aria-label="Knowva 학습 홈">
+    <span class="brand-logo-frame" aria-hidden="true">
+      <img class="brand-logo brand-logo-light" th:src="@{/assets/images/icons/header_logo_light.png}" alt="">
+      <img class="brand-logo brand-logo-dark" th:src="@{/assets/images/icons/header_logo_dark.png}" alt="">
+    </span>
+  </a>
+  <nav class="topbar-nav" aria-label="주요 메뉴">
+    <a class="nav-link" th:href="@{/learning}" data-nav-prefix="/learning">학습</a>
+    <a class="nav-link" th:href="@{/analysis}" data-nav-prefix="/analysis">분석</a>
+    <a class="nav-link" th:href="@{/community}" data-nav-prefix="/community">커뮤니티</a>
+    <a class="nav-link" th:href="@{/mypage}" data-nav-prefix="/mypage">마이페이지</a>
+  </nav>
+  <div class="topbar-actions">
+    <button class="header-icon theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
+      <span class="theme-icon" aria-hidden="true"></span>
+    </button>
+    <a class="header-icon settings-icon" th:href="@{/settings}" data-nav-prefix="/settings" aria-label="설정">
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+        <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2.1 2.1 0 0 1-2.97 2.97l-.05-.05a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65V21a2.1 2.1 0 0 1-4.2 0v-.08a1.8 1.8 0 0 0-1.1-1.65 1.8 1.8 0 0 0-1.97.36l-.05.05a2.1 2.1 0 0 1-2.97-2.97l.05-.05A1.8 1.8 0 0 0 3.84 15a1.8 1.8 0 0 0-1.65-1.09H2.1a2.1 2.1 0 0 1 0-4.2h.08a1.8 1.8 0 0 0 1.65-1.1 1.8 1.8 0 0 0-.36-1.97l-.05-.05a2.1 2.1 0 0 1 2.97-2.97l.05.05a1.8 1.8 0 0 0 1.98.36 1.8 1.8 0 0 0 1.09-1.65V2.1a2.1 2.1 0 0 1 4.2 0v.08a1.8 1.8 0 0 0 1.1 1.65 1.8 1.8 0 0 0 1.97-.36l.05-.05a2.1 2.1 0 0 1 2.97 2.97l-.05.05a1.8 1.8 0 0 0-.36 1.98 1.8 1.8 0 0 0 1.65 1.09h.08a2.1 2.1 0 0 1 0 4.2h-.08A1.8 1.8 0 0 0 19.4 15Z"></path>
+      </svg>
+    </a>
+    <a class="profile-pill" th:if="${loginUser != null}" th:href="@{/mypage}" data-nav-prefix="/mypage" aria-label="마이페이지">
+      <span class="profile-dot" aria-hidden="true" th:text="${loginUser.nickname != null and !#strings.isEmpty(loginUser.nickname) ? #strings.substring(loginUser.nickname, 0, 1) : 'K'}">K</span>
+      <span class="profile-label" th:text="${loginUser.nickname != null and !#strings.isEmpty(loginUser.nickname) ? loginUser.nickname : '프로필'}">프로필</span>
+    </a>
+    <a class="profile-pill" th:if="${loginUser == null}" th:href="@{/login}" data-nav-exact="/login" aria-label="로그인">
+      <span class="profile-dot" aria-hidden="true">K</span>
+      <span class="profile-label">로그인</span>
+    </a>
+  </div>
+</header>
