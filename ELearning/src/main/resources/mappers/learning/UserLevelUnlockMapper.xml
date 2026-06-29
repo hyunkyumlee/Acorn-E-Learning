@@ -1,37 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.learning.mapper.UserLevelUnlockMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="UserLevelUnlockResultMap" type="com.acorn.elearning.learning.model.UserLevelUnlock">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="UserLevelUnlockResultMap">
-          SELECT /* DDL column list */
-          FROM user_level_unlocks
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="UserLevelUnlockResultMap">
-          SELECT /* DDL column list */
-          FROM user_level_unlocks
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.learning.model.UserLevelUnlock" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO user_level_unlocks (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.learning.model.UserLevelUnlock">
-          UPDATE user_level_unlocks
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="UserLevelUnlockResultMap" type="com.acorn.elearning.learning.model.UserLevelUnlock">
+        <id property="unlockId" column="unlock_id" />
+        <result property="userId" column="user_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="levelCode" column="level_code" />
+        <result property="unlockSource" column="unlock_source" />
+        <result property="unlockedByExamId" column="unlocked_by_exam_id" />
+        <result property="unlockedAt" column="unlocked_at" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <sql id="columns">
+        unlock_id, user_id, subject_id, level_code, unlock_source,
+        unlocked_by_exam_id, unlocked_at, created_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="UserLevelUnlockResultMap">
+        SELECT <include refid="columns" />
+        FROM user_level_unlocks
+        WHERE unlock_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="UserLevelUnlockResultMap">
+        SELECT <include refid="columns" />
+        FROM user_level_unlocks
+        ORDER BY user_id ASC, subject_id ASC, level_code ASC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.UserLevelUnlock"
+            useGeneratedKeys="true" keyProperty="unlockId">
+        INSERT INTO user_level_unlocks
+            (user_id, subject_id, level_code, unlock_source, unlocked_by_exam_id, unlocked_at)
+        VALUES
+            (#{userId}, #{subjectId}, #{levelCode}, #{unlockSource}, #{unlockedByExamId}, #{unlockedAt})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.UserLevelUnlock">
+        UPDATE user_level_unlocks
+        SET user_id             = #{userId},
+            subject_id          = #{subjectId},
+            level_code          = #{levelCode},
+            unlock_source       = #{unlockSource},
+            unlocked_by_exam_id = #{unlockedByExamId},
+            unlocked_at         = #{unlockedAt}
+        WHERE unlock_id = #{unlockId}
+    </update>
+
 </mapper>

@@ -1,37 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.learning.mapper.LessonBookmarkMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="LessonBookmarkResultMap" type="com.acorn.elearning.learning.model.LessonBookmark">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="LessonBookmarkResultMap">
-          SELECT /* DDL column list */
-          FROM lesson_bookmarks
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="LessonBookmarkResultMap">
-          SELECT /* DDL column list */
-          FROM lesson_bookmarks
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.learning.model.LessonBookmark" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO lesson_bookmarks (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.learning.model.LessonBookmark">
-          UPDATE lesson_bookmarks
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="LessonBookmarkResultMap" type="com.acorn.elearning.learning.model.LessonBookmark">
+        <id property="bookmarkId" column="bookmark_id" />
+        <result property="userId" column="user_id" />
+        <result property="lessonId" column="lesson_id" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <sql id="columns">
+        bookmark_id, user_id, lesson_id, created_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="LessonBookmarkResultMap">
+        SELECT <include refid="columns" />
+        FROM lesson_bookmarks
+        WHERE bookmark_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="LessonBookmarkResultMap">
+        SELECT <include refid="columns" />
+        FROM lesson_bookmarks
+        ORDER BY created_at DESC, bookmark_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.LessonBookmark"
+            useGeneratedKeys="true" keyProperty="bookmarkId">
+        INSERT INTO lesson_bookmarks (user_id, lesson_id)
+        VALUES (#{userId}, #{lessonId})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.LessonBookmark">
+        UPDATE lesson_bookmarks
+        SET user_id   = #{userId},
+            lesson_id = #{lessonId}
+        WHERE bookmark_id = #{bookmarkId}
+    </update>
+
 </mapper>

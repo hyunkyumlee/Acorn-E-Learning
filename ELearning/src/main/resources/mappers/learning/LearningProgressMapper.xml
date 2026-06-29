@@ -1,37 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.learning.mapper.LearningProgressMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="LearningProgressResultMap" type="com.acorn.elearning.learning.model.LearningProgress">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="LearningProgressResultMap">
-          SELECT /* DDL column list */
-          FROM learning_progress
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="LearningProgressResultMap">
-          SELECT /* DDL column list */
-          FROM learning_progress
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.learning.model.LearningProgress" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO learning_progress (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.learning.model.LearningProgress">
-          UPDATE learning_progress
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="LearningProgressResultMap" type="com.acorn.elearning.learning.model.LearningProgress">
+        <id property="progressId" column="progress_id" />
+        <result property="userId" column="user_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="nodeId" column="node_id" />
+        <result property="lessonCompleted" column="lesson_completed" />
+        <result property="practicePassed" column="practice_passed" />
+        <result property="progressRate" column="progress_rate" />
+        <result property="completedAt" column="completed_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        progress_id, user_id, subject_id, node_id, lesson_completed, practice_passed,
+        progress_rate, completed_at, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="LearningProgressResultMap">
+        SELECT <include refid="columns" />
+        FROM learning_progress
+        WHERE progress_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="LearningProgressResultMap">
+        SELECT <include refid="columns" />
+        FROM learning_progress
+        ORDER BY subject_id ASC, node_id ASC, progress_id ASC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.LearningProgress"
+            useGeneratedKeys="true" keyProperty="progressId">
+        INSERT INTO learning_progress
+            (user_id, subject_id, node_id, lesson_completed, practice_passed, progress_rate, completed_at)
+        VALUES
+            (#{userId}, #{subjectId}, #{nodeId}, #{lessonCompleted}, #{practicePassed}, #{progressRate}, #{completedAt})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.LearningProgress">
+        UPDATE learning_progress
+        SET user_id          = #{userId},
+            subject_id       = #{subjectId},
+            node_id          = #{nodeId},
+            lesson_completed = #{lessonCompleted},
+            practice_passed  = #{practicePassed},
+            progress_rate    = #{progressRate},
+            completed_at     = #{completedAt},
+            updated_at       = NOW()
+        WHERE progress_id = #{progressId}
+    </update>
+
 </mapper>
