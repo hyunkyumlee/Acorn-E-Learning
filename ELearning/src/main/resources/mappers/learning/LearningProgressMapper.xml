@@ -32,6 +32,15 @@
         ORDER BY subject_id ASC, node_id ASC, progress_id ASC
     </select>
 
+    <!-- 대시보드 진행률 집계용: 사용자+과목 기준 진행 행 -->
+    <select id="findByUserIdAndSubjectId" resultMap="LearningProgressResultMap">
+        SELECT <include refid="columns" />
+        FROM learning_progress
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+        ORDER BY node_id ASC, progress_id ASC
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.LearningProgress"
             useGeneratedKeys="true" keyProperty="progressId">
         INSERT INTO learning_progress
