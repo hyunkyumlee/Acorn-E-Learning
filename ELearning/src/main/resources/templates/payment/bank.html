@@ -1,17 +1,55 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>무통장 더미 결제 | Knowva</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>무통장 입금 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/payment.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/payment.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell payment-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>무통장 더미 결제</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>payment/bank</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p><form method="post"><input type="hidden" name="_csrf" value="TODO-CSRF"><input type="hidden" name="idempotencyToken" value="TODO-IDEMPOTENCY"><button class="button primary" type="submit">Submit</button></form></section>
+  <main class="payment-screen">
+    <section class="figma-payment-page">
+      <div class="figma-payment-step"><strong>1 / 2</strong><span></span></div>
+      <header class="figma-payment-head">
+        <h1>결제 진행</h1>
+        <p>무통장 입금 정보를 확인합니다.</p>
+      </header>
+      <section class="figma-payment-layout">
+        <form class="figma-payment-form" method="post" th:action="@{/payments/dummy}" action="/payments/dummy">
+          <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <input type="hidden" name="productCode" th:value="${productCode ?: 'PREMIUM_LIFETIME'}" value="PREMIUM_LIFETIME">
+          <input type="hidden" name="paymentMethod" value="BANK_TRANSFER">
+          <input type="hidden" name="memo" value="무통장 입금 더미 결제">
+          <input type="hidden" name="idempotencyToken" th:value="${idempotencyToken}" value="">
+          <div class="figma-method-row">
+            <a class="figma-button" th:href="@{/payments/card}" href="/payments/card">신용카드</a>
+            <a class="figma-button primary" th:href="@{/payments/bank}" href="/payments/bank">무통장 입금</a>
+          </div>
+          <div class="figma-form-grid">
+            <label for="depositorName">입금자명<input id="depositorName" class="field" name="depositorName" value="이정하"></label>
+            <label for="depositAmount">입금 금액<input id="depositAmount" class="field" name="depositAmount" th:value="${productPriceLabel ?: '9,900원'}" value="9,900원"></label>
+            <label class="span-2" for="depositAccount">입금 계좌<input id="depositAccount" class="field" name="depositAccount" value="국민 123456-01-987654 KNOWVA"></label>
+          </div>
+          <button class="figma-button primary" type="submit">결제하기</button>
+        </form>
+        <aside class="figma-order-panel">
+          <h2>상품 정보</h2>
+          <dl>
+            <div><dt>주문 번호</dt><dd>결제 시 자동 생성</dd></div>
+            <div><dt>결제 방식</dt><dd>무통장 입금</dd></div>
+            <div><dt>상품명</dt><dd th:text="${productName ?: 'Premium Lifetime'}">Premium Lifetime</dd></div>
+            <div><dt>결제 금액</dt><dd th:text="${productPriceLabel ?: '9,900원'}">9,900원</dd></div>
+          </dl>
+        </aside>
+      </section>
+    </section>
   </main>
 </body>
 </html>

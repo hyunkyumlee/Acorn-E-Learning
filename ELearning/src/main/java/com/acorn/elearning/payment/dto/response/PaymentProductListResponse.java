@@ -1,7 +1,31 @@
 package com.acorn.elearning.payment.dto.response;
 
-import java.util.Map;
+import com.acorn.elearning.payment.model.PaymentProduct;
+import java.math.BigDecimal;
+import java.util.List;
 
-public record PaymentProductListResponse(String status, Map<String, Object> data) {
-    public static PaymentProductListResponse stub() { return new PaymentProductListResponse("SKELETON", Map.of()); }
+public record PaymentProductListResponse(List<Product> products) {
+    public static PaymentProductListResponse from(List<PaymentProduct> products) {
+        return new PaymentProductListResponse(products.stream()
+                .map(Product::from)
+                .toList());
+    }
+
+    public record Product(
+            Long productId,
+            String productCode,
+            String productName,
+            BigDecimal price,
+            boolean active
+    ) {
+        public static Product from(PaymentProduct product) {
+            return new Product(
+                    product.getProductId(),
+                    product.getProductCode(),
+                    product.getProductName(),
+                    product.getPrice(),
+                    Boolean.TRUE.equals(product.getIsActive())
+            );
+        }
+    }
 }

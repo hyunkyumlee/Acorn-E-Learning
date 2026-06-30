@@ -1,37 +1,131 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.payment.mapper.DummyPaymentMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="DummyPaymentResultMap" type="com.acorn.elearning.payment.model.DummyPayment">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="DummyPaymentResultMap">
-          SELECT /* DDL column list */
-          FROM dummy_payments
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="DummyPaymentResultMap">
-          SELECT /* DDL column list */
-          FROM dummy_payments
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.payment.model.DummyPayment" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO dummy_payments (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.payment.model.DummyPayment">
-          UPDATE dummy_payments
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="DummyPaymentResultMap" type="com.acorn.elearning.payment.model.DummyPayment">
+        <id property="paymentId" column="payment_id" />
+        <result property="orderNo" column="order_no" />
+        <result property="userId" column="user_id" />
+        <result property="productId" column="product_id" />
+        <result property="paymentMethod" column="payment_method" />
+        <result property="paymentStatus" column="payment_status" />
+        <result property="amount" column="amount" />
+        <result property="paidAt" column="paid_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="DummyPaymentColumns">
+        payment_id,
+        order_no,
+        user_id,
+        product_id,
+        payment_method,
+        payment_status,
+        amount,
+        paid_at,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        WHERE payment_id = #{id}
+    </select>
+
+    <select id="findByOrderNo" parameterType="string" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        WHERE order_no = #{orderNo}
+    </select>
+
+    <select id="findByIdAndUserId" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        WHERE payment_id = #{paymentId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="findAll" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        ORDER BY payment_id DESC
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        WHERE user_id = #{userId}
+        ORDER BY payment_id DESC
+    </select>
+
+    <select id="findLatestByUserId" parameterType="long" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        WHERE user_id = #{userId}
+        ORDER BY payment_id DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.payment.model.DummyPayment" useGeneratedKeys="true" keyProperty="paymentId">
+        INSERT INTO dummy_payments (
+            order_no,
+            user_id,
+            product_id,
+            payment_method,
+            payment_status,
+            amount,
+            paid_at
+        )
+        VALUES (
+            #{orderNo},
+            #{userId},
+            #{productId},
+            #{paymentMethod},
+            #{paymentStatus},
+            #{amount},
+            #{paidAt}
+        )
+    </insert>
+
+    <insert id="insertPaid" parameterType="com.acorn.elearning.payment.model.DummyPayment" useGeneratedKeys="true" keyProperty="paymentId">
+        INSERT INTO dummy_payments (
+            order_no,
+            user_id,
+            product_id,
+            payment_method,
+            payment_status,
+            amount,
+            paid_at
+        )
+        VALUES (
+            #{orderNo},
+            #{userId},
+            #{productId},
+            #{paymentMethod},
+            'PAID',
+            #{amount},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.payment.model.DummyPayment">
+        UPDATE dummy_payments
+        SET
+            order_no = #{orderNo},
+            user_id = #{userId},
+            product_id = #{productId},
+            payment_method = #{paymentMethod},
+            payment_status = #{paymentStatus},
+            amount = #{amount},
+            paid_at = #{paidAt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE payment_id = #{paymentId}
+    </update>
 </mapper>
