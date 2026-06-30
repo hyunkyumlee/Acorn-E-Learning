@@ -1,64 +1,173 @@
 package com.acorn.elearning.payment.controller;
 
+import com.acorn.elearning.common.idempotency.IdempotencyTokenService;
+import com.acorn.elearning.payment.dto.response.PaymentDetailResponse;
+import com.acorn.elearning.payment.dto.response.PaymentProductListResponse;
+import com.acorn.elearning.payment.dto.response.PaymentResultResponse;
+import com.acorn.elearning.payment.form.DummyPaymentForm;
+import com.acorn.elearning.payment.service.DummyPaymentService;
+import com.acorn.elearning.payment.service.PaymentAccessService;
+import com.acorn.elearning.security.SessionUser;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Optional;
+import java.util.Locale;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PaymentController {
+    private static final String PRODUCT_CODE = "PREMIUM_LIFETIME";
+    private static final String FORM_TYPE = "PAYMENT_DUMMY";
+
+    private final DummyPaymentService dummyPaymentService;
+    private final PaymentAccessService paymentAccessService;
+    private final IdempotencyTokenService idempotencyTokenService;
+
+    public PaymentController(
+            DummyPaymentService dummyPaymentService,
+            PaymentAccessService paymentAccessService,
+            IdempotencyTokenService idempotencyTokenService
+    ) {
+        this.dummyPaymentService = dummyPaymentService;
+        this.paymentAccessService = paymentAccessService;
+        this.idempotencyTokenService = idempotencyTokenService;
+    }
 
     @GetMapping("/payments")
     public String index(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PaymentChoiceView view = dummyPaymentService.index(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
         model.addAttribute("screen", "payment/index");
+        addProductModel(model);
         return "payment/index";
     }
 
     @GetMapping("/payments/card")
-    public String cardForm(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PaymentChoiceView view = dummyPaymentService.cardForm(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
-        model.addAttribute("screen", "payment/card");
+    public String cardForm(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            HttpSession httpSession,
+            Model model
+    ) {
+        SessionUser currentUser = currentUser(sessionUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        preparePaymentForm(model, httpSession, currentUser, "CARD");
         return "payment/card";
     }
 
     @GetMapping("/payments/bank")
-    public String bankForm(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PaymentChoiceView view = dummyPaymentService.bankForm(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
-        model.addAttribute("screen", "payment/bank");
+    public String bankForm(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            HttpSession httpSession,
+            Model model
+    ) {
+        SessionUser currentUser = currentUser(sessionUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        preparePaymentForm(model, httpSession, currentUser, "BANK_TRANSFER");
         return "payment/bank";
     }
 
     @PostMapping("/payments/dummy")
-    public String dummyPay() {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "payment/index"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // dummyPaymentService.dummyPay(sessionUser, form);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+    public String dummyPay(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid DummyPaymentForm form,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes,
+            Model model
+    ) {
+        SessionUser currentUser = currentUser(sessionUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("screen", "payment/card");
+            addProductModel(model);
+            model.addAttribute("idempotencyToken", form.getIdempotencyToken());
+            return paymentFormView(form.getPaymentMethod());
+        }
+
+        PaymentResultResponse result = dummyPaymentService.pay(currentUser, form);
+        redirectAttributes.addAttribute("paymentId", result.paymentId());
         return "redirect:/payments/complete";
     }
 
     @GetMapping("/payments/complete")
-    public String complete(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PaymentResultView view = dummyPaymentService.complete(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+    public String complete(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam(name = "paymentId", required = false) Long paymentId,
+            Model model
+    ) {
+        SessionUser currentUser = currentUser(sessionUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
         model.addAttribute("screen", "payment/complete");
+        if (paymentId != null) {
+            PaymentDetailResponse detail = dummyPaymentService.detail(currentUser, paymentId);
+            model.addAttribute("detail", detail);
+        } else {
+            Optional<PaymentResultResponse> result = dummyPaymentService.latestResult(currentUser.userId());
+            result.ifPresent(value -> model.addAttribute("result", value));
+        }
         return "payment/complete";
+    }
+
+    private void preparePaymentForm(
+            Model model,
+            HttpSession httpSession,
+            SessionUser sessionUser,
+            String paymentMethod
+    ) {
+        DummyPaymentForm form = new DummyPaymentForm();
+        form.setProductCode(PRODUCT_CODE);
+        form.setPaymentMethod(paymentMethod);
+        form.setIdempotencyToken(idempotencyTokenService.issue(FORM_TYPE, httpSession, sessionUser.userId()).token());
+
+        model.addAttribute("screen", paymentFormView(paymentMethod));
+        model.addAttribute("form", form);
+        addProductModel(model);
+        model.addAttribute("idempotencyToken", form.getIdempotencyToken());
+    }
+
+    private String paymentFormView(String paymentMethod) {
+        if ("BANK_TRANSFER".equals(paymentMethod)) {
+            return "payment/bank";
+        }
+        return "payment/card";
+    }
+
+    private SessionUser currentUser(SessionUser sessionUser) {
+        return sessionUser;
+    }
+
+    private void addProductModel(Model model) {
+        PaymentProductListResponse response = paymentAccessService.products();
+        PaymentProductListResponse.Product product = response.products().stream()
+                .filter(item -> PRODUCT_CODE.equals(item.productCode()))
+                .findFirst()
+                .orElseGet(() -> response.products().isEmpty() ? null : response.products().get(0));
+
+        model.addAttribute("products", response.products());
+        model.addAttribute("product", product);
+        model.addAttribute("productCode", product == null ? PRODUCT_CODE : product.productCode());
+        model.addAttribute("productName", product == null ? "Premium Lifetime" : product.productName());
+        model.addAttribute("productPriceLabel", product == null ? "9,900원" : priceLabel(product.price()));
+    }
+
+    private String priceLabel(BigDecimal price) {
+        if (price == null) {
+            return "0원";
+        }
+        return NumberFormat.getIntegerInstance(Locale.KOREA).format(price) + "원";
     }
 }
