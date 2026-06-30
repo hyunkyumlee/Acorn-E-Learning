@@ -19,7 +19,7 @@
         <result property="createdAt" column="created_at " />
         <result property="updatedAt" column="updated_at " />
     </resultMap>
-    
+
     <!-- TODO findById 구현 예시입니다.
       <select id="findById" parameterType="long" resultMap="NoticeResultMap">
           SELECT /* DDL column list */
@@ -41,11 +41,11 @@
           ORDER BY id DESC
       </select>
     -->
-    
+
     <select id="findAll" resultMap="NoticeResultMap">
         SELECT N.NOTICE_ID, N.TITLE, U.NICKNAME, N.PUBLISHED_AT, N.STATUS
-        FROM N.NOTICES
-        JOIN U.USERS
+        FROM NOTICES N
+        JOIN USERS U
         ON N.WRITER_ID = U.USER_ID
         ORDER BY NOTICE_ID
     </select>
@@ -56,6 +56,22 @@
           VALUES (/* #{property} values */)
       </insert>
     -->
+
+    <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notices (
+        writer_id,
+        title,
+        content,
+        status
+        )
+        VALUES (
+        #{writerId},
+        #{title},
+        #{content},
+        #{status}
+        )
+    </insert>
+
     <!-- TODO update 구현 예시입니다.
       <update id="update" parameterType="com.acorn.elearning.admin.model.Notice">
           UPDATE notices
@@ -63,4 +79,13 @@
           WHERE id = #{id}
       </update>
     -->
+
+    <update id="update" parameterType="com.acorn.elearning.admin.model.Notice">
+        UPDATE notices
+        SET title = #{title},
+        content = #{content},
+        status = #{status},
+        update_at = NOW()
+        WHERE NOTICE_ID = #{notice_Id}
+    </update>
 </mapper>
