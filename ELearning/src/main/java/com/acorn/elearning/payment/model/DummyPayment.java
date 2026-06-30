@@ -1,14 +1,14 @@
-        package com.acorn.elearning.payment.model;
+package com.acorn.elearning.payment.model;
 
-        import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-        import lombok.Getter;
-        import lombok.Setter;
+import lombok.Getter;
+import lombok.Setter;
 
-        @Getter
-        @Setter
-        public class DummyPayment {
-            private Long paymentId;
+@Getter
+@Setter
+public class DummyPayment {
+    private Long paymentId;
     private String orderNo;
     private Long userId;
     private Long productId;
@@ -18,4 +18,4 @@ import java.time.LocalDateTime;
     private LocalDateTime paidAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-        }
+}

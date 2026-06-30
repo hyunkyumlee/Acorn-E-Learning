@@ -1,1 +1,273 @@
-.payment-screen .panel { border-left: 4px solid var(--accent); }
+.payment-screen {
+  --payment-line: color-mix(in srgb, var(--text) 12%, transparent);
+  --payment-business: var(--primary);
+  --payment-business-dark: color-mix(in srgb, var(--primary) 72%, var(--accent));
+  --payment-bg-soft: color-mix(in srgb, var(--surface-soft) 78%, var(--surface));
+  --payment-card-bg: color-mix(in srgb, var(--surface) 92%, transparent);
+  --payment-card-bg-strong: var(--surface);
+  --payment-ink: var(--text);
+  --payment-muted: var(--muted);
+  --payment-shadow-tight: var(--shadow-soft);
+  --payment-cta-text: #081215;
+  --payment-cyan-text: var(--accent);
+  min-height: 100vh;
+}
+
+.payment-screen *,
+.payment-screen *::before,
+.payment-screen *::after {
+  box-sizing: border-box;
+}
+
+.payment-screen .figma-payment-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 18% 12%, color-mix(in srgb, var(--payment-business) 12%, transparent), transparent 32%),
+    radial-gradient(circle at 86% 78%, color-mix(in srgb, var(--payment-business) 16%, transparent), transparent 30%),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface) 98%, transparent), var(--bg), var(--surface-soft));
+  padding: clamp(24px, 4vw, 60px);
+}
+
+.payment-screen .figma-payment-step {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  max-width: 960px;
+  margin: 0 auto 34px;
+}
+
+.payment-screen .figma-payment-step strong,
+.payment-screen .figma-payment-step span {
+  border-radius: var(--radius-pill);
+}
+
+.payment-screen .figma-payment-step strong {
+  border: 1px solid var(--payment-line);
+  background: var(--payment-card-bg);
+  color: var(--payment-ink);
+  padding: 12px 18px;
+  text-align: center;
+}
+
+.payment-screen .figma-payment-step span {
+  height: 10px;
+  background: var(--payment-business);
+}
+
+.payment-screen .figma-payment-head h1,
+.payment-screen .figma-method-card h2,
+.payment-screen .figma-order-panel h2,
+.payment-screen .figma-payment-complete h1 {
+  margin: 0;
+  color: var(--payment-ink);
+}
+
+.payment-screen .figma-payment-head p,
+.payment-screen .figma-method-card p,
+.payment-screen .figma-payment-complete p {
+  margin: 8px 0 0;
+  color: var(--payment-muted);
+  font-weight: 800;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+.payment-screen .figma-payment-choice,
+.payment-screen .figma-payment-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr)) 320px;
+  gap: 22px;
+  align-items: start;
+  margin-top: 28px;
+}
+
+.payment-screen .figma-payment-layout {
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+.payment-screen .figma-method-card,
+.payment-screen .figma-payment-form,
+.payment-screen .figma-order-panel,
+.payment-screen .figma-payment-complete {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--payment-line);
+  border-radius: var(--radius);
+  background: var(--payment-card-bg);
+  padding: clamp(18px, 2.4vw, 30px);
+  box-shadow: var(--payment-shadow-tight);
+}
+
+.payment-screen .figma-method-card span {
+  display: grid;
+  width: 78px;
+  height: 78px;
+  place-items: center;
+  border: 1px solid var(--payment-line);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--surface) 95%, transparent) 0 9%, transparent 10%),
+    var(--payment-business);
+  color: var(--payment-cta-text);
+  font-weight: 950;
+}
+
+.payment-screen .figma-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-radius: var(--radius);
+  background: var(--payment-card-bg-strong);
+  color: var(--payment-ink);
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 950;
+  text-decoration: none;
+  transition: transform 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out;
+}
+
+.payment-screen .figma-button:hover {
+  border-color: color-mix(in srgb, var(--payment-business) 50%, transparent);
+  transform: translateY(-1px);
+}
+
+.payment-screen .figma-button.primary {
+  border-color: var(--payment-business-dark);
+  background: var(--payment-business);
+  color: var(--payment-cta-text);
+  box-shadow: 0 2px 0 var(--payment-business-dark), 0 12px 22px color-mix(in srgb, var(--payment-business) 16%, transparent);
+}
+
+.payment-screen .figma-method-row,
+.payment-screen .button-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.payment-screen .figma-method-row {
+  margin-bottom: 18px;
+}
+
+.payment-screen form.figma-payment-form {
+  max-width: none;
+}
+
+.payment-screen .figma-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.payment-screen .figma-form-grid label {
+  display: grid;
+  gap: 8px;
+  color: var(--payment-muted);
+  font-weight: 900;
+}
+
+.payment-screen .figma-form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+.payment-screen .field {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--payment-ink);
+  padding: 0 13px;
+}
+
+.payment-screen .figma-order-panel dl {
+  display: grid;
+  gap: 14px;
+}
+
+.payment-screen .figma-order-panel div,
+.payment-screen .figma-payment-history {
+  display: grid;
+  grid-template-columns: minmax(86px, 0.7fr) minmax(0, 1.3fr);
+  gap: 14px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--payment-business) 14%, transparent);
+  border-radius: var(--radius);
+  background: var(--payment-bg-soft);
+  padding: 14px 16px;
+}
+
+.payment-screen .figma-order-panel dt,
+.payment-screen .figma-order-panel dd {
+  margin: 0;
+  word-break: keep-all;
+}
+
+.payment-screen .figma-order-panel dd {
+  justify-self: end;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.payment-screen .figma-payment-complete {
+  min-height: 520px;
+  place-items: center;
+  text-align: center;
+}
+
+.payment-screen .figma-complete-mark {
+  display: grid;
+  width: 118px;
+  height: 118px;
+  place-items: center;
+  border: 1px solid var(--payment-line);
+  border-radius: 50%;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--payment-business) 22%, transparent), color-mix(in srgb, var(--payment-business) 24%, transparent));
+  color: var(--payment-cyan-text);
+  font-size: 32px;
+  font-weight: 950;
+}
+
+.payment-screen .figma-payment-history b {
+  color: var(--payment-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 1180px) {
+  .payment-screen .figma-payment-choice,
+  .payment-screen .figma-payment-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-screen .figma-payment-page {
+    padding: 28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .payment-screen .figma-payment-page {
+    padding: 20px 16px;
+  }
+
+  .payment-screen .figma-form-grid,
+  .payment-screen .figma-order-panel div,
+  .payment-screen .figma-payment-history {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-screen .figma-method-card,
+  .payment-screen .figma-payment-form,
+  .payment-screen .figma-order-panel {
+    padding: 16px;
+  }
+
+  .payment-screen .figma-payment-step {
+    grid-template-columns: 64px minmax(0, 1fr);
+    margin-bottom: 22px;
+  }
+}

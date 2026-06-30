@@ -1,55 +1,72 @@
 package com.acorn.elearning.payment.controller;
 
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.common.response.ApiResponse;
-import java.util.Map;
+import com.acorn.elearning.payment.dto.request.CreateDummyPaymentRequest;
+import com.acorn.elearning.payment.dto.response.PaymentDetailResponse;
+import com.acorn.elearning.payment.dto.response.PaymentProductListResponse;
+import com.acorn.elearning.payment.dto.response.PaymentResultResponse;
+import com.acorn.elearning.payment.dto.response.PremiumAccessResponse;
+import com.acorn.elearning.payment.service.DummyPaymentService;
+import com.acorn.elearning.payment.service.PaymentAccessService;
+import com.acorn.elearning.security.SessionUser;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class PaymentApiController {
+    private final PaymentAccessService paymentAccessService;
+    private final DummyPaymentService dummyPaymentService;
+
+    public PaymentApiController(
+            PaymentAccessService paymentAccessService,
+            DummyPaymentService dummyPaymentService
+    ) {
+        this.paymentAccessService = paymentAccessService;
+        this.dummyPaymentService = dummyPaymentService;
+    }
 
     @GetMapping("/api/payments/products")
-    public ApiResponse<Map<String, Object>> products() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PaymentProductListResponse response = paymentAccessService.products(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("PAY-001");
+    public ApiResponse<PaymentProductListResponse> products(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+    ) {
+        requireSessionUser(sessionUser);
+        return ApiResponse.success(paymentAccessService.products());
     }
 
     @PostMapping("/api/payments/dummy")
-    public ApiResponse<Map<String, Object>> dummy() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // DummyPaymentForm form = request body 또는 form binding 값으로 받으세요.
-        // PaymentResultResponse response = dummyPaymentService.dummy(sessionUser, form);
-        // return ApiResponse.success(response);
-        return ok("PAY-002");
-    }
-
-    @GetMapping("/api/payments/{paymentId}")
-    public ApiResponse<Map<String, Object>> detail(@PathVariable Long paymentId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PaymentDetailResponse response = dummyPaymentService.detail(sessionUser, paymentId);
-        // return ApiResponse.success(response);
-        return ok("PAY-003");
+    public ApiResponse<PaymentResultResponse> dummy(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid @RequestBody CreateDummyPaymentRequest request
+    ) {
+        return ApiResponse.success(dummyPaymentService.pay(requireSessionUser(sessionUser), request.toForm()));
     }
 
     @GetMapping("/api/payments/premium-access")
-    public ApiResponse<Map<String, Object>> premiumAccess() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PremiumAccessResponse response = paymentAccessService.premiumAccess(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("PAY-003");
+    public ApiResponse<PremiumAccessResponse> premiumAccess(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+    ) {
+        return ApiResponse.success(paymentAccessService.premiumAccess(requireSessionUser(sessionUser)));
     }
 
-    private ApiResponse<Map<String, Object>> ok(String endpointId) {
-        // TODO: 개별 endpoint method에서 service 호출과 Response DTO 변환을 끝내면 이 helper를 제거하세요.
-        // return ApiResponse.success(response); 형태가 최종 구현입니다.
-        return ApiResponse.success(Map.of("endpointId", endpointId, "status", "SKELETON"));
+    @GetMapping("/api/payments/{paymentId}")
+    public ApiResponse<PaymentDetailResponse> detail(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long paymentId
+    ) {
+        return ApiResponse.success(dummyPaymentService.detail(requireSessionUser(sessionUser), paymentId));
+    }
+
+    private SessionUser requireSessionUser(SessionUser sessionUser) {
+        if (sessionUser != null && sessionUser.userId() != null) {
+            return sessionUser;
+        }
+        throw new BusinessException(ErrorCode.AUTH_REQUIRED);
     }
 }

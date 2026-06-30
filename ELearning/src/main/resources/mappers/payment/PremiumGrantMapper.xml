@@ -1,37 +1,118 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.payment.mapper.PremiumGrantMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="PremiumGrantResultMap" type="com.acorn.elearning.payment.model.PremiumGrant">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="PremiumGrantResultMap">
-          SELECT /* DDL column list */
-          FROM premium_grants
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="PremiumGrantResultMap">
-          SELECT /* DDL column list */
-          FROM premium_grants
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.payment.model.PremiumGrant" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO premium_grants (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.payment.model.PremiumGrant">
-          UPDATE premium_grants
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="PremiumGrantResultMap" type="com.acorn.elearning.payment.model.PremiumGrant">
+        <id property="grantId" column="grant_id" />
+        <result property="userId" column="user_id" />
+        <result property="paymentId" column="payment_id" />
+        <result property="grantType" column="grant_type" />
+        <result property="status" column="status" />
+        <result property="grantedAt" column="granted_at" />
+        <result property="expiresAt" column="expires_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="PremiumGrantColumns">
+        grant_id,
+        user_id,
+        payment_id,
+        grant_type,
+        status,
+        granted_at,
+        expires_at,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="PremiumGrantResultMap">
+        SELECT
+        <include refid="PremiumGrantColumns" />
+        FROM premium_grants
+        WHERE grant_id = #{id}
+    </select>
+
+    <select id="findByPaymentId" parameterType="long" resultMap="PremiumGrantResultMap">
+        SELECT
+        <include refid="PremiumGrantColumns" />
+        FROM premium_grants
+        WHERE payment_id = #{paymentId}
+    </select>
+
+    <select id="findActiveByUserId" parameterType="long" resultMap="PremiumGrantResultMap">
+        SELECT
+        <include refid="PremiumGrantColumns" />
+        FROM premium_grants
+        WHERE user_id = #{userId}
+          AND status = 'ACTIVE'
+          AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+        ORDER BY grant_id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findAll" resultMap="PremiumGrantResultMap">
+        SELECT
+        <include refid="PremiumGrantColumns" />
+        FROM premium_grants
+        ORDER BY grant_id DESC
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="PremiumGrantResultMap">
+        SELECT
+        <include refid="PremiumGrantColumns" />
+        FROM premium_grants
+        WHERE user_id = #{userId}
+        ORDER BY grant_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.payment.model.PremiumGrant" useGeneratedKeys="true" keyProperty="grantId">
+        INSERT INTO premium_grants (
+            user_id,
+            payment_id,
+            grant_type,
+            status,
+            granted_at,
+            expires_at
+        )
+        VALUES (
+            #{userId},
+            #{paymentId},
+            #{grantType},
+            #{status},
+            #{grantedAt},
+            #{expiresAt}
+        )
+    </insert>
+
+    <insert id="insertLifetimeGrant" parameterType="com.acorn.elearning.payment.model.PremiumGrant" useGeneratedKeys="true" keyProperty="grantId">
+        INSERT INTO premium_grants (
+            user_id,
+            payment_id,
+            grant_type,
+            status,
+            granted_at,
+            expires_at
+        )
+        VALUES (
+            #{userId},
+            #{paymentId},
+            'LIFETIME',
+            'ACTIVE',
+            CURRENT_TIMESTAMP,
+            NULL
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.payment.model.PremiumGrant">
+        UPDATE premium_grants
+        SET
+            user_id = #{userId},
+            payment_id = #{paymentId},
+            grant_type = #{grantType},
+            status = #{status},
+            granted_at = #{grantedAt},
+            expires_at = #{expiresAt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE grant_id = #{grantId}
+    </update>
 </mapper>
