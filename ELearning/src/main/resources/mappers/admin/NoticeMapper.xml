@@ -7,6 +7,19 @@
           <result property="..." column="..." />
       </resultMap>
     -->
+
+    <resultMap id="NoticeResultMap" type="com.acorn.elearning.admin.model.Notice">
+        <id property= "noticeId" column="notice_id" />
+
+        <result property="writerId" column="writer_id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="status" column="status" />
+        <result property="publishedAt" column="published_at " />
+        <result property="createdAt" column="created_at " />
+        <result property="updatedAt" column="updated_at " />
+    </resultMap>
+
     <!-- TODO findById 구현 예시입니다.
       <select id="findById" parameterType="long" resultMap="NoticeResultMap">
           SELECT /* DDL column list */
@@ -14,6 +27,13 @@
           WHERE id = #{id}
       </select>
     -->
+
+    <select id="findById" resultMap="NoticeResultMap">
+        SELECT NOTICE_ID, WRITER_ID, TITLE, CONTENT, PUBLISHED_AT, STATUS
+        FROM NOTICES
+        WHERE NOTICE_ID = #{id}
+    </select>
+
     <!-- TODO findAll 구현 예시입니다.
       <select id="findAll" resultMap="NoticeResultMap">
           SELECT /* DDL column list */
@@ -21,12 +41,37 @@
           ORDER BY id DESC
       </select>
     -->
+
+    <select id="findAll" resultMap="NoticeResultMap">
+        SELECT N.NOTICE_ID, N.TITLE, U.NICKNAME, N.PUBLISHED_AT, N.STATUS
+        FROM NOTICES N
+        JOIN USERS U
+        ON N.WRITER_ID = U.USER_ID
+        ORDER BY NOTICE_ID
+    </select>
+
     <!-- TODO insert 구현 예시입니다.
       <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="id">
           INSERT INTO notices (/* writable columns */)
           VALUES (/* #{property} values */)
       </insert>
     -->
+
+    <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notices (
+        writer_id,
+        title,
+        content,
+        status
+        )
+        VALUES (
+        #{writerId},
+        #{title},
+        #{content},
+        #{status}
+        )
+    </insert>
+
     <!-- TODO update 구현 예시입니다.
       <update id="update" parameterType="com.acorn.elearning.admin.model.Notice">
           UPDATE notices
@@ -34,4 +79,13 @@
           WHERE id = #{id}
       </update>
     -->
+
+    <update id="update" parameterType="com.acorn.elearning.admin.model.Notice">
+        UPDATE notices
+        SET title = #{title},
+        content = #{content},
+        status = #{status},
+        update_at = NOW()
+        WHERE NOTICE_ID = #{notice_Id}
+    </update>
 </mapper>

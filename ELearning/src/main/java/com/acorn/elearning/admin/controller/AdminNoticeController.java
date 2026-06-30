@@ -1,5 +1,8 @@
 package com.acorn.elearning.admin.controller;
 
+import com.acorn.elearning.admin.model.Notice;
+import com.acorn.elearning.admin.service.AdminNoticeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class AdminNoticeController {
 
+    @Autowired
+    AdminNoticeService service;
+
+
     @GetMapping("/admin/notices")
     public String notices(Model model) {
         // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
@@ -16,27 +23,41 @@ public class AdminNoticeController {
         // AdminManagePageView view = adminNoticeService.notices(sessionUser);
         // model.addAttribute("view", view);
         // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+
+       model.addAttribute("noticeList", service.findAll());
+
         model.addAttribute("screen", "admin/notices");
         return "admin/notices";
     }
 
     @PostMapping("/admin/notices")
-    public String create() {
+    public String create(Notice notice) {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "admin/notices"; }
         // SessionUser sessionUser = currentSessionUser();
         // adminNoticeService.create(sessionUser, form);
         // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+
+        // 임시 관리자 ID
+        notice.setWriterId(1L);
+
+        service.insert(notice);
+
         return "redirect:/admin/notices";
     }
 
     @PostMapping("/admin/notices/{noticeId}")
-    public String update(@PathVariable Long noticeId) {
+    public String update(@PathVariable Long noticeId, Notice notice) {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "/admin/notices"; }
         // SessionUser sessionUser = currentSessionUser();
         // adminNoticeService.update(sessionUser, form, noticeId);
         // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+
+        notice.setNoticeId(noticeId);
+
+        service.update(notice);
+
         return "redirect:/admin/notices";
     }
 }

@@ -5,13 +5,98 @@
   <title>공지 관리 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/adminNotices.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>공지 관리</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/notices</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+
+<main class="page-shell admin-screen">
+
+  <!-- 제목 영역 -->
+  <section class="admin-header">
+    <h1>공지사항 관리</h1>
+    <button type="button">+ 공지사항 작성</button>
+  </section>
+
+  <!-- 검색/필터 영역 -->
+  <section class="admin-filter">
+    <select>
+      <option>기간</option>
+    </select>
+
+    <select>
+      <option>공개 상태</option>
+      <option value="PUBLISHED">공개</option>
+      <option value="DRAFT">비공개</option>
+    </select>
+  </section>
+
+  <!-- 공지사항 목록 -->
+  <section class="admin-table-section">
+    <h2>공지사항 목록</h2>
+
+    <table>
+      <thead>
+      <tr>
+        <th>공지 ID</th>
+        <th>제목</th>
+        <th>작성자</th>
+        <th>게시일</th>
+        <th>조회수</th>
+        <th>상태</th>
+        <th>관리</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr th:each="notice : ${noticeList}">
+        <td th:text="${notice.noticeId}">#N001</td>
+        <td th:text="${notice.title}">공지 제목</td>
+        <td th:text="${notice.writerId}">관리자</td>
+        <td th:text="${notice.publishedAt}">2026-06-01</td>
+        <td>-</td>
+        <td th:text="${notice.status}">공개</td>
+        <td>
+          <button type="button">수정</button>
+          <button type="button">삭제</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 등록 / 수정 폼 -->
+  <section class="admin-form-section">
+    <h2>공지사항 등록 / 수정</h2>
+
+    <form method="post" action="/admin/notices">
+      <div>
+        <label>제목</label>
+        <input type="text" name="title" placeholder="공지사항 제목을 입력하세요">
+      </div>
+
+      <div>
+        <label>내용</label>
+        <textarea name="content" placeholder="공지사항 내용을 입력하세요"></textarea>
+      </div>
+
+      <div>
+        <label>공개 여부</label>
+        <select name="status">
+          <option value="PUBLISHED">공개</option>
+          <option value="DRAFT">비공개</option>
+        </select>
+      </div>
+
+      <div>
+        <button type="submit">저장</button>
+        <button type="reset">취소</button>
+      </div>
+    </form>
+  </section>
+
+</main>
 </body>
 </html>
+
