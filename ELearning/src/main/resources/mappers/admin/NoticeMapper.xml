@@ -27,6 +27,13 @@
           WHERE id = #{id}
       </select>
     -->
+
+    <select id="findById" resultMap="NoticeResultMap">
+        SELECT NOTICE_ID, WRITER_ID, TITLE, CONTENT, PUBLISHED_AT, STATUS
+        FROM NOTICES
+        WHERE NOTICE_ID = #{id}
+    </select>
+
     <!-- TODO findAll 구현 예시입니다.
       <select id="findAll" resultMap="NoticeResultMap">
           SELECT /* DDL column list */
@@ -36,10 +43,13 @@
     -->
     
     <select id="findAll" resultMap="NoticeResultMap">
-        SELECT *
-        FROM notices
+        SELECT N.NOTICE_ID, N.TITLE, U.NICKNAME, N.PUBLISHED_AT, N.STATUS
+        FROM N.NOTICES
+        JOIN U.USERS
+        ON N.WRITER_ID = U.USER_ID
         ORDER BY NOTICE_ID
     </select>
+
     <!-- TODO insert 구현 예시입니다.
       <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="id">
           INSERT INTO notices (/* writable columns */)
