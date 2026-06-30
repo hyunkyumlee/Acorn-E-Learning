@@ -1,37 +1,49 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.learning.mapper.LevelTestAnswerMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="LevelTestAnswerResultMap" type="com.acorn.elearning.learning.model.LevelTestAnswer">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="LevelTestAnswerResultMap">
-          SELECT /* DDL column list */
-          FROM level_test_answers
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="LevelTestAnswerResultMap">
-          SELECT /* DDL column list */
-          FROM level_test_answers
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.learning.model.LevelTestAnswer" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO level_test_answers (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.learning.model.LevelTestAnswer">
-          UPDATE level_test_answers
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="LevelTestAnswerResultMap" type="com.acorn.elearning.learning.model.LevelTestAnswer">
+        <id property="answerId" column="answer_id" />
+        <result property="attemptId" column="attempt_id" />
+        <result property="questionId" column="question_id" />
+        <result property="choiceId" column="choice_id" />
+        <result property="submittedAnswer" column="submitted_answer" />
+        <result property="isCorrect" column="is_correct" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <sql id="columns">
+        answer_id, attempt_id, question_id, choice_id, submitted_answer, is_correct, created_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="LevelTestAnswerResultMap">
+        SELECT <include refid="columns" />
+        FROM level_test_answers
+        WHERE answer_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="LevelTestAnswerResultMap">
+        SELECT <include refid="columns" />
+        FROM level_test_answers
+        ORDER BY answer_id ASC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.LevelTestAnswer"
+            useGeneratedKeys="true" keyProperty="answerId">
+        INSERT INTO level_test_answers
+            (attempt_id, question_id, choice_id, submitted_answer, is_correct)
+        VALUES
+            (#{attemptId}, #{questionId}, #{choiceId}, #{submittedAnswer}, #{isCorrect})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.LevelTestAnswer">
+        UPDATE level_test_answers
+        SET attempt_id       = #{attemptId},
+            question_id      = #{questionId},
+            choice_id        = #{choiceId},
+            submitted_answer = #{submittedAnswer},
+            is_correct       = #{isCorrect}
+        WHERE answer_id = #{answerId}
+    </update>
+
 </mapper>

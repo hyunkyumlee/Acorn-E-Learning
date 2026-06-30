@@ -1,37 +1,58 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.learning.mapper.LessonMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="LessonResultMap" type="com.acorn.elearning.learning.model.Lesson">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="LessonResultMap">
-          SELECT /* DDL column list */
-          FROM lessons
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="LessonResultMap">
-          SELECT /* DDL column list */
-          FROM lessons
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.learning.model.Lesson" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO lessons (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.learning.model.Lesson">
-          UPDATE lessons
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="LessonResultMap" type="com.acorn.elearning.learning.model.Lesson">
+        <id property="lessonId" column="lesson_id" />
+        <result property="nodeId" column="node_id" />
+        <result property="title" column="title" />
+        <result property="summary" column="summary" />
+        <result property="content" column="content" />
+        <result property="exampleCode" column="example_code" />
+        <result property="sortOrder" column="sort_order" />
+        <result property="isActive" column="is_active" />
+        <result property="createdBy" column="created_by" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        lesson_id, node_id, title, summary, content, example_code,
+        sort_order, is_active, created_by, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="LessonResultMap">
+        SELECT <include refid="columns" />
+        FROM lessons
+        WHERE lesson_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="LessonResultMap">
+        SELECT <include refid="columns" />
+        FROM lessons
+        ORDER BY node_id ASC, sort_order ASC, lesson_id ASC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.Lesson"
+            useGeneratedKeys="true" keyProperty="lessonId">
+        INSERT INTO lessons
+            (node_id, title, summary, content, example_code, sort_order, is_active, created_by)
+        VALUES
+            (#{nodeId}, #{title}, #{summary}, #{content}, #{exampleCode}, #{sortOrder}, #{isActive}, #{createdBy})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.Lesson">
+        UPDATE lessons
+        SET node_id      = #{nodeId},
+            title        = #{title},
+            summary      = #{summary},
+            content      = #{content},
+            example_code = #{exampleCode},
+            sort_order   = #{sortOrder},
+            is_active    = #{isActive},
+            created_by   = #{createdBy},
+            updated_at   = NOW()
+        WHERE lesson_id = #{lessonId}
+    </update>
+
 </mapper>

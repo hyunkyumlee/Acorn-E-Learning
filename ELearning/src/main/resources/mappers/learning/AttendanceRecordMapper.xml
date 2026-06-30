@@ -1,37 +1,50 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.learning.mapper.AttendanceRecordMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="AttendanceRecordResultMap" type="com.acorn.elearning.learning.model.AttendanceRecord">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="AttendanceRecordResultMap">
-          SELECT /* DDL column list */
-          FROM attendance_records
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="AttendanceRecordResultMap">
-          SELECT /* DDL column list */
-          FROM attendance_records
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.learning.model.AttendanceRecord" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO attendance_records (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.learning.model.AttendanceRecord">
-          UPDATE attendance_records
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="AttendanceRecordResultMap" type="com.acorn.elearning.learning.model.AttendanceRecord">
+        <id property="attendanceId" column="attendance_id" />
+        <result property="userId" column="user_id" />
+        <result property="attendanceDate" column="attendance_date" />
+        <result property="streakCount" column="streak_count" />
+        <result property="qualifiedSetAttemptId" column="qualified_set_attempt_id" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        attendance_id, user_id, attendance_date, streak_count,
+        qualified_set_attempt_id, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="AttendanceRecordResultMap">
+        SELECT <include refid="columns" />
+        FROM attendance_records
+        WHERE attendance_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="AttendanceRecordResultMap">
+        SELECT <include refid="columns" />
+        FROM attendance_records
+        ORDER BY attendance_date DESC, attendance_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.AttendanceRecord"
+            useGeneratedKeys="true" keyProperty="attendanceId">
+        INSERT INTO attendance_records
+            (user_id, attendance_date, streak_count, qualified_set_attempt_id)
+        VALUES
+            (#{userId}, #{attendanceDate}, #{streakCount}, #{qualifiedSetAttemptId})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.AttendanceRecord">
+        UPDATE attendance_records
+        SET user_id                  = #{userId},
+            attendance_date          = #{attendanceDate},
+            streak_count             = #{streakCount},
+            qualified_set_attempt_id = #{qualifiedSetAttemptId},
+            updated_at               = NOW()
+        WHERE attendance_id = #{attendanceId}
+    </update>
+
 </mapper>

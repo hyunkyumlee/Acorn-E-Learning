@@ -10,8 +10,46 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>학습 메인</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>learning/main</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="page-heading"><span class="eyebrow">Learning</span><h1>학습 메인</h1><p>subjects 테이블의 활성 과목을 DB에서 직접 읽어 표시합니다. (learning 도메인 첫 DB 연결 슬라이스)</p></section>
+
+    <section class="panel">
+      <h2>과목 목록 <small th:text="'(' + ${#lists.size(subjects)} + '개)'">(0개)</small></h2>
+      <p th:if="${#lists.isEmpty(subjects)}">표시할 활성 과목이 없습니다. (subjects 테이블 seed/접속 확인)</p>
+      <table th:unless="${#lists.isEmpty(subjects)}" class="subject-table">
+        <thead>
+          <tr><th>순서</th><th>코드</th><th>과목명</th><th>설명</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="subject : ${subjects}">
+            <td th:text="${subject.sortOrder}">0</td>
+            <td><code th:text="${subject.subjectCode}">CODE</code></td>
+            <td th:text="${subject.subjectName}">과목명</td>
+            <td th:text="${subject.description}">설명</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>커리큘럼 로드맵 <small>(JAVA · <span th:text="${#lists.size(roadmap)}">0</span>개 노드)</small></h2>
+      <p th:if="${#lists.isEmpty(roadmap)}">로드맵 노드가 없습니다. (curriculum_nodes seed 확인)</p>
+      <table th:unless="${#lists.isEmpty(roadmap)}" class="roadmap-table">
+        <thead>
+          <tr><th>행성</th><th>레벨</th><th>제목</th><th>설명</th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="node : ${roadmap}">
+            <td th:text="${node.planetNo}">1</td>
+            <td><code th:text="${node.levelCode}">BRONZE</code></td>
+            <td th:text="${node.title}">제목</td>
+            <td th:text="${node.description}">설명</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><a th:href="@{/learning/lessons/1}">→ 이론 lesson 상세 예시 보기 (lesson #1)</a></p>
+    </section>
+
+    <section class="panel"><h2>Route contract</h2><p>View name: <code>learning/main</code> · 데이터: <code>SubjectMapper.findAll()</code> / <code>CurriculumService.getRoadmap(1)</code></p></section>
   </main>
 </body>
 </html>

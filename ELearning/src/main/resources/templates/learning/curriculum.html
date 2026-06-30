@@ -10,8 +10,23 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>이론 학습</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>learning/curriculum</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="page-heading"><span class="eyebrow">Learning</span><h1>이론 학습</h1><p>lessons 테이블에서 단일 lesson 상세를 DB에서 읽어 표시합니다.</p></section>
+
+    <section class="panel" th:if="${lesson != null}">
+      <h2 th:text="${lesson.title}">lesson 제목</h2>
+      <p class="lesson-summary" th:if="${lesson.summary != null}" th:text="${lesson.summary}">요약</p>
+      <hr/>
+      <div class="lesson-content" th:text="${lesson.content}">본문</div>
+      <pre th:if="${lesson.exampleCode != null}"><code th:text="${lesson.exampleCode}">예시 코드</code></pre>
+      <p class="lesson-meta">lesson_id=<span th:text="${lesson.lessonId}">0</span> · node_id=<span th:text="${lesson.nodeId}">0</span></p>
+    </section>
+
+    <section class="panel" th:if="${lesson == null}">
+      <h2>lesson을 찾을 수 없습니다</h2>
+      <p>해당 lessonId의 데이터가 없습니다. (lessons seed 확인)</p>
+    </section>
+
+    <section class="panel"><p><a th:href="@{/learning}">← 학습 메인으로</a> · View: <code>learning/curriculum</code> · 데이터: <code>LessonMapper.findById()</code></p></section>
   </main>
 </body>
 </html>

@@ -1,5 +1,6 @@
 package com.acorn.elearning.learning.controller;
 
+import com.acorn.elearning.learning.service.CurriculumService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,13 +10,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class CurriculumController {
 
+    private final CurriculumService curriculumService;
+
+    public CurriculumController(CurriculumService curriculumService) {
+        this.curriculumService = curriculumService;
+    }
+
     @GetMapping("/learning/lessons/{lessonId}")
     public String lessonDetail(@PathVariable Long lessonId, Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // LessonDetailView view = curriculumService.lessonDetail(sessionUser, lessonId);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+        // TODO 추후 signature에 HttpSession/SessionUser를 추가하고 진행률/북마크도 함께 조회한다.
+        // 현재는 lessons 테이블에서 단일 lesson 상세를 조회해 표시한다.
+        model.addAttribute("lesson", curriculumService.getLessonDetail(lessonId));
         model.addAttribute("screen", "learning/curriculum");
         return "learning/curriculum";
     }

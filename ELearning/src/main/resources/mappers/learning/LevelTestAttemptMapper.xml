@@ -1,37 +1,54 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.learning.mapper.LevelTestAttemptMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="LevelTestAttemptResultMap" type="com.acorn.elearning.learning.model.LevelTestAttempt">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="LevelTestAttemptResultMap">
-          SELECT /* DDL column list */
-          FROM level_test_attempts
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="LevelTestAttemptResultMap">
-          SELECT /* DDL column list */
-          FROM level_test_attempts
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.learning.model.LevelTestAttempt" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO level_test_attempts (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.learning.model.LevelTestAttempt">
-          UPDATE level_test_attempts
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="LevelTestAttemptResultMap" type="com.acorn.elearning.learning.model.LevelTestAttempt">
+        <id property="attemptId" column="attempt_id" />
+        <result property="userId" column="user_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="totalCount" column="total_count" />
+        <result property="correctCount" column="correct_count" />
+        <result property="resultLevelCode" column="result_level_code" />
+        <result property="status" column="status" />
+        <result property="submittedAt" column="submitted_at" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <sql id="columns">
+        attempt_id, user_id, subject_id, total_count, correct_count,
+        result_level_code, status, submitted_at, created_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="LevelTestAttemptResultMap">
+        SELECT <include refid="columns" />
+        FROM level_test_attempts
+        WHERE attempt_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="LevelTestAttemptResultMap">
+        SELECT <include refid="columns" />
+        FROM level_test_attempts
+        ORDER BY submitted_at DESC, attempt_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.LevelTestAttempt"
+            useGeneratedKeys="true" keyProperty="attemptId">
+        INSERT INTO level_test_attempts
+            (user_id, subject_id, total_count, correct_count, result_level_code, status, submitted_at)
+        VALUES
+            (#{userId}, #{subjectId}, #{totalCount}, #{correctCount}, #{resultLevelCode}, #{status}, #{submittedAt})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.LevelTestAttempt">
+        UPDATE level_test_attempts
+        SET user_id           = #{userId},
+            subject_id        = #{subjectId},
+            total_count       = #{totalCount},
+            correct_count     = #{correctCount},
+            result_level_code = #{resultLevelCode},
+            status            = #{status},
+            submitted_at      = #{submittedAt}
+        WHERE attempt_id = #{attemptId}
+    </update>
+
 </mapper>

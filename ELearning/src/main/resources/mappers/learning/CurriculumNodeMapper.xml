@@ -1,37 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.learning.mapper.CurriculumNodeMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="CurriculumNodeResultMap" type="com.acorn.elearning.learning.model.CurriculumNode">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="CurriculumNodeResultMap">
-          SELECT /* DDL column list */
-          FROM curriculum_nodes
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="CurriculumNodeResultMap">
-          SELECT /* DDL column list */
-          FROM curriculum_nodes
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.learning.model.CurriculumNode" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO curriculum_nodes (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.learning.model.CurriculumNode">
-          UPDATE curriculum_nodes
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="CurriculumNodeResultMap" type="com.acorn.elearning.learning.model.CurriculumNode">
+        <id property="nodeId" column="node_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="parentNodeId" column="parent_node_id" />
+        <result property="levelCode" column="level_code" />
+        <result property="nodeType" column="node_type" />
+        <result property="planetNo" column="planet_no" />
+        <result property="title" column="title" />
+        <result property="description" column="description" />
+        <result property="sortOrder" column="sort_order" />
+        <result property="gateCondition" column="gate_condition" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        node_id, subject_id, parent_node_id, level_code, node_type, planet_no,
+        title, description, sort_order, gate_condition, is_active, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="CurriculumNodeResultMap">
+        SELECT <include refid="columns" />
+        FROM curriculum_nodes
+        WHERE node_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="CurriculumNodeResultMap">
+        SELECT <include refid="columns" />
+        FROM curriculum_nodes
+        ORDER BY subject_id ASC, level_code ASC, sort_order ASC, node_id ASC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.CurriculumNode"
+            useGeneratedKeys="true" keyProperty="nodeId">
+        INSERT INTO curriculum_nodes
+            (subject_id, parent_node_id, level_code, node_type, planet_no,
+             title, description, sort_order, gate_condition, is_active)
+        VALUES
+            (#{subjectId}, #{parentNodeId}, #{levelCode}, #{nodeType}, #{planetNo},
+             #{title}, #{description}, #{sortOrder}, #{gateCondition}, #{isActive})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.CurriculumNode">
+        UPDATE curriculum_nodes
+        SET subject_id     = #{subjectId},
+            parent_node_id = #{parentNodeId},
+            level_code     = #{levelCode},
+            node_type      = #{nodeType},
+            planet_no      = #{planetNo},
+            title          = #{title},
+            description    = #{description},
+            sort_order     = #{sortOrder},
+            gate_condition = #{gateCondition},
+            is_active      = #{isActive},
+            updated_at     = NOW()
+        WHERE node_id = #{nodeId}
+    </update>
+
 </mapper>
