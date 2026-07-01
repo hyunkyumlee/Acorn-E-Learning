@@ -1,17 +1,131 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>이론 관리 | Knowva</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>이론 자료 관리 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/theory.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>이론 관리</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/theory</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+
+<main class="page-shell admin-screen theory-manage-screen">
+  <section class="theory-manage-header">
+    <h1>이론 자료 관리</h1>
+  </section>
+
+  <section class="theory-toolbar">
+    <div class="theory-filter">
+      <select>
+        <option value="">과목</option>
+      </select>
+      <select>
+        <option value="">커리큘럼</option>
+      </select>
+      <select>
+        <option value="">레벨</option>
+        <option value="Lv.1">Lv.1</option>
+        <option value="Lv.2">Lv.2</option>
+        <option value="Lv.3">Lv.3</option>
+      </select>
+      <select>
+        <option value="">활성화 상태</option>
+        <option value="true">활성</option>
+        <option value="false">비활성</option>
+      </select>
+    </div>
+    <button type="button" class="theory-primary-button">+ 자료 등록</button>
+  </section>
+
+  <section class="theory-section">
+    <div class="theory-section-title">
+      <h2>이론 자료 목록</h2>
+    </div>
+
+    <div class="theory-table-wrap">
+      <table class="theory-table">
+        <thead>
+        <tr>
+          <th>자료 ID</th>
+          <th>과목</th>
+          <th>커리큘럼</th>
+          <th>제목</th>
+          <th>레벨</th>
+          <th>수정일</th>
+          <th>활성화</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="lesson : ${theoryList}">
+          <td th:text="${'#' + lesson.lessonId}">#001</td>
+          <td th:text="${lesson.subjectName}">Java</td>
+          <td th:text="${lesson.curriculumTitle}">변수와 자료형</td>
+          <td th:text="${lesson.lessonTitle}">Java 변수 이해하기</td>
+          <td th:text="${lesson.levelCode}">Lv.1</td>
+          <td th:text="${#temporals.format(lesson.updatedAt, 'yyyy-MM-dd')}">2026-06-01</td>
+          <td th:text="${lesson.isActive} ? '활성' : '비활성'">활성</td>
+          <td>
+            <div class="theory-table-actions">
+              <button type="button" class="theory-table-button">수정</button>
+              <button type="button" class="theory-table-button">삭제</button>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(theoryList)}">
+          <td colspan="8" class="theory-empty">등록된 이론 자료가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="theory-form-panel">
+    <h2>이론 자료 등록 / 수정 폼</h2>
+
+    <form method="post" action="/admin/theory" th:object="${lessonForm}">
+      <div class="theory-form-layout">
+        <div class="theory-form-fields">
+          <input type="text" name="title" placeholder="제목 입력">
+
+          <div class="theory-form-row">
+            <select name="subjectId">
+              <option value="">과목 선택</option>
+            </select>
+            <select name="nodeId">
+              <option value="">커리큘럼 선택</option>
+            </select>
+          </div>
+
+          <div class="theory-form-row">
+            <input type="text" name="levelCode" placeholder="레벨 / 순서">
+            <select name="isActive">
+              <option value="">활성화 토글</option>
+              <option value="true">활성</option>
+              <option value="false">비활성</option>
+            </select>
+          </div>
+
+          <div class="theory-form-actions">
+            <button type="submit" class="theory-primary-button">저장</button>
+            <button type="reset" class="theory-secondary-button">취소</button>
+            <button type="button" class="theory-secondary-button">삭제</button>
+          </div>
+        </div>
+
+        <textarea name="content" class="theory-content-area" placeholder="내용 입력 영역"></textarea>
+      </div>
+    </form>
+  </section>
+</main>
 </body>
 </html>

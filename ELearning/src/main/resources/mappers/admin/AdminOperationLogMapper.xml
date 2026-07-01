@@ -7,6 +7,18 @@
           <result property="..." column="..." />
       </resultMap>
     -->
+
+    <resultMap id="AdminOperationLogResultMap" type="com.acorn.elearning.admin.model.AdminOperationLog">
+        <id property= "logId" column="log_id" />
+
+        <result property="adminId" column="admin_id" />
+        <result property="actionType" column="action_type" />
+        <result property="targetType" column="target_type" />
+        <result property="targetId" column="target_id" />
+        <result property="resultStatus" column="result_status" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
     <!-- TODO findById 구현 예시입니다.
       <select id="findById" parameterType="long" resultMap="AdminOperationLogResultMap">
           SELECT /* DDL column list */
@@ -14,6 +26,14 @@
           WHERE id = #{id}
       </select>
     -->
+
+    <select id="findById" parameterType="long" resultMap="AdminOperationLogResultMap">
+        SELECT log_id, admin_id, action_type, target_type, target_id, result_status, created_at
+        FROM admin_operation_logs
+        WHERE log_id = #{id}
+    </select>
+
+
     <!-- TODO findAll 구현 예시입니다.
       <select id="findAll" resultMap="AdminOperationLogResultMap">
           SELECT /* DDL column list */
@@ -21,12 +41,34 @@
           ORDER BY id DESC
       </select>
     -->
+
+    <select id="findAll" resultMap="AdminOperationLogResultMap">
+        SELECT log_id, admin_id, action_type, target_type, target_id, result_status, created_at
+        FROM admin_operation_logs
+        ORDER BY log_id DESC
+    </select>
+
     <!-- TODO insert 구현 예시입니다.
       <insert id="insert" parameterType="com.acorn.elearning.admin.model.AdminOperationLog" useGeneratedKeys="true" keyProperty="id">
           INSERT INTO admin_operation_logs (/* writable columns */)
           VALUES (/* #{property} values */)
       </insert>
     -->
+
+    <insert id="insert" parameterType="com.acorn.elearning.admin.model.AdminOperationLog" useGeneratedKeys="true" keyProperty="logId">
+        INSERT INTO admin_operation_logs (
+        admin_id, action_type, target_type, target_id, result_status, created_at
+        )
+        VALUES (
+            #{adminId},
+            #{actionType},
+            #{targetType},
+            #{targetId},
+            #{resultStatus},
+            #{createdAt}
+        )
+    </insert>
+
     <!-- TODO update 구현 예시입니다.
       <update id="update" parameterType="com.acorn.elearning.admin.model.AdminOperationLog">
           UPDATE admin_operation_logs
@@ -34,4 +76,14 @@
           WHERE id = #{id}
       </update>
     -->
+
+    <update id="update" parameterType="com.acorn.elearning.admin.model.AdminOperationLog">
+        UPDATE admin_operation_logs
+        SET admin_id = #{adminId},
+        action_type = #{actionType},
+        target_id = #{targetId},
+        result_status = #{resultStatus},
+        target_type = #{targetType}
+        WHERE log_id = #{logId}
+    </update>
 </mapper>

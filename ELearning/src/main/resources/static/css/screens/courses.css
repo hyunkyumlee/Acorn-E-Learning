@@ -1,0 +1,335 @@
+.course-manage-screen {
+    padding: 22px 28px 28px;
+    background: #f6f7f9;
+    min-height: 100vh;
+}
+
+.course-manage-header,
+.course-tabs,
+.course-filter,
+.course-form-panel {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+.course-manage-header {
+    padding: 0 0 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.course-manage-header h1,
+.course-section-title h2,
+.course-form-panel h2 {
+    margin: 0;
+    color: #111827;
+}
+
+.course-manage-header h1 {
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.course-tab-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.course-tabs {
+    display: flex;
+    gap: 6px;
+    height: 42px;
+    width: max-content;
+    margin-bottom: 12px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    line-height: 1;
+}
+
+.course-tab-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    min-width: 170px;
+    padding: 0 28px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.course-tab-label:last-child {
+    border-right: 1px solid #d1d5db;
+}
+
+#courseSubjectTab:checked ~ .course-tabs label[for="courseSubjectTab"],
+#courseCurriculumTab:checked ~ .course-tabs label[for="courseCurriculumTab"] {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.course-tab-panel {
+    display: none;
+}
+
+#courseSubjectTab:checked ~ .course-subject-panel,
+#courseCurriculumTab:checked ~ .course-curriculum-panel {
+    display: block;
+}
+
+.course-manage-actions,
+.course-table-actions,
+.course-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.course-primary-button,
+.course-secondary-button,
+.course-table-button {
+    border-radius: 7px;
+    border: 1px solid #d1d5db;
+    cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.course-primary-button {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+    height: 38px;
+    padding: 0 18px;
+}
+
+.course-secondary-button {
+    background: #ffffff;
+    color: #111827;
+    height: 38px;
+    padding: 0 18px;
+}
+
+.course-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.course-filter {
+    display: grid;
+    grid-template-columns: 220px 160px 160px;
+    gap: 12px;
+    width: max-content;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.course-filter input,
+.course-filter select,
+.course-form-panel input,
+.course-form-panel select,
+.course-form-panel textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+}
+
+.course-filter input,
+.course-filter select {
+    height: 36px;
+    padding: 0 12px;
+}
+
+.course-section {
+    padding: 0;
+    margin-bottom: 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    overflow: visible;
+}
+
+.course-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 6px;
+    margin-bottom: 0;
+    background: transparent;
+}
+
+.course-section-title h2,
+.course-form-panel h2 {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.course-section-title span {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.course-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.course-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.course-table thead {
+    background: #eef0f2;
+}
+
+.course-table th,
+.course-table td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 11px 14px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+.course-table th {
+    color: #374151;
+    font-weight: 800;
+}
+
+.course-table td {
+    color: #1f2937;
+}
+
+.course-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.course-table-title {
+    font-weight: 700;
+}
+
+.course-table-button {
+    min-width: 46px;
+    height: 28px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 12px;
+}
+
+.course-table-button:hover,
+.course-secondary-button:hover {
+    background: #f3f4f6;
+}
+
+.course-primary-button:hover {
+    background: #374151;
+}
+
+.course-empty {
+    height: 76px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.course-form-panel {
+    padding: 18px;
+    background: #eeeeef;
+}
+
+.course-form-panel h2 {
+    margin-bottom: 16px;
+}
+
+.course-form-panel form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.course-form-panel label {
+    display: block;
+    margin-bottom: 7px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.course-form-panel input,
+.course-form-panel select {
+    height: 38px;
+    padding: 0 12px;
+}
+
+.course-form-panel textarea {
+    min-height: 112px;
+    padding: 11px 12px;
+    resize: vertical;
+}
+
+.course-form-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.course-subject-form-row {
+    grid-template-columns: minmax(260px, 1fr) 160px;
+    max-width: 640px;
+}
+
+.course-form-actions {
+    justify-content: flex-start;
+    margin-top: 4px;
+}
+
+@media (max-width: 1024px) {
+    .course-manage-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .course-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .course-filter,
+    .course-form-row,
+    .course-subject-form-row {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .course-manage-screen {
+        padding: 18px;
+    }
+
+    .course-manage-actions {
+        align-items: stretch;
+        flex-direction: column;
+        width: 100%;
+    }
+}
