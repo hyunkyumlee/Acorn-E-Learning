@@ -4,14 +4,47 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>시험 결과 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/exam.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>시험 결과</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>exam/result</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+  <main class="page-shell exam-screen">
+    <section class="exam-result-hero" th:if="${result != null}">
+      <span class="exam-state-badge is-complete">채점 완료</span>
+      <h1 th:text="${result.resultStatus() == 'PASSED'} ? '코딩테스트 통과' : '코딩테스트 재시도'">코딩테스트 통과</h1>
+      <p>테스트케이스 실행 결과와 AI 해설/코드 리뷰를 확인합니다.</p>
+      <div class="exam-result-metrics">
+        <article>
+          <span>정답</span>
+          <strong th:text="${result.correctCount()} + ' / ' + ${result.totalProblemCount()}">2 / 3</strong>
+        </article>
+        <article>
+          <span>상태</span>
+          <strong th:text="${result.resultStatus()}">PASSED</strong>
+        </article>
+        <article>
+          <span>다음</span>
+          <strong>AI 분석</strong>
+        </article>
+      </div>
+      <div class="exam-action-row">
+        <a class="button primary" th:href="@{/analysis}">AI 분석 보기</a>
+        <a class="button" th:href="@{/exams/coding-test}">다시 응시</a>
+      </div>
+    </section>
+
+    <section class="exam-review-list" th:if="${result != null}">
+      <article th:each="answer : ${result.answers()}" class="exam-review-card">
+        <div>
+          <span class="exam-state-badge" th:classappend="${answer.correct()} ? ' is-complete' : ' is-warning'"
+                th:text="${answer.correct()} ? '정답' : '재확인'">정답</span>
+          <h2 th:text="'문제 ID ' + ${answer.aiProblemId()}">문제 ID</h2>
+          <p th:text="${answer.passedCaseCount()} + '개 테스트케이스 통과'">0개 테스트케이스 통과</p>
+        </div>
+        <pre th:text="${answer.aiReview()}">리뷰가 아직 없습니다.</pre>
+      </article>
+    </section>
   </main>
 </body>
 </html>

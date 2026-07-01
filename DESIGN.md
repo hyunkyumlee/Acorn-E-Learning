@@ -108,6 +108,22 @@ All spacing derives from 4px.
 - **States**: hover, focus-visible, active, disabled.
 - **Motion**: 160ms transform/background/color transitions.
 
+### Exam Workbench
+
+- **Structure**: `.exam-stepper`, `.exam-studio`, `.exam-problem-pane`, `.exam-editor-pane`.
+- **Variants**: ready gate, sequential problem step, result summary.
+- **Spacing**: `--space-3`, `--space-4`, `--space-5`, `--space-6`.
+- **States**: current problem, answered problem, locked gate, submitted result.
+- **Accessibility**: one problem is exposed as the current task; previous/next links keep focusable navigation clear.
+
+### Analysis Report Grid
+
+- **Structure**: `.analysis-summary`, `.analysis-grid`, `.analysis-premium-grid`, `.analysis-card`.
+- **Variants**: free summary, premium locked, premium active, analysis failure.
+- **Spacing**: `--space-4`, `--space-5`.
+- **States**: locked Premium section, retryable failure, generated report.
+- **Accessibility**: metric cards use text labels and do not rely on chart color alone.
+
 ## 6. Motion & Interaction
 
 | Type | Duration | Easing | Usage |

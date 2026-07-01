@@ -8,7 +8,9 @@ import lombok.Setter;
 @Setter
 public class SaveExamAnswerForm {
     @NotBlank
-    private String skeletonValue = "TODO";
+    private String answerText;
+
+    private String move = "stay";
+
     private String idempotencyToken;
-    private Long id;
 }

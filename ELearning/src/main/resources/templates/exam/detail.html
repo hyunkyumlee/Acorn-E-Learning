@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 시험 응시 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/exam.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+  <script type="module" th:src="@{/js/exam/code-runner.js}"></script>
+</head>
+<body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="page-shell exam-screen">
+    <section class="exam-workbench-head" th:if="${exam != null and step != null}">
+      <div>
+        <span class="eyebrow">SR-008 · Sequential Test</span>
+        <h1 th:text="'시험 #' + ${exam.examId()}">시험 #1</h1>
+        <p>문제별 코드를 실행 테스트하고, 제출 시 테스트케이스 결과로 채점합니다.</p>
+      </div>
+      <div class="exam-progress-card" aria-label="시험 진행 상태">
+        <span th:text="${step.currentProblemNo()} + ' / ' + ${step.totalProblemCount()}">1 / 3</span>
+        <strong th:text="${step.answeredCount()} + '문항 저장'">0문항 저장</strong>
+      </div>
+    </section>
+
+    <section class="exam-stepper" aria-label="문제 진행 순서" th:if="${exam != null and step != null}">
+      <a th:each="problem : ${exam.problems()}"
+         th:href="@{/exams/{examId}/problems/{problemNo}(examId=${exam.examId()}, problemNo=${problem.problemNo()})}"
+         th:classappend="${problem.problemNo() == step.currentProblemNo()} ? ' is-active' : (${problem.answered()} ? ' is-done' : '')">
+        <span th:text="${problem.problemNo()}">1</span>
+        <strong th:text="${problem.answered()} ? '저장됨' : '작성 전'">작성 전</strong>
+      </a>
+    </section>
+
+    <section class="exam-studio" th:if="${exam != null and step != null}">
+      <article class="exam-problem-pane">
+        <span class="exam-state-badge" th:text="'문제 ' + ${step.currentProblemNo()}">문제 1</span>
+        <h2>문제 설명</h2>
+        <pre th:text="${step.problem().prompt()}">문제 본문</pre>
+        <dl>
+          <div>
+            <dt>풀이 형식</dt>
+            <dd>Java `public class Solution`의 `main` 함수로 표준 입력을 읽고 표준 출력으로 답을 출력합니다.</dd>
+          </div>
+          <div>
+            <dt>채점 방식</dt>
+            <dd>실행 테스트는 임시 코드로 확인하고, 제출은 현재 답안을 저장한 뒤 전체 테스트케이스 결과로 채점합니다.</dd>
+          </div>
+        </dl>
+      </article>
+
+      <aside class="exam-editor-pane">
+        <div class="exam-editor-head">
+          <div>
+            <h2>코드 작성</h2>
+            <p>사용자가 구현해야 할 로직 영역만 채워 실행 테스트를 확인하세요.</p>
+          </div>
+          <span class="exam-state-badge" th:classappend="${step.problem().answered()} ? ' is-complete' : ''"
+                th:text="${step.problem().answered()} ? '저장됨' : '작성 중'">작성 중</span>
+        </div>
+
+        <form class="exam-answer-form"
+              id="exam-answer-form"
+              data-code-run-form
+              th:attr="data-test-run-url=@{/api/exams/{examId}/problems/{problemNo}/answers/{aiProblemId}/test-run(examId=${exam.examId()}, problemNo=${step.currentProblemNo()}, aiProblemId=${step.problem().aiProblemId()})}"
+              th:action="@{/exams/{examId}/problems/{problemNo}/answers/{aiProblemId}(examId=${exam.examId()}, problemNo=${step.currentProblemNo()}, aiProblemId=${step.problem().aiProblemId()})}"
+              method="post">
+          <div class="exam-code-field">
+            <span id="exam-code-label">답안 코드</span>
+            <textarea class="exam-code-source" name="answerText" rows="18" spellcheck="false" autocomplete="off" aria-labelledby="exam-code-label" th:text="${step.problem().answerText()}"></textarea>
+            <div class="exam-code-editor" data-code-editor aria-labelledby="exam-code-label"></div>
+          </div>
+        </form>
+
+        <section class="exam-run-result" data-code-run-result hidden aria-live="polite">
+          <div>
+            <span>결과</span>
+            <strong data-code-run-status>대기</strong>
+          </div>
+          <div>
+            <span>실행 시간</span>
+            <strong data-code-run-time>-</strong>
+          </div>
+          <pre data-code-run-detail>실행 테스트 결과가 여기에 표시됩니다.</pre>
+        </section>
+
+        <div class="exam-action-row">
+          <button type="button" class="button" data-code-run-button>실행 테스트</button>
+          <button type="submit" class="button" form="exam-answer-form" name="move" value="stay">저장</button>
+          <button type="submit" class="button primary" form="exam-answer-form" name="move" value="submit"
+                  th:disabled="${!step.submittableAfterCurrentSave()}">제출</button>
+          <a class="button" th:if="${step.nextProblemNo() != null}"
+             th:href="@{/exams/{examId}/problems/{problemNo}(examId=${exam.examId()}, problemNo=${step.nextProblemNo()})}">넘어가기</a>
+        </div>
+        <p class="exam-submit-help" th:if="${!step.submittableAfterCurrentSave()}">제출하려면 모든 문제의 답안을 저장해야 합니다.</p>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

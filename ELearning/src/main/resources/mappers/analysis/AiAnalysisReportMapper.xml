@@ -1,37 +1,103 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.analysis.mapper.AiAnalysisReportMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="AiAnalysisReportResultMap" type="com.acorn.elearning.analysis.model.AiAnalysisReport">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="AiAnalysisReportResultMap">
-          SELECT /* DDL column list */
-          FROM ai_analysis_reports
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="AiAnalysisReportResultMap">
-          SELECT /* DDL column list */
-          FROM ai_analysis_reports
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.analysis.model.AiAnalysisReport" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO ai_analysis_reports (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.analysis.model.AiAnalysisReport">
-          UPDATE ai_analysis_reports
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="AiAnalysisReportResultMap" type="com.acorn.elearning.analysis.model.AiAnalysisReport">
+        <id property="reportId" column="report_id" />
+        <result property="userId" column="user_id" />
+        <result property="examId" column="exam_id" />
+        <result property="status" column="status" />
+        <result property="freeSummary" column="free_summary" />
+        <result property="premiumDetail" column="premium_detail" />
+        <result property="analysisErrorCode" column="analysis_error_code" />
+        <result property="retryCount" column="retry_count" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="AiAnalysisReportColumns">
+        report_id,
+        user_id,
+        exam_id,
+        status,
+        free_summary,
+        premium_detail,
+        analysis_error_code,
+        retry_count,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="AiAnalysisReportResultMap">
+        SELECT
+        <include refid="AiAnalysisReportColumns" />
+        FROM ai_analysis_reports
+        WHERE report_id = #{id}
+    </select>
+
+    <select id="findByIdAndUserId" resultMap="AiAnalysisReportResultMap">
+        SELECT
+        <include refid="AiAnalysisReportColumns" />
+        FROM ai_analysis_reports
+        WHERE report_id = #{reportId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="findByExamId" parameterType="long" resultMap="AiAnalysisReportResultMap">
+        SELECT
+        <include refid="AiAnalysisReportColumns" />
+        FROM ai_analysis_reports
+        WHERE exam_id = #{examId}
+        ORDER BY report_id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="AiAnalysisReportResultMap">
+        SELECT
+        <include refid="AiAnalysisReportColumns" />
+        FROM ai_analysis_reports
+        WHERE user_id = #{userId}
+        ORDER BY report_id DESC
+    </select>
+
+    <select id="findAll" resultMap="AiAnalysisReportResultMap">
+        SELECT
+        <include refid="AiAnalysisReportColumns" />
+        FROM ai_analysis_reports
+        ORDER BY report_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.analysis.model.AiAnalysisReport" useGeneratedKeys="true" keyProperty="reportId">
+        INSERT INTO ai_analysis_reports (
+            user_id,
+            exam_id,
+            status,
+            free_summary,
+            premium_detail,
+            analysis_error_code,
+            retry_count
+        )
+        VALUES (
+            #{userId},
+            #{examId},
+            #{status},
+            #{freeSummary},
+            CAST(#{premiumDetail} AS JSON),
+            #{analysisErrorCode},
+            #{retryCount}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.analysis.model.AiAnalysisReport">
+        UPDATE ai_analysis_reports
+        SET
+            user_id = #{userId},
+            exam_id = #{examId},
+            status = #{status},
+            free_summary = #{freeSummary},
+            premium_detail = CAST(#{premiumDetail} AS JSON),
+            analysis_error_code = #{analysisErrorCode},
+            retry_count = #{retryCount},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE report_id = #{reportId}
+    </update>
 </mapper>
