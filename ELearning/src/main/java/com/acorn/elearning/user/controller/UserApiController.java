@@ -1,14 +1,24 @@
 package com.acorn.elearning.user.controller;
 
 import com.acorn.elearning.common.response.ApiResponse;
+import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.dto.response.PaymentHistoryPageResponse;
+import com.acorn.elearning.user.service.UserActivityService;
 import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class UserApiController {
+    private final UserActivityService userActivityService;
+
+    public UserApiController(UserActivityService userActivityService) {
+        this.userActivityService = userActivityService;
+    }
 
     @GetMapping("/api/users/me")
     public ApiResponse<Map<String, Object>> me() {
@@ -59,12 +69,12 @@ public class UserApiController {
     }
 
     @GetMapping("/api/users/me/payments")
-    public ApiResponse<Map<String, Object>> payments() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PaymentHistoryPageResponse response = userActivityService.payments(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("USER-005");
+    public ApiResponse<PaymentHistoryPageResponse> payments(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ApiResponse.success(userActivityService.payments(sessionUser, page, size));
     }
 
     @GetMapping("/api/mypage/summary")
