@@ -63,7 +63,7 @@ public class AiAnalysisService {
                 .orElse(null);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = BusinessException.class)
     public AnalysisReportResponse generate(SessionUser sessionUser, GenerateAnalysisRequest request) {
         Long userId = requireUserId(sessionUser);
         ExamSession session = requireExam(userId, request.examId());
@@ -77,7 +77,7 @@ public class AiAnalysisService {
         return AnalysisReportResponse.from(report);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = BusinessException.class)
     public AnalysisReportResponse retry(SessionUser sessionUser, Long reportId) {
         Long userId = requireUserId(sessionUser);
         AiAnalysisReport report = requireReport(userId, reportId);

@@ -9,6 +9,8 @@ import com.acorn.elearning.exam.model.AiRequestLog;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AiRequestLogService {
@@ -24,6 +26,7 @@ public class AiRequestLogService {
         this.objectMapper = objectMapper;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AiRequestLog start(String targetType, Long targetId, String requestType, ChatGptRequest request) {
         AiRequestLog log = new AiRequestLog();
         log.setTargetType(targetType);
@@ -36,6 +39,7 @@ public class AiRequestLogService {
         return log;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void success(AiRequestLog log, ChatGptResponse response) {
         log.setStatus(STATUS_SUCCESS);
         log.setResponsePayload(toJson(response));
@@ -44,6 +48,7 @@ public class AiRequestLogService {
         aiRequestLogMapper.update(log);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failed(AiRequestLog log, Exception exception) {
         log.setStatus(STATUS_FAILED);
         log.setErrorCode(exception instanceof BusinessException businessException

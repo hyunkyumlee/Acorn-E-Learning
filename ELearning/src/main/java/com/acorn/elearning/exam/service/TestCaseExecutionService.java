@@ -47,7 +47,7 @@ public class TestCaseExecutionService {
         Path workDir = createWorkDir();
         try {
             Files.writeString(workDir.resolve("Solution.java"), answer.getAnswerText(), StandardCharsets.UTF_8);
-            ProcessResult compile = runProcess(workDir, COMPILE_TIMEOUT, "javac", "Solution.java");
+            ProcessResult compile = runProcess(workDir, COMPILE_TIMEOUT, "javac", "--limit-modules", "java.base", "Solution.java");
             if (compile.exitCode() != 0) {
                 return compileError(cases, compile.output());
             }
@@ -92,6 +92,8 @@ public class TestCaseExecutionService {
                     testCase.input(),
                     RUN_TIMEOUT,
                     "java",
+                    "--limit-modules",
+                    "java.base",
                     "-Xms16m",
                     "-Xmx64m",
                     "-Dfile.encoding=UTF-8",

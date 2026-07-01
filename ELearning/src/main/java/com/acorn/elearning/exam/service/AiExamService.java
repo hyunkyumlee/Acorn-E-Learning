@@ -81,7 +81,7 @@ public class AiExamService {
                 examLearningScopeService.eligibility(userId));
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = BusinessException.class)
     public ExamSessionResponse create(SessionUser sessionUser, CreateExamRequest request) {
         Long userId = requireUserId(sessionUser);
         ExamLearningScope learningScope = examLearningScopeService.build(userId, request.subjectId(), request.levelCode());

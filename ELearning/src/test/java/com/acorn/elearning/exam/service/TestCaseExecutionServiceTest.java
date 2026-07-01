@@ -86,6 +86,46 @@ class TestCaseExecutionServiceTest {
     }
 
     @Test
+    void execute_blocks_process_api_when_runtime_call_uses_whitespace() {
+        AiExamProblem problem = new AiExamProblem();
+        problem.setTestCaseSpec(twoCaseSpec());
+        ExamAnswer answer = new ExamAnswer();
+        answer.setAnswerText("""
+                public class Solution {
+                    public static void main(String[] args) throws Exception {
+                        Runtime . getRuntime() . exec("whoami");
+                    }
+                }
+                """);
+
+        TestCaseExecutionResult result = service.execute(problem, answer);
+
+        assertEquals("SECURITY_VIOLATION", result.status());
+        assertFalse(result.passed());
+        assertTrue(result.cases().get(0).errorMessage().contains("허용되지 않는 API"));
+    }
+
+    @Test
+    void execute_blocks_unicode_escape_source_before_compilation() {
+        AiExamProblem problem = new AiExamProblem();
+        problem.setTestCaseSpec(twoCaseSpec());
+        ExamAnswer answer = new ExamAnswer();
+        answer.setAnswerText("""
+                public class Solution {
+                    public static void main(String[] args) throws Exception {
+                        \\u0052untime.getRuntime().exec("whoami");
+                    }
+                }
+                """);
+
+        TestCaseExecutionResult result = service.execute(problem, answer);
+
+        assertEquals("SECURITY_VIOLATION", result.status());
+        assertFalse(result.passed());
+        assertTrue(result.cases().get(0).errorMessage().contains("허용되지 않는 API"));
+    }
+
+    @Test
     void codeRunResponse_uses_security_violation_message() {
         TestCaseExecutionResult result = new TestCaseExecutionResult(
                 "SECURITY_VIOLATION",
