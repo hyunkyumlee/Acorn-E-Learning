@@ -476,3 +476,113 @@
     left: 23px;
   }
 }
+
+/* =========================================================================
+   SR-004 레벨 테스트 — 문항 / 보기 / 결과 (화면 전용)
+   - 공통 component(button/card/form)는 재정의하지 않는다. 문항/보기 레이아웃만 정의.
+   - components.css의 form(max-width:420px)/input(width:100%)은 이 화면 폼에 한해 완화.
+   - 색은 토큰만 사용(cyan=--primary는 CTA/선택상태 한정). 우주 별/궤도 배경 없음.
+   - 보기 선택 강조는 기존 .subject-chip.is-current 방식(테두리+inset)을 따른다.
+   ========================================================================= */
+
+/* 문항 폼: 공통 form 폭 제한(420px)을 이 퀴즈 폼에서만 넓힌다 */
+.learning-screen .level-quiz {
+  max-width: none;
+  gap: var(--space-5);
+}
+
+.level-question-list {
+  list-style: none;
+  margin: var(--space-2) 0 var(--space-4);
+  padding: 0;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.level-question {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.level-question-text {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+/* 문항 번호 배지 */
+.level-question-no {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.level-choice-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* 보기 한 줄: 선택 가능한 pill (subject-chip과 같은 톤) */
+.level-choice label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  padding: 10px 12px;
+  line-height: 1.4;
+  word-break: keep-all;
+  cursor: pointer;
+  transition: border-color 140ms ease-out, box-shadow 140ms ease-out;
+}
+
+.level-choice label:hover {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
+}
+
+/* 라디오: 공통 input(width:100%)을 이 화면 라디오에 한해 원복 */
+.level-choice input[type="radio"] {
+  width: auto;
+  flex: none;
+  margin: 0;
+  accent-color: var(--primary);
+}
+
+/* 선택된 보기 강조 (:has 지원 브라우저) — subject-chip.is-current와 동일 방식 */
+.level-choice label:has(input:checked) {
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--line));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+/* 제출 버튼은 폼 왼쪽 정렬 */
+.level-quiz > .button {
+  justify-self: start;
+}
+
+/* ----- 결과 카드 ----- */
+.level-grade {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.level-grade strong {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text);
+}
