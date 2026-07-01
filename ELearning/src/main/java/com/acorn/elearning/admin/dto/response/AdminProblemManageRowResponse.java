@@ -9,6 +9,8 @@ public record AdminProblemManageRowResponse(
         String problemType,
         String question,
         String answerText,
+        String explanation,
         String difficultyCode,
         Boolean isActive
+
 ) { }

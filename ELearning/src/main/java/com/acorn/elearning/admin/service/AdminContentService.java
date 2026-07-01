@@ -215,6 +215,11 @@ public class AdminContentService {
         problem.setProblemType(toProblemTypeCode(form.getProblemType()));
         problem.setQuestion(form.getQuestion());
         problem.setAnswerText(form.getAnswerText());
+
+        /*
+            practice PracticeProblem에 explanation 필드 추가 후 연결
+            problem.setExplanation(form.getExplanation());
+        */
         problem.setDifficultyCode(toDifficultyCode(form.getDifficultyCode()));
         problem.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 

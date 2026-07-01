@@ -104,6 +104,7 @@
                       th:data-problem-type="${problem.problemType}"
                       th:data-question="${problem.question}"
                       th:data-answer-text="${problem.answerText}"
+                      th:data-explanation="${problem.explanation}"
                       th:data-difficulty-code="${problem.difficultyCode}"
                       th:data-is-active="${problem.isActive}">
                 수정
@@ -175,7 +176,7 @@
           </div>
         </div>
 
-        <textarea name="explanation" class="problem-explanation-area" placeholder="해설 입력 영역"></textarea>
+        <textarea name="explanation" id="problemExplanation" class="problem-explanation-area" placeholder="해설 입력 영역"></textarea>
       </div>
     </form>
   </section>
@@ -202,6 +203,7 @@
       document.querySelector("#problemType").value = problemTypeCodeMap[button.dataset.problemType] || button.dataset.problemType;
       document.querySelector("#problemQuestion").value = button.dataset.question || "";
       document.querySelector("#problemAnswerText").value = button.dataset.answerText || "";
+      document.querySelector("#problemExplanation").value = button.dataset.explanation || "";
       document.querySelector("#problemDifficultyCode").value = difficultyCodeMap[button.dataset.difficultyCode] || button.dataset.difficultyCode;
       document.querySelector("#problemIsActive").value = button.dataset.isActive;
     });

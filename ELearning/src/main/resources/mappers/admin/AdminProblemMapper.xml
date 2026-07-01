@@ -18,6 +18,7 @@
         <result property="problemType" column="problem_type" />
         <result property="question" column="question" />
         <result property="answerText" column="answer_text" />
+        <result property="explanation" column="explanation" />
         <result property="difficultyCode" column="difficulty_code" />
         <result property="isActive" column="is_active" />
     </resultMap>
@@ -42,6 +43,7 @@
         c.title AS curriculum_title,
         p.problem_type,
         p.question,
+        p.explanation,
         p.answer_text,
         p.difficulty_code,
         p.is_active

@@ -14,4 +14,6 @@ public class ProblemForm {
     private String answerText;
     private String difficultyCode;
     private Boolean isActive;
+    private String choices;
+    private String explanation;
 }
