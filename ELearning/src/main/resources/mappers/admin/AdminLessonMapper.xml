@@ -11,10 +11,13 @@
     <resultMap id="AdminLessonManageRowResultMap"
                type="com.acorn.elearning.admin.dto.response.AdminLessonManageRowResponse">
         <id property="lessonId" column="lesson_id" />
+        <result property="nodeId" column="node_id" />
         <result property="subjectName" column="subject_name" />
         <result property="curriculumTitle" column="curriculum_title" />
         <result property="lessonTitle" column="lesson_title" />
+        <result property="content" column="content" />
         <result property="levelCode" column="level_code" />
+        <result property="sortOrder" column="sort_order" />
         <result property="updatedAt" column="updated_at" />
         <result property="isActive" column="is_active" />
     </resultMap>
@@ -33,10 +36,13 @@
     <select id="findAll" resultMap="AdminLessonManageRowResultMap">
         SELECT
         l.lesson_id,
+        l.node_id,
         s.subject_name,
         c.title AS curriculum_title,
         l.title AS lesson_title,
+        l.content,
         c.level_code,
+        l.sort_order,
         l.updated_at,
         l.is_active
         FROM lessons l

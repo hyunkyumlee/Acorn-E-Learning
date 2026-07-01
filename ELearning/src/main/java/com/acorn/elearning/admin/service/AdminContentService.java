@@ -7,6 +7,10 @@ import java.util.Optional;
 
 import com.acorn.elearning.admin.dto.response.AdminLessonManageRowResponse;
 import com.acorn.elearning.admin.dto.response.AdminProblemManageRowResponse;
+import com.acorn.elearning.admin.form.CurriculumNodeForm;
+import com.acorn.elearning.admin.form.LessonForm;
+import com.acorn.elearning.admin.form.ProblemForm;
+import com.acorn.elearning.admin.form.SubjectForm;
 import com.acorn.elearning.admin.mapper.AdminLessonMapper;
 import com.acorn.elearning.admin.mapper.AdminProblemMapper;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
@@ -55,6 +59,30 @@ public class AdminContentService {
         return sm.update(model);
     }
 
+    public int createSubject(SubjectForm form){
+
+        Subject s = new Subject();
+        s.setSubjectName(form.getSubjectName());
+        s.setIsActive(form.getIsActive());
+        s.setDescription(form.getDescription());
+
+        s.setSubjectCode(form.getSubjectName());
+        s.setSortOrder(0);
+
+        return sm.insert(s);
+    }
+
+    public int updateSubject(SubjectForm form){
+        Subject s = sm.findById(form.getSubjectId())
+                        .orElseThrow();
+
+        s.setSubjectName(form.getSubjectName());
+        s.setIsActive(form.getIsActive());
+        s.setDescription(form.getDescription());
+
+        return sm.update(s);
+    }
+
     //커리큘럼 조회
     public List<CurriculumNode> findAllCurriculumNode(){
         return cm.findAll();
@@ -74,6 +102,39 @@ public class AdminContentService {
     public int update(CurriculumNode model) {
         return cm.update(model);
     }
+
+    public int createCurriculumNode(CurriculumNodeForm form){
+
+        CurriculumNode c = new CurriculumNode();
+
+        c.setSubjectId(form.getSubjectId());
+        c.setLevelCode(form.getLevelCode());
+        c.setNodeType(form.getNodeType());
+
+        c.setTitle(form.getTitle());
+        c.setSortOrder(form.getSortOrder());
+        c.setIsActive(form.getIsActive());
+        c.setDescription(form.getDescription());
+
+        return cm.insert(c);
+    }
+
+    public int updateCurriculumNode(CurriculumNodeForm form){
+        CurriculumNode c = cm.findById(form.getNodeId())
+                .orElseThrow();
+
+        c.setSubjectId(form.getSubjectId());
+        c.setLevelCode(form.getLevelCode());
+        c.setNodeType(form.getNodeType());
+
+        c.setTitle(form.getTitle());
+        c.setSortOrder(form.getSortOrder());
+        c.setIsActive(form.getIsActive());
+        c.setDescription(form.getDescription());
+
+        return cm.update(c);
+    }
+
 
     //이론 자료 조회
     public List<Lesson> findAllLesson(){
@@ -99,6 +160,30 @@ public class AdminContentService {
         return lm.update(model);
     }
 
+    public int createLesson(LessonForm form){
+        Lesson lesson = new Lesson();
+        lesson.setNodeId(form.getNodeId());
+        lesson.setTitle(form.getTitle());
+        lesson.setContent(form.getContent());
+        lesson.setSortOrder(form.getSortOrder() == null ? 0 : form.getSortOrder());
+        lesson.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
+
+        return lm.insert(lesson);
+    }
+
+    public int updateLesson(LessonForm form){
+        Lesson lesson = lm.findById(form.getLessonId())
+                .orElseThrow();
+
+        lesson.setNodeId(form.getNodeId());
+        lesson.setTitle(form.getTitle());
+        lesson.setContent(form.getContent());
+        lesson.setSortOrder(form.getSortOrder() == null ? lesson.getSortOrder() : form.getSortOrder());
+        lesson.setIsActive(form.getIsActive() == null ? lesson.getIsActive() : form.getIsActive());
+
+        return lm.update(lesson);
+    }
+
     //관리자 문제 목록 조회
     public List<AdminProblemManageRowResponse> findAllAdminProblem(){
         return apm.findAll();
@@ -121,6 +206,59 @@ public class AdminContentService {
     //문제 목록 수정
     public int update(PracticeProblem model) {
         return ppm.update(model);
+    }
+
+    public int createProblem(ProblemForm form){
+        PracticeProblem problem = new PracticeProblem();
+        problem.setSubjectId(form.getSubjectId());
+        problem.setNodeId(form.getNodeId());
+        problem.setProblemType(toProblemTypeCode(form.getProblemType()));
+        problem.setQuestion(form.getQuestion());
+        problem.setAnswerText(form.getAnswerText());
+        problem.setDifficultyCode(toDifficultyCode(form.getDifficultyCode()));
+        problem.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
+
+        return ppm.insert(problem);
+    }
+
+    public int updateProblem(ProblemForm form){
+        PracticeProblem problem = ppm.findById(form.getProblemId())
+                .orElseThrow();
+
+        problem.setSubjectId(form.getSubjectId());
+        problem.setNodeId(form.getNodeId());
+        problem.setProblemType(toProblemTypeCode(form.getProblemType()));
+        problem.setQuestion(form.getQuestion());
+        problem.setAnswerText(form.getAnswerText());
+        problem.setDifficultyCode(toDifficultyCode(form.getDifficultyCode()));
+        problem.setIsActive(form.getIsActive() == null ? problem.getIsActive() : form.getIsActive());
+
+        return ppm.update(problem);
+    }
+
+    private String toProblemTypeCode(String value) {
+        if (value == null) {
+            return null;
+        }
+        return switch (value) {
+            case "객관식" -> "MULTIPLE_CHOICE";
+            case "빈칸" -> "FILL_BLANK";
+            case "코드 결과 예측" -> "CODE_OUTPUT";
+            case "간단 코드 입력" -> "SHORT_CODE";
+            default -> value;
+        };
+    }
+
+    private String toDifficultyCode(String value) {
+        if (value == null) {
+            return null;
+        }
+        return switch (value) {
+            case "하" -> "LOW";
+            case "중" -> "MEDIUM";
+            case "상" -> "HIGH";
+            default -> value;
+        };
     }
 
 

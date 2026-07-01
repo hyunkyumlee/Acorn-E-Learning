@@ -76,7 +76,14 @@
             <td th:text="${#temporals.format(subject.createdAt, 'yyyy-MM-dd')}">2026-06-01</td>
             <td>
               <div class="course-table-actions">
-                <button type="button" class="course-table-button">수정</button>
+                <button type="button"
+                        class="course-table-button subject-edit-button"
+                        th:data-subject-id="${subject.subjectId}"
+                        th:data-subject-name="${subject.subjectName}"
+                        th:data-description="${subject.description}"
+                        th:data-is-active="${subject.isActive}">
+                  수정
+                </button>
                 <button type="button" class="course-table-button">삭제</button>
               </div>
             </td>
@@ -94,15 +101,16 @@
 
       <form method="post" action="/admin/courses/subjects" th:object="${subjectForm}">
         <div class="course-form-row course-subject-form-row">
-          <input type="text" name="subjectName" placeholder="과목명 입력">
-          <select name="isActive">
+          <input type="hidden" name="subjectId" id="subjectId">
+          <input type="text" name="subjectName" id="subjectName" placeholder="과목명 입력">
+          <select name="isActive" id="isActive">
             <option value="">사용 여부 선택</option>
             <option value="true">활성</option>
             <option value="false">비활성</option>
           </select>
         </div>
 
-        <textarea name="description" placeholder="설명 입력 (여러 줄)"></textarea>
+        <textarea name="description" id="description" placeholder="설명 입력 (여러 줄)"></textarea>
 
         <div class="course-form-actions">
           <button type="submit" class="course-primary-button">저장</button>
@@ -160,7 +168,18 @@
             <td th:text="${node.isActive} ? '활성' : '비활성'">활성</td>
             <td>
               <div class="course-table-actions">
-                <button type="button" class="course-table-button">수정</button>
+                <button type="button"
+                        class="course-table-button curriculum-edit-button"
+                        th:data-node-id="${node.nodeId}"
+                        th:data-subject-id="${node.subjectId}"
+                        th:data-level-code="${node.levelCode}"
+                        th:data-node-type="${node.nodeType}"
+                        th:data-title="${node.title}"
+                        th:data-sort-order="${node.sortOrder}"
+                        th:data-description="${node.description}"
+                        th:data-is-active="${node.isActive}">
+                  수정
+                </button>
                 <button type="button" class="course-table-button">삭제</button>
               </div>
             </td>
@@ -178,9 +197,10 @@
 
       <form method="post" action="/admin/courses/curriculum-nodes" th:object="${curriculumNodeForm}">
         <div class="course-form-row">
-          <input type="number" name="subjectId" min="1" placeholder="과목 ID">
-          <input type="text" name="levelCode" placeholder="레벨 코드">
-          <select name="nodeType">
+          <input type="hidden" name="nodeId" id="curriculumNodeId">
+          <input type="number" name="subjectId" id="curriculumSubjectId" min="1" placeholder="과목 ID">
+          <input type="text" name="levelCode" id="curriculumLevelCode" placeholder="레벨 코드">
+          <select name="nodeType" id="curriculumNodeType">
             <option value="">노드 타입 선택</option>
             <option value="LESSON">LESSON</option>
             <option value="PRACTICE">PRACTICE</option>
@@ -189,16 +209,16 @@
         </div>
 
         <div class="course-form-row">
-          <input type="text" name="title" placeholder="커리큘럼명 입력">
-          <input type="number" name="sortOrder" min="0" placeholder="정렬 순서">
-          <select name="isActive">
+          <input type="text" name="title" id="curriculumTitle" placeholder="커리큘럼명 입력">
+          <input type="number" name="sortOrder" id="curriculumSortOrder" min="0" placeholder="정렬 순서">
+          <select name="isActive" id="curriculumIsActive">
             <option value="">사용 여부 선택</option>
             <option value="true">활성</option>
             <option value="false">비활성</option>
           </select>
         </div>
 
-        <textarea name="description" placeholder="설명 입력 (여러 줄)"></textarea>
+        <textarea name="description" id="curriculumDescription" placeholder="설명 입력 (여러 줄)"></textarea>
 
         <div class="course-form-actions">
           <button type="submit" class="course-primary-button">저장</button>
@@ -209,5 +229,28 @@
     </section>
   </section>
 </main>
+<script>
+  document.querySelectorAll(".subject-edit-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector("#subjectId").value = button.dataset.subjectId;
+      document.querySelector("#subjectName").value = button.dataset.subjectName;
+      document.querySelector("#description").value = button.dataset.description || "";
+      document.querySelector("#isActive").value = button.dataset.isActive;
+    });
+  });
+
+  document.querySelectorAll(".curriculum-edit-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector("#curriculumNodeId").value = button.dataset.nodeId;
+      document.querySelector("#curriculumSubjectId").value = button.dataset.subjectId;
+      document.querySelector("#curriculumLevelCode").value = button.dataset.levelCode;
+      document.querySelector("#curriculumNodeType").value = button.dataset.nodeType;
+      document.querySelector("#curriculumTitle").value = button.dataset.title;
+      document.querySelector("#curriculumSortOrder").value = button.dataset.sortOrder;
+      document.querySelector("#curriculumDescription").value = button.dataset.description || "";
+      document.querySelector("#curriculumIsActive").value = button.dataset.isActive;
+    });
+  });
+</script>
 </body>
 </html>
