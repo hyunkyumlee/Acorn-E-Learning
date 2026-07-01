@@ -27,6 +27,14 @@
         ORDER BY question_id ASC, sort_order ASC, choice_id ASC
     </select>
 
+    <!-- 문항 화면 표시용: 특정 문항의 선택지를 정렬 순으로 -->
+    <select id="findByQuestionId" parameterType="long" resultMap="LevelTestChoiceResultMap">
+        SELECT <include refid="columns" />
+        FROM level_test_choices
+        WHERE question_id = #{questionId}
+        ORDER BY sort_order ASC, choice_id ASC
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.LevelTestChoice"
             useGeneratedKeys="true" keyProperty="choiceId">
         INSERT INTO level_test_choices

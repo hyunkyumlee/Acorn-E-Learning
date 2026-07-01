@@ -28,6 +28,14 @@
         ORDER BY answer_id ASC
     </select>
 
+    <!-- 결과 화면용: 특정 attempt의 제출 답안 목록 -->
+    <select id="findByAttemptId" parameterType="long" resultMap="LevelTestAnswerResultMap">
+        SELECT <include refid="columns" />
+        FROM level_test_answers
+        WHERE attempt_id = #{attemptId}
+        ORDER BY answer_id ASC
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.LevelTestAnswer"
             useGeneratedKeys="true" keyProperty="answerId">
         INSERT INTO level_test_answers
