@@ -1,6 +1,5 @@
 package com.acorn.elearning.analysis.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import java.util.Map;
+import jakarta.validation.constraints.NotNull;
 
-public record GenerateAnalysisRequest(@NotBlank String requestId, Map<String, Object> payload) {}
+public record GenerateAnalysisRequest(@NotNull Long examId) {}

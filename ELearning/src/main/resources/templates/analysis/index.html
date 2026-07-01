@@ -10,8 +10,100 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell analysis-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>AI 분석</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>analysis/index</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="analysis-head">
+      <div>
+        <span class="eyebrow">SR-009 · AI Analysis</span>
+        <h1>AI 분석 리포트</h1>
+        <p>기본 분석은 무료로 제공하고, Premium 상세 분석은 결제 상태에 따라 열립니다.</p>
+      </div>
+      <form th:action="@{/analysis}" th:object="${form}" method="post" class="analysis-generate-form">
+        <label>
+          <span>시험 ID</span>
+          <input type="number" th:field="*{examId}" min="1" required>
+        </label>
+        <button type="submit" class="button primary">분석 생성</button>
+      </form>
+    </section>
+
+    <section class="analysis-summary" aria-label="기본 분석 요약">
+      <article><span>총학습일</span><strong>45일</strong></article>
+      <article><span>총문제수</span><strong>326개</strong></article>
+      <article><span>평균정답률</span><strong>78%</strong></article>
+      <article><span>현재 Level</span><strong>Lv.12</strong></article>
+    </section>
+
+    <section class="analysis-grid">
+      <article class="analysis-card">
+        <div class="analysis-card-head">
+          <h2>성장 그래프</h2>
+          <span>최근 7회</span>
+        </div>
+        <div class="analysis-bar-chart" aria-label="성장 그래프">
+          <i style="height:24%"></i>
+          <i style="height:38%"></i>
+          <i style="height:54%"></i>
+          <i style="height:72%"></i>
+          <i style="height:76%"></i>
+          <i style="height:80%"></i>
+          <i style="height:92%"></i>
+        </div>
+      </article>
+
+      <article class="analysis-card">
+        <div class="analysis-card-head">
+          <h2>분야별 역량분석</h2>
+          <span>기본</span>
+        </div>
+        <p th:if="${report == null}">기초 문법 영역의 학습 성취도가 높게 나타났습니다. 반복문 활용 능력 향상을 위해 추가 문제 풀이를 권장합니다.</p>
+        <p th:if="${report != null}" th:text="${report.freeSummary()}">무료 요약이 표시됩니다.</p>
+      </article>
+
+      <article class="analysis-card analysis-card-wide">
+        <div class="analysis-card-head">
+          <h2>최근 응시 테스트</h2>
+          <span th:text="${report == null ? '샘플' : '시험 #' + report.examId()}">샘플</span>
+        </div>
+        <div class="analysis-result-metrics">
+          <article><span>점수</span><strong>78점</strong></article>
+          <article><span>정답</span><strong>8 / 10</strong></article>
+          <article><span>응시일</span><strong>2026.06.15</strong></article>
+        </div>
+      </article>
+    </section>
+
+    <section class="analysis-premium-grid">
+      <article class="analysis-card" th:classappend="${report != null and report.premiumDetail() != null} ? '' : ' is-locked'">
+        <div class="analysis-card-head">
+          <h2>AI PREMIUM 분석</h2>
+          <span th:text="${report != null and report.premiumDetail() != null} ? '활성' : '잠금'">잠금</span>
+        </div>
+        <div th:if="${report == null or report.premiumDetail() == null}" class="analysis-lock">
+          <strong>Premium 분석 잠금상태</strong>
+          <p>강점, 취약점, 오답 분석, AI 추천 로드맵은 Premium에서 확인합니다.</p>
+          <a class="button primary" th:href="@{/analysis/payment}">결제하기</a>
+        </div>
+        <pre th:if="${report != null and report.premiumDetail() != null}" th:text="${report.premiumDetail()}">Premium 상세 분석</pre>
+      </article>
+
+      <article class="analysis-card">
+        <div class="analysis-card-head">
+          <h2>추천 학습</h2>
+          <span>Roadmap</span>
+        </div>
+        <div class="analysis-recommendations">
+          <a class="button" th:href="@{/learning/review}">오답 복습하기</a>
+          <a class="button primary" th:href="@{/learning}">다음 단원 학습하기</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="analysis-failure" th:if="${report != null and report.status() == 'FAILED'}">
+      <strong>AI 분석 생성 실패</strong>
+      <p>분석 재시도 또는 기본 분석 화면으로 돌아갈 수 있습니다.</p>
+      <form th:action="@{/analysis/{reportId}/retry(reportId=${report.reportId()})}" method="post">
+        <button type="submit" class="button primary">분석 재시도</button>
+      </form>
+    </section>
   </main>
 </body>
 </html>

@@ -1,56 +1,58 @@
 package com.acorn.elearning.analysis.controller;
 
+import com.acorn.elearning.analysis.dto.request.AnalysisRetryRequest;
+import com.acorn.elearning.analysis.dto.request.GenerateAnalysisRequest;
+import com.acorn.elearning.analysis.dto.response.AnalysisReportResponse;
+import com.acorn.elearning.analysis.dto.response.AnalysisStatusResponse;
+import com.acorn.elearning.analysis.service.AiAnalysisService;
 import com.acorn.elearning.common.response.ApiResponse;
-import java.util.Map;
+import com.acorn.elearning.security.SessionUser;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AnalysisApiController {
+    private final AiAnalysisService aiAnalysisService;
+
+    public AnalysisApiController(AiAnalysisService aiAnalysisService) {
+        this.aiAnalysisService = aiAnalysisService;
+    }
 
     @PostMapping("/api/analyses")
-    public ApiResponse<Map<String, Object>> generate() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // GenerateAnalysisForm form = request body 또는 form binding 값으로 받으세요.
-        // AnalysisReportResponse response = aiAnalysisService.generate(sessionUser, form);
-        // return ApiResponse.success(response);
-        return ok("ANALYSIS-001");
+    public ApiResponse<AnalysisReportResponse> generate(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid @RequestBody GenerateAnalysisRequest request
+    ) {
+        return ApiResponse.success(aiAnalysisService.generate(sessionUser, request));
     }
 
     @GetMapping("/api/analyses/{reportId}")
-    public ApiResponse<Map<String, Object>> detail(@PathVariable Long reportId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // ExamSessionResponse response = aiAnalysisService.detail(sessionUser, reportId);
-        // return ApiResponse.success(response);
-        return ok("ANALYSIS-002");
+    public ApiResponse<AnalysisReportResponse> detail(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long reportId
+    ) {
+        return ApiResponse.success(aiAnalysisService.detail(sessionUser, reportId));
     }
 
     @PostMapping("/api/analyses/{reportId}/retry")
-    public ApiResponse<Map<String, Object>> retry(@PathVariable Long reportId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // AnalysisRetryForm form = request body 또는 form binding 값으로 받으세요.
-        // ExamStatusResponse response = aiAnalysisService.retry(sessionUser, form, reportId);
-        // return ApiResponse.success(response);
-        return ok("ANALYSIS-003");
+    public ApiResponse<AnalysisReportResponse> retry(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long reportId,
+            @Valid @RequestBody AnalysisRetryRequest request
+    ) {
+        return ApiResponse.success(aiAnalysisService.retry(sessionUser, reportId));
     }
 
     @GetMapping("/api/analyses/{reportId}/status")
-    public ApiResponse<Map<String, Object>> status(@PathVariable Long reportId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // ExamStatusResponse response = aiAnalysisService.status(sessionUser, reportId);
-        // return ApiResponse.success(response);
-        return ok("ANALYSIS-004");
-    }
-
-    private ApiResponse<Map<String, Object>> ok(String endpointId) {
-        // TODO: 개별 endpoint method에서 service 호출과 Response DTO 변환을 끝내면 이 helper를 제거하세요.
-        // return ApiResponse.success(response); 형태가 최종 구현입니다.
-        return ApiResponse.success(Map.of("endpointId", endpointId, "status", "SKELETON"));
+    public ApiResponse<AnalysisStatusResponse> status(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long reportId
+    ) {
+        return ApiResponse.success(aiAnalysisService.status(sessionUser, reportId));
     }
 }

@@ -1,88 +1,142 @@
 package com.acorn.elearning.exam.controller;
 
 import com.acorn.elearning.common.response.ApiResponse;
-import java.util.Map;
+import com.acorn.elearning.exam.dto.request.CreateExamRequest;
+import com.acorn.elearning.exam.dto.request.ExamSubmitRequest;
+import com.acorn.elearning.exam.dto.request.SaveExamAnswerRequest;
+import com.acorn.elearning.exam.dto.response.ExamEligibilityResponse;
+import com.acorn.elearning.exam.dto.response.ExamCodeRunResponse;
+import com.acorn.elearning.exam.dto.response.ExamProblemStepResponse;
+import com.acorn.elearning.exam.dto.response.ExamResultResponse;
+import com.acorn.elearning.exam.dto.response.ExamSessionResponse;
+import com.acorn.elearning.exam.dto.response.ExamStatusResponse;
+import com.acorn.elearning.exam.dto.response.ExamSubmitResponse;
+import com.acorn.elearning.exam.service.AiExamService;
+import com.acorn.elearning.exam.service.ExamCodeRunService;
+import com.acorn.elearning.security.SessionUser;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ExamApiController {
+    private final AiExamService aiExamService;
+    private final ExamCodeRunService examCodeRunService;
+
+    public ExamApiController(AiExamService aiExamService, ExamCodeRunService examCodeRunService) {
+        this.aiExamService = aiExamService;
+        this.examCodeRunService = examCodeRunService;
+    }
 
     @GetMapping("/api/exams/eligibility")
-    public ApiResponse<Map<String, Object>> eligibility() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // ExamStatusResponse response = aiExamService.eligibility(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("EXAM-001");
+    public ApiResponse<ExamEligibilityResponse> eligibility(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+    ) {
+        return ApiResponse.success(aiExamService.eligibility(sessionUser));
     }
 
     @PostMapping("/api/exams")
-    public ApiResponse<Map<String, Object>> create() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // CreateExamForm form = request body 또는 form binding 값으로 받으세요.
-        // ExamSessionResponse response = aiExamService.create(sessionUser, form);
-        // return ApiResponse.success(response);
-        return ok("EXAM-002");
+    public ApiResponse<ExamSessionResponse> create(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid @RequestBody CreateExamRequest request
+    ) {
+        return ApiResponse.success(aiExamService.create(sessionUser, request));
     }
 
     @GetMapping("/api/exams/{examId}")
-    public ApiResponse<Map<String, Object>> detail(@PathVariable Long examId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // ExamSessionResponse response = aiExamService.detail(sessionUser, examId);
-        // return ApiResponse.success(response);
-        return ok("EXAM-003");
+    public ApiResponse<ExamSessionResponse> detail(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId
+    ) {
+        return ApiResponse.success(aiExamService.detail(sessionUser, examId));
+    }
+
+    @GetMapping("/api/exams/{examId}/problems/{problemNo}")
+    public ApiResponse<ExamProblemStepResponse> problem(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId,
+            @PathVariable Integer problemNo
+    ) {
+        return ApiResponse.success(ExamProblemStepResponse.from(aiExamService.detail(sessionUser, examId), problemNo));
     }
 
     @PostMapping("/api/exams/{examId}/answers/{aiProblemId}")
-    public ApiResponse<Map<String, Object>> answer(@PathVariable Long examId, @PathVariable Long aiProblemId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // SaveExamAnswerForm form = request body 또는 form binding 값으로 받으세요.
-        // return ApiResponse.success(response);
-        return ok("EXAM-004");
+    public ApiResponse<ExamSessionResponse> saveAnswer(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId,
+            @PathVariable Long aiProblemId,
+            @Valid @RequestBody SaveExamAnswerRequest request
+    ) {
+        return ApiResponse.success(aiExamService.saveAnswer(sessionUser, examId, aiProblemId, request));
+    }
+
+    @PostMapping("/api/exams/{examId}/problems/{problemNo}/answers/{aiProblemId}")
+    public ApiResponse<ExamProblemStepResponse> saveStepAnswer(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId,
+            @PathVariable Integer problemNo,
+            @PathVariable Long aiProblemId,
+            @Valid @RequestBody SaveExamAnswerRequest request
+    ) {
+        ExamSessionResponse exam = aiExamService.saveAnswer(sessionUser, examId, aiProblemId, request);
+        return ApiResponse.success(ExamProblemStepResponse.from(exam, problemNo));
+    }
+
+    @PostMapping("/api/exams/{examId}/problems/{problemNo}/answers/{aiProblemId}/test-run")
+    public ApiResponse<ExamCodeRunResponse> testRun(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId,
+            @PathVariable Integer problemNo,
+            @PathVariable Long aiProblemId,
+            @Valid @RequestBody SaveExamAnswerRequest request
+    ) {
+        return ApiResponse.success(examCodeRunService.run(sessionUser, examId, aiProblemId, request));
     }
 
     @PostMapping("/api/exams/{examId}/submit")
-    public ApiResponse<Map<String, Object>> submit(@PathVariable Long examId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // ExamSubmitForm form = request body 또는 form binding 값으로 받으세요.
-        // return ApiResponse.success(response);
-        return ok("EXAM-005");
+    public ApiResponse<ExamSubmitResponse> submit(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId,
+            @Valid @RequestBody ExamSubmitRequest request
+    ) {
+        return ApiResponse.success(aiExamService.submit(sessionUser, examId));
+    }
+
+    @PostMapping("/api/exams/{examId}/problems/{problemNo}/submit")
+    public ApiResponse<ExamSubmitResponse> submitStep(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId,
+            @PathVariable Integer problemNo,
+            @Valid @RequestBody ExamSubmitRequest request
+    ) {
+        return ApiResponse.success(aiExamService.submit(sessionUser, examId));
     }
 
     @PostMapping("/api/exams/{examId}/retry-execution")
-    public ApiResponse<Map<String, Object>> retryExecution(@PathVariable Long examId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // return ApiResponse.success(response);
-        return ok("EXAM-006");
+    public ApiResponse<ExamSubmitResponse> retryExecution(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId
+    ) {
+        return ApiResponse.success(aiExamService.retryExecution(sessionUser, examId));
     }
 
     @GetMapping("/api/exams/{examId}/result")
-    public ApiResponse<Map<String, Object>> result(@PathVariable Long examId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // return ApiResponse.success(response);
-        return ok("EXAM-007");
+    public ApiResponse<ExamResultResponse> result(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId
+    ) {
+        return ApiResponse.success(aiExamService.result(sessionUser, examId));
     }
 
     @GetMapping("/api/exams/{examId}/status")
-    public ApiResponse<Map<String, Object>> status(@PathVariable Long examId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // return ApiResponse.success(response);
-        return ok("EXAM-008");
-    }
-
-    private ApiResponse<Map<String, Object>> ok(String endpointId) {
-        // TODO: 개별 endpoint method에서 service 호출과 Response DTO 변환을 끝내면 이 helper를 제거하세요.
-        // return ApiResponse.success(response); 형태가 최종 구현입니다.
-        return ApiResponse.success(Map.of("endpointId", endpointId, "status", "SKELETON"));
+    public ApiResponse<ExamStatusResponse> status(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long examId
+    ) {
+        return ApiResponse.success(aiExamService.status(sessionUser, examId));
     }
 }

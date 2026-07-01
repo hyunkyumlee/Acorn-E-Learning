@@ -1,54 +1,77 @@
 package com.acorn.elearning.analysis.controller;
 
+import com.acorn.elearning.analysis.dto.request.GenerateAnalysisRequest;
+import com.acorn.elearning.analysis.dto.response.AnalysisReportResponse;
+import com.acorn.elearning.analysis.form.GenerateAnalysisForm;
+import com.acorn.elearning.analysis.service.AiAnalysisService;
+import com.acorn.elearning.security.SessionUser;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AnalysisController {
+    private final AiAnalysisService aiAnalysisService;
+
+    public AnalysisController(AiAnalysisService aiAnalysisService) {
+        this.aiAnalysisService = aiAnalysisService;
+    }
 
     @GetMapping("/analysis")
-    public String index(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // AnalysisDashboardView view = analysisService.index(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+    public String index(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            Model model
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
         model.addAttribute("screen", "analysis/index");
+        model.addAttribute("form", new GenerateAnalysisForm());
+        model.addAttribute("report", aiAnalysisService.latest(sessionUser));
         return "analysis/index";
     }
 
     @PostMapping("/analysis")
-    public String generate() {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "analysis/index"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // aiAnalysisService.generate(sessionUser, form);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
-        return "redirect:/analysis";
+    public String generate(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid GenerateAnalysisForm form,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("screen", "analysis/index");
+            model.addAttribute("report", aiAnalysisService.latest(sessionUser));
+            return "analysis/index";
+        }
+        AnalysisReportResponse report = aiAnalysisService.generate(sessionUser, new GenerateAnalysisRequest(form.getExamId()));
+        redirectAttributes.addAttribute("reportId", report.reportId());
+        return "redirect:/analysis?reportId={reportId}";
     }
 
     @PostMapping("/analysis/{reportId}/retry")
-    public String retry(@PathVariable Long reportId) {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "/analysis"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // aiAnalysisService.retry(sessionUser, form, reportId);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+    public String retry(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long reportId
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        aiAnalysisService.retry(sessionUser, reportId);
         return "redirect:/analysis";
     }
 
     @GetMapping("/analysis/payment")
-    public String paymentEntry(Model model) {
-        // TODO 구현 예시입니다. 이 method는 화면 렌더링이 아니라 browser redirect flow입니다.
-        // SessionUser sessionUser = currentSessionUser();
-        // RedirectTarget redirectTarget = paymentAccessService.requirePremiumOrPaymentRedirect(sessionUser);
-        // return "redirect:" + redirectTarget.url();
-
-        model.addAttribute("screen", "redirect:/payments");
-
+    public String paymentEntry() {
         return "redirect:/payments";
     }
 }
