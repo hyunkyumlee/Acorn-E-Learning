@@ -10,8 +10,99 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell settings-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>결제 내역</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>settings/payment</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="page-heading">
+      <span class="eyebrow">Premium</span>
+      <h1 th:text="${view == null ? '결제 내역' : view.title()}">결제 내역</h1>
+      <p>Premium 이용 상태와 결제 내역을 확인할 수 있어요.</p>
+    </section>
+
+    <section class="panel payment-summary-panel" th:if="${view != null}">
+      <div class="payment-summary-head">
+        <div>
+          <h2>Premium 상태</h2>
+          <p>현재 계정에 적용된 Premium 권한 기준입니다.</p>
+        </div>
+        <span class="payment-status-badge"
+              th:classappend="${view.premiumAccess() != null and view.premiumAccess().premiumActive()} ? ' is-active' : ' is-inactive'"
+              th:text="${view.premiumStatusLabel()}">Premium 활성</span>
+      </div>
+      <dl class="payment-summary-list">
+        <div>
+          <dt>권한 유형</dt>
+          <dd th:text="${view.premiumGrantTypeLabel()}">Lifetime</dd>
+        </div>
+        <div>
+          <dt>시작일</dt>
+          <dd th:text="${view.premiumGrantedAtLabel()}">2026.06.30 12:00</dd>
+        </div>
+        <div>
+          <dt>만료일</dt>
+          <dd th:text="${view.premiumExpiresAtLabel()}">무제한</dd>
+        </div>
+        <div>
+          <dt>결제 건수</dt>
+          <dd th:text="${view.totalElements()}">1</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="panel payment-history-panel" th:if="${view != null}">
+      <div class="payment-section-head">
+        <div>
+          <h2>결제 내역</h2>
+          <p th:text="|총 ${view.totalElements()}건|">총 1건</p>
+        </div>
+        <a class="button primary" th:href="@{/payments}" href="/payments">Premium 결제</a>
+      </div>
+
+      <div class="payment-empty" th:if="${view.empty()}">
+        <strong>아직 결제 내역이 없습니다.</strong>
+        <p>Premium 결제를 완료하면 이곳에 내역이 표시됩니다.</p>
+      </div>
+
+      <div class="payment-table-wrap" th:unless="${view.empty()}">
+        <table class="payment-history-table">
+          <thead>
+            <tr>
+              <th scope="col">결제일</th>
+              <th scope="col">상품</th>
+              <th scope="col">결제수단</th>
+              <th scope="col">금액</th>
+              <th scope="col">결제상태</th>
+              <th scope="col">Premium</th>
+              <th scope="col">만료일</th>
+              <th scope="col">주문번호</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="payment : ${view.payments()}">
+              <td th:text="${payment.paidAtLabel()}">2026.06.30 12:00</td>
+              <td th:text="${payment.productNameLabel()}">Premium Lifetime</td>
+              <td th:text="${payment.paymentMethodLabel()}">신용카드</td>
+              <td class="numeric" th:text="${payment.amountLabel()}">9,900원</td>
+              <td>
+                <span class="payment-status-badge is-paid" th:text="${payment.paymentStatusLabel()}">결제 완료</span>
+              </td>
+              <td th:text="${payment.premiumStatusLabel()}">Premium 활성</td>
+              <td th:text="${payment.expiresAtLabel()}">무제한</td>
+              <td class="order-no" th:text="${payment.orderNo()}">KNV-ORDER</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav class="payment-pagination" th:if="${view.totalPages() > 1}" aria-label="결제 내역 페이지">
+        <a class="button"
+           th:classappend="${view.first()} ? ' is-disabled'"
+           th:href="@{/settings/payment(page=${view.page() - 1},size=${view.size()})}"
+           th:attr="aria-disabled=${view.first()}">이전</a>
+        <span th:text="|${view.page() + 1} / ${view.totalPages()}|">1 / 1</span>
+        <a class="button"
+           th:classappend="${view.last()} ? ' is-disabled'"
+           th:href="@{/settings/payment(page=${view.page() + 1},size=${view.size()})}"
+           th:attr="aria-disabled=${view.last()}">다음</a>
+      </nav>
+    </section>
   </main>
 </body>
 </html>
