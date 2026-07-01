@@ -65,6 +65,7 @@
               th:attr="data-test-run-url=@{/api/exams/{examId}/problems/{problemNo}/answers/{aiProblemId}/test-run(examId=${exam.examId()}, problemNo=${step.currentProblemNo()}, aiProblemId=${step.problem().aiProblemId()})}"
               th:action="@{/exams/{examId}/problems/{problemNo}/answers/{aiProblemId}(examId=${exam.examId()}, problemNo=${step.currentProblemNo()}, aiProblemId=${step.problem().aiProblemId()})}"
               method="post">
+          <input type="hidden" name="idempotencyToken" th:value="${answerIdempotencyToken}">
           <div class="exam-code-field">
             <span id="exam-code-label">답안 코드</span>
             <textarea class="exam-code-source" name="answerText" rows="18" spellcheck="false" autocomplete="off" aria-labelledby="exam-code-label" th:text="${step.problem().answerText()}"></textarea>

@@ -20,10 +20,10 @@ import com.acorn.elearning.exam.model.AiExamProblem;
 import com.acorn.elearning.exam.model.AiRequestLog;
 import com.acorn.elearning.exam.model.ExamAnswer;
 import com.acorn.elearning.exam.model.ExamSession;
+import com.acorn.elearning.exam.service.AiGeneratedProblemParser.GeneratedProblem;
 import com.acorn.elearning.exam.service.ExamLearningScopeService.ExamLearningScope;
 import com.acorn.elearning.security.SessionUser;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,6 +47,7 @@ public class AiExamService {
     private final TestCaseExecutionService testCaseExecutionService;
     private final AiReviewService aiReviewService;
     private final ExamLearningScopeService examLearningScopeService;
+    private final AiGeneratedProblemParser generatedProblemParser;
     private final ObjectMapper objectMapper;
 
     public AiExamService(
@@ -68,43 +69,51 @@ public class AiExamService {
         this.testCaseExecutionService = testCaseExecutionService;
         this.aiReviewService = aiReviewService;
         this.examLearningScopeService = examLearningScopeService;
+        this.generatedProblemParser = new AiGeneratedProblemParser(objectMapper);
         this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
     public ExamEligibilityResponse eligibility(SessionUser sessionUser) {
         Long userId = requireUserId(sessionUser);
-        return ExamEligibilityResponse.from(examSessionMapper.findLatestByUserId(userId).orElse(null));
+        return ExamEligibilityResponse.from(
+                examSessionMapper.findLatestByUserId(userId).orElse(null),
+                examLearningScopeService.eligibility(userId));
     }
 
     @Transactional
     public ExamSessionResponse create(SessionUser sessionUser, CreateExamRequest request) {
         Long userId = requireUserId(sessionUser);
+        ExamLearningScope learningScope = examLearningScopeService.build(userId, request.subjectId(), request.levelCode());
+        ExamSession activeSession = examSessionMapper.findLatestActiveByUserSubjectLevel(userId, request.subjectId(), request.levelCode()).orElse(null);
+        if (activeSession != null) {
+            return detail(userId, activeSession.getExamId());
+        }
         ExamSession session = new ExamSession();
         session.setUserId(userId);
         session.setSubjectId(request.subjectId());
         session.setLevelCode(request.levelCode());
-        session.setStatus("CREATED");
+        session.setStatus(ExamSessionStatusPolicy.CREATED);
         session.setTotalProblemCount(PROBLEM_COUNT);
         session.setCorrectCount(0);
         session.setRetryCount(0);
         session.setStartedAt(LocalDateTime.now());
         examSessionMapper.insert(session);
 
-        ChatGptRequest chatGptRequest = problemGenerationRequest(userId, request);
+        ChatGptRequest chatGptRequest = ExamProblemGenerationRequestFactory.create(request, learningScope, PROBLEM_COUNT);
         AiRequestLog log = aiRequestLogService.start(TARGET_TYPE, session.getExamId(), "PROBLEM_GENERATION", chatGptRequest);
         try {
             ChatGptResponse response = chatGptApiClient.send(chatGptRequest);
-            saveGeneratedProblems(session.getExamId(), response.content());
+            saveGeneratedProblems(session.getExamId(), response.content(), learningScope);
             aiRequestLogService.success(log, response);
         } catch (RuntimeException exception) {
-            session.setStatus("FAILED");
+            session.setStatus(ExamSessionStatusPolicy.FAILED);
             examSessionMapper.updateStatus(session);
             aiRequestLogService.failed(log, exception);
             throw exception;
         }
 
-        session.setStatus("READY");
+        session.setStatus(ExamSessionStatusPolicy.READY);
         examSessionMapper.updateStatus(session);
         return detail(userId, session.getExamId());
     }
@@ -112,7 +121,8 @@ public class AiExamService {
     @Transactional
     public ExamSessionResponse saveAnswer(SessionUser sessionUser, Long examId, Long aiProblemId, SaveExamAnswerRequest request) {
         Long userId = requireUserId(sessionUser);
-        requireSession(userId, examId);
+        ExamSession session = requireSession(userId, examId);
+        ExamSessionStatusPolicy.requireEditable(session);
         aiExamProblemMapper.findByIdAndExamId(aiProblemId, examId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "AI 시험 문제를 찾을 수 없습니다."));
         ExamAnswer answer = new ExamAnswer();
@@ -127,6 +137,10 @@ public class AiExamService {
     public ExamSubmitResponse submit(SessionUser sessionUser, Long examId) {
         Long userId = requireUserId(sessionUser);
         ExamSession session = requireSession(userId, examId);
+        if (ExamSessionStatusPolicy.graded(session)) {
+            return ExamSubmitResponse.from(session);
+        }
+        ExamSessionStatusPolicy.requireSubmittable(session);
         grade(session);
         return ExamSubmitResponse.from(requireSession(userId, examId));
     }
@@ -135,6 +149,7 @@ public class AiExamService {
     public ExamSubmitResponse retryExecution(SessionUser sessionUser, Long examId) {
         Long userId = requireUserId(sessionUser);
         ExamSession session = requireSession(userId, examId);
+        ExamSessionStatusPolicy.requireSubmittable(session);
         session.setRetryCount(session.getRetryCount() + 1);
         examSessionMapper.updateStatus(session);
         grade(session);
@@ -192,7 +207,7 @@ public class AiExamService {
             }
         }
 
-        session.setStatus("GRADED");
+        session.setStatus(ExamSessionStatusPolicy.GRADED);
         session.setResultStatus(correctCount >= PASS_COUNT ? "PASSED" : "FAILED");
         session.setCorrectCount(correctCount);
         session.setSubmittedAt(LocalDateTime.now());
@@ -200,56 +215,19 @@ public class AiExamService {
         examSessionMapper.updateResult(session);
     }
 
-    private ChatGptRequest problemGenerationRequest(Long userId, CreateExamRequest request) {
-        ExamLearningScope learningScope = examLearningScopeService.build(userId, request.subjectId(), request.levelCode());
-        return new ChatGptRequest(
-                "exam-problem-generation",
-                "exam-problem-v2",
-                Map.of(
-                        "instruction", """
-                                Java main 함수로 풀 수 있는 코딩테스트 문제 3개를 JSON으로 생성하세요.
-                                반드시 learnedScope.learnedItems와 learnedScope.allowedConcepts에 포함된 이론 학습 및 문제풀이 내용만 출제합니다.
-                                learnedScope에 없는 문법, API, 자료구조, 알고리즘은 문제 해결에 필요하게 만들지 않습니다.
-                                특히 BufferedReader, InputStreamReader, StringTokenizer는 learnedScope에 직접 등장하지 않으면 starterCode와 정답 요구사항에 포함하지 않습니다.
-                                각 문제는 prompt, starterCode, testCases를 포함합니다.
-                                starterCode는 입력을 읽는 기본 틀을 포함하고, 사용자가 구현해야 할 로직 영역만 TODO 주석으로 비워 둡니다.
-                                testCases는 input, expectedOutput 필드를 가진 배열입니다.
-                                """,
-                        "subjectId", request.subjectId(),
-                        "levelCode", request.levelCode(),
-                        "problemCount", PROBLEM_COUNT,
-                        "learnedScope", learningScope));
-    }
-
-    private void saveGeneratedProblems(Long examId, String content) {
-        try {
-            JsonNode problems = objectMapper.readTree(content).path("problems");
-            if (!problems.isArray() || problems.size() < PROBLEM_COUNT) {
-                throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 문제 수가 부족합니다.");
-            }
-            for (int index = 0; index < PROBLEM_COUNT; index++) {
-                JsonNode node = problems.get(index);
-                AiExamProblem problem = new AiExamProblem();
-                problem.setExamId(examId);
-                problem.setProblemNo(index + 1);
-                problem.setPrompt(requiredText(node, "prompt"));
-                requiredText(node, "starterCode");
-                problem.setTestCaseSpec(objectMapper.writeValueAsString(node.path("testCases")));
-                problem.setAiRawResponse(content);
-                problem.setStatus("GENERATED");
-                aiExamProblemMapper.insert(problem);
-            }
-        } catch (JacksonException exception) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 문제 형식이 올바르지 않습니다.");
+    private void saveGeneratedProblems(Long examId, String content, ExamLearningScope learningScope) {
+        List<GeneratedProblem> generatedProblems = generatedProblemParser.parse(content, learningScope, PROBLEM_COUNT);
+        for (int index = 0; index < generatedProblems.size(); index++) {
+            GeneratedProblem generatedProblem = generatedProblems.get(index);
+            AiExamProblem problem = new AiExamProblem();
+            problem.setExamId(examId);
+            problem.setProblemNo(index + 1);
+            problem.setPrompt(generatedProblem.prompt());
+            problem.setTestCaseSpec(generatedProblem.testCaseSpec());
+            problem.setAiRawResponse(generatedProblem.rawResponse());
+            problem.setStatus("GENERATED");
+            aiExamProblemMapper.insert(problem);
         }
-    }
-
-    private String requiredText(JsonNode node, String fieldName) {
-        JsonNode field = node.path(fieldName);
-        if (!field.isTextual() || field.asText().isBlank()) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 문제 본문이 비어 있습니다.");
-        }
-        return field.asText();
     }
 
     private ExamSession requireSession(Long userId, Long examId) {
@@ -260,6 +238,9 @@ public class AiExamService {
     private Long requireUserId(SessionUser sessionUser) {
         if (sessionUser == null || sessionUser.userId() == null) {
             throw new BusinessException(ErrorCode.AUTH_REQUIRED);
+        }
+        if (!sessionUser.user()) {
+            throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "AI 코딩테스트는 학습자 계정으로만 이용할 수 있습니다.");
         }
         return sessionUser.userId();
     }

@@ -9,6 +9,10 @@ public interface ExamSessionMapper {
     Optional<ExamSession> findById(Long id);
     Optional<ExamSession> findByIdAndUserId(@Param("examId") Long examId, @Param("userId") Long userId);
     Optional<ExamSession> findLatestByUserId(Long userId);
+    Optional<ExamSession> findLatestActiveByUserSubjectLevel(
+            @Param("userId") Long userId,
+            @Param("subjectId") Long subjectId,
+            @Param("levelCode") String levelCode);
     List<ExamSession> findByUserId(Long userId);
     List<ExamSession> findAll();
     int insert(ExamSession model);

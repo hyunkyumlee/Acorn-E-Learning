@@ -59,6 +59,18 @@
         LIMIT 1
     </select>
 
+    <select id="findLatestActiveByUserSubjectLevel" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+          AND level_code = #{levelCode}
+          AND status IN ('CREATED', 'READY')
+        ORDER BY exam_id DESC
+        LIMIT 1
+    </select>
+
     <select id="findByUserId" parameterType="long" resultMap="ExamSessionResultMap">
         SELECT
         <include refid="ExamSessionColumns" />

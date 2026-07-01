@@ -37,6 +37,28 @@ class ExamLearningScopeServiceTest {
         assertEquals(ErrorCode.COMMON_VALIDATION_FAILED, exception.errorCode());
     }
 
+    @Test
+    void eligibility_allows_exam_when_user_has_available_scope() {
+        ExamLearningScopeService service = new ExamLearningScopeService(new FakeExamLearningScopeMapper(
+                List.of(item("LESSON", "Java 변수 행성", "변수", "int 변수를 배웁니다.", "int score = 10;", 10)),
+                List.of()));
+
+        ExamLearningScopeService.ExamLearningEligibility eligibility = service.eligibility(2L);
+
+        assertTrue(eligibility.eligible());
+        assertEquals(1, eligibility.availableScopeCount());
+    }
+
+    @Test
+    void eligibility_blocks_exam_when_user_has_no_available_scope() {
+        ExamLearningScopeService service = new ExamLearningScopeService(new FakeExamLearningScopeMapper(List.of(), List.of()));
+
+        ExamLearningScopeService.ExamLearningEligibility eligibility = service.eligibility(2L);
+
+        assertEquals(false, eligibility.eligible());
+        assertEquals(0, eligibility.availableScopeCount());
+    }
+
     private static ExamLearningScopeItem item(
             String sourceType,
             String nodeTitle,
@@ -67,6 +89,11 @@ class ExamLearningScopeServiceTest {
         @Override
         public List<ExamLearningScopeItem> findPassedPracticeScope(Long userId, Long subjectId, String levelCode) {
             return practices;
+        }
+
+        @Override
+        public int countAvailableScopeItems(Long userId, Long subjectId, String levelCode) {
+            return lessons.size() + practices.size();
         }
     }
 }

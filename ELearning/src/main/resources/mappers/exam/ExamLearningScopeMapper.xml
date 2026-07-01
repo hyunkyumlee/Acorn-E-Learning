@@ -54,4 +54,46 @@
           AND pp.is_active = 1
         ORDER BY sort_order ASC
     </select>
+
+    <select id="countAvailableScopeItems" resultType="int">
+        SELECT COUNT(*)
+        FROM (
+            SELECT l.lesson_id AS scope_item_id
+            FROM learning_progress lp
+            INNER JOIN curriculum_nodes cn
+                ON cn.node_id = lp.node_id
+            INNER JOIN lessons l
+                ON l.node_id = cn.node_id
+            WHERE lp.user_id = #{userId}
+              AND lp.lesson_completed = 1
+              AND cn.is_active = 1
+              AND l.is_active = 1
+            <if test="subjectId != null">
+              AND lp.subject_id = #{subjectId}
+            </if>
+            <if test="levelCode != null and levelCode != ''">
+              AND cn.level_code = #{levelCode}
+            </if>
+
+            UNION ALL
+
+            SELECT DISTINCT pp.problem_id AS scope_item_id
+            FROM learning_progress lp
+            INNER JOIN curriculum_nodes cn
+                ON cn.node_id = lp.node_id
+            INNER JOIN practice_problems pp
+                ON pp.node_id = cn.node_id
+               AND pp.subject_id = lp.subject_id
+            WHERE lp.user_id = #{userId}
+              AND lp.practice_passed = 1
+              AND cn.is_active = 1
+              AND pp.is_active = 1
+            <if test="subjectId != null">
+              AND lp.subject_id = #{subjectId}
+            </if>
+            <if test="levelCode != null and levelCode != ''">
+              AND cn.level_code = #{levelCode}
+            </if>
+        ) available_scope_items
+    </select>
 </mapper>

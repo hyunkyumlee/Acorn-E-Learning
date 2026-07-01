@@ -16,13 +16,18 @@
       <p>응시 조건을 확인하고 3문항을 순차적으로 풉니다.</p>
     </section>
 
+    <div class="exam-alert is-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">
+      시험을 시작할 수 없습니다.
+    </div>
+
     <section class="exam-gate">
-      <article class="exam-gate-card" th:if="${eligibility != null}">
+      <article class="exam-gate-card" th:if="${eligibility != null && eligibility.eligible()}">
         <span class="exam-state-badge">응시 가능</span>
         <h2 th:text="${eligibility.message()}">AI 코딩테스트를 시작할 수 있습니다.</h2>
         <p>문제 생성 후 1번 문제부터 순서대로 이동합니다. 제출 후에는 테스트케이스 실행 결과로 채점됩니다.</p>
         <div class="exam-gate-actions">
           <form th:action="@{/exams}" th:object="${form}" method="post" class="exam-create-form">
+            <input type="hidden" th:field="*{idempotencyToken}">
             <label>
               <span>과목 ID</span>
               <input type="number" th:field="*{subjectId}" min="1" required>
@@ -45,10 +50,10 @@
           </a>
         </div>
       </article>
-      <aside class="exam-gate-card is-locked">
-        <span class="exam-state-badge is-warning">응시 조건 미달 예시</span>
-        <h2>필수 이론 학습 완료 후 응시</h2>
-        <p>학습 진행률 조건을 충족하지 못하면 코딩테스트 대신 학습 화면으로 이동합니다.</p>
+      <aside class="exam-gate-card is-locked" th:if="${eligibility == null || !eligibility.eligible()}">
+        <span class="exam-state-badge is-warning">응시 조건 미달</span>
+        <h2 th:text="${eligibility == null ? '로그인이 필요합니다.' : eligibility.message()}">필수 이론 학습 완료 후 응시</h2>
+        <p>완료한 이론 학습 또는 통과한 문제풀이 범위가 있어야 AI 코딩테스트 문제를 생성할 수 있습니다.</p>
         <a class="button" th:href="@{/learning}">학습 이어가기</a>
       </aside>
     </section>

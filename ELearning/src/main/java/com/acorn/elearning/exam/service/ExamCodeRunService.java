@@ -9,6 +9,7 @@ import com.acorn.elearning.exam.mapper.AiExamProblemMapper;
 import com.acorn.elearning.exam.mapper.ExamSessionMapper;
 import com.acorn.elearning.exam.model.AiExamProblem;
 import com.acorn.elearning.exam.model.ExamAnswer;
+import com.acorn.elearning.exam.model.ExamSession;
 import com.acorn.elearning.security.SessionUser;
 import java.time.Duration;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,8 @@ public class ExamCodeRunService {
     @Transactional(readOnly = true)
     public ExamCodeRunResponse run(SessionUser sessionUser, Long examId, Long aiProblemId, SaveExamAnswerRequest request) {
         Long userId = requireUserId(sessionUser);
-        requireSession(userId, examId);
+        ExamSession session = requireSession(userId, examId);
+        ExamSessionStatusPolicy.requireRunnable(session);
         AiExamProblem problem = aiExamProblemMapper.findByIdAndExamId(aiProblemId, examId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "AI 시험 문제를 찾을 수 없습니다."));
         ExamAnswer answer = new ExamAnswer();
@@ -47,14 +49,17 @@ public class ExamCodeRunService {
         return ExamCodeRunResponse.from(result, elapsedMs);
     }
 
-    private void requireSession(Long userId, Long examId) {
-        examSessionMapper.findByIdAndUserId(examId, userId)
+    private ExamSession requireSession(Long userId, Long examId) {
+        return examSessionMapper.findByIdAndUserId(examId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "AI 시험을 찾을 수 없습니다."));
     }
 
     private Long requireUserId(SessionUser sessionUser) {
         if (sessionUser == null || sessionUser.userId() == null) {
             throw new BusinessException(ErrorCode.AUTH_REQUIRED);
+        }
+        if (!sessionUser.user()) {
+            throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "AI 코딩테스트는 학습자 계정으로만 이용할 수 있습니다.");
         }
         return sessionUser.userId();
     }

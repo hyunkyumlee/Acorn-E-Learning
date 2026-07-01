@@ -55,6 +55,21 @@
   background: color-mix(in srgb, var(--warning) 8%, var(--surface));
 }
 
+.exam-alert {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.exam-alert.is-danger {
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  color: var(--danger);
+}
+
 .exam-state-badge {
   display: inline-flex;
   width: max-content;

@@ -1,18 +1,21 @@
 package com.acorn.elearning.exam.dto.response;
 
 import com.acorn.elearning.exam.model.ExamSession;
+import com.acorn.elearning.exam.service.ExamLearningScopeService.ExamLearningEligibility;
 
 public record ExamEligibilityResponse(
         boolean eligible,
         Long latestExamId,
         String latestStatus,
-        String message
+        String message,
+        int availableScopeCount
 ) {
-    public static ExamEligibilityResponse from(ExamSession latestExam) {
+    public static ExamEligibilityResponse from(ExamSession latestExam, ExamLearningEligibility eligibility) {
         return new ExamEligibilityResponse(
-                true,
+                eligibility.eligible(),
                 latestExam == null ? null : latestExam.getExamId(),
                 latestExam == null ? null : latestExam.getStatus(),
-                "AI 코딩테스트를 시작할 수 있습니다.");
+                eligibility.message(),
+                eligibility.availableScopeCount());
     }
 }

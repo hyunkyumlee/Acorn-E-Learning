@@ -26,6 +26,9 @@ public record ExamCodeRunResponse(
         if ("COMPILE_ERROR".equals(result.status())) {
             return "컴파일 오류가 발생했습니다.";
         }
+        if ("SECURITY_VIOLATION".equals(result.status())) {
+            return "보안 정책으로 실행이 차단되었습니다.";
+        }
         if (result.passed()) {
             return "모든 테스트케이스를 통과했습니다.";
         }
