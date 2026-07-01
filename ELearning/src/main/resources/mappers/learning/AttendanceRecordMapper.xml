@@ -29,6 +29,15 @@
         ORDER BY attendance_date DESC, attendance_id DESC
     </select>
 
+    <!-- 대시보드 streak용: 가장 최근 출석 1건 -->
+    <select id="findLatestByUserId" parameterType="long" resultMap="AttendanceRecordResultMap">
+        SELECT <include refid="columns" />
+        FROM attendance_records
+        WHERE user_id = #{userId}
+        ORDER BY attendance_date DESC, attendance_id DESC
+        LIMIT 1
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.AttendanceRecord"
             useGeneratedKeys="true" keyProperty="attendanceId">
         INSERT INTO attendance_records

@@ -10,46 +10,155 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Learning</span><h1>학습 메인</h1><p>subjects 테이블의 활성 과목을 DB에서 직접 읽어 표시합니다. (learning 도메인 첫 DB 연결 슬라이스)</p></section>
-
-    <section class="panel">
-      <h2>과목 목록 <small th:text="'(' + ${#lists.size(subjects)} + '개)'">(0개)</small></h2>
-      <p th:if="${#lists.isEmpty(subjects)}">표시할 활성 과목이 없습니다. (subjects 테이블 seed/접속 확인)</p>
-      <table th:unless="${#lists.isEmpty(subjects)}" class="subject-table">
-        <thead>
-          <tr><th>순서</th><th>코드</th><th>과목명</th><th>설명</th></tr>
-        </thead>
-        <tbody>
-          <tr th:each="subject : ${subjects}">
-            <td th:text="${subject.sortOrder}">0</td>
-            <td><code th:text="${subject.subjectCode}">CODE</code></td>
-            <td th:text="${subject.subjectName}">과목명</td>
-            <td th:text="${subject.description}">설명</td>
-          </tr>
-        </tbody>
-      </table>
+    <section class="page-heading">
+      <span class="eyebrow">Learning</span>
+      <h1>학습 메인 <small class="page-heading-name" th:if="${dashboard != null}" th:text="'· ' + ${dashboard.nickname} + '님'">· 학습자님</small></h1>
+      <p>오늘의 미션과 커리큘럼 로드맵, 진행 상태를 한 화면에서 확인하세요. (SR-003 Mission Control)</p>
     </section>
 
-    <section class="panel">
-      <h2>커리큘럼 로드맵 <small>(JAVA · <span th:text="${#lists.size(roadmap)}">0</span>개 노드)</small></h2>
-      <p th:if="${#lists.isEmpty(roadmap)}">로드맵 노드가 없습니다. (curriculum_nodes seed 확인)</p>
-      <table th:unless="${#lists.isEmpty(roadmap)}" class="roadmap-table">
-        <thead>
-          <tr><th>행성</th><th>레벨</th><th>제목</th><th>설명</th></tr>
-        </thead>
-        <tbody>
-          <tr th:each="node : ${roadmap}">
-            <td th:text="${node.planetNo}">1</td>
-            <td><code th:text="${node.levelCode}">BRONZE</code></td>
-            <td th:text="${node.title}">제목</td>
-            <td th:text="${node.description}">설명</td>
-          </tr>
-        </tbody>
-      </table>
-      <p><a th:href="@{/learning/lessons/1}">→ 이론 lesson 상세 예시 보기 (lesson #1)</a></p>
-    </section>
+    <!-- 연속 출석 메시지 (화면설계 화면구상: 학습화면 진입 시 'N일 연속 출석' 표시). streak는 우패널 카드 아님. -->
+    <p class="streak-banner" th:if="${dashboard != null and dashboard.streakCount > 0}">
+      🔥 <strong th:text="${dashboard.streakCount}">0</strong>일 연속 학습 중<span
+         th:text="${dashboard.attendedToday} ? ' · 오늘 출석 완료 ✓' : ' · 오늘 아직 학습 전'"> · 오늘 아직 학습 전</span>
+    </p>
 
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>learning/main</code> · 데이터: <code>SubjectMapper.findAll()</code> / <code>CurriculumService.getRoadmap(1)</code></p></section>
+    <!--
+      SR-003 학습 화면(메인) Layout — 출처: 화면 정의서.pptx(slide 8) + Figma export PNG (둘이 일치).
+        좌 LearningSidebar(과목+진행률+랭킹진입) + 중앙 RoadmapCanvas(오늘의미션+로드맵) + 우 StatusPanel(단원진행현황+시험응시여부 / 내 랭킹).
+      미연결(문제풀이수·내랭킹 = practice/ranking 도메인)은 가짜 수치 대신 "데이터 연결 예정" placeholder.
+    -->
+    <div class="learning-console">
+
+      <!-- ===== 좌: LearningSidebar ===== -->
+      <aside class="learning-sidebar" aria-label="학습 사이드바">
+        <!-- SubjectSwitcher -->
+        <section class="console-card">
+          <h2 class="console-card-title">과목 선택</h2>
+          <p th:if="${#lists.isEmpty(subjects)}" class="console-empty">활성 과목이 없습니다. (subjects seed 확인)</p>
+          <ul th:unless="${#lists.isEmpty(subjects)}" class="subject-switcher">
+            <li th:each="subject : ${subjects}"
+                class="subject-chip"
+                th:classappend="${dashboard != null and dashboard.primarySubjectId != null and subject.subjectId == dashboard.primarySubjectId} ? 'is-current' : ''">
+              <code th:text="${subject.subjectCode}">JAVA</code>
+              <span class="subject-chip-name" th:text="${subject.subjectName}">과목명</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- ProgressSummary -->
+        <section class="console-card" th:if="${dashboard != null}">
+          <h2 class="console-card-title">진행 요약</h2>
+          <dl class="summary-grid">
+            <dt>현재 레벨</dt><dd><code th:text="${dashboard.currentLevelCode} ?: '-'">BRONZE</code></dd>
+            <dt>등급</dt><dd th:text="${dashboard.gradeCode} ?: '-'">BEGINNER</dd>
+            <dt>누적 점수</dt><dd><span th:text="${dashboard.totalScore}">0</span> 점</dd>
+          </dl>
+          <div class="progress-meter" th:attr="aria-label='주 과목 진행률 ' + ${dashboard.progressRate} + '퍼센트'">
+            <div class="progress-meter-head">
+              <span>진행률(주 과목)</span>
+              <strong th:text="${dashboard.progressRate} + '%'">0%</strong>
+            </div>
+            <div class="progress-bar"><span th:style="'width:' + ${dashboard.progressRate} + '%'"></span></div>
+          </div>
+        </section>
+
+        <!-- 진입(오답복습/랭킹) — 데이터 미연결: CTA만 -->
+        <section class="console-card console-entries">
+          <a class="button" th:href="@{/learning/review}">오답 복습하기</a>
+          <a class="button" th:href="@{/ranking}">랭킹 보기</a>
+          <p class="console-note">출석은 랭킹 점수에 반영되지 않습니다.</p>
+        </section>
+      </aside>
+
+      <!-- ===== 중앙: RoadmapCanvas ===== -->
+      <section class="roadmap-canvas" aria-label="학습 로드맵">
+
+        <!-- TodayMissionCard -->
+        <section class="mission-card" th:if="${currentNode != null}">
+          <span class="mission-eyebrow">오늘의 미션</span>
+          <h2 class="mission-title" th:text="${currentNode.title}">Java 배열 행성</h2>
+          <p class="mission-desc" th:text="${currentNode.description}">현재 학습 중인 단원입니다.</p>
+          <a class="button primary" th:href="@{/learning/lessons/{id}(id=${currentNode.nodeId})}">이어서 학습하기</a>
+        </section>
+        <!-- 모든 행성 완료 시: 게이트 안내 -->
+        <section class="mission-card mission-card-gate" th:if="${currentNode == null and !#lists.isEmpty(roadmap)}">
+          <span class="mission-eyebrow">코딩테스트 Gate</span>
+          <h2 class="mission-title">모든 행성 완료!</h2>
+          <p class="mission-desc">이번 레벨의 행성을 모두 마쳤어요. 코딩테스트 Gate에 응시할 수 있습니다.</p>
+          <a class="button primary" th:href="@{/exam/coding-test}">코딩테스트 응시</a>
+        </section>
+
+        <!-- LearningRoadmap (행성 경로) -->
+        <section class="console-card roadmap-panel">
+          <h2 class="console-card-title">커리큘럼 로드맵 <small>(JAVA · <span th:text="${#lists.size(roadmap)}">0</span>개 노드)</small></h2>
+          <p th:if="${#lists.isEmpty(roadmap)}" class="console-empty">로드맵 노드가 없습니다. (curriculum_nodes seed 확인)</p>
+
+          <!--
+            행성 경로(듀오링고식). 노드 상태 = completedPlanets/planetCount(컨트롤러 계산) 기준.
+            - 행성(PLANET): planetNo<=완료수 → done(✓) / 다음 1개 → current / 그 외 → locked
+            - 게이트(GATE): 모든 행성 완료 시 ready, 아니면 locked
+            디자인 명세 v2.0: done=progress green / gate=quest warm / locked=muted. (색은 토큰만 사용)
+          -->
+          <ol th:unless="${#lists.isEmpty(roadmap)}" class="roadmap" aria-label="커리큘럼 로드맵">
+            <li th:each="node : ${roadmap}"
+                class="roadmap-node"
+                th:classappend="${node.nodeType == 'GATE'
+                    ? (completedPlanets >= planetCount ? 'is-gate is-ready' : 'is-gate is-locked')
+                    : (node.planetNo <= completedPlanets ? 'is-done'
+                        : (node.planetNo == completedPlanets + 1 ? 'is-current' : 'is-locked'))}">
+              <span class="roadmap-orb" aria-hidden="true">
+                <span class="roadmap-orb-label"
+                      th:text="${node.nodeType == 'GATE' ? '★'
+                          : (node.planetNo <= completedPlanets ? '✓' : node.planetNo)}">1</span>
+              </span>
+              <div class="roadmap-body">
+                <span class="roadmap-level" th:text="${node.levelCode}">BRONZE</span>
+                <h3 class="roadmap-title" th:text="${node.title}">제목</h3>
+                <p class="roadmap-desc" th:text="${node.description}">설명</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+      </section>
+
+      <!-- ===== 우: StatusPanel (화면 정의서 slide8: 단원진행현황+시험응시여부 / 내 랭킹) ===== -->
+      <aside class="status-panel" aria-label="상태 패널">
+        <!-- 단원 진행 현황 + 시험 응시가능여부 -->
+        <section class="console-card status-card">
+          <h2 class="console-card-title">단원 진행 현황</h2>
+          <div class="progress-meter">
+            <div class="progress-meter-head">
+              <span>[학습] 진행률</span>
+              <strong th:text="${dashboard != null ? dashboard.progressRate + '%' : '-'}">0%</strong>
+            </div>
+            <div class="progress-bar"><span th:style="'width:' + ${dashboard != null ? dashboard.progressRate : 0} + '%'"></span></div>
+          </div>
+          <!-- [문제풀이] n/10 : practice 도메인 미연결 → placeholder -->
+          <div class="progress-meter">
+            <div class="progress-meter-head">
+              <span>[문제풀이]</span>
+              <strong>– / 10</strong>
+            </div>
+            <p class="status-sub">데이터 연결 예정 (practice 도메인)</p>
+          </div>
+          <hr class="status-divider">
+          <!-- 시험 응시가능여부 (행성 완료수 기준) -->
+          <p class="status-sub" th:if="${completedPlanets >= planetCount}">
+            시험 Gate: <strong>응시 가능</strong> (행성 <span th:text="${completedPlanets + '/' + planetCount}">0/0</span> 완료)
+          </p>
+          <p class="status-sub" th:unless="${completedPlanets >= planetCount}"
+             th:text="${'시험 Gate까지: 행성 ' + (planetCount - completedPlanets) + '개 더! (' + completedPlanets + '/' + planetCount + ')'}">시험 Gate까지: 행성 N개 더</p>
+          <p class="status-sub" th:if="${currentNode != null}">다음 단원: <strong th:text="${currentNode.title}">배열</strong> 🔒</p>
+        </section>
+
+        <!-- 내 랭킹 (ranking 도메인 미연결 → placeholder. 진입 버튼은 좌측 대시보드에 있음) -->
+        <section class="console-card status-card is-placeholder">
+          <h2 class="console-card-title">내 랭킹</h2>
+          <p class="status-sub">통합 –위 · Java –위 · 알고리즘 –위</p>
+          <p class="status-sub">데이터 연결 예정 (ranking 도메인). 출석은 랭킹 점수 제외.</p>
+        </section>
+      </aside>
+    </div>
   </main>
 </body>
 </html>

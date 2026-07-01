@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.learning.mapper.LearningProfileReadMapper">
+
+    <resultMap id="UserLearningProfileResultMap" type="com.acorn.elearning.user.model.UserLearningProfile">
+        <id property="profileId" column="profile_id" />
+        <result property="userId" column="user_id" />
+        <result property="primarySubjectId" column="primary_subject_id" />
+        <result property="learningGoal" column="learning_goal" />
+        <result property="currentLevelCode" column="current_level_code" />
+        <result property="totalScore" column="total_score" />
+        <result property="gradeCode" column="grade_code" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <!-- 대시보드용: user_id 기준 1:1 확장 프로필 read -->
+    <select id="findByUserId" parameterType="long" resultMap="UserLearningProfileResultMap">
+        SELECT profile_id, user_id, primary_subject_id, learning_goal, current_level_code,
+               total_score, grade_code, created_at, updated_at
+        FROM user_learning_profiles
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>
