@@ -32,6 +32,15 @@
         ORDER BY subject_id ASC, question_no ASC
     </select>
 
+    <!-- 레벨 테스트 출제용: 특정 과목의 활성 문항을 문항번호 순으로 -->
+    <select id="findActiveBySubjectId" parameterType="long" resultMap="LevelTestQuestionResultMap">
+        SELECT <include refid="columns" />
+        FROM level_test_questions
+        WHERE subject_id = #{subjectId}
+          AND is_active = 1
+        ORDER BY question_no ASC
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.LevelTestQuestion"
             useGeneratedKeys="true" keyProperty="questionId">
         INSERT INTO level_test_questions

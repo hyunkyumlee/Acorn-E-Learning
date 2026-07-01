@@ -2,6 +2,7 @@ package com.acorn.elearning.user.controller;
 
 import com.acorn.elearning.common.response.ApiResponse;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.dto.response.MyPageSummaryResponse;
 import com.acorn.elearning.user.dto.response.PaymentHistoryPageResponse;
 import com.acorn.elearning.user.service.UserActivityService;
 import java.util.Map;
@@ -78,12 +79,10 @@ public class UserApiController {
     }
 
     @GetMapping("/api/mypage/summary")
-    public ApiResponse<Map<String, Object>> mypage() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // MyPageSummaryResponse response = userActivityService.mypage(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("USER-006");
+    public ApiResponse<MyPageSummaryResponse> mypage(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+    ) {
+        return ApiResponse.success(userActivityService.mypage(sessionUser));
     }
 
     @DeleteMapping("/api/users/me")
