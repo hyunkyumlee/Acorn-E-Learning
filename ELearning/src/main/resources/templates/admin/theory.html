@@ -76,7 +76,16 @@
           <td th:text="${lesson.isActive} ? '활성' : '비활성'">활성</td>
           <td>
             <div class="theory-table-actions">
-              <button type="button" class="theory-table-button">수정</button>
+              <button type="button"
+                      class="theory-table-button theory-edit-button"
+                      th:data-lesson-id="${lesson.lessonId}"
+                      th:data-node-id="${lesson.nodeId}"
+                      th:data-title="${lesson.lessonTitle}"
+                      th:data-content="${lesson.content}"
+                      th:data-sort-order="${lesson.sortOrder}"
+                      th:data-is-active="${lesson.isActive}">
+                수정
+              </button>
               <button type="button" class="theory-table-button">삭제</button>
             </div>
           </td>
@@ -95,20 +104,23 @@
     <form method="post" action="/admin/theory" th:object="${lessonForm}">
       <div class="theory-form-layout">
         <div class="theory-form-fields">
-          <input type="text" name="title" placeholder="제목 입력">
+          <input type="hidden" name="lessonId" id="lessonId">
+          <input type="text" name="title" id="lessonTitle" placeholder="제목 입력">
 
           <div class="theory-form-row">
-            <select name="subjectId">
+            <select name="subjectId" id="lessonSubjectId">
               <option value="">과목 선택</option>
+              <option th:each="subject : ${subjectList}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
             </select>
-            <select name="nodeId">
+            <select name="nodeId" id="lessonNodeId">
               <option value="">커리큘럼 선택</option>
+              <option th:each="node : ${curriculumList}" th:value="${node.nodeId}" th:text="${node.title}">Java 기초</option>
             </select>
           </div>
 
           <div class="theory-form-row">
-            <input type="text" name="levelCode" placeholder="레벨 / 순서">
-            <select name="isActive">
+            <input type="number" name="sortOrder" id="lessonSortOrder" min="0" placeholder="순서">
+            <select name="isActive" id="lessonIsActive">
               <option value="">활성화 토글</option>
               <option value="true">활성</option>
               <option value="false">비활성</option>
@@ -122,10 +134,22 @@
           </div>
         </div>
 
-        <textarea name="content" class="theory-content-area" placeholder="내용 입력 영역"></textarea>
+        <textarea name="content" id="lessonContent" class="theory-content-area" placeholder="내용 입력 영역"></textarea>
       </div>
     </form>
   </section>
 </main>
+<script>
+  document.querySelectorAll(".theory-edit-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector("#lessonId").value = button.dataset.lessonId;
+      document.querySelector("#lessonTitle").value = button.dataset.title;
+      document.querySelector("#lessonNodeId").value = button.dataset.nodeId;
+      document.querySelector("#lessonSortOrder").value = button.dataset.sortOrder;
+      document.querySelector("#lessonIsActive").value = button.dataset.isActive;
+      document.querySelector("#lessonContent").value = button.dataset.content || "";
+    });
+  });
+</script>
 </body>
 </html>

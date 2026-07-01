@@ -11,10 +11,13 @@
     <resultMap id="AdminProblemManageRowResultMap"
                type="com.acorn.elearning.admin.dto.response.AdminProblemManageRowResponse">
         <id property="problemId" column="problem_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="nodeId" column="node_id" />
         <result property="subjectName" column="subject_name" />
         <result property="curriculumTitle" column="curriculum_title" />
         <result property="problemType" column="problem_type" />
         <result property="question" column="question" />
+        <result property="answerText" column="answer_text" />
         <result property="difficultyCode" column="difficulty_code" />
         <result property="isActive" column="is_active" />
     </resultMap>
@@ -33,10 +36,13 @@
     <select id="findAll" resultMap="AdminProblemManageRowResultMap">
         SELECT
         p.problem_id,
+        p.subject_id,
+        p.node_id,
         s.subject_name,
         c.title AS curriculum_title,
         p.problem_type,
         p.question,
+        p.answer_text,
         p.difficulty_code,
         p.is_active
         FROM practice_problems p

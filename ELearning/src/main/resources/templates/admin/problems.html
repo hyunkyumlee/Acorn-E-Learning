@@ -34,16 +34,16 @@
       </select>
       <select>
         <option value="">문제 유형</option>
-        <option value="객관식">객관식</option>
-        <option value="빈칸">빈칸</option>
-        <option value="코드 결과 예측">코드 결과 예측</option>
-        <option value="간단 코드 입력">간단 코드 입력</option>
+        <option value="MULTIPLE_CHOICE">객관식</option>
+        <option value="FILL_BLANK">빈칸</option>
+        <option value="CODE_OUTPUT">코드 결과 예측</option>
+        <option value="SHORT_CODE">간단 코드 입력</option>
       </select>
       <select>
         <option value="">난이도</option>
-        <option value="하">하</option>
-        <option value="중">중</option>
-        <option value="상">상</option>
+        <option value="LOW">하</option>
+        <option value="MEDIUM">중</option>
+        <option value="HIGH">상</option>
       </select>
       <select>
         <option value="">활성화 상태</option>
@@ -79,13 +79,35 @@
           <td th:text="${'#' + problem.problemId}">#001</td>
           <td th:text="${problem.subjectName}">Java</td>
           <td th:text="${problem.curriculumTitle}">변수와 자료형</td>
-          <td th:text="${problem.problemType}">객관식</td>
+          <td th:switch="${problem.problemType}">
+            <span th:case="'MULTIPLE_CHOICE'">객관식</span>
+            <span th:case="'FILL_BLANK'">빈칸</span>
+            <span th:case="'CODE_OUTPUT'">코드 결과 예측</span>
+            <span th:case="'SHORT_CODE'">간단 코드 입력</span>
+            <span th:case="*" th:text="${problem.problemType}">객관식</span>
+          </td>
           <td class="problem-question" th:text="${problem.question}">Java에서 정수형 변수를 선언하는 키워드는?</td>
-          <td th:text="${problem.difficultyCode}">하</td>
+          <td th:switch="${problem.difficultyCode}">
+            <span th:case="'LOW'">하</span>
+            <span th:case="'MEDIUM'">중</span>
+            <span th:case="'HIGH'">상</span>
+            <span th:case="*" th:text="${problem.difficultyCode}">하</span>
+          </td>
           <td th:text="${problem.isActive} ? '활성' : '비활성'">활성</td>
           <td>
             <div class="problem-table-actions">
-              <button type="button" class="problem-table-button">수정</button>
+              <button type="button"
+                      class="problem-table-button problem-edit-button"
+                      th:data-problem-id="${problem.problemId}"
+                      th:data-subject-id="${problem.subjectId}"
+                      th:data-node-id="${problem.nodeId}"
+                      th:data-problem-type="${problem.problemType}"
+                      th:data-question="${problem.question}"
+                      th:data-answer-text="${problem.answerText}"
+                      th:data-difficulty-code="${problem.difficultyCode}"
+                      th:data-is-active="${problem.isActive}">
+                수정
+              </button>
               <button type="button" class="problem-table-button">삭제</button>
             </div>
           </td>
@@ -104,34 +126,45 @@
     <form method="post" action="/admin/problems" th:object="${problemForm}">
       <div class="problem-form-layout">
         <div class="problem-form-fields">
-          <select name="problemType">
+          <input type="hidden" name="problemId" id="problemId">
+          <select name="problemType" id="problemType">
             <option value="">문제 유형 선택 (객관식 / 빈칸 / 코드 결과 예측 / 간단 코드 입력)</option>
-            <option value="객관식">객관식</option>
-            <option value="빈칸">빈칸</option>
-            <option value="코드 결과 예측">코드 결과 예측</option>
-            <option value="간단 코드 입력">간단 코드 입력</option>
+            <option value="MULTIPLE_CHOICE">객관식</option>
+            <option value="FILL_BLANK">빈칸</option>
+            <option value="CODE_OUTPUT">코드 결과 예측</option>
+            <option value="SHORT_CODE">간단 코드 입력</option>
           </select>
 
-          <textarea name="question" class="problem-question-input" placeholder="문제 내용 입력"></textarea>
+          <textarea name="question" id="problemQuestion" class="problem-question-input" placeholder="문제 내용 입력"></textarea>
 
           <textarea name="choices" class="problem-choice-input" placeholder="선택지 입력 영역"></textarea>
 
           <div class="problem-form-row">
-            <input type="text" name="answerText" placeholder="정답 입력">
-            <select name="difficultyCode">
+            <input type="text" name="answerText" id="problemAnswerText" placeholder="정답 입력">
+            <select name="difficultyCode" id="problemDifficultyCode">
               <option value="">난이도 선택</option>
-              <option value="하">하</option>
-              <option value="중">중</option>
-              <option value="상">상</option>
+              <option value="LOW">하</option>
+              <option value="MEDIUM">중</option>
+              <option value="HIGH">상</option>
             </select>
           </div>
 
           <div class="problem-form-row">
-            <select name="subjectId">
+            <select name="subjectId" id="problemSubjectId">
               <option value="">과목 선택</option>
+              <option th:each="subject : ${subjectList}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
             </select>
-            <select name="nodeId">
+            <select name="nodeId" id="problemNodeId">
               <option value="">커리큘럼 선택</option>
+              <option th:each="node : ${curriculumList}" th:value="${node.nodeId}" th:text="${node.title}">Java 기초</option>
+            </select>
+          </div>
+
+          <div class="problem-form-row">
+            <select name="isActive" id="problemIsActive">
+              <option value="">활성화 상태</option>
+              <option value="true">활성</option>
+              <option value="false">비활성</option>
             </select>
           </div>
 
@@ -147,5 +180,32 @@
     </form>
   </section>
 </main>
+<script>
+  const problemTypeCodeMap = {
+    "객관식": "MULTIPLE_CHOICE",
+    "빈칸": "FILL_BLANK",
+    "코드 결과 예측": "CODE_OUTPUT",
+    "간단 코드 입력": "SHORT_CODE"
+  };
+
+  const difficultyCodeMap = {
+    "하": "LOW",
+    "중": "MEDIUM",
+    "상": "HIGH"
+  };
+
+  document.querySelectorAll(".problem-edit-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector("#problemId").value = button.dataset.problemId;
+      document.querySelector("#problemSubjectId").value = button.dataset.subjectId;
+      document.querySelector("#problemNodeId").value = button.dataset.nodeId;
+      document.querySelector("#problemType").value = problemTypeCodeMap[button.dataset.problemType] || button.dataset.problemType;
+      document.querySelector("#problemQuestion").value = button.dataset.question || "";
+      document.querySelector("#problemAnswerText").value = button.dataset.answerText || "";
+      document.querySelector("#problemDifficultyCode").value = difficultyCodeMap[button.dataset.difficultyCode] || button.dataset.difficultyCode;
+      document.querySelector("#problemIsActive").value = button.dataset.isActive;
+    });
+  });
+</script>
 </body>
 </html>
