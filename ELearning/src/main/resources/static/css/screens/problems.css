@@ -1,0 +1,258 @@
+.problem-manage-screen {
+    padding: 22px 28px 28px;
+    background: #f6f7f9;
+    min-height: 100vh;
+}
+
+.problem-manage-header {
+    padding: 0 0 14px;
+}
+
+.problem-manage-header h1,
+.problem-section-title h2,
+.problem-form-panel h2 {
+    margin: 0;
+    color: #111827;
+}
+
+.problem-manage-header h1 {
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.problem-note {
+    margin: 0 0 14px;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.problem-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.problem-filter {
+    display: grid;
+    grid-template-columns: repeat(5, 150px);
+    gap: 12px;
+}
+
+.problem-filter select,
+.problem-form-panel input,
+.problem-form-panel select,
+.problem-form-panel textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+}
+
+.problem-filter select {
+    height: 36px;
+    padding: 0 12px;
+}
+
+.problem-primary-button,
+.problem-secondary-button,
+.problem-table-button {
+    border-radius: 7px;
+    border: 1px solid #d1d5db;
+    cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.problem-primary-button {
+    height: 38px;
+    padding: 0 18px;
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
+}
+
+.problem-secondary-button {
+    height: 38px;
+    padding: 0 18px;
+    background: #ffffff;
+    color: #111827;
+}
+
+.problem-primary-button:hover {
+    background: #374151;
+}
+
+.problem-secondary-button:hover,
+.problem-table-button:hover {
+    background: #f3f4f6;
+}
+
+.problem-section {
+    margin-bottom: 30px;
+}
+
+.problem-section-title {
+    padding-bottom: 6px;
+}
+
+.problem-section-title h2,
+.problem-form-panel h2 {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.problem-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.problem-table {
+    width: 100%;
+    min-width: 1050px;
+    border-collapse: collapse;
+}
+
+.problem-table thead {
+    background: #eef0f2;
+}
+
+.problem-table th,
+.problem-table td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 11px 14px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+.problem-table th {
+    color: #374151;
+    font-weight: 800;
+}
+
+.problem-table td {
+    color: #1f2937;
+}
+
+.problem-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.problem-question {
+    max-width: 420px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.problem-table-actions,
+.problem-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.problem-table-button {
+    min-width: 46px;
+    height: 28px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 12px;
+}
+
+.problem-empty {
+    height: 76px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.problem-form-panel {
+    padding: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #eeeeef;
+}
+
+.problem-form-panel h2 {
+    margin-bottom: 16px;
+}
+
+.problem-form-layout {
+    display: grid;
+    grid-template-columns: minmax(420px, 1fr) minmax(360px, 1.2fr);
+    gap: 28px;
+    align-items: stretch;
+}
+
+.problem-form-fields {
+    display: flex;
+    min-height: 330px;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.problem-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.problem-form-panel input,
+.problem-form-panel select {
+    height: 38px;
+    padding: 0 12px;
+}
+
+.problem-form-panel textarea {
+    padding: 11px 12px;
+    resize: vertical;
+}
+
+.problem-question-input,
+.problem-choice-input {
+    min-height: 58px;
+}
+
+.problem-explanation-area {
+    min-height: 330px;
+}
+
+.problem-form-actions {
+    margin-top: auto;
+}
+
+@media (max-width: 1024px) {
+    .problem-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .problem-filter,
+    .problem-form-layout,
+    .problem-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .problem-manage-screen {
+        padding: 18px;
+    }
+
+    .problem-filter {
+        width: 100%;
+    }
+
+    .problem-form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
