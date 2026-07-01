@@ -1,37 +1,97 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.exam.mapper.AiRequestLogMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="AiRequestLogResultMap" type="com.acorn.elearning.exam.model.AiRequestLog">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="AiRequestLogResultMap">
-          SELECT /* DDL column list */
-          FROM ai_request_logs
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="AiRequestLogResultMap">
-          SELECT /* DDL column list */
-          FROM ai_request_logs
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.exam.model.AiRequestLog" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO ai_request_logs (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.exam.model.AiRequestLog">
-          UPDATE ai_request_logs
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="AiRequestLogResultMap" type="com.acorn.elearning.exam.model.AiRequestLog">
+        <id property="aiRequestLogId" column="ai_request_log_id" />
+        <result property="targetType" column="target_type" />
+        <result property="targetId" column="target_id" />
+        <result property="requestType" column="request_type" />
+        <result property="status" column="status" />
+        <result property="retryNo" column="retry_no" />
+        <result property="requestPayload" column="request_payload" />
+        <result property="responsePayload" column="response_payload" />
+        <result property="errorCode" column="error_code" />
+        <result property="errorMessage" column="error_message" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="AiRequestLogColumns">
+        ai_request_log_id,
+        target_type,
+        target_id,
+        request_type,
+        status,
+        retry_no,
+        request_payload,
+        response_payload,
+        error_code,
+        error_message,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="AiRequestLogResultMap">
+        SELECT
+        <include refid="AiRequestLogColumns" />
+        FROM ai_request_logs
+        WHERE ai_request_log_id = #{id}
+    </select>
+
+    <select id="findByTarget" resultMap="AiRequestLogResultMap">
+        SELECT
+        <include refid="AiRequestLogColumns" />
+        FROM ai_request_logs
+        WHERE target_type = #{targetType}
+          AND target_id = #{targetId}
+        ORDER BY ai_request_log_id DESC
+    </select>
+
+    <select id="findAll" resultMap="AiRequestLogResultMap">
+        SELECT
+        <include refid="AiRequestLogColumns" />
+        FROM ai_request_logs
+        ORDER BY ai_request_log_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.exam.model.AiRequestLog" useGeneratedKeys="true" keyProperty="aiRequestLogId">
+        INSERT INTO ai_request_logs (
+            target_type,
+            target_id,
+            request_type,
+            status,
+            retry_no,
+            request_payload,
+            response_payload,
+            error_code,
+            error_message
+        )
+        VALUES (
+            #{targetType},
+            #{targetId},
+            #{requestType},
+            #{status},
+            #{retryNo},
+            CAST(#{requestPayload} AS JSON),
+            CAST(#{responsePayload} AS JSON),
+            #{errorCode},
+            #{errorMessage}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.exam.model.AiRequestLog">
+        UPDATE ai_request_logs
+        SET
+            target_type = #{targetType},
+            target_id = #{targetId},
+            request_type = #{requestType},
+            status = #{status},
+            retry_no = #{retryNo},
+            request_payload = CAST(#{requestPayload} AS JSON),
+            response_payload = CAST(#{responsePayload} AS JSON),
+            error_code = #{errorCode},
+            error_message = #{errorMessage},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE ai_request_log_id = #{aiRequestLogId}
+    </update>
 </mapper>

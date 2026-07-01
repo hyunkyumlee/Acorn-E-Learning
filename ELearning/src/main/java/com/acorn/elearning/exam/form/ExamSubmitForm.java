@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class ExamSubmitForm {
     @NotBlank
-    private String skeletonValue = "TODO";
+    private String confirm = "SUBMIT";
+
     private String idempotencyToken;
-    private Long id;
 }

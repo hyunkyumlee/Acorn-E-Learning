@@ -4,14 +4,59 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI 시험 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/exam.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>AI 시험</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>exam/coding-test</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+  <main class="page-shell exam-screen">
+    <section class="page-heading">
+      <span class="eyebrow">SR-008 · AI Coding Test</span>
+      <h1>AI 코딩테스트</h1>
+      <p>응시 조건을 확인하고 3문항을 순차적으로 풉니다.</p>
+    </section>
+
+    <div class="exam-alert is-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">
+      시험을 시작할 수 없습니다.
+    </div>
+
+    <section class="exam-gate">
+      <article class="exam-gate-card" th:if="${eligibility != null && eligibility.eligible()}">
+        <span class="exam-state-badge">응시 가능</span>
+        <h2 th:text="${eligibility.message()}">AI 코딩테스트를 시작할 수 있습니다.</h2>
+        <p>문제 생성 후 1번 문제부터 순서대로 이동합니다. 제출 후에는 테스트케이스 실행 결과로 채점됩니다.</p>
+        <div class="exam-gate-actions">
+          <form th:action="@{/exams}" th:object="${form}" method="post" class="exam-create-form">
+            <input type="hidden" th:field="*{idempotencyToken}">
+            <label>
+              <span>과목 ID</span>
+              <input type="number" th:field="*{subjectId}" min="1" required>
+            </label>
+            <label>
+              <span>레벨</span>
+              <select th:field="*{levelCode}" required>
+                <option value="">선택</option>
+                <option value="BEGINNER">BEGINNER</option>
+                <option value="INTERMEDIATE">INTERMEDIATE</option>
+                <option value="ADVANCED">ADVANCED</option>
+              </select>
+            </label>
+            <button type="submit" class="button primary">시험 시작</button>
+          </form>
+          <a class="button"
+             th:if="${eligibility.latestExamId() != null}"
+             th:href="${eligibility.latestStatus() == 'GRADED'} ? @{/exams/{examId}/result(examId=${eligibility.latestExamId()})} : @{/exams/{examId}/problems/1(examId=${eligibility.latestExamId()})}">
+            최근 시험 이어가기
+          </a>
+        </div>
+      </article>
+      <aside class="exam-gate-card is-locked" th:if="${eligibility == null || !eligibility.eligible()}">
+        <span class="exam-state-badge is-warning">응시 조건 미달</span>
+        <h2 th:text="${eligibility == null ? '로그인이 필요합니다.' : eligibility.message()}">필수 이론 학습 완료 후 응시</h2>
+        <p>완료한 이론 학습 또는 통과한 문제풀이 범위가 있어야 AI 코딩테스트 문제를 생성할 수 있습니다.</p>
+        <a class="button" th:href="@{/learning}">학습 이어가기</a>
+      </aside>
+    </section>
   </main>
 </body>
 </html>

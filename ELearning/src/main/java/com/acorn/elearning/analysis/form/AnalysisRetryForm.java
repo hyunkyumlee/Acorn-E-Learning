@@ -8,7 +8,5 @@ import lombok.Setter;
 @Setter
 public class AnalysisRetryForm {
     @NotBlank
-    private String skeletonValue = "TODO";
-    private String idempotencyToken;
-    private Long id;
+    private String confirm = "RETRY";
 }

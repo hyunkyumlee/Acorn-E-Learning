@@ -1,1 +1,172 @@
-.analysis-screen .panel { border-left: 4px solid var(--accent); }
+.page-shell.analysis-screen {
+  max-width: 1280px;
+}
+
+.analysis-head,
+.analysis-summary,
+.analysis-grid,
+.analysis-premium-grid,
+.analysis-result-metrics,
+.analysis-recommendations {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.analysis-head {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.34fr);
+  align-items: end;
+}
+
+.analysis-generate-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: end;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  padding: var(--space-4);
+}
+
+.analysis-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.analysis-summary article,
+.analysis-result-metrics article {
+  display: grid;
+  gap: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--space-4);
+}
+
+.analysis-summary span,
+.analysis-result-metrics span,
+.analysis-card-head span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.analysis-summary strong,
+.analysis-result-metrics strong {
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 850;
+}
+
+.analysis-grid {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.analysis-premium-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+}
+
+.analysis-card,
+.analysis-failure {
+  display: grid;
+  gap: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  padding: var(--space-5);
+}
+
+.analysis-card-wide {
+  grid-column: 1 / -1;
+}
+
+.analysis-card.is-locked {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--surface-soft) 54%, var(--surface));
+}
+
+.analysis-card-head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.analysis-card p,
+.analysis-lock p,
+.analysis-failure p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.analysis-bar-chart {
+  display: flex;
+  min-height: 200px;
+  align-items: end;
+  gap: var(--space-3);
+  border-left: 2px solid var(--line);
+  border-bottom: 2px solid var(--line);
+  padding: var(--space-4);
+}
+
+.analysis-bar-chart i {
+  display: block;
+  flex: 1;
+  min-width: 18px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 82%, var(--surface)),
+    color-mix(in srgb, var(--accent) 66%, var(--surface))
+  );
+}
+
+.analysis-result-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysis-lock {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  padding: var(--space-5);
+}
+
+.analysis-lock strong,
+.analysis-failure strong {
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 850;
+}
+
+.analysis-card pre {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  padding: var(--space-4);
+  color: var(--text);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.analysis-recommendations {
+  grid-template-columns: 1fr;
+}
+
+.analysis-failure {
+  border-color: color-mix(in srgb, var(--danger) 38%, var(--line));
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+}
+
+@media (max-width: 900px) {
+  .analysis-head,
+  .analysis-summary,
+  .analysis-grid,
+  .analysis-premium-grid,
+  .analysis-result-metrics {
+    grid-template-columns: 1fr;
+  }
+}

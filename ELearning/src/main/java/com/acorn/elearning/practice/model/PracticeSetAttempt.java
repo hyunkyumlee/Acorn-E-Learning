@@ -8,13 +8,13 @@
     @Setter
     public class PracticeSetAttempt {
         private Long setAttemptId;
-private Long userId;
-private Long nodeId;
-private Integer totalCount;
-private Integer correctCount;
-private String status;
-private Boolean passed;
-private LocalDateTime completedAt;
-private LocalDateTime createdAt;
-private LocalDateTime updatedAt;
+        private Long userId;
+        private Long nodeId;
+        private Integer totalCount;
+        private Integer correctCount;
+        private String status;
+        private Boolean passed;
+        private LocalDateTime completedAt;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
     }

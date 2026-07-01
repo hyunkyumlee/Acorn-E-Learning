@@ -7,31 +7,72 @@
           <result property="..." column="..." />
       </resultMap>
     -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="PracticeProblemResultMap">
-          SELECT /* DDL column list */
-          FROM practice_problems
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="PracticeProblemResultMap">
-          SELECT /* DDL column list */
-          FROM practice_problems
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.practice.model.PracticeProblem" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO practice_problems (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.practice.model.PracticeProblem">
-          UPDATE practice_problems
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <select id="findById" resultType="com.acorn.elearning.practice.model.PracticeProblem">
+        SELECT * FROM practice_problems
+        WHERE problem_id = #{id}
+    </select>
+
+    <select id="findAll" resultType="com.acorn.elearning.practice.model.PracticeProblem">
+        SELECT * FROM practice_problems
+        ORDER BY problem_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.practice.model.PracticeProblem" useGeneratedKeys="true" keyProperty="problemId">
+        INSERT INTO practice_problems (
+        subject_id,
+        node_id,
+        problem_type,
+        question,
+        answer_text,
+        difficulty_code,
+        created_by,
+        is_active,
+        created_at
+        ) VALUES (
+        #{subjectId},
+        #{nodeId},
+        #{problemType},
+        #{question},
+        #{answerText},
+        #{difficultyCode},
+        #{createdBy},
+        #{isActive},
+        NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.practice.model.PracticeProblem">
+        UPDATE practice_problems
+        SET subject_id = #{subjectId},
+        node_id = #{nodeId},
+        problem_type = #{problemType},
+        question = #{question},
+        answer_text = #{answerText},
+        difficulty_code = #{difficultyCode},
+        is_active = #{isActive},
+        updated_at = NOW()
+        WHERE problem_id = #{problemId}
+    </update>
+
+
+    <select id="findPracticeProblems" resultType="com.acorn.elearning.practice.model.PracticeProblem">
+        SELECT
+        problem_id,
+        subject_id,
+        node_id,
+        problem_type,
+        question,
+        answer_text,
+        difficulty_code,
+        created_by,
+        is_active,
+        created_at,
+        updated_at
+        FROM practice_problems
+        WHERE subject_id = #{subjectId}
+        AND difficulty_code = #{difficultyCode}
+        AND is_active = 1
+        ORDER BY RAND()
+        LIMIT 10
+    </select>
 </mapper>
