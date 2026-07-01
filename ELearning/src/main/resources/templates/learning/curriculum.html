@@ -12,6 +12,9 @@
   <main class="page-shell learning-screen">
     <section class="page-heading"><span class="eyebrow">Learning</span><h1>이론 학습</h1><p>lessons 테이블에서 단일 lesson 상세를 DB에서 읽어 표시합니다.</p></section>
 
+    <!-- 이론 완료(LEARN-005) 후 redirect flash 메시지 -->
+    <p class="flash-message" th:if="${message != null}" th:text="${message}">처리되었습니다.</p>
+
     <section class="panel" th:if="${lesson != null}">
       <h2 th:text="${lesson.title}">lesson 제목</h2>
       <p class="lesson-summary" th:if="${lesson.summary != null}" th:text="${lesson.summary}">요약</p>
@@ -19,6 +22,11 @@
       <div class="lesson-content" th:text="${lesson.content}">본문</div>
       <pre th:if="${lesson.exampleCode != null}"><code th:text="${lesson.exampleCode}">예시 코드</code></pre>
       <p class="lesson-meta">lesson_id=<span th:text="${lesson.lessonId}">0</span> · node_id=<span th:text="${lesson.nodeId}">0</span></p>
+
+      <!-- 이론 완료 처리(POST). 완료 시 learning_progress upsert 후 같은 화면으로 redirect. -->
+      <form class="lesson-actions" th:action="@{/learning/lessons/{id}/complete(id=${lesson.lessonId})}" method="post">
+        <button type="submit" class="button primary">이론 완료</button>
+      </form>
     </section>
 
     <section class="panel" th:if="${lesson == null}">
