@@ -1,6 +1,9 @@
 package com.acorn.elearning.exam.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import java.util.Map;
+import jakarta.validation.constraints.NotNull;
 
-public record CreateExamRequest(@NotBlank String requestId, Map<String, Object> payload) {}
+public record CreateExamRequest(
+        @NotNull Long subjectId,
+        @NotBlank String levelCode
+) {}

@@ -30,6 +30,15 @@
         ORDER BY user_id ASC, subject_id ASC, level_code ASC
     </select>
 
+    <!-- 중복 unlock 방지용: (user_id, subject_id, level_code) UNIQUE 키 조회 -->
+    <select id="findByUserSubjectLevel" resultMap="UserLevelUnlockResultMap">
+        SELECT <include refid="columns" />
+        FROM user_level_unlocks
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+          AND level_code = #{levelCode}
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.UserLevelUnlock"
             useGeneratedKeys="true" keyProperty="unlockId">
         INSERT INTO user_level_unlocks
