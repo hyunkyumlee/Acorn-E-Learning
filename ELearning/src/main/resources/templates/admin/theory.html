@@ -1,17 +1,236 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>이론 관리 | Knowva</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>이론 자료 관리 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/theory.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>이론 관리</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/theory</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+
+<main class="page-shell admin-screen theory-manage-screen">
+  <section class="theory-manage-header">
+    <h1>이론 자료 관리</h1>
+  </section>
+
+  <section class="theory-toolbar">
+    <div class="theory-filter">
+      <input type="search" id="searchTheory" placeholder="제목 검색">
+      <select id="theorySubjectFilter">
+        <option value="">과목</option>
+        <option th:each="subject : ${subjectList}" th:value="${subject.subjectName}" th:text="${subject.subjectName}">Java</option>
+      </select>
+      <select id="theoryCurriculumFilter">
+        <option value="">커리큘럼</option>
+        <option th:each="node : ${curriculumList}" th:value="${node.title}" th:text="${node.title}">Java 기초</option>
+      </select>
+      <select id="theoryLevelFilter">
+        <option value="">레벨</option>
+        <option value="BEGINNER">BEGINNER</option>
+        <option value="INTERMEDIATE">INTERMEDIATE</option>
+        <option value="ADVANCED">ADVANCED</option>
+      </select>
+      <select id="theoryActiveFilter">
+        <option value="">활성화 상태</option>
+        <option value="true">활성</option>
+        <option value="false">비활성</option>
+      </select>
+    </div>
+    <button type="button" class="theory-primary-button">+ 자료 등록</button>
+  </section>
+
+  <section class="theory-section">
+    <div class="theory-section-title">
+      <h2>이론 자료 목록</h2>
+    </div>
+
+    <div class="theory-table-wrap">
+      <table class="theory-table">
+        <thead>
+        <tr>
+          <th>자료 ID</th>
+          <th>과목</th>
+          <th>커리큘럼</th>
+          <th>제목</th>
+          <th>레벨</th>
+          <th>수정일</th>
+          <th>활성화</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="lesson : ${theoryList}" class="theory-row"
+            th:data-subject-name="${lesson.subjectName}"
+            th:data-curriculum-title="${lesson.curriculumTitle}"
+            th:data-title="${lesson.lessonTitle}"
+            th:data-level-code="${lesson.levelCode}"
+            th:data-is-active="${lesson.isActive}">
+          <td th:text="${'#' + lesson.lessonId}">#001</td>
+          <td th:text="${lesson.subjectName}">Java</td>
+          <td th:text="${lesson.curriculumTitle}">변수와 자료형</td>
+          <td th:text="${lesson.lessonTitle}">Java 변수 이해하기</td>
+          <td th:text="${lesson.levelCode}">Lv.1</td>
+          <td th:text="${#temporals.format(lesson.updatedAt, 'yyyy-MM-dd')}">2026-06-01</td>
+          <td th:text="${lesson.isActive} ? '활성' : '비활성'">활성</td>
+          <td>
+            <div class="theory-table-actions">
+              <button type="button"
+                      class="theory-table-button theory-edit-button"
+                      th:data-lesson-id="${lesson.lessonId}"
+                      th:data-node-id="${lesson.nodeId}"
+                      th:data-title="${lesson.lessonTitle}"
+                      th:data-content="${lesson.content}"
+                      th:data-sort-order="${lesson.sortOrder}"
+                      th:data-is-active="${lesson.isActive}">
+                수정
+              </button>
+              <button type="button" class="theory-table-button">삭제</button>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(theoryList)}">
+          <td colspan="8" class="theory-empty">등록된 이론 자료가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="theory-form-panel">
+    <h2>이론 자료 등록 / 수정 폼</h2>
+
+    <form method="post" action="/admin/theory" th:object="${lessonForm}">
+      <div class="theory-form-layout">
+        <div class="theory-form-fields">
+          <input type="hidden" name="lessonId" id="lessonId">
+          <input type="text" name="title" id="lessonTitle" placeholder="제목 입력">
+
+          <div class="theory-form-row">
+            <select name="subjectId" id="lessonSubjectId">
+              <option value="">과목 선택</option>
+              <option th:each="subject : ${subjectList}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
+            </select>
+            <select name="nodeId" id="lessonNodeId">
+              <option value="">커리큘럼 선택</option>
+              <option th:each="node : ${curriculumList}"
+                      th:value="${node.nodeId}"
+                      th:text="${node.title}"
+                      th:data-subject-id="${node.subjectId}">Java 기초</option>
+            </select>
+          </div>
+
+          <div class="theory-form-row">
+            <input type="number" name="sortOrder" id="lessonSortOrder" min="0" placeholder="순서">
+            <select name="isActive" id="lessonIsActive">
+              <option value="">활성화 토글</option>
+              <option value="true">활성</option>
+              <option value="false">비활성</option>
+            </select>
+          </div>
+
+          <div class="theory-form-actions">
+            <button type="submit" class="theory-primary-button">저장</button>
+            <button type="reset" class="theory-secondary-button">취소</button>
+            <button type="button" class="theory-secondary-button">삭제</button>
+          </div>
+        </div>
+
+        <textarea name="content" id="lessonContent" class="theory-content-area" placeholder="내용 입력 영역"></textarea>
+      </div>
+    </form>
+  </section>
+</main>
+<script>
+  function applyTheoryFilters() {
+    const keyword = document.querySelector("#searchTheory").value.trim().toLowerCase();
+    const subjectName = document.querySelector("#theorySubjectFilter").value;
+    const curriculumTitle = document.querySelector("#theoryCurriculumFilter").value;
+    const levelCode = document.querySelector("#theoryLevelFilter").value;
+    const isActive = document.querySelector("#theoryActiveFilter").value;
+
+    document.querySelectorAll(".theory-row").forEach((row) => {
+      const rowTitle = (row.dataset.title || "").toLowerCase();
+      const rowSubjectName = row.dataset.subjectName || "";
+      const rowCurriculumTitle = row.dataset.curriculumTitle || "";
+      const rowLevelCode = row.dataset.levelCode || "";
+      const rowIsActive = row.dataset.isActive || "";
+
+      const matchesTitle = rowTitle.includes(keyword);
+      const matchesSubject = subjectName === "" || rowSubjectName === subjectName;
+      const matchesCurriculum = curriculumTitle === "" || rowCurriculumTitle === curriculumTitle;
+      const matchesLevel = levelCode === "" || rowLevelCode === levelCode;
+      const matchesActive = isActive === "" || rowIsActive === isActive;
+
+      row.style.display = matchesTitle && matchesSubject && matchesCurriculum && matchesLevel && matchesActive ? "" : "none";
+    });
+  }
+
+  document.querySelector("#searchTheory")?.addEventListener("input", applyTheoryFilters);
+  document.querySelector("#theorySubjectFilter")?.addEventListener("change", applyTheoryFilters);
+  document.querySelector("#theoryCurriculumFilter")?.addEventListener("change", applyTheoryFilters);
+  document.querySelector("#theoryLevelFilter")?.addEventListener("change", applyTheoryFilters);
+  document.querySelector("#theoryActiveFilter")?.addEventListener("change", applyTheoryFilters);
+
+  document.querySelector("#lessonNodeId")?.addEventListener("change", (event) => {
+    const selectedOption = event.target.selectedOptions[0];
+    document.querySelector("#lessonSubjectId").value = selectedOption?.dataset.subjectId || "";
+  });
+
+  function syncLessonCurriculumOptions() {
+    const selectedSubjectId = document.querySelector("#lessonSubjectId").value;
+    const lessonNodeSelect = document.querySelector("#lessonNodeId");
+
+    lessonNodeSelect.querySelectorAll("option").forEach((option) => {
+      option.hidden = selectedSubjectId !== "" && option.value !== "" && option.dataset.subjectId !== selectedSubjectId;
+    });
+
+    const selectedNode = lessonNodeSelect.selectedOptions[0];
+    if (selectedNode?.hidden) {
+      lessonNodeSelect.value = "";
+    }
+  }
+
+  document.querySelector("#lessonSubjectId")?.addEventListener("change", syncLessonCurriculumOptions);
+
+  document.querySelector(".theory-primary-button")?.addEventListener("click", () => {
+    document.querySelector("#lessonId").value = "";
+    document.querySelector("#lessonTitle").value = "";
+    document.querySelector("#lessonSubjectId").value = "";
+    document.querySelector("#lessonNodeId").value = "";
+    syncLessonCurriculumOptions();
+    document.querySelector("#lessonSortOrder").value = "";
+    document.querySelector("#lessonIsActive").value = "";
+    document.querySelector("#lessonContent").value = "";
+
+    document.querySelector("#lessonTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.querySelector("#lessonTitle").focus({ preventScroll: true });
+  });
+
+  document.querySelectorAll(".theory-edit-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector("#lessonId").value = button.dataset.lessonId;
+      document.querySelector("#lessonTitle").value = button.dataset.title;
+      document.querySelector("#lessonNodeId").value = button.dataset.nodeId;
+      document.querySelector("#lessonSubjectId").value = document.querySelector("#lessonNodeId").selectedOptions[0]?.dataset.subjectId || "";
+      syncLessonCurriculumOptions();
+      document.querySelector("#lessonSortOrder").value = button.dataset.sortOrder;
+      document.querySelector("#lessonIsActive").value = button.dataset.isActive;
+      document.querySelector("#lessonContent").value = button.dataset.content || "";
+
+      document.querySelector("#lessonTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+      document.querySelector("#lessonTitle").focus({ preventScroll: true });
+    });
+  });
+</script>
 </body>
 </html>

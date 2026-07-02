@@ -1,37 +1,159 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.exam.mapper.ExamSessionMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="ExamSessionResultMap" type="com.acorn.elearning.exam.model.ExamSession">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="ExamSessionResultMap">
-          SELECT /* DDL column list */
-          FROM exam_sessions
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="ExamSessionResultMap">
-          SELECT /* DDL column list */
-          FROM exam_sessions
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.exam.model.ExamSession" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO exam_sessions (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.exam.model.ExamSession">
-          UPDATE exam_sessions
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="ExamSessionResultMap" type="com.acorn.elearning.exam.model.ExamSession">
+        <id property="examId" column="exam_id" />
+        <result property="userId" column="user_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="levelCode" column="level_code" />
+        <result property="status" column="status" />
+        <result property="resultStatus" column="result_status" />
+        <result property="totalProblemCount" column="total_problem_count" />
+        <result property="correctCount" column="correct_count" />
+        <result property="retryCount" column="retry_count" />
+        <result property="startedAt" column="started_at" />
+        <result property="submittedAt" column="submitted_at" />
+        <result property="gradedAt" column="graded_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="ExamSessionColumns">
+        exam_id,
+        user_id,
+        subject_id,
+        level_code,
+        status,
+        result_status,
+        total_problem_count,
+        correct_count,
+        retry_count,
+        started_at,
+        submitted_at,
+        graded_at,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        WHERE exam_id = #{id}
+    </select>
+
+    <select id="findByIdAndUserId" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        WHERE exam_id = #{examId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="findLatestByUserId" parameterType="long" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        WHERE user_id = #{userId}
+        ORDER BY exam_id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findLatestActiveByUserSubjectLevel" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+          AND level_code = #{levelCode}
+          AND status IN ('CREATED', 'READY')
+        ORDER BY exam_id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        WHERE user_id = #{userId}
+        ORDER BY exam_id DESC
+    </select>
+
+    <select id="findAll" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        ORDER BY exam_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.exam.model.ExamSession" useGeneratedKeys="true" keyProperty="examId">
+        INSERT INTO exam_sessions (
+            user_id,
+            subject_id,
+            level_code,
+            status,
+            result_status,
+            total_problem_count,
+            correct_count,
+            retry_count,
+            started_at,
+            submitted_at,
+            graded_at
+        )
+        VALUES (
+            #{userId},
+            #{subjectId},
+            #{levelCode},
+            #{status},
+            #{resultStatus},
+            #{totalProblemCount},
+            #{correctCount},
+            #{retryCount},
+            #{startedAt},
+            #{submittedAt},
+            #{gradedAt}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.exam.model.ExamSession">
+        UPDATE exam_sessions
+        SET
+            user_id = #{userId},
+            subject_id = #{subjectId},
+            level_code = #{levelCode},
+            status = #{status},
+            result_status = #{resultStatus},
+            total_problem_count = #{totalProblemCount},
+            correct_count = #{correctCount},
+            retry_count = #{retryCount},
+            started_at = #{startedAt},
+            submitted_at = #{submittedAt},
+            graded_at = #{gradedAt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE exam_id = #{examId}
+    </update>
+
+    <update id="updateStatus" parameterType="com.acorn.elearning.exam.model.ExamSession">
+        UPDATE exam_sessions
+        SET
+            status = #{status},
+            retry_count = #{retryCount},
+            started_at = #{startedAt},
+            submitted_at = #{submittedAt},
+            graded_at = #{gradedAt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE exam_id = #{examId}
+    </update>
+
+    <update id="updateResult" parameterType="com.acorn.elearning.exam.model.ExamSession">
+        UPDATE exam_sessions
+        SET
+            status = #{status},
+            result_status = #{resultStatus},
+            correct_count = #{correctCount},
+            submitted_at = #{submittedAt},
+            graded_at = #{gradedAt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE exam_id = #{examId}
+    </update>
 </mapper>

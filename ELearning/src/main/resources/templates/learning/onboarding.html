@@ -10,8 +10,66 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>온보딩 / 레벨 테스트</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>learning/onboarding</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="page-heading">
+      <span class="eyebrow">Level Test</span>
+      <h1>레벨 테스트</h1>
+      <p>8문항으로 현재 실력을 진단해 시작 난이도를 정합니다. (SR-004 · 정답 개수 기준 Bronze / Silver / Gold)</p>
+    </section>
+
+    <!-- ===== 결과 화면 (LEVEL-002 result) ===== -->
+    <section class="console-card level-result" th:if="${result != null}">
+      <h2 class="console-card-title">레벨 테스트 결과</h2>
+      <p class="level-grade">
+        획득 레벨: <strong th:text="${result.resultLevelCode}">BRONZE</strong>
+      </p>
+      <p class="status-sub">
+        정답 <strong th:text="${result.correctCount}">0</strong> / <span th:text="${result.totalCount}">8</span> 문항
+      </p>
+      <dl class="summary-grid">
+        <dt>Bronze</dt><dd>0 ~ 2 정답</dd>
+        <dt>Silver</dt><dd>3 ~ 5 정답</dd>
+        <dt>Gold</dt><dd>6 ~ 8 정답</dd>
+      </dl>
+      <a class="button primary" th:href="@{/learning}">학습 메인으로</a>
+    </section>
+
+    <!-- ===== 문항 화면 (LEVEL-001 questions) ===== -->
+    <section class="console-card level-test" th:if="${result == null and questions != null}">
+      <h2 class="console-card-title">진단 문항 <small>(<span th:text="${#lists.size(questions)}">8</span>문항)</small></h2>
+      <p th:if="${#lists.isEmpty(questions)}" class="console-empty">출제할 문항이 없습니다. (level_test_questions seed 확인)</p>
+
+      <form class="level-quiz" th:unless="${#lists.isEmpty(questions)}" th:action="@{/learning/level-test}" th:object="${levelTestForm}" method="post">
+        <input type="hidden" th:field="*{subjectId}">
+
+        <ol class="level-question-list">
+          <li th:each="q : ${questions}" class="level-question">
+            <p class="level-question-text">
+              <span class="level-question-no" th:text="${q.questionNo}">1</span>
+              <span th:text="${q.questionText}">문항 내용</span>
+            </p>
+            <ul class="level-choice-list">
+              <li th:each="c : ${q.choices}" class="level-choice">
+                <label>
+                  <input type="radio"
+                         th:field="*{answers[__${q.questionId}__]}"
+                         th:value="${c.choiceId}">
+                  <span th:text="${c.choiceLabel} + '. ' + ${c.choiceText}">A. 보기</span>
+                </label>
+              </li>
+            </ul>
+          </li>
+        </ol>
+
+        <button type="submit" class="button primary">제출하고 결과 보기</button>
+      </form>
+    </section>
+
+    <!-- ===== 진입 안내 (문항/결과 없이 직접 들어온 경우) ===== -->
+    <section class="console-card" th:if="${result == null and questions == null}">
+      <h2 class="console-card-title">레벨 테스트 시작</h2>
+      <p class="status-sub">과목을 선택하면 레벨 테스트를 시작합니다.</p>
+      <a class="button primary" th:href="@{/learning/level-test}">레벨 테스트 시작</a>
+    </section>
   </main>
 </body>
 </html>

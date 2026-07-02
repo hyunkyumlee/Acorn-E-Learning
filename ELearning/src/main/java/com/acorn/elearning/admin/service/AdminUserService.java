@@ -1,10 +1,14 @@
 package com.acorn.elearning.admin.service;
 
+
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AdminUserService {
+
     public Map<String, Object> stub(String action) {
         // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
         // SessionUser admin = currentAdminSessionUser();

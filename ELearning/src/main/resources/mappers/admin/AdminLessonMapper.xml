@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.admin.mapper.AdminLessonMapper">
+    <!-- TODO resultMap 구현 예시입니다.
+      <resultMap id="AdminOperationLogResultMap" type="com.acorn.elearning.admin.model.AdminOperationLog">
+          <id property="id" column="id" />
+          <result property="..." column="..." />
+      </resultMap>
+    -->
+
+    <resultMap id="AdminLessonManageRowResultMap"
+               type="com.acorn.elearning.admin.dto.response.AdminLessonManageRowResponse">
+        <id property="lessonId" column="lesson_id" />
+        <result property="nodeId" column="node_id" />
+        <result property="subjectName" column="subject_name" />
+        <result property="curriculumTitle" column="curriculum_title" />
+        <result property="lessonTitle" column="lesson_title" />
+        <result property="content" column="content" />
+        <result property="levelCode" column="level_code" />
+        <result property="sortOrder" column="sort_order" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="isActive" column="is_active" />
+    </resultMap>
+
+
+
+
+    <!-- TODO findAll 구현 예시입니다.
+      <select id="findAll" resultMap="AdminOperationLogResultMap">
+          SELECT /* DDL column list */
+          FROM admin_operation_logs
+          ORDER BY id DESC
+      </select>
+    -->
+
+    <select id="findAll" resultMap="AdminLessonManageRowResultMap">
+        SELECT
+        l.lesson_id,
+        l.node_id,
+        s.subject_name,
+        c.title AS curriculum_title,
+        l.title AS lesson_title,
+        l.content,
+        c.level_code,
+        l.sort_order,
+        l.updated_at,
+        l.is_active
+        FROM lessons l
+        JOIN curriculum_nodes c
+        ON l.node_id = c.node_id
+        JOIN subjects s
+        ON c.subject_id = s.subject_id
+        ORDER BY l.updated_at DESC, l.lesson_id DESC
+    </select>
+
+
+</mapper>

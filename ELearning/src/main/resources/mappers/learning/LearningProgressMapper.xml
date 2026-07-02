@@ -41,6 +41,15 @@
         ORDER BY node_id ASC, progress_id ASC
     </select>
 
+    <!-- completeLesson upsert용: (user, subject, node) UNIQUE 단일 행 -->
+    <select id="findByUserSubjectNode" resultMap="LearningProgressResultMap">
+        SELECT <include refid="columns" />
+        FROM learning_progress
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+          AND node_id = #{nodeId}
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.LearningProgress"
             useGeneratedKeys="true" keyProperty="progressId">
         INSERT INTO learning_progress

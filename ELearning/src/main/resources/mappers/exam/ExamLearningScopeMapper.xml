@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.exam.mapper.ExamLearningScopeMapper">
+    <resultMap id="ExamLearningScopeItemResultMap" type="com.acorn.elearning.exam.model.ExamLearningScopeItem">
+        <result property="sourceType" column="source_type" />
+        <result property="nodeTitle" column="node_title" />
+        <result property="title" column="title" />
+        <result property="summary" column="summary" />
+        <result property="exampleCode" column="example_code" />
+        <result property="sortOrder" column="sort_order" />
+    </resultMap>
+
+    <select id="findCompletedLessonScope" resultMap="ExamLearningScopeItemResultMap">
+        SELECT
+            'LESSON' AS source_type,
+            cn.title AS node_title,
+            l.title AS title,
+            COALESCE(NULLIF(l.summary, ''), LEFT(l.content, 500)) AS summary,
+            l.example_code AS example_code,
+            (cn.sort_order * 100 + l.sort_order) AS sort_order
+        FROM learning_progress lp
+        INNER JOIN curriculum_nodes cn
+            ON cn.node_id = lp.node_id
+        INNER JOIN lessons l
+            ON l.node_id = cn.node_id
+        WHERE lp.user_id = #{userId}
+          AND lp.subject_id = #{subjectId}
+          AND cn.level_code = #{levelCode}
+          AND lp.lesson_completed = 1
+          AND cn.is_active = 1
+          AND l.is_active = 1
+        ORDER BY cn.sort_order ASC, l.sort_order ASC, l.lesson_id ASC
+    </select>
+
+    <select id="findPassedPracticeScope" resultMap="ExamLearningScopeItemResultMap">
+        SELECT DISTINCT
+            'PRACTICE' AS source_type,
+            cn.title AS node_title,
+            pp.question AS title,
+            pp.answer_text AS summary,
+            pp.answer_text AS example_code,
+            (cn.sort_order * 100 + pp.problem_id) AS sort_order
+        FROM learning_progress lp
+        INNER JOIN curriculum_nodes cn
+            ON cn.node_id = lp.node_id
+        INNER JOIN practice_problems pp
+            ON pp.node_id = cn.node_id
+           AND pp.subject_id = lp.subject_id
+        WHERE lp.user_id = #{userId}
+          AND lp.subject_id = #{subjectId}
+          AND cn.level_code = #{levelCode}
+          AND lp.practice_passed = 1
+          AND cn.is_active = 1
+          AND pp.is_active = 1
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="countAvailableScopeItems" resultType="int">
+        SELECT COUNT(*)
+        FROM (
+            SELECT l.lesson_id AS scope_item_id
+            FROM learning_progress lp
+            INNER JOIN curriculum_nodes cn
+                ON cn.node_id = lp.node_id
+            INNER JOIN lessons l
+                ON l.node_id = cn.node_id
+            WHERE lp.user_id = #{userId}
+              AND lp.lesson_completed = 1
+              AND cn.is_active = 1
+              AND l.is_active = 1
+            <if test="subjectId != null">
+              AND lp.subject_id = #{subjectId}
+            </if>
+            <if test="levelCode != null and levelCode != ''">
+              AND cn.level_code = #{levelCode}
+            </if>
+
+            UNION ALL
+
+            SELECT DISTINCT pp.problem_id AS scope_item_id
+            FROM learning_progress lp
+            INNER JOIN curriculum_nodes cn
+                ON cn.node_id = lp.node_id
+            INNER JOIN practice_problems pp
+                ON pp.node_id = cn.node_id
+               AND pp.subject_id = lp.subject_id
+            WHERE lp.user_id = #{userId}
+              AND lp.practice_passed = 1
+              AND cn.is_active = 1
+              AND pp.is_active = 1
+            <if test="subjectId != null">
+              AND lp.subject_id = #{subjectId}
+            </if>
+            <if test="levelCode != null and levelCode != ''">
+              AND cn.level_code = #{levelCode}
+            </if>
+        ) available_scope_items
+    </select>
+</mapper>

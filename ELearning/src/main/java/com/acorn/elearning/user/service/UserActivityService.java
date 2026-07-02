@@ -2,13 +2,21 @@ package com.acorn.elearning.user.service;
 
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
+import com.acorn.elearning.learning.mapper.AttendanceRecordMapper;
+import com.acorn.elearning.learning.mapper.LearningProfileReadMapper;
+import com.acorn.elearning.learning.mapper.LearningProgressMapper;
+import com.acorn.elearning.learning.model.AttendanceRecord;
+import com.acorn.elearning.learning.model.LearningProgress;
 import com.acorn.elearning.payment.dto.response.PremiumAccessResponse;
 import com.acorn.elearning.payment.mapper.DummyPaymentMapper;
+import com.acorn.elearning.payment.model.DummyPayment;
 import com.acorn.elearning.payment.model.PaymentHistoryItem;
 import com.acorn.elearning.payment.service.PaymentAccessService;
 import com.acorn.elearning.payment.view.PaymentHistoryView;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.dto.response.MyPageSummaryResponse;
 import com.acorn.elearning.user.dto.response.PaymentHistoryPageResponse;
+import com.acorn.elearning.user.model.UserLearningProfile;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -22,13 +30,43 @@ public class UserActivityService {
 
     private final DummyPaymentMapper dummyPaymentMapper;
     private final PaymentAccessService paymentAccessService;
+    private final LearningProfileReadMapper learningProfileReadMapper;
+    private final AttendanceRecordMapper attendanceRecordMapper;
+    private final LearningProgressMapper learningProgressMapper;
 
     public UserActivityService(
             DummyPaymentMapper dummyPaymentMapper,
-            PaymentAccessService paymentAccessService
+            PaymentAccessService paymentAccessService,
+            LearningProfileReadMapper learningProfileReadMapper,
+            AttendanceRecordMapper attendanceRecordMapper,
+            LearningProgressMapper learningProgressMapper
     ) {
         this.dummyPaymentMapper = dummyPaymentMapper;
         this.paymentAccessService = paymentAccessService;
+        this.learningProfileReadMapper = learningProfileReadMapper;
+        this.attendanceRecordMapper = attendanceRecordMapper;
+        this.learningProgressMapper = learningProgressMapper;
+    }
+
+    @Transactional(readOnly = true)
+    public MyPageSummaryResponse mypage(SessionUser sessionUser) {
+        Long userId = requireUserId(sessionUser);
+        PremiumAccessResponse premiumAccess = paymentAccessService.premiumAccess(userId);
+        UserLearningProfile learningProfile = learningProfileReadMapper.findByUserId(userId).orElse(null);
+        AttendanceRecord latestAttendance = attendanceRecordMapper.findLatestByUserId(userId).orElse(null);
+        List<LearningProgress> progressItems = learningProfile == null || learningProfile.getPrimarySubjectId() == null
+                ? List.of()
+                : learningProgressMapper.findByUserIdAndSubjectId(userId, learningProfile.getPrimarySubjectId());
+        DummyPayment latestPayment = dummyPaymentMapper.findLatestByUserId(userId).orElse(null);
+
+        return MyPageSummaryResponse.of(
+                sessionUser,
+                premiumAccess,
+                learningProfile,
+                latestAttendance,
+                progressItems,
+                latestPayment
+        );
     }
 
     @Transactional(readOnly = true)

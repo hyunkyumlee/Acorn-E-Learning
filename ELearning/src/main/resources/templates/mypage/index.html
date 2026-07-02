@@ -10,8 +10,180 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell mypage-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>마이페이지</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>mypage/index</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="mypage-page" th:if="${view != null}">
+      <header class="mypage-heading">
+        <h1>마이페이지</h1>
+        <p>나의 학습 활동과 기록을 한눈에 확인하세요.</p>
+      </header>
+
+      <section class="mypage-profile-panel">
+        <div class="mypage-profile-avatar" aria-label="프로필 아바타">
+          <span th:text="${view.user().nickname() == null || #strings.isEmpty(view.user().nickname()) ? 'K' : #strings.substring(view.user().nickname(), 0, 1)}">NL</span>
+        </div>
+        <div class="mypage-profile-copy">
+          <h2 th:text="${view.user().nickname() == null || #strings.isEmpty(view.user().nickname()) ? view.user().email() : view.user().nickname()}">이름</h2>
+          <p th:text="${view.learning().learningGoal() == null || #strings.isEmpty(view.learning().learningGoal()) ? '꾸준히 성장하는 개발자가 되고 싶어요!' : view.learning().learningGoal()}">꾸준히 성장하는 개발자가 되고 싶어요!</p>
+          <a class="mini-button" th:href="@{/settings/profile}">프로필 편집</a>
+        </div>
+        <div class="mypage-profile-divider"></div>
+        <dl class="mypage-profile-meta">
+          <div>
+            <dt>현재 레벨</dt>
+            <dd th:text="${view.learning().currentLevelCode() == null || #strings.isEmpty(view.learning().currentLevelCode()) ? '-' : view.learning().currentLevelCode()}">Lv.5</dd>
+          </div>
+          <div>
+            <dt>대표 과목</dt>
+            <dd>Java</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="mypage-summary-grid">
+        <article class="mypage-stat-card">
+          <span class="mypage-icon book" aria-hidden="true"></span>
+          <div>
+            <h2>연속 출석</h2>
+            <strong th:text="${view.learning().streakLabel()}">10일</strong>
+            <p>계속해서 학습을 이어가세요</p>
+          </div>
+        </article>
+        <article class="mypage-stat-card">
+          <span class="mypage-icon test" aria-hidden="true"></span>
+          <div>
+            <h2>최근 시험 결과</h2>
+            <strong>합격</strong>
+            <p>SQL Lv.5</p>
+          </div>
+        </article>
+        <article class="mypage-stat-card">
+          <span class="mypage-icon ranking" aria-hidden="true"></span>
+          <div>
+            <h2>전체 랭킹</h2>
+            <strong>10위</strong>
+            <p>50,000점</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="mypage-section attendance-section">
+        <div class="mypage-section-head">
+          <h2>출석 캘린더</h2>
+          <div class="month-control"><span>2026년 6월</span><button type="button" aria-label="이전 달">&lt;</button><button type="button" aria-label="다음 달">&gt;</button></div>
+        </div>
+        <div class="attendance-grid">
+          <div class="calendar-box">
+            <div class="calendar-orbit-head">
+              <strong>6월 출석</strong>
+              <span th:text="|${view.learning().streakLabel()} 연속|">10일 연속</span>
+            </div>
+            <div class="calendar-weekdays" aria-hidden="true">
+              <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
+            </div>
+            <div class="calendar-days" aria-label="2026년 6월 출석 캘린더">
+              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span class="attended">6</span><span class="attended">7</span>
+              <span class="attended">8</span><span class="attended">9</span><span class="attended">10</span><span class="attended">11</span><span class="attended">12</span><span class="attended">13</span><span class="attended">14</span>
+              <span class="today attended">15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span>
+              <span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span>
+              <span>29</span><span>30</span><span class="muted" aria-hidden="true"></span><span class="muted" aria-hidden="true"></span><span class="muted" aria-hidden="true"></span><span class="muted" aria-hidden="true"></span><span class="muted" aria-hidden="true"></span>
+            </div>
+          </div>
+          <article class="streak-card">
+            <span class="circle-icon streak" th:text="${view.learning().streakCount()}">10</span>
+            <div>
+              <h3 th:text="|${view.learning().streakLabel()} 연속 출석 중!|">10일 연속 출석 중!</h3>
+              <p>조금만 더 힘내요!</p>
+            </div>
+            <div class="attendance-progress">
+              <span>이번 달 출석률</span>
+              <div class="mini-progress"><i style="width:50%"></i></div>
+              <strong>50%</strong>
+            </div>
+            <dl>
+              <dt>총 출석일</dt>
+              <dd>25일</dd>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <section class="mypage-detail-grid">
+        <article class="mypage-section list-section">
+          <div class="mypage-section-head"><h2>최근 학습 현황</h2><a class="mini-button" th:href="@{/learning}">전체보기</a></div>
+          <div class="learning-status-list">
+            <div class="learning-status-row">
+              <span class="language-thumb java">J</span>
+              <strong>Java</strong>
+              <span>Lv.1</span>
+              <div class="mini-progress"><i style="width:30%"></i></div>
+              <b>30%</b>
+            </div>
+            <div class="learning-status-row">
+              <span class="language-thumb python">Py</span>
+              <strong>Python</strong>
+              <span>Lv.3</span>
+              <div class="mini-progress"><i style="width:80%"></i></div>
+              <b>80%</b>
+            </div>
+            <div class="learning-status-row">
+              <span class="language-thumb sql">SQL</span>
+              <strong>SQL</strong>
+              <span>Lv.6</span>
+              <div class="mini-progress"><i style="width:50%"></i></div>
+              <b>50%</b>
+            </div>
+          </div>
+        </article>
+        <article class="mypage-section list-section">
+          <div class="mypage-section-head"><h2>최근 시험 결과</h2><a class="mini-button" th:href="@{/exams/coding-test}">전체보기</a></div>
+          <div class="exam-result-list">
+            <div class="exam-result-row">
+              <strong>SQL</strong>
+              <span>Lv.5</span>
+              <b class="result-badge">합격</b>
+            </div>
+            <div class="exam-result-row">
+              <strong>Python</strong>
+              <span>Lv.2</span>
+              <b class="result-badge">재시</b>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="mypage-section community-activity-section">
+        <h2>커뮤니티 활동</h2>
+        <div class="community-activity-grid">
+          <article class="community-activity-card">
+            <span class="mypage-icon heart" aria-hidden="true"></span>
+            <h3>좋아요 누른 글</h3>
+            <a class="mini-button" th:href="@{/community/board}">보기</a>
+            <strong>10개</strong>
+            <p>관심 있는 게시글 모음</p>
+          </article>
+          <article class="community-activity-card">
+            <span class="mypage-icon bookmark" aria-hidden="true"></span>
+            <h3>스크랩한 글</h3>
+            <a class="mini-button" th:href="@{/community/board}">보기</a>
+            <strong>10개</strong>
+            <p>나중에 다시 볼 글 모음</p>
+          </article>
+          <article class="community-activity-card">
+            <span class="mypage-icon pencil" aria-hidden="true"></span>
+            <h3>작성한 글</h3>
+            <a class="mini-button" th:href="@{/community/profile}">보기</a>
+            <strong>10개</strong>
+            <p>내가 작성한 게시글</p>
+          </article>
+        </div>
+      </section>
+    </section>
+
+    <section class="mypage-page" th:if="${view == null}">
+      <header class="mypage-heading">
+        <h1>마이페이지</h1>
+        <p>로그인 후 나의 학습 활동과 기록을 확인할 수 있어요.</p>
+      </header>
+    </section>
   </main>
 </body>
 </html>
