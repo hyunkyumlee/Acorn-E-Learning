@@ -24,45 +24,94 @@
       <section class="figma-settings-main">
         <article class="figma-settings-panel">
           <h1>시스템 설정</h1>
-          <p>알림, 화면 모드, 접근성 옵션을 관리합니다.</p>
+          <p>편의 기능과 화면 표시 방식을 설정합니다.</p>
           <p class="figma-flash" th:if="${message != null}" th:text="${message}">저장되었습니다.</p>
-          <form class="figma-settings-box" method="post" th:action="@{/settings/system}" th:object="${form}">
-            <label class="figma-setting-row">
-              <strong>학습 알림</strong>
-              <span>
-                <select class="figma-field" th:field="*{notificationEnabled}">
-                  <option th:value="true">켜짐</option>
-                  <option th:value="false">꺼짐</option>
-                </select>
-                <small class="figma-field-error" th:if="${#fields.hasErrors('notificationEnabled')}" th:errors="*{notificationEnabled}">학습 알림 오류</small>
-              </span>
-            </label>
-            <label class="figma-setting-row">
-              <strong>테마</strong>
-              <span>
-                <select class="figma-field" th:field="*{theme}">
-                  <option value="SYSTEM">시스템 설정 따름</option>
-                  <option value="LIGHT">라이트</option>
-                  <option value="DARK">다크</option>
-                </select>
-                <small class="figma-field-error" th:if="${#fields.hasErrors('theme')}" th:errors="*{theme}">테마 오류</small>
-              </span>
-            </label>
-            <label class="figma-setting-row">
-              <strong>모션 줄이기</strong>
-              <span>
-                <select class="figma-field" th:field="*{reducedMotionEnabled}">
-                  <option th:value="false">꺼짐</option>
-                  <option th:value="true">켜짐</option>
-                </select>
-                <small class="figma-field-error" th:if="${#fields.hasErrors('reducedMotionEnabled')}" th:errors="*{reducedMotionEnabled}">모션 줄이기 오류</small>
-              </span>
-            </label>
-            <button class="figma-button primary" type="submit">저장</button>
+          <form class="figma-system-form" method="post" th:action="@{/settings/system}" th:object="${form}">
+            <section class="figma-system-section">
+              <h2>편의 기능</h2>
+              <div class="figma-system-list">
+                <div class="figma-system-row">
+                  <div>
+                    <strong>다크 모드</strong>
+                    <span>어두운 테마로 화면을 표시합니다.</span>
+                    <small class="figma-field-error" th:if="${#fields.hasErrors('darkModeEnabled')}" th:errors="*{darkModeEnabled}">다크 모드 오류</small>
+                  </div>
+                  <label class="figma-toggle">
+                    <input type="checkbox" th:field="*{darkModeEnabled}" data-system-theme-toggle>
+                    <span></span>
+                    <em>다크 모드</em>
+                  </label>
+                </div>
+                <div class="figma-system-row">
+                  <div>
+                    <strong>학습 알림</strong>
+                    <span>오늘의 학습 알림을 받습니다.</span>
+                    <small class="figma-field-error" th:if="${#fields.hasErrors('notificationEnabled')}" th:errors="*{notificationEnabled}">학습 알림 오류</small>
+                  </div>
+                  <label class="figma-toggle">
+                    <input type="checkbox" th:field="*{notificationEnabled}">
+                    <span></span>
+                    <em>학습 알림</em>
+                  </label>
+                </div>
+                <div class="figma-system-row">
+                  <div>
+                    <strong>이메일 알림</strong>
+                    <span>주요 소식을 이메일로 받습니다.</span>
+                    <small class="figma-field-error" th:if="${#fields.hasErrors('reducedMotionEnabled')}" th:errors="*{reducedMotionEnabled}">이메일 알림 오류</small>
+                  </div>
+                  <label class="figma-toggle">
+                    <input type="checkbox" th:field="*{reducedMotionEnabled}">
+                    <span></span>
+                    <em>이메일 알림</em>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section class="figma-system-section figma-language-section">
+              <h2>언어 및 지역</h2>
+              <label class="figma-language-row">
+                <strong>표시 언어</strong>
+                <span>
+                  <select class="figma-field figma-language-select" th:field="*{displayLanguage}">
+                    <option value="KO">한국어</option>
+                    <option value="EN">English</option>
+                    <option value="JA">日本語</option>
+                    <option value="ZH">中文</option>
+                  </select>
+                  <small class="figma-field-error" th:if="${#fields.hasErrors('displayLanguage')}" th:errors="*{displayLanguage}">표시 언어 오류</small>
+                </span>
+              </label>
+            </section>
+
+            <button class="figma-button primary figma-system-save" type="submit">저장</button>
           </form>
         </article>
       </section>
     </section>
   </main>
+  <script>
+    (function () {
+      var toggle = document.querySelector("[data-system-theme-toggle]");
+      if (!toggle) {
+        return;
+      }
+      function applyTheme(isDark) {
+        var mode = isDark ? "dark" : "light";
+        document.documentElement.dataset.theme = isDark ? "knowva-ion-dark" : "knowva-ion-light";
+        document.documentElement.style.colorScheme = mode;
+        document.body.classList.toggle("theme-dark", isDark);
+        try {
+          localStorage.setItem("knowva-ui-theme", mode);
+        } catch (error) {
+          return;
+        }
+      }
+      toggle.addEventListener("change", function () {
+        applyTheme(toggle.checked);
+      });
+    })();
+  </script>
 </body>
 </html>

@@ -139,6 +139,30 @@
   padding: clamp(18px, 3vw, 28px);
 }
 
+.figma-password-box {
+  margin-top: 18px;
+}
+
+.figma-settings-box-title {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.figma-settings-box-title h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.figma-settings-box-title span {
+  color: var(--muted);
+  font-weight: 950;
+}
+
 .figma-setting-row,
 .figma-payment-plan,
 .figma-payment-history {
@@ -207,6 +231,41 @@ textarea.figma-field {
   font-weight: 900;
 }
 
+.figma-form-error {
+  display: grid;
+  gap: 4px;
+  border: 1px solid color-mix(in srgb, var(--danger) 38%, var(--line));
+  border-radius: var(--radius);
+  background: var(--settings-danger-soft);
+  color: var(--danger);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.figma-form-error p {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.figma-check-row {
+  display: inline-grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  color: var(--muted);
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.figma-check-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+}
+
 .figma-flash {
   justify-self: start;
   border: 1px solid color-mix(in srgb, var(--success) 42%, var(--line));
@@ -247,6 +306,171 @@ textarea.figma-field {
   color: color-mix(in srgb, var(--accent) 82%, black);
 }
 
+.figma-profile-save {
+  justify-self: center;
+  min-width: 112px;
+}
+
+.figma-security-action {
+  justify-self: end;
+}
+
+.figma-system-form {
+  display: grid;
+  gap: 18px;
+  justify-self: stretch;
+  margin-top: 28px;
+  max-width: none;
+  min-width: 100%;
+  width: 100%;
+}
+
+.figma-system-section {
+  display: grid;
+  gap: 12px;
+  justify-self: stretch;
+  max-width: none;
+  min-width: 100%;
+  width: 100%;
+  border: 1px solid var(--settings-line);
+  border-radius: var(--radius);
+  background: var(--settings-panel);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(18px, 2.5vw, 24px);
+}
+
+.figma-system-section h2 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.figma-system-list {
+  display: grid;
+  min-width: 100%;
+  width: 100%;
+}
+
+.figma-system-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--settings-line);
+  padding: 14px 8px;
+}
+
+.figma-system-row:first-child {
+  padding-top: 4px;
+}
+
+.figma-system-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 4px;
+}
+
+.figma-system-row strong,
+.figma-language-row strong {
+  display: block;
+  color: var(--text);
+  font-weight: 950;
+}
+
+.figma-system-row span,
+.figma-language-row > span {
+  display: grid;
+  gap: 6px;
+}
+
+.figma-system-row div > span {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.figma-toggle {
+  position: relative;
+  display: inline-flex;
+  width: 46px;
+  height: 26px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.figma-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.figma-toggle span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 18%, var(--surface));
+  transition: background 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+.figma-toggle span::after {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 4px color-mix(in srgb, black 24%, transparent);
+  content: "";
+  transition: transform 160ms ease-out;
+}
+
+.figma-toggle input:checked + span {
+  background: color-mix(in srgb, var(--text) 48%, var(--primary));
+}
+
+.figma-toggle input:checked + span::after {
+  transform: translateX(20px);
+}
+
+.figma-toggle input:focus-visible + span {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.figma-toggle em {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.figma-language-section {
+  min-height: 126px;
+}
+
+.figma-language-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  justify-self: stretch;
+  max-width: none;
+  min-width: 100%;
+  width: 100%;
+}
+
+.figma-language-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.figma-system-save {
+  justify-self: end;
+}
+
 .figma-button.danger {
   border-color: color-mix(in srgb, var(--danger) 46%, var(--line));
   background: var(--settings-danger-soft);
@@ -255,33 +479,37 @@ textarea.figma-field {
 
 .figma-social-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(14px, 2vw, 22px);
+  grid-template-columns: 1fr;
+  gap: 14px;
   margin-top: 28px;
 }
 
 .figma-social-card {
   display: grid;
-  min-height: 168px;
-  align-content: start;
-  gap: 10px;
-  padding: 22px;
-}
-
-.figma-social-card span {
-  justify-self: start;
-  border: 1px solid color-mix(in srgb, var(--success) 42%, var(--line));
-  border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--success) 12%, var(--surface));
-  color: var(--success);
-  padding: 6px 11px;
-  font-size: 12px;
-  font-weight: 950;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 88px;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 24px;
 }
 
 .figma-social-card h2 {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 950;
+}
+
+.figma-social-card p {
+  margin-top: 8px;
+}
+
+.figma-social-card form {
+  justify-self: end;
+}
+
+.figma-social-disconnect {
+  min-width: 100px;
+  border-color: color-mix(in srgb, var(--text) 10%, var(--line));
+  background: color-mix(in srgb, var(--text) 12%, var(--surface));
 }
 
 .figma-payment-plan {
@@ -351,5 +579,17 @@ textarea.figma-field {
 
   .figma-payment-history b {
     justify-self: start;
+  }
+
+  .figma-system-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .figma-language-row {
+    grid-template-columns: 1fr;
+  }
+
+  .figma-language-select {
+    min-width: 0;
   }
 }

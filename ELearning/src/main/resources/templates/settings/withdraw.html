@@ -25,15 +25,21 @@
         <article class="figma-settings-panel">
           <h1>회원 탈퇴</h1>
           <p>탈퇴 요청 전 학습 기록 보관/마스킹 안내를 확인합니다.</p>
-          <section class="figma-settings-box">
+          <form class="figma-settings-box" method="post" th:action="@{/settings/withdraw}" th:object="${form}">
             <div class="figma-setting-row"><strong>계정 상태</strong><span th:text="${profile != null ? profile.statusLabel() : '활성'}">활성</span></div>
             <div class="figma-setting-row"><strong>학습 기록</strong><span th:text="${profile != null ? profile.learningGoalLabel() : '탈퇴 후 보관 정책에 따라 처리됩니다.'}">탈퇴 후 보관 정책에 따라 처리됩니다.</span></div>
             <div class="figma-payment-plan">
               <strong>탈퇴 요청</strong>
-              <span>탈퇴하면 로그인과 학습 기록 수정이 제한됩니다.</span>
-              <a class="figma-button danger" th:href="@{/settings/profile}">탈퇴 요청</a>
+              <span>
+                <label class="figma-check-row">
+                  <input type="checkbox" th:field="*{confirmed}">
+                  <span>탈퇴하면 로그인과 학습 기록 수정이 제한됩니다.</span>
+                </label>
+                <small class="figma-field-error" th:if="${#fields.hasErrors('confirmed')}" th:errors="*{confirmed}">탈퇴 확인 오류</small>
+              </span>
+              <button class="figma-button danger" type="submit">탈퇴 요청</button>
             </div>
-          </section>
+          </form>
         </article>
       </section>
     </section>

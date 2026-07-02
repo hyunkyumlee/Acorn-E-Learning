@@ -6,10 +6,12 @@ import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.dto.response.UserProfileResponse;
 import com.acorn.elearning.user.form.ProfileForm;
 import com.acorn.elearning.user.form.SecurityForm;
+import com.acorn.elearning.user.form.WithdrawUserForm;
 import com.acorn.elearning.user.mapper.UserLearningProfileMapper;
 import com.acorn.elearning.user.mapper.UserMapper;
 import com.acorn.elearning.user.model.User;
 import com.acorn.elearning.user.model.UserLearningProfile;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +74,23 @@ public class UserService {
                 });
 
         user.setEmail(email);
+        userMapper.update(user);
+
+        UserLearningProfile learningProfile = userLearningProfileMapper.findByUserId(userId).orElse(null);
+        return UserProfileResponse.of(user, learningProfile);
+    }
+
+    @Transactional
+    public UserProfileResponse withdraw(SessionUser sessionUser, WithdrawUserForm form) {
+        Long userId = requireUserId(sessionUser);
+        User user = userMapper.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
+        if (!Boolean.TRUE.equals(form.getConfirmed())) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "회원 탈퇴 확인에 동의해주세요.");
+        }
+
+        user.setStatus("WITHDRAWN");
+        user.setWithdrawnAt(LocalDateTime.now());
         userMapper.update(user);
 
         UserLearningProfile learningProfile = userLearningProfileMapper.findByUserId(userId).orElse(null);

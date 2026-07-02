@@ -34,9 +34,39 @@
                 <small class="figma-field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">이메일 오류</small>
               </span>
             </label>
-            <div class="figma-setting-row"><strong>비밀번호</strong><span>••••••••••</span></div>
-            <button class="figma-button primary" type="submit">이메일 저장</button>
-            <a class="figma-button" th:href="@{/settings/security}">비밀번호 변경</a>
+            <button class="figma-button primary figma-security-action" type="submit">이메일 저장</button>
+          </form>
+          <form class="figma-settings-box figma-password-box" method="post" th:action="@{/settings/security/password}" th:object="${passwordForm}">
+            <div class="figma-settings-box-title">
+              <h2>비밀번호 변경</h2>
+              <span>••••••••••</span>
+            </div>
+            <div class="figma-form-error" th:if="${#fields.hasGlobalErrors()}">
+              <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">비밀번호 변경 오류</p>
+            </div>
+            <label class="figma-setting-row">
+              <strong>현재 비밀번호</strong>
+              <span>
+                <input class="figma-field" id="currentPassword" name="currentPassword" type="password" autocomplete="current-password">
+                <small class="figma-field-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}">현재 비밀번호 오류</small>
+              </span>
+            </label>
+            <label class="figma-setting-row">
+              <strong>새 비밀번호</strong>
+              <span>
+                <input class="figma-field" id="newPassword" name="newPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password">
+                <small class="figma-field-error" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}">새 비밀번호 오류</small>
+              </span>
+            </label>
+            <label class="figma-setting-row">
+              <strong>새 비밀번호 확인</strong>
+              <span>
+                <input class="figma-field" id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password">
+                <small class="figma-field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">새 비밀번호 확인 오류</small>
+                <small class="figma-field-error" th:if="${#fields.hasErrors('passwordConfirmed')}" th:errors="*{passwordConfirmed}">새 비밀번호 확인 오류</small>
+              </span>
+            </label>
+            <button class="figma-button primary figma-security-action" type="submit">비밀번호 변경</button>
           </form>
         </article>
       </section>

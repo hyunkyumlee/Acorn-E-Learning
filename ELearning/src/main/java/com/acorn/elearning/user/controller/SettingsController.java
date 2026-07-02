@@ -5,11 +5,14 @@ import com.acorn.elearning.payment.view.PaymentHistoryView;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.dto.response.UserProfileResponse;
 import com.acorn.elearning.user.dto.response.UserSettingsResponse;
+import com.acorn.elearning.user.form.PasswordChangeForm;
 import com.acorn.elearning.user.form.ProfileForm;
 import com.acorn.elearning.user.form.SecurityForm;
 import com.acorn.elearning.user.form.SystemSettingsForm;
+import com.acorn.elearning.user.form.WithdrawUserForm;
 import com.acorn.elearning.user.service.SettingsService;
 import com.acorn.elearning.user.service.UserActivityService;
+import com.acorn.elearning.user.view.WithdrawConfirmView;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -128,6 +131,33 @@ public class SettingsController {
         return "redirect:/settings/security";
     }
 
+    @PostMapping("/settings/security/password")
+    public String changePassword(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid @ModelAttribute("passwordForm") PasswordChangeForm form,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes,
+            Model model
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        if (bindingResult.hasErrors()) {
+            addSecurityModel(model, settingsService.security(sessionUser));
+            return "settings/security";
+        }
+
+        try {
+            settingsService.changePassword(sessionUser, form);
+            redirectAttributes.addFlashAttribute("message", "비밀번호가 변경되었습니다.");
+        } catch (BusinessException exception) {
+            bindingResult.reject("passwordChange", exception.getMessage());
+            addSecurityModel(model, settingsService.security(sessionUser));
+            return "settings/security";
+        }
+        return "redirect:/settings/security";
+    }
+
     @GetMapping("/settings/social")
     public String social(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
@@ -209,18 +239,28 @@ public class SettingsController {
         if (sessionUser == null) {
             return "redirect:/login";
         }
-        model.addAttribute("screen", "settings/withdraw");
-        model.addAttribute("view", settingsService.withdrawConfirm(sessionUser));
+        addWithdrawModel(model, settingsService.withdrawConfirm(sessionUser));
         return "settings/withdraw";
     }
 
     @PostMapping("/settings/withdraw")
-    public String withdraw() {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "settings/payment"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // userService.withdraw(sessionUser, form);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+    public String withdraw(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid @ModelAttribute("form") WithdrawUserForm form,
+            BindingResult bindingResult,
+            HttpSession httpSession,
+            Model model
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        if (bindingResult.hasErrors()) {
+            addWithdrawModel(model, settingsService.withdrawConfirm(sessionUser));
+            return "settings/withdraw";
+        }
+
+        settingsService.withdraw(sessionUser, form);
+        httpSession.invalidate();
         return "redirect:/login?withdrawn=1";
     }
 
@@ -245,6 +285,9 @@ public class SettingsController {
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", securityForm(view));
         }
+        if (!model.containsAttribute("passwordForm")) {
+            model.addAttribute("passwordForm", new PasswordChangeForm());
+        }
     }
 
     private SecurityForm securityForm(UserProfileResponse view) {
@@ -264,8 +307,18 @@ public class SettingsController {
     private SystemSettingsForm systemSettingsForm(UserSettingsResponse view) {
         SystemSettingsForm form = new SystemSettingsForm();
         form.setTheme(view.theme());
+        form.setDarkModeEnabled("DARK".equals(view.theme()));
         form.setNotificationEnabled(view.notificationEnabled());
         form.setReducedMotionEnabled(view.reducedMotionEnabled());
+        form.setDisplayLanguage(view.displayLanguage());
         return form;
+    }
+
+    private void addWithdrawModel(Model model, WithdrawConfirmView view) {
+        model.addAttribute("screen", "settings/withdraw");
+        model.addAttribute("view", view);
+        if (!model.containsAttribute("form")) {
+            model.addAttribute("form", new WithdrawUserForm());
+        }
     }
 }

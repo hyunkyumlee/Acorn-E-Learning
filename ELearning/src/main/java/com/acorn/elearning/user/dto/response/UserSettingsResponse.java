@@ -10,12 +10,14 @@ public record UserSettingsResponse(
         Boolean notificationEnabled,
         String accessibilityMode,
         Boolean reducedMotionEnabled,
+        String displayLanguage,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         String themeLabel,
         String notificationLabel,
         String accessibilityModeLabel,
-        String reducedMotionLabel
+        String reducedMotionLabel,
+        String displayLanguageLabel
 ) {
     public static UserSettingsResponse from(Long userId, UserSetting setting) {
         String theme = setting == null || !hasText(setting.getTheme()) ? "SYSTEM" : setting.getTheme();
@@ -26,6 +28,7 @@ public record UserSettingsResponse(
                 ? Boolean.FALSE
                 : setting.getReducedMotionEnabled();
         String accessibilityMode = setting == null ? null : setting.getAccessibilityMode();
+        String displayLanguage = displayLanguage(accessibilityMode);
 
         return new UserSettingsResponse(
                 setting == null ? null : setting.getSettingId(),
@@ -34,12 +37,14 @@ public record UserSettingsResponse(
                 notificationEnabled,
                 accessibilityMode,
                 reducedMotionEnabled,
+                displayLanguage,
                 setting == null ? null : setting.getCreatedAt(),
                 setting == null ? null : setting.getUpdatedAt(),
                 themeLabel(theme),
                 Boolean.TRUE.equals(notificationEnabled) ? "켜짐" : "꺼짐",
                 accessibilityModeLabel(accessibilityMode),
-                Boolean.TRUE.equals(reducedMotionEnabled) ? "켜짐" : "꺼짐"
+                Boolean.TRUE.equals(reducedMotionEnabled) ? "켜짐" : "꺼짐",
+                displayLanguageLabel(displayLanguage)
         );
     }
 
@@ -64,6 +69,26 @@ public record UserSettingsResponse(
             return "기본";
         }
         return hasText(accessibilityMode) ? accessibilityMode : "기본";
+    }
+
+    private static String displayLanguage(String accessibilityMode) {
+        if ("EN".equals(accessibilityMode) || "JA".equals(accessibilityMode) || "ZH".equals(accessibilityMode)) {
+            return accessibilityMode;
+        }
+        return "KO";
+    }
+
+    private static String displayLanguageLabel(String displayLanguage) {
+        if ("EN".equals(displayLanguage)) {
+            return "English";
+        }
+        if ("JA".equals(displayLanguage)) {
+            return "日本語";
+        }
+        if ("ZH".equals(displayLanguage)) {
+            return "中文";
+        }
+        return "한국어";
     }
 
     private static boolean hasText(String value) {
