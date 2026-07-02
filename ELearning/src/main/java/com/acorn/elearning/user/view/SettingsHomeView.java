@@ -1,7 +1,10 @@
 package com.acorn.elearning.user.view;
 
-import java.util.Map;
+import com.acorn.elearning.user.dto.response.UserProfileResponse;
+import com.acorn.elearning.user.dto.response.UserSettingsResponse;
 
-public record SettingsHomeView(String title, String status, Map<String, Object> attributes) {
-    public static SettingsHomeView stub(String title) { return new SettingsHomeView(title, "SKELETON", Map.of()); }
-}
+public record SettingsHomeView(
+        String title,
+        UserProfileResponse profile,
+        UserSettingsResponse settings
+) {}

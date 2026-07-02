@@ -30,10 +30,11 @@
 
 .theory-filter {
     display: grid;
-    grid-template-columns: repeat(4, 160px);
+    grid-template-columns: 190px repeat(4, 150px);
     gap: 12px;
 }
 
+.theory-filter input,
 .theory-filter select,
 .theory-form-panel input,
 .theory-form-panel select,
@@ -46,6 +47,7 @@
     font-size: 14px;
 }
 
+.theory-filter input,
 .theory-filter select {
     height: 36px;
     padding: 0 12px;

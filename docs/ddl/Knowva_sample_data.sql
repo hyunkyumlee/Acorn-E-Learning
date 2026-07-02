@@ -281,13 +281,14 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO practice_set_attempts (
-  set_attempt_id, user_id, node_id, total_count, correct_count, status, passed, completed_at, created_at, updated_at
+  set_attempt_id, user_id, subject_id, node_id, total_count, correct_count, status, passed, completed_at, created_at, updated_at
 )
 VALUES
-  (1, 2, 1, 10, 7, 'COMPLETED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (2, 3, 5, 10, 9, 'COMPLETED', 1, CURRENT_TIMESTAMP, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP)
+  (1, 2, @java_subject_id, 1, 10, 7, 'COMPLETED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (2, 3, @java_subject_id, 5, 10, 9, 'COMPLETED', 1, CURRENT_TIMESTAMP, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
+  subject_id = VALUES(subject_id),
   node_id = VALUES(node_id),
   total_count = VALUES(total_count),
   correct_count = VALUES(correct_count),
@@ -375,13 +376,14 @@ ON DUPLICATE KEY UPDATE
   solved_at = VALUES(solved_at);
 
 INSERT INTO wrong_answers (
-  wrong_answer_id, user_id, problem_id, last_submission_id, wrong_count, review_status, retry_bonus_awarded, created_at, updated_at
+  wrong_answer_id, user_id, set_attempt_id, problem_id, last_submission_id, wrong_count, review_status, retry_bonus_awarded, created_at, updated_at
 )
 VALUES
-  (1, 2, 3, 3, 1, 'OPEN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (2, 2, 10, 10, 1, 'OPEN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (1, 2, 1, 3, 3, 1, 'OPEN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (2, 2, 1, 10, 10, 1, 'OPEN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
+  set_attempt_id = VALUES(set_attempt_id),
   problem_id = VALUES(problem_id),
   last_submission_id = VALUES(last_submission_id),
   wrong_count = VALUES(wrong_count),

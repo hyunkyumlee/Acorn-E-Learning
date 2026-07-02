@@ -43,7 +43,7 @@
         c.title AS curriculum_title,
         p.problem_type,
         p.question,
-        p.explanation,
+        NULL AS explanation,
         p.answer_text,
         p.difficulty_code,
         p.is_active
@@ -55,5 +55,9 @@
         ORDER BY p.updated_at DESC, p.problem_id DESC
     </select>
 
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM practice_problems
+        WHERE problem_id = #{problemId}
+    </delete>
 
 </mapper>

@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.4
+  Source: Notion DB 명세 v1.5
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -321,6 +321,7 @@ CREATE TABLE learning_progress (
 CREATE TABLE practice_set_attempts (
   set_attempt_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
+  subject_id BIGINT UNSIGNED NOT NULL,
   node_id BIGINT UNSIGNED NOT NULL,
   total_count TINYINT UNSIGNED NOT NULL DEFAULT 10,
   correct_count TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -331,8 +332,10 @@ CREATE TABLE practice_set_attempts (
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (set_attempt_id),
   KEY idx_practice_set_attempt_user_node (user_id, node_id),
+  KEY idx_practice_set_attempt_subject (subject_id),
   KEY idx_practice_set_attempt_completed_at (completed_at),
   CONSTRAINT fk_practice_set_attempts_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_practice_set_attempts_subject FOREIGN KEY (subject_id) REFERENCES subjects (subject_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_practice_set_attempts_node FOREIGN KEY (node_id) REFERENCES curriculum_nodes (node_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -410,6 +413,7 @@ CREATE TABLE practice_submissions (
 CREATE TABLE wrong_answers (
   wrong_answer_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
+  set_attempt_id BIGINT UNSIGNED NOT NULL,
   problem_id BIGINT UNSIGNED NOT NULL,
   last_submission_id BIGINT UNSIGNED NULL,
   wrong_count INT UNSIGNED NOT NULL DEFAULT 1,
@@ -419,10 +423,12 @@ CREATE TABLE wrong_answers (
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (wrong_answer_id),
   UNIQUE KEY uk_wrong_answers_user_problem (user_id, problem_id),
+  KEY idx_wrong_answers_set_attempt (set_attempt_id),
   KEY idx_wrong_answers_problem (problem_id),
   KEY idx_wrong_answers_last_submission (last_submission_id),
   KEY idx_wrong_answers_review_status (review_status),
   CONSTRAINT fk_wrong_answers_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_wrong_answers_set_attempt FOREIGN KEY (set_attempt_id) REFERENCES practice_set_attempts (set_attempt_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_wrong_answers_problem FOREIGN KEY (problem_id) REFERENCES practice_problems (problem_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_wrong_answers_last_submission FOREIGN KEY (last_submission_id) REFERENCES practice_submissions (submission_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
