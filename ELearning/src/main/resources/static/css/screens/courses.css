@@ -298,6 +298,11 @@
     max-width: 640px;
 }
 
+.course-curriculum-form-row {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+}
+
 .course-form-actions {
     justify-content: flex-start;
     margin-top: 4px;

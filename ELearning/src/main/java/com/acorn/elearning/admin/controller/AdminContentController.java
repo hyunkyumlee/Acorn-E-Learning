@@ -5,11 +5,18 @@ import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.service.AdminContentService;
+import com.acorn.elearning.learning.model.Subject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,7 +34,12 @@ public class AdminContentController {
         // model.addAttribute("view", view);
         // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
 
-        model.addAttribute("subjectList", service.findAllSubject());
+        List<Subject> subjectList = service.findAllSubject();
+        Map<Long, String> subjectNameMap = subjectList.stream()
+                .collect(Collectors.toMap(Subject::getSubjectId, Subject::getSubjectName));
+
+        model.addAttribute("subjectList", subjectList);
+        model.addAttribute("subjectNameMap", subjectNameMap);
 
         model.addAttribute("curriculumList", service.findAllCurriculumNode());
 
@@ -50,6 +62,22 @@ public class AdminContentController {
         return "redirect:/admin/courses";
     }
 
+
+//    @PostMapping("/admin/courses/subjects/{subjectId}/delete")
+//    public String deleteSubjects(@PathVariable Long subjectId,
+//                                 RedirectAttributes redirectAttributes){
+//
+//        int deleteCount = service.deleteSubject(subjectId);
+//       if(deleteCount == 1){
+//            redirectAttributes.addFlashAttribute("message", "과목이 삭제되었습니다.");
+//       }else{
+//            redirectAttributes.addFlashAttribute("errorMessage", "삭제할 과목을 찾을 수 없습니다.");
+//       }
+//
+//       return "redirect:/admin/courses";
+//
+//    }
+
     @PostMapping("/admin/courses/curriculum-nodes")
     public String regCurriculumNode(CurriculumNodeForm form){
 
@@ -59,8 +87,9 @@ public class AdminContentController {
             service.updateCurriculumNode(form);
         }
 
-        return "redirect:/admin/courses";
+        return "redirect:/admin/courses?tab=curriculum";
     }
+
 
     @GetMapping("/admin/theory")
     public String theory(Model model) {
@@ -115,6 +144,21 @@ public class AdminContentController {
             service.createProblem(form);
         } else {
             service.updateProblem(form);
+        }
+
+        return "redirect:/admin/problems";
+    }
+
+    @PostMapping("/admin/problems/{problemId}/delete")
+    public String deleteProblem(@PathVariable Long problemId,
+                                RedirectAttributes redirectAttributes) {
+
+        int deleteCount = service.deleteProblem(problemId);
+
+        if (deleteCount == 1) {
+            redirectAttributes.addFlashAttribute("message", "문제가 삭제되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "삭제할 문제를 찾을 수 없습니다.");
         }
 
         return "redirect:/admin/problems";
