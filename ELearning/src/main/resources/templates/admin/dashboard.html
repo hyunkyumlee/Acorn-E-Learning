@@ -1,18 +1,176 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>관리자 대시보드 | Knowva</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>관리자 홈 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/dashboard.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>관리자 대시보드</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/dashboard</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+<div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
+
+<main class="page-shell admin-screen admin-dashboard-screen">
+  <section class="admin-dashboard-header">
+    <h1>관리자 홈</h1>
+  </section>
+
+  <section class="admin-dashboard-summary" aria-label="관리자 주요 지표">
+    <article class="admin-dashboard-stat">
+      <span>전체 사용자 수</span>
+      <strong>2,847</strong>
+      <small>+ 12% 지난달 대비</small>
+    </article>
+    <article class="admin-dashboard-stat">
+      <span>오늘 학습량</span>
+      <strong>153</strong>
+      <small>+ 8% 어제 대비</small>
+    </article>
+    <article class="admin-dashboard-stat">
+      <span>오늘 문제풀이 수</span>
+      <strong>1,024</strong>
+      <small>+ 15% 어제 대비</small>
+    </article>
+    <article class="admin-dashboard-stat">
+      <span>신고 대기 수</span>
+      <strong>5</strong>
+      <small>처리 대기 중</small>
+    </article>
+  </section>
+
+  <section class="admin-dashboard-analytics" aria-label="사용량 및 학습 통계">
+    <article class="admin-dashboard-card admin-dashboard-chart-card">
+      <div class="admin-dashboard-card-head">
+        <h2>일별 사용자 접속률</h2>
+        <div class="admin-dashboard-period">
+          <span>오늘</span>
+          <span class="is-active">7일</span>
+          <span>30일</span>
+        </div>
+      </div>
+      <div class="admin-dashboard-chart" aria-label="일별 사용자 접속률 막대 그래프">
+        <div class="admin-dashboard-bar" style="--bar-height: 42%"><i></i><span>6/9</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 66%"><i></i><span>6/10</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 34%"><i></i><span>6/11</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 78%"><i></i><span>6/12</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 56%"><i></i><span>6/13</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 86%"><i></i><span>6/14</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 70%"><i></i><span>6/15</span></div>
+      </div>
+    </article>
+
+    <article class="admin-dashboard-card admin-dashboard-chart-card">
+      <div class="admin-dashboard-card-head">
+        <h2>과목별 학습 완료 수</h2>
+        <div class="admin-dashboard-period">
+          <span>오늘</span>
+          <span class="is-active">7일</span>
+          <span>30일</span>
+        </div>
+      </div>
+      <div class="admin-dashboard-chart" aria-label="과목별 학습 완료 수 막대 그래프">
+        <div class="admin-dashboard-bar" style="--bar-height: 50%"><i></i><span>Java</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 72%"><i></i><span>Python</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 28%"><i></i><span>SQL</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 64%"><i></i><span>HTML/CSS</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 82%"><i></i><span>JS</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 44%"><i></i><span>자료구조</span></div>
+        <div class="admin-dashboard-bar" style="--bar-height: 60%"><i></i><span>알고리즘</span></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="admin-dashboard-quick" aria-label="빠른 이동">
+    <h2>빠른 이동</h2>
+    <div class="admin-dashboard-quick-grid">
+      <a th:href="@{/admin/problems}" class="admin-dashboard-quick-link">문제 등록</a>
+      <a th:href="@{/admin/theory}" class="admin-dashboard-quick-link">이론 자료 등록</a>
+      <a th:href="@{/admin/reports}" class="admin-dashboard-quick-link">신고 확인</a>
+      <a th:href="@{/admin/notices}" class="admin-dashboard-quick-link">공지 작성</a>
+    </div>
+  </section>
+
+  <section class="admin-dashboard-recent" aria-label="최근 항목">
+    <article class="admin-dashboard-card admin-dashboard-table-card">
+      <h2>최근 신고 목록</h2>
+      <div class="admin-dashboard-table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>내용 요약</th>
+            <th>처리 상태</th>
+            <th>일시</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>#R001</td>
+            <td>Java 게시글 부적절한 사용</td>
+            <td>처리 완료</td>
+            <td>06/15</td>
+          </tr>
+          <tr>
+            <td>#R002</td>
+            <td>욕설 댓글 신고</td>
+            <td>검토 중</td>
+            <td>06/14</td>
+          </tr>
+          <tr>
+            <td>#R003</td>
+            <td>광고성 게시물 신고</td>
+            <td>대기</td>
+            <td>06/13</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="admin-dashboard-card admin-dashboard-table-card">
+      <h2>최근 공지사항</h2>
+      <div class="admin-dashboard-table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>제목</th>
+            <th>상태</th>
+            <th>작성일</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>#N001</td>
+            <td>KNOWVA 이용약관 변경 안내</td>
+            <td>공개</td>
+            <td>06/15</td>
+          </tr>
+          <tr>
+            <td>#N002</td>
+            <td>6월 시스템 점검 안내</td>
+            <td>공개</td>
+            <td>06/10</td>
+          </tr>
+          <tr>
+            <td>#N003</td>
+            <td>신규 과목 업데이트 안내</td>
+            <td>공개</td>
+            <td>06/05</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+</main>
 </body>
 </html>
