@@ -2,16 +2,58 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>프로필 설정 | Knowva</title>
+  <title>회원 정보 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/settings.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell settings-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>프로필 설정</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>settings/profile</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p><form method="post"><input type="hidden" name="_csrf" value="TODO-CSRF"><input type="hidden" name="idempotencyToken" value="TODO-IDEMPOTENCY"><button class="button primary" type="submit">Submit</button></form></section>
+  <main class="settings-screen" th:with="profile=${view}">
+    <section class="figma-settings-page">
+      <a class="figma-logout" th:href="@{/login}">로그아웃</a>
+      <aside class="figma-settings-sidebar">
+        <h1>설정</h1>
+        <nav aria-label="설정 메뉴">
+          <a class="is-active" th:href="@{/settings/profile}">회원 정보</a>
+          <a th:href="@{/settings/security}">이메일 / 비밀번호</a>
+          <a th:href="@{/settings/social}">연동된 소셜 계정</a>
+          <a th:href="@{/settings/system}">시스템 설정</a>
+          <a th:href="@{/settings/payment}">결제 정보</a>
+        </nav>
+      </aside>
+      <section class="figma-settings-main">
+        <article class="figma-settings-panel">
+          <h1>회원 정보</h1>
+          <p>프로필과 기본 계정 정보를 확인하고 수정합니다.</p>
+          <p class="figma-flash" th:if="${message != null}" th:text="${message}">저장되었습니다.</p>
+          <form class="figma-settings-box" method="post" th:action="@{/settings/profile}" th:object="${form}">
+            <label class="figma-setting-row">
+              <strong>닉네임</strong>
+              <span>
+                <input class="figma-field" type="text" th:field="*{nickname}" maxlength="50" autocomplete="nickname">
+                <small class="figma-field-error" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}">닉네임 오류</small>
+              </span>
+            </label>
+            <div class="figma-setting-row"><strong>이메일</strong><span th:text="${profile != null ? profile.email() : 'jeongha@example.com'}">jeongha@example.com</span></div>
+            <div class="figma-setting-row"><strong>가입일</strong><span th:text="${profile != null ? profile.createdAtLabel() : '2026.06.01'}">2026.06.01</span></div>
+            <label class="figma-setting-row">
+              <strong>학습 목표</strong>
+              <span>
+                <textarea class="figma-field" th:field="*{learningGoal}" maxlength="500" rows="3"></textarea>
+                <small class="figma-field-error" th:if="${#fields.hasErrors('learningGoal')}" th:errors="*{learningGoal}">학습 목표 오류</small>
+              </span>
+            </label>
+            <div class="figma-setting-row"><strong>학습 언어</strong><span th:text="${profile != null ? profile.learningLanguageLabel() : 'Java, HTML, Spring'}">Java, HTML, Spring</span></div>
+            <button class="figma-button primary figma-profile-save" type="submit">저장</button>
+            <div id="withdrawal" class="figma-payment-plan">
+              <strong>회원 탈퇴</strong>
+              <span>탈퇴 요청 전 학습 기록 보관/마스킹 안내를 확인합니다.</span>
+              <a class="figma-button danger" th:href="@{/settings/withdraw}">탈퇴 요청</a>
+            </div>
+          </form>
+        </article>
+      </section>
+    </section>
   </main>
 </body>
 </html>

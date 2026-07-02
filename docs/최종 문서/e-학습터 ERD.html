@@ -127,11 +127,11 @@
 <body>
   <section class="page">
     <h1>Knowva ERD</h1>
-    <p class="source">Source: Notion DB 명세 v1.4 Mermaid ERD. HTML 원본을 Mermaid로 렌더한 뒤 HeadlessChrome으로 PDF 내보냄.</p>
+    <p class="source">Source: Notion DB 명세 v1.5 Mermaid ERD. HTML 원본을 Mermaid로 렌더한 뒤 HeadlessChrome으로 PDF 내보냄.</p>
     <div class="summary">
-      <div class="summary-card"><strong>Version</strong><span>v1.4</span></div>
+      <div class="summary-card"><strong>Version</strong><span>v1.5</span></div>
       <div class="summary-card"><strong>Tables</strong><span>40</span></div>
-      <div class="summary-card"><strong>Foreign Keys</strong><span>69</span></div>
+      <div class="summary-card"><strong>Foreign Keys</strong><span>71</span></div>
       <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
     </div>
     <table class="inventory compact">
@@ -151,12 +151,12 @@
 <tr><td>level_test_attempts</td><td>BIGINT attempt_id PK</td><td>2</td></tr>
 <tr><td>level_test_answers</td><td>BIGINT answer_id PK</td><td>3</td></tr>
 <tr><td>learning_progress</td><td>BIGINT progress_id PK</td><td>3</td></tr>
-<tr><td>practice_set_attempts</td><td>BIGINT set_attempt_id PK</td><td>2</td></tr>
+<tr><td>practice_set_attempts</td><td>BIGINT set_attempt_id PK</td><td>3</td></tr>
 <tr><td>attendance_records</td><td>BIGINT attendance_id PK</td><td>2</td></tr>
 <tr><td>practice_problems</td><td>BIGINT problem_id PK</td><td>3</td></tr>
 <tr><td>problem_choices</td><td>BIGINT choice_id PK</td><td>1</td></tr>
 <tr><td>practice_submissions</td><td>BIGINT submission_id PK</td><td>3</td></tr>
-<tr><td>wrong_answers</td><td>BIGINT wrong_answer_id PK</td><td>3</td></tr>
+<tr><td>wrong_answers</td><td>BIGINT wrong_answer_id PK</td><td>4</td></tr>
 <tr><td>score_events</td><td>BIGINT score_event_id PK</td><td>2</td></tr>
 <tr><td>ranking_scores</td><td>BIGINT ranking_id PK</td><td>2</td></tr>
 <tr><td>exam_sessions</td><td>BIGINT exam_id PK</td><td>2</td></tr>
@@ -334,6 +334,7 @@
     practice_set_attempts {
         BIGINT set_attempt_id PK
         BIGINT user_id FK
+        BIGINT subject_id FK
         BIGINT node_id FK
         TINYINT total_count
         TINYINT correct_count
@@ -386,6 +387,7 @@
     wrong_answers {
         BIGINT wrong_answer_id PK
         BIGINT user_id FK
+        BIGINT set_attempt_id FK
         BIGINT problem_id FK
         BIGINT last_submission_id FK
         INT wrong_count
@@ -610,6 +612,7 @@
     subjects ||--o{ learning_progress : subject
     curriculum_nodes ||--o{ learning_progress : node
     users ||--o{ practice_set_attempts : user
+    subjects ||--o{ practice_set_attempts : subject
     curriculum_nodes ||--o{ practice_set_attempts : node
     users ||--o{ attendance_records : user
     practice_set_attempts ||--o{ attendance_records : qualified_set_attempt
@@ -621,6 +624,7 @@
     users ||--o{ practice_submissions : user
     practice_problems ||--o{ practice_submissions : problem
     users ||--o{ wrong_answers : user
+    practice_set_attempts ||--o{ wrong_answers : set_attempt
     practice_problems ||--o{ wrong_answers : problem
     practice_submissions ||--o{ wrong_answers : last_submission
     users ||--o{ score_events : user
@@ -1139,6 +1143,7 @@
     practice_set_attempts {
         BIGINT set_attempt_id PK
         BIGINT user_id FK
+        BIGINT subject_id FK
         BIGINT node_id FK
         TINYINT total_count
         TINYINT correct_count
@@ -1182,6 +1187,7 @@
     wrong_answers {
         BIGINT wrong_answer_id PK
         BIGINT user_id FK
+        BIGINT set_attempt_id FK
         BIGINT problem_id FK
         BIGINT last_submission_id FK
         INT wrong_count
@@ -1224,6 +1230,7 @@
     users ||--o{ attendance_records : user
     practice_set_attempts ||--o{ attendance_records : qualified_set_attempt
     users ||--o{ practice_set_attempts : user
+    subjects ||--o{ practice_set_attempts : subject
     curriculum_nodes ||--o{ practice_set_attempts : node
     subjects ||--o{ practice_problems : subject
     curriculum_nodes ||--o{ practice_problems : node
@@ -1233,6 +1240,7 @@
     users ||--o{ practice_submissions : user
     practice_problems ||--o{ practice_submissions : problem
     users ||--o{ wrong_answers : user
+    practice_set_attempts ||--o{ wrong_answers : set_attempt
     practice_problems ||--o{ wrong_answers : problem
     practice_submissions ||--o{ wrong_answers : last_submission
     users ||--o{ score_events : user
@@ -1254,6 +1262,7 @@
 <tr><td>attendance_records</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>attendance_records</td><td>qualified_set_attempt_id</td><td>practice_set_attempts</td><td>set_attempt_id</td></tr>
 <tr><td>practice_set_attempts</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>practice_set_attempts</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
 <tr><td>practice_set_attempts</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
 <tr><td>practice_problems</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
 <tr><td>practice_problems</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
@@ -1263,6 +1272,7 @@
 <tr><td>practice_submissions</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>practice_submissions</td><td>problem_id</td><td>practice_problems</td><td>problem_id</td></tr>
 <tr><td>wrong_answers</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>wrong_answers</td><td>set_attempt_id</td><td>practice_set_attempts</td><td>set_attempt_id</td></tr>
 <tr><td>wrong_answers</td><td>problem_id</td><td>practice_problems</td><td>problem_id</td></tr>
 <tr><td>wrong_answers</td><td>last_submission_id</td><td>practice_submissions</td><td>submission_id</td></tr>
 <tr><td>score_events</td><td>user_id</td><td>users</td><td>user_id</td></tr>
@@ -1373,8 +1383,9 @@
                   <h3>practice_set_attempts</h3>
                   <table class="small-table">
                     <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
-                    <tbody><tr><td>set_attempt_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tbody><tr><td>set_attempt_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
 <tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>total_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 10</td><td></td><td>NN</td></tr>
 <tr><td>correct_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
@@ -1438,8 +1449,9 @@
                   <h3>wrong_answers</h3>
                   <table class="small-table">
                     <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
-                    <tbody><tr><td>wrong_answer_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tbody><tr><td>wrong_answer_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
 <tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>set_attempt_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>problem_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
 <tr><td>last_submission_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
 <tr><td>wrong_count</td><td>INT UNSIGNED NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
@@ -2315,7 +2327,7 @@
             
 
   <section class="page">
-    <h2>v1.4 변경 요약</h2>
+    <h2>v1.5 변경 요약</h2>
     
       <section class="callout">
         <h2>v1.4 AI 정책 반영</h2>
@@ -2330,6 +2342,8 @@
     <table class="inventory" style="margin-top:16px">
       <thead><tr><th>구분</th><th>반영 내용</th></tr></thead>
       <tbody>
+        <tr><td>일반 문제 세트</td><td><code>practice_set_attempts.subject_id</code> 추가. 문제 세트 attempt에서 과목을 직접 추적.</td></tr>
+        <tr><td>오답 복습</td><td><code>wrong_answers.set_attempt_id</code> 추가. 오답이 발생한 문제 세트 attempt를 직접 추적.</td></tr>
         <tr><td>로그인/권한</td><td>관리자는 사용자와 같은 로그인 화면을 사용하고, 로그인 후 role에 따라 학습 또는 관리자 메인으로 이동.</td></tr>
         <tr><td>AI Provider</td><td>로컬 LLM 미사용. ChatGPT API 호출/응답/실패/재시도 기록을 ai_request_logs에 저장.</td></tr>
         <tr><td>AI 코딩테스트</td><td>AI는 문제 생성, 테스트케이스 생성 보조, 해설 생성, 코드 리뷰 담당. 정답/오답은 testcase 실행 결과로 판정.</td></tr>

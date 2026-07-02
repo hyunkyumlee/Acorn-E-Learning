@@ -1,7 +1,12 @@
 package com.acorn.elearning.user.view;
 
-import java.util.Map;
+import com.acorn.elearning.user.dto.response.UserProfileResponse;
 
-public record SocialAccountView(String title, String status, Map<String, Object> attributes) {
-    public static SocialAccountView stub(String title) { return new SocialAccountView(title, "SKELETON", Map.of()); }
+public record SocialAccountView(
+        String title,
+        UserProfileResponse profile
+) {
+    public String googleAccountLabel() {
+        return profile.email() + " 계정이 연결되어 있습니다.";
+    }
 }
