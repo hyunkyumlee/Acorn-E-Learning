@@ -24,11 +24,9 @@ public class AdminUserService {
         return mapper.findById(userId);
     }
 
-    public Optional<AdminUserManageRowResponse> findLearningSummaryByUserId(Long userId){
-        return mapper.findLearningSummaryByUserId(userId);
-    }
-
-
+//    public Optional<AdminUserManageRowResponse> findLearningSummaryByUserId(Long userId){
+//        return mapper.findLearningSummaryByUserId(userId);
+//    }
 
     public Map<String, Object> stub(String action) {
         // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
