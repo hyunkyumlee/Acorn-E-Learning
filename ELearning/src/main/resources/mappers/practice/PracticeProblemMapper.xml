@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.practice.mapper.PracticeProblemMapper">
-    <!-- TODO resultMap 구현 예시입니다.
+
       <resultMap id="PracticeProblemResultMap" type="com.acorn.elearning.practice.model.PracticeProblem">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
+          <id property="problemId" column="problem_id" />
+          <result property="subjectId" column="subject_id" />
+          <result property="nodeId" column="node_id" />
+          <result property="problemType" column="problem_type" />
+          <result property="question" column="question" />
+          <result property="answerText" column="answer_text" />
+          <result property="difficultyCode" column="difficulty_code" />
+          <result property="createdBy" column="created_by" />
+          <result property="isActive" column="is_active" />
+          <result property="createdAt" column="created_at" />
+          <result property="updatedAt" column="updated_at" />
       </resultMap>
-    -->
-    <select id="findById" resultType="com.acorn.elearning.practice.model.PracticeProblem">
+
+    <select id="findById" parameterType="long" resultMap="PracticeProblemResultMap">
         SELECT * FROM practice_problems
         WHERE problem_id = #{id}
     </select>
 
-    <select id="findAll" resultType="com.acorn.elearning.practice.model.PracticeProblem">
+    <select id="findAll" resultMap="PracticeProblemResultMap">
         SELECT * FROM practice_problems
         ORDER BY problem_id DESC
     </select>
@@ -54,8 +63,7 @@
         WHERE problem_id = #{problemId}
     </update>
 
-
-    <select id="findPracticeProblems" resultType="com.acorn.elearning.practice.model.PracticeProblem">
+    <select id="findPracticeProblems" resultMap="PracticeProblemResultMap">
         SELECT
         problem_id,
         subject_id,
@@ -75,4 +83,5 @@
         ORDER BY RAND()
         LIMIT 10
     </select>
+
 </mapper>

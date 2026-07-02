@@ -8,13 +8,13 @@
     @Setter
     public class PracticeSubmission {
         private Long submissionId;
-private Long setAttemptId;
-private Long userId;
-private Long problemId;
-private String submissionContext;
-private String submittedAnswer;
-private Boolean isCorrect;
-private Boolean isSkipped;
-private LocalDateTime solvedAt;
-private LocalDateTime createdAt;
+        private Long setAttemptId;
+        private Long userId;
+        private Long problemId;
+        private String submissionContext;
+        private String submittedAnswer;
+        private Boolean isCorrect;
+        private Boolean isSkipped;
+        private LocalDateTime solvedAt;
+        private LocalDateTime createdAt;
     }

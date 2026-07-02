@@ -1,32 +1,53 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.practice.mapper.PracticeSubmissionMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="PracticeSubmissionResultMap" type="com.acorn.elearning.practice.model.PracticeSubmission">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
+
+    <resultMap id="PracticeSubmissionResultMap" type="com.acorn.elearning.practice.model.PracticeSubmission">
+        <id property="submissionId" column="submission_id" />
+        <result property="setAttemptId" column="set_attempt_id" />
+        <result property="userId" column="user_id" />
+        <result property="problemId" column="problem_id" />
+        <result property="submissionContext" column="submission_context" />
+        <result property="submittedAnswer" column="submitted_answer" />
+        <result property="isCorrect" column="is_correct" />
+        <result property="isSkipped" column="is_skipped" />
+        <result property="solvedAt" column="solved_at" />
+        <result property="createdAt" column="created_at" />
       </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="PracticeSubmissionResultMap">
-          SELECT /* DDL column list */
-          FROM practice_submissions
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="PracticeSubmissionResultMap">
-          SELECT /* DDL column list */
-          FROM practice_submissions
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.practice.model.PracticeSubmission" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO practice_submissions (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
+
+    <select id="findByIdSubmission" parameterType="long" resultMap="PracticeSubmissionResultMap">
+        SELECT * FROM practice_submissions WHERE submission_id = #{submissionId}
+    </select>
+
+    <select id="findAllSubmission" resultMap="PracticeSubmissionResultMap">
+        SELECT * FROM practice_submissions ORDER BY submission_id DESC
+    </select>
+
+    <insert id="insertSubmission" parameterType="com.acorn.elearning.practice.model.PracticeSubmission"
+            useGeneratedKeys="true" keyProperty="submissionId">
+        INSERT INTO practice_submissions (
+        set_attempt_id,
+        user_id,
+        problem_id,
+        submission_context,
+        submitted_answer,
+        is_correct,
+        is_skipped,
+        solved_at,
+        created_at
+        ) VALUES (
+        #{setAttemptId},
+        #{userId},
+        #{problemId},
+        #{submissionContext},
+        #{submittedAnswer},
+        #{isCorrect},
+        #{isSkipped},
+        NOW(),
+        NOW()
+        )
+    </insert>
+
     <!-- TODO update 구현 예시입니다.
       <update id="update" parameterType="com.acorn.elearning.practice.model.PracticeSubmission">
           UPDATE practice_submissions
