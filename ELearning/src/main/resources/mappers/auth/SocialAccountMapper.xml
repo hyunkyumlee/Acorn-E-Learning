@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.auth.mapper.SocialAccountMapper">
+
+    <!--  테이블 model 매핑  -->
+    <resultMap id="SocialAccountResultMap" type="com.acorn.elearning.auth.model.SocialAccount">
+        <id property="socialAccountId" column="social_account_id"></id>
+        <result property="userId" column="user_id"></result>
+        <result property="provider" column="provider"></result>
+        <result property="providerUserId" column="provider_user_id"></result>
+        <result property="providerEmail" column="provider_email"></result>
+        <result property="isActive" column="is_active"></result>
+        <result property="connectedAt" column="connected_at"></result>
+        <result property="disconnectedAt" column="disconnected_at"></result>
+    </resultMap>
+
+    <!--  pk로 연동 row 1건 조회  -->
+    <select id="findById" parameterType="long" resultMap="SocialAccountResultMap">
+        select social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+        from social_accounts
+        where social_account_id = #{socialAccountId}
+    </select>
+
+    <!--  provider + providerUserId 로 기존 연동 여부 확인  -->
+    <select id="findByProviderAndProviderUserId" resultMap="SocialAccountResultMap">
+        select social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+        from social_accounts
+        where provider = #{provider} and provider_user_id = #{providerUserId}
+    </select>
+
+    <!--  로그인 회원의 소셜 연동 목록 - providerUserId 로 기존 연동 여부 확인  -->
+    <select id="findByUserId" parameterType="long" resultMap="SocialAccountResultMap">
+        select social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+        from social_accounts
+        where user_id = #{userId} order by social_account_id desc
+    </select>
+
+    <!--  전체 목록  -->
+    <select id="findAll" resultMap="SocialAccountResultMap">
+        select social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+        from social_accounts
+        order by social_account_id desc
+    </select>
+
+    <!--  소셜 connect - 신규 row insert  -->
+    <insert id="insert" parameterType="com.acorn.elearning.auth.model.SocialAccount" useGeneratedKeys="true" keyProperty="socialAccountId" keyColumn="social_account_id">
+        insert into social_accounts (social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at)
+        values(#{userId}, #{provider}, #{providerUserId}, #{ProviderEmail}, #{isActive}, NOW())
+    </insert>
+
+    <!--  소셜 disconnect - row 삭제 X, is_active = false + disconnected_at 갱신   -->
+    <update id="update" parameterType="com.acorn.elearning.auth.model.SocialAccount">
+        update social_accounts
+        set provider_email = #{providerEmail}, is_active = #{isActive}, disconnected_at = #{disconnectedAt}
+        where socia_account_id = #{socialAccountId}
+    </update>
+
+
+
+
     <!-- TODO resultMap 구현 예시입니다.
       <resultMap id="SocialAccountResultMap" type="com.acorn.elearning.auth.model.SocialAccount">
           <id property="id" column="id" />
