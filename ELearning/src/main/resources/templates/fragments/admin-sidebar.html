@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="adminSidebar" class="admin-sidebar" aria-label="관리자 메뉴">
+  <div class="admin-sidebar-brand">
+    KNOWVA 관리자
+  </div>
+
+  <nav class="admin-sidebar-nav">
+    <a class="admin-sidebar-link"
+       th:href="@{/admin/dashboard}"
+       th:classappend="${screen == 'admin/dashboard'} ? ' is-active'">
+      관리자 홈
+    </a>
+
+    <a class="admin-sidebar-link"
+       th:href="@{/admin/stats}"
+       th:classappend="${screen == 'admin/stats'} ? ' is-active'">
+      통계
+    </a>
+
+    <div class="admin-sidebar-group">
+      <div class="admin-sidebar-group-title">학습 콘텐츠 관리</div>
+      <a class="admin-sidebar-link"
+         th:href="@{/admin/courses}"
+         th:classappend="${screen == 'admin/courses'} ? ' is-active'">
+        과목/커리큘럼 관리
+      </a>
+      <a class="admin-sidebar-link"
+         th:href="@{/admin/theory}"
+         th:classappend="${screen == 'admin/theory'} ? ' is-active'">
+        이론 자료 관리
+      </a>
+      <a class="admin-sidebar-link"
+         th:href="@{/admin/problems}"
+         th:classappend="${screen == 'admin/problems'} ? ' is-active'">
+        일반 문제 관리
+      </a>
+    </div>
+
+    <div class="admin-sidebar-group">
+      <div class="admin-sidebar-group-title">운영 관리</div>
+      <a class="admin-sidebar-link"
+         th:href="@{/admin/users}"
+         th:classappend="${screen == 'admin/users'} ? ' is-active'">
+        사용자 관리
+      </a>
+      <a class="admin-sidebar-link"
+         th:href="@{/admin/community}"
+         th:classappend="${screen == 'admin/community'} ? ' is-active'">
+        커뮤니티 관리
+      </a>
+      <a class="admin-sidebar-link"
+         th:href="@{/admin/reports}"
+         th:classappend="${screen == 'admin/reports'} ? ' is-active'">
+        신고 관리
+      </a>
+      <a class="admin-sidebar-link"
+         th:href="@{/admin/notices}"
+         th:classappend="${screen == 'admin/notices'} ? ' is-active'">
+        공지사항 관리
+      </a>
+    </div>
+  </nav>
+
+  <a class="admin-sidebar-logout" th:href="@{/logout}">
+    로그아웃
+  </a>
+</aside>
+</body>
+</html>

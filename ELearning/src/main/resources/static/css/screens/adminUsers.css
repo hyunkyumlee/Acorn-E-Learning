@@ -1,0 +1,232 @@
+.admin-user-screen {
+    padding: 22px 28px 28px;
+    background: #f6f7f9;
+    min-height: 100vh;
+}
+
+.admin-user-header {
+    padding: 0 0 16px;
+}
+
+.admin-user-header h1,
+.admin-user-section-title h2,
+.admin-user-detail-panel h2 {
+    margin: 0;
+    color: #111827;
+}
+
+.admin-user-header h1 {
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.admin-user-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.admin-user-filter {
+    display: grid;
+    grid-template-columns: 220px repeat(4, 150px);
+    gap: 12px;
+}
+
+.admin-user-filter input,
+.admin-user-filter select,
+.admin-user-detail-panel input,
+.admin-user-detail-panel textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+}
+
+.admin-user-filter input,
+.admin-user-filter select {
+    height: 36px;
+    padding: 0 12px;
+}
+
+.admin-user-primary-button,
+.admin-user-secondary-button,
+.admin-user-table-button {
+    border-radius: 7px;
+    border: 1px solid #d1d5db;
+    cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-user-primary-button {
+    height: 38px;
+    padding: 0 18px;
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
+}
+
+.admin-user-secondary-button {
+    height: 38px;
+    padding: 0 18px;
+    background: #ffffff;
+    color: #111827;
+}
+
+.admin-user-primary-button:hover {
+    background: #374151;
+}
+
+.admin-user-secondary-button:hover,
+.admin-user-table-button:hover {
+    background: #f3f4f6;
+}
+
+.admin-user-section {
+    margin-bottom: 28px;
+}
+
+.admin-user-section-title {
+    padding-bottom: 6px;
+}
+
+.admin-user-section-title h2,
+.admin-user-detail-panel h2 {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.admin-user-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.admin-user-table {
+    width: 100%;
+    min-width: 1040px;
+    border-collapse: collapse;
+}
+
+.admin-user-table thead {
+    background: #eef0f2;
+}
+
+.admin-user-table th,
+.admin-user-table td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 11px 14px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+.admin-user-table th {
+    color: #374151;
+    font-weight: 800;
+}
+
+.admin-user-table td {
+    color: #1f2937;
+}
+
+.admin-user-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.admin-user-status-danger {
+    color: #dc2626;
+    font-weight: 800;
+}
+
+.admin-user-table-actions,
+.admin-user-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-user-table-button {
+    min-width: 64px;
+    height: 28px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 12px;
+}
+
+.admin-user-empty {
+    height: 76px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.admin-user-detail-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #eeeeef;
+}
+
+.admin-user-detail-panel h2 {
+    margin-bottom: 4px;
+}
+
+.admin-user-detail-top {
+    display: grid;
+    grid-template-columns: minmax(360px, 1fr) auto;
+    gap: 20px;
+    align-items: center;
+}
+
+.admin-user-detail-panel input {
+    box-sizing: border-box;
+    height: 38px;
+    padding: 0 12px;
+}
+
+.admin-user-detail-panel textarea {
+    box-sizing: border-box;
+    min-height: 88px;
+    padding: 11px 12px;
+    resize: vertical;
+}
+
+@media (max-width: 1024px) {
+    .admin-user-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-user-filter,
+    .admin-user-detail-top {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-user-detail-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-user-screen {
+        padding: 18px;
+    }
+
+    .admin-user-filter {
+        width: 100%;
+    }
+
+    .admin-user-detail-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
