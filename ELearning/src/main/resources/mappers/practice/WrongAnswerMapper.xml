@@ -1,37 +1,55 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.practice.mapper.WrongAnswerMapper">
-    <!-- TODO resultMap 구현 예시입니다.
+
       <resultMap id="WrongAnswerResultMap" type="com.acorn.elearning.practice.model.WrongAnswer">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
+          <id property="wrongAnswerId" column="wrong_answer_id" />
+          <result property="setAttemptId" column="set_attempt_id" />
+          <result property="userId" column="user_id" />
+          <result property="problemId" column="problem_id" />
+          <result property="lastSubmissionId" column="last_submission_id" />
+          <result property="wrongCount" column="wrong_count" />
+          <result property="reviewStatus" column="review_status" />
+          <result property="retryBonusAwarded" column="retry_bonus_awarded" />
+          <result property="createdAt" column="created_at" />
+          <result property="updatedAt" column="updated_at" />
       </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="WrongAnswerResultMap">
-          SELECT /* DDL column list */
-          FROM wrong_answers
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="WrongAnswerResultMap">
-          SELECT /* DDL column list */
-          FROM wrong_answers
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.practice.model.WrongAnswer" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO wrong_answers (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.practice.model.WrongAnswer">
-          UPDATE wrong_answers
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <insert id="insertWrongAnswer" parameterType="com.acorn.elearning.practice.model.WrongAnswer"
+            useGeneratedKeys="true" keyProperty="wrongAnswerId">
+        INSERT INTO wrong_answers (
+        set_attempt_id,
+        user_id,
+        problem_id,
+        last_submission_id,
+        wrong_count,
+        review_status,
+        retry_bonus_awarded,
+        created_at
+        ) VALUES (
+        #{setAttemptId},
+        #{userId},
+        #{problemId},
+        #{lastSubmissionId},
+        #{wrongCount},
+        #{reviewStatus},
+        #{retryBonusAwarded},
+        NOW()
+        )
+    </insert>
+
+    <select id="findByIdWrongAnswer" parameterType="long" resultMap="WrongAnswerResultMap">
+        SELECT * FROM wrong_answers WHERE wrong_answer_id = #{wrongAnswerId}
+    </select>
+
+    <select id="findAllWrongAnswersByUserId" resultMap="WrongAnswerResultMap">
+        SELECT * FROM wrong_answers WHERE user_id = #{userId} ORDER BY created_at DESC
+    </select>
+
+    <update id="updateWrongAnswer" parameterType="long">
+        UPDATE wrong_answers
+        SET review_status = 'SOLVED',
+        updated_at = NOW()
+        WHERE wrong_answer_id = #{wrongAnswerId}
+    </update>
 </mapper>

@@ -1,32 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.practice.mapper.ScoreEventMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="ScoreEventResultMap" type="com.acorn.elearning.practice.model.ScoreEvent">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
+    <resultMap id="ScoreEventResultMap" type="com.acorn.elearning.practice.model.ScoreEvent">
+        <id property="scoreEventId" column="score_event_id" />
+        <result property="userId" column="user_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="sourceType" column="source_type" />
+        <result property="sourceId" column="source_id" />
+        <result property="scoreDelta" column="score_delta" />
+        <result property="reasonCode" column="reason_code" />
+        <result property="idempotencyKey" column="idempotency_key" />
+        <result property="createdAt" column="created_at" />
       </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="ScoreEventResultMap">
-          SELECT /* DDL column list */
-          FROM score_events
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="ScoreEventResultMap">
-          SELECT /* DDL column list */
-          FROM score_events
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.practice.model.ScoreEvent" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO score_events (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
+
+    <select id="findById" parameterType="long" resultMap="ScoreEventResultMap">
+        SELECT * FROM score_events WHERE score_event_id = #{scoreEventId}
+    </select>
+    <insert id="insert" parameterType="com.acorn.elearning.practice.model.ScoreEvent"
+            useGeneratedKeys="true" keyProperty="scoreEventId">
+        INSERT INTO score_events (
+        user_id, subject_id, source_type, source_id, score_delta, reason_code, idempotency_key, created_at
+        ) VALUES (
+        #{userId}, #{subjectId}, #{sourceType}, #{subjectId}, #{scoreDelta}, #{reasonCode}, #{idempotencyKey}, NOW()
+        )
+    </insert>
     <!-- TODO update 구현 예시입니다.
       <update id="update" parameterType="com.acorn.elearning.practice.model.ScoreEvent">
           UPDATE score_events

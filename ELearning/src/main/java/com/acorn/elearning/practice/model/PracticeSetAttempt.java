@@ -9,6 +9,7 @@
     public class PracticeSetAttempt {
         private Long setAttemptId;
         private Long userId;
+        private Long subjectId; //추가
         private Long nodeId;
         private Integer totalCount;
         private Integer correctCount;
