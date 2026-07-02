@@ -1,16 +1,20 @@
 package com.acorn.elearning.admin.dto.response;
 
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
-public record AdminLessonManageRowResponse(
-        Long lessonId,
-        Long nodeId,
-        String subjectName,
-        String curriculumTitle,
-        String lessonTitle,
-        String content,
-        String levelCode,
-        Integer sortOrder,
-        LocalDateTime updatedAt,
-        Boolean isActive
-) { }
+@Getter
+@Setter
+public class AdminLessonManageRowResponse {
+    private Long lessonId;
+    private Long nodeId;
+    private String subjectName;
+    private String curriculumTitle;
+    private String lessonTitle;
+    private String content;
+    private String levelCode;
+    private Integer sortOrder;
+    private LocalDateTime updatedAt;
+    private Boolean isActive;
+}

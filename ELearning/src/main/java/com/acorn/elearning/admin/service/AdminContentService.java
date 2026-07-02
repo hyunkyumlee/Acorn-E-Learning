@@ -11,6 +11,7 @@ import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.form.SubjectForm;
+import com.acorn.elearning.admin.mapper.AdminContentMapper;
 import com.acorn.elearning.admin.mapper.AdminLessonMapper;
 import com.acorn.elearning.admin.mapper.AdminProblemMapper;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 public class AdminContentService {
 
     private final SubjectMapper sm;
+    private final AdminContentMapper acm;
 
     private final CurriculumNodeMapper cm;
 
@@ -59,6 +61,7 @@ public class AdminContentService {
         return sm.update(model);
     }
 
+
     public int createSubject(SubjectForm form){
 
         Subject s = new Subject();
@@ -67,7 +70,7 @@ public class AdminContentService {
         s.setDescription(form.getDescription());
 
         s.setSubjectCode(form.getSubjectName());
-        s.setSortOrder(0);
+        s.setSortOrder(sm.findAll().size() + 1);
 
         return sm.insert(s);
     }
@@ -82,6 +85,10 @@ public class AdminContentService {
 
         return sm.update(s);
     }
+
+//    public int deleteSubject(Long subjectId){
+//        return acm.deleteSubjectById(subjectId);
+//    }
 
     //커리큘럼 조회
     public List<CurriculumNode> findAllCurriculumNode(){
@@ -136,6 +143,10 @@ public class AdminContentService {
     }
 
 
+//    public int deleteCurriculumNode(Long nodeId){
+//        return acm.deleteCurriculumNodeById(nodeId);
+//    }
+
     //이론 자료 조회
     public List<Lesson> findAllLesson(){
         return lm.findAll();
@@ -188,6 +199,11 @@ public class AdminContentService {
     public List<AdminProblemManageRowResponse> findAllAdminProblem(){
         return apm.findAll();
     }
+
+    public int deleteProblem(Long problemId) {
+        return apm.deleteById(problemId);
+    }
+
     //문제 목록 조회
     public List<PracticeProblem> findAllProblems(){
         return ppm.findAll();

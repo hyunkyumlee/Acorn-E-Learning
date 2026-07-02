@@ -37,10 +37,11 @@
 
 .problem-filter {
     display: grid;
-    grid-template-columns: repeat(5, 150px);
+    grid-template-columns: 200px repeat(5, 145px);
     gap: 12px;
 }
 
+.problem-filter input,
 .problem-filter select,
 .problem-form-panel input,
 .problem-form-panel select,
@@ -53,6 +54,7 @@
     font-size: 14px;
 }
 
+.problem-filter input,
 .problem-filter select {
     height: 36px;
     padding: 0 12px;
