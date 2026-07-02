@@ -1,37 +1,80 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.user.mapper.UserLearningProfileMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="UserLearningProfileResultMap" type="com.acorn.elearning.user.model.UserLearningProfile">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="UserLearningProfileResultMap">
-          SELECT /* DDL column list */
-          FROM user_learning_profiles
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="UserLearningProfileResultMap">
-          SELECT /* DDL column list */
-          FROM user_learning_profiles
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.user.model.UserLearningProfile" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO user_learning_profiles (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.user.model.UserLearningProfile">
-          UPDATE user_learning_profiles
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="UserLearningProfileResultMap" type="com.acorn.elearning.user.model.UserLearningProfile">
+        <id property="profileId" column="profile_id" />
+        <result property="userId" column="user_id" />
+        <result property="primarySubjectId" column="primary_subject_id" />
+        <result property="learningGoal" column="learning_goal" />
+        <result property="currentLevelCode" column="current_level_code" />
+        <result property="totalScore" column="total_score" />
+        <result property="gradeCode" column="grade_code" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="UserLearningProfileColumns">
+        profile_id,
+        user_id,
+        primary_subject_id,
+        learning_goal,
+        current_level_code,
+        total_score,
+        grade_code,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="UserLearningProfileResultMap">
+        SELECT
+        <include refid="UserLearningProfileColumns" />
+        FROM user_learning_profiles
+        WHERE profile_id = #{id}
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="UserLearningProfileResultMap">
+        SELECT
+        <include refid="UserLearningProfileColumns" />
+        FROM user_learning_profiles
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="findAll" resultMap="UserLearningProfileResultMap">
+        SELECT
+        <include refid="UserLearningProfileColumns" />
+        FROM user_learning_profiles
+        ORDER BY profile_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.user.model.UserLearningProfile" useGeneratedKeys="true" keyProperty="profileId">
+        INSERT INTO user_learning_profiles (
+            user_id,
+            primary_subject_id,
+            learning_goal,
+            current_level_code,
+            total_score,
+            grade_code
+        )
+        VALUES (
+            #{userId},
+            #{primarySubjectId},
+            #{learningGoal},
+            #{currentLevelCode},
+            #{totalScore},
+            #{gradeCode}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.user.model.UserLearningProfile">
+        UPDATE user_learning_profiles
+        SET
+            user_id = #{userId},
+            primary_subject_id = #{primarySubjectId},
+            learning_goal = #{learningGoal},
+            current_level_code = #{currentLevelCode},
+            total_score = #{totalScore},
+            grade_code = #{gradeCode},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE profile_id = #{profileId}
+    </update>
 </mapper>

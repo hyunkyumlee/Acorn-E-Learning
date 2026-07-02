@@ -1,16 +1,107 @@
 package com.acorn.elearning.user.service;
 
-import java.util.Map;
+import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.dto.response.UserProfileResponse;
+import com.acorn.elearning.user.dto.response.UserSettingsResponse;
+import com.acorn.elearning.user.form.ProfileForm;
+import com.acorn.elearning.user.form.SecurityForm;
+import com.acorn.elearning.user.form.SystemSettingsForm;
+import com.acorn.elearning.user.mapper.UserSettingMapper;
+import com.acorn.elearning.user.model.UserSetting;
+import com.acorn.elearning.user.view.SettingsHomeView;
+import com.acorn.elearning.user.view.SocialAccountView;
+import com.acorn.elearning.user.view.WithdrawConfirmView;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SettingsService {
-    public Map<String, Object> stub(String action) {
-        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-        // Long userId = sessionUser.userId();
-        // User user = userMapper.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
-        // userMapper.update(applyForm(user, form));
-        // return Map.of("user", UserProfileResponse.from(user));
-        return Map.of("action", action, "status", "SKELETON");
+    private final UserService userService;
+    private final UserSettingMapper userSettingMapper;
+
+    public SettingsService(UserService userService, UserSettingMapper userSettingMapper) {
+        this.userService = userService;
+        this.userSettingMapper = userSettingMapper;
+    }
+
+    @Transactional(readOnly = true)
+    public SettingsHomeView index(SessionUser sessionUser) {
+        UserProfileResponse profile = profile(sessionUser);
+        UserSettingsResponse settings = settings(sessionUser);
+        return new SettingsHomeView("설정", profile, settings);
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse profile(SessionUser sessionUser) {
+        return userService.me(sessionUser);
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse security(SessionUser sessionUser) {
+        return userService.me(sessionUser);
+    }
+
+    @Transactional
+    public UserProfileResponse updateProfile(SessionUser sessionUser, ProfileForm form) {
+        return userService.updateProfile(sessionUser, form);
+    }
+
+    @Transactional
+    public UserProfileResponse updateSecurity(SessionUser sessionUser, SecurityForm form) {
+        return userService.updateSecurity(sessionUser, form);
+    }
+
+    @Transactional(readOnly = true)
+    public SocialAccountView social(SessionUser sessionUser) {
+        return new SocialAccountView("연동된 소셜 계정", userService.me(sessionUser));
+    }
+
+    @Transactional(readOnly = true)
+    public UserSettingsResponse settings(SessionUser sessionUser) {
+        Long userId = userService.requireUserId(sessionUser);
+        UserSetting setting = userSettingMapper.findByUserId(userId).orElse(null);
+        return UserSettingsResponse.from(userId, setting);
+    }
+
+    @Transactional(readOnly = true)
+    public UserSettingsResponse system(SessionUser sessionUser) {
+        return settings(sessionUser);
+    }
+
+    @Transactional
+    public UserSettingsResponse updateSettings(SessionUser sessionUser, SystemSettingsForm form) {
+        Long userId = userService.requireUserId(sessionUser);
+        UserSetting setting = userSettingMapper.findByUserId(userId).orElse(null);
+
+        if (setting == null) {
+            setting = new UserSetting();
+            setting.setUserId(userId);
+            setting.setAccessibilityMode(null);
+            applySettings(setting, form);
+            userSettingMapper.insert(setting);
+        } else {
+            applySettings(setting, form);
+            userSettingMapper.update(setting);
+        }
+
+        return UserSettingsResponse.from(userId, setting);
+    }
+
+    @Transactional(readOnly = true)
+    public WithdrawConfirmView withdrawConfirm(SessionUser sessionUser) {
+        return new WithdrawConfirmView("회원 탈퇴", userService.me(sessionUser));
+    }
+
+    private void applySettings(UserSetting setting, SystemSettingsForm form) {
+        setting.setTheme(normalizeTheme(form.getTheme()));
+        setting.setNotificationEnabled(Boolean.TRUE.equals(form.getNotificationEnabled()));
+        setting.setReducedMotionEnabled(Boolean.TRUE.equals(form.getReducedMotionEnabled()));
+    }
+
+    private String normalizeTheme(String theme) {
+        if (theme == null || theme.isBlank()) {
+            return "SYSTEM";
+        }
+        return theme.trim();
     }
 }

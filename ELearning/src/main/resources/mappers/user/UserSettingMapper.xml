@@ -1,37 +1,75 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.user.mapper.UserSettingMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="UserSettingResultMap" type="com.acorn.elearning.user.model.UserSetting">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="UserSettingResultMap">
-          SELECT /* DDL column list */
-          FROM user_settings
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="UserSettingResultMap">
-          SELECT /* DDL column list */
-          FROM user_settings
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.user.model.UserSetting" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO user_settings (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.user.model.UserSetting">
-          UPDATE user_settings
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="UserSettingResultMap" type="com.acorn.elearning.user.model.UserSetting">
+        <id property="settingId" column="setting_id" />
+        <result property="userId" column="user_id" />
+        <result property="theme" column="theme" />
+        <result property="notificationEnabled" column="notification_enabled" />
+        <result property="accessibilityMode" column="accessibility_mode" />
+        <result property="reducedMotionEnabled" column="reduced_motion_enabled" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="UserSettingColumns">
+        setting_id,
+        user_id,
+        theme,
+        notification_enabled,
+        accessibility_mode,
+        reduced_motion_enabled,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="UserSettingResultMap">
+        SELECT
+        <include refid="UserSettingColumns" />
+        FROM user_settings
+        WHERE setting_id = #{id}
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="UserSettingResultMap">
+        SELECT
+        <include refid="UserSettingColumns" />
+        FROM user_settings
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="findAll" resultMap="UserSettingResultMap">
+        SELECT
+        <include refid="UserSettingColumns" />
+        FROM user_settings
+        ORDER BY setting_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.user.model.UserSetting" useGeneratedKeys="true" keyProperty="settingId">
+        INSERT INTO user_settings (
+            user_id,
+            theme,
+            notification_enabled,
+            accessibility_mode,
+            reduced_motion_enabled
+        )
+        VALUES (
+            #{userId},
+            #{theme},
+            #{notificationEnabled},
+            #{accessibilityMode},
+            #{reducedMotionEnabled}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.user.model.UserSetting">
+        UPDATE user_settings
+        SET
+            user_id = #{userId},
+            theme = #{theme},
+            notification_enabled = #{notificationEnabled},
+            accessibility_mode = #{accessibilityMode},
+            reduced_motion_enabled = #{reducedMotionEnabled},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE setting_id = #{settingId}
+    </update>
 </mapper>
