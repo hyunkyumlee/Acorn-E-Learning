@@ -1,37 +1,89 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.exam.mapper.AiExamProblemMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="AiExamProblemResultMap" type="com.acorn.elearning.exam.model.AiExamProblem">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="AiExamProblemResultMap">
-          SELECT /* DDL column list */
-          FROM ai_exam_problems
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="AiExamProblemResultMap">
-          SELECT /* DDL column list */
-          FROM ai_exam_problems
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.exam.model.AiExamProblem" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO ai_exam_problems (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.exam.model.AiExamProblem">
-          UPDATE ai_exam_problems
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="AiExamProblemResultMap" type="com.acorn.elearning.exam.model.AiExamProblem">
+        <id property="aiProblemId" column="ai_problem_id" />
+        <result property="examId" column="exam_id" />
+        <result property="problemNo" column="problem_no" />
+        <result property="prompt" column="prompt" />
+        <result property="testCaseSpec" column="test_case_spec" />
+        <result property="aiRawResponse" column="ai_raw_response" />
+        <result property="status" column="status" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="AiExamProblemColumns">
+        ai_problem_id,
+        exam_id,
+        problem_no,
+        prompt,
+        test_case_spec,
+        ai_raw_response,
+        status,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="AiExamProblemResultMap">
+        SELECT
+        <include refid="AiExamProblemColumns" />
+        FROM ai_exam_problems
+        WHERE ai_problem_id = #{id}
+    </select>
+
+    <select id="findByIdAndExamId" resultMap="AiExamProblemResultMap">
+        SELECT
+        <include refid="AiExamProblemColumns" />
+        FROM ai_exam_problems
+        WHERE ai_problem_id = #{aiProblemId}
+          AND exam_id = #{examId}
+    </select>
+
+    <select id="findByExamId" parameterType="long" resultMap="AiExamProblemResultMap">
+        SELECT
+        <include refid="AiExamProblemColumns" />
+        FROM ai_exam_problems
+        WHERE exam_id = #{examId}
+        ORDER BY problem_no ASC
+    </select>
+
+    <select id="findAll" resultMap="AiExamProblemResultMap">
+        SELECT
+        <include refid="AiExamProblemColumns" />
+        FROM ai_exam_problems
+        ORDER BY ai_problem_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.exam.model.AiExamProblem" useGeneratedKeys="true" keyProperty="aiProblemId">
+        INSERT INTO ai_exam_problems (
+            exam_id,
+            problem_no,
+            prompt,
+            test_case_spec,
+            ai_raw_response,
+            status
+        )
+        VALUES (
+            #{examId},
+            #{problemNo},
+            #{prompt},
+            CAST(#{testCaseSpec} AS JSON),
+            CAST(#{aiRawResponse} AS JSON),
+            #{status}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.exam.model.AiExamProblem">
+        UPDATE ai_exam_problems
+        SET
+            exam_id = #{examId},
+            problem_no = #{problemNo},
+            prompt = #{prompt},
+            test_case_spec = CAST(#{testCaseSpec} AS JSON),
+            ai_raw_response = CAST(#{aiRawResponse} AS JSON),
+            status = #{status},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE ai_problem_id = #{aiProblemId}
+    </update>
 </mapper>

@@ -35,6 +35,21 @@
         ORDER BY subject_id ASC, level_code ASC, sort_order ASC, node_id ASC
     </select>
 
+    <!-- 로드맵 순서 기준 "다음" 활성 노드 1건 (completeLesson nextAction 판단용) -->
+    <select id="findNextNode" resultMap="CurriculumNodeResultMap">
+        SELECT <include refid="columns" />
+        FROM curriculum_nodes
+        WHERE subject_id = #{subjectId}
+          AND is_active = 1
+          AND (
+                level_code &gt; #{levelCode}
+             OR (level_code = #{levelCode} AND sort_order &gt; #{sortOrder})
+             OR (level_code = #{levelCode} AND sort_order = #{sortOrder} AND node_id &gt; #{nodeId})
+          )
+        ORDER BY level_code ASC, sort_order ASC, node_id ASC
+        LIMIT 1
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.CurriculumNode"
             useGeneratedKeys="true" keyProperty="nodeId">
         INSERT INTO curriculum_nodes

@@ -1,37 +1,66 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.practice.mapper.PracticeProblemMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="PracticeProblemResultMap" type="com.acorn.elearning.practice.model.PracticeProblem">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="PracticeProblemResultMap">
-          SELECT /* DDL column list */
-          FROM practice_problems
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="PracticeProblemResultMap">
-          SELECT /* DDL column list */
-          FROM practice_problems
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.practice.model.PracticeProblem" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO practice_problems (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.practice.model.PracticeProblem">
-          UPDATE practice_problems
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="PracticeProblemResultMap" type="com.acorn.elearning.practice.model.PracticeProblem">
+        <id property="problemId" column="problem_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="nodeId" column="node_id" />
+        <result property="problemType" column="problem_type" />
+        <result property="question" column="question" />
+        <result property="answerText" column="answer_text" />
+        <result property="difficultyCode" column="difficulty_code" />
+        <result property="createdBy" column="created_by" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        problem_id, subject_id, node_id, problem_type, question, answer_text,
+        difficulty_code, created_by, is_active, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="PracticeProblemResultMap">
+        SELECT <include refid="columns" />
+        FROM practice_problems
+        WHERE problem_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="PracticeProblemResultMap">
+        SELECT <include refid="columns" />
+        FROM practice_problems
+        ORDER BY updated_at DESC, problem_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.practice.model.PracticeProblem"
+            useGeneratedKeys="true" keyProperty="problemId">
+        INSERT INTO practice_problems
+            (subject_id, node_id, problem_type, question, answer_text, difficulty_code, created_by, is_active)
+        VALUES
+            (#{subjectId}, #{nodeId}, #{problemType}, #{question}, #{answerText}, #{difficultyCode}, #{createdBy}, #{isActive})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.practice.model.PracticeProblem">
+        UPDATE practice_problems
+        SET subject_id      = #{subjectId},
+            node_id         = #{nodeId},
+            problem_type    = #{problemType},
+            question        = #{question},
+            answer_text     = #{answerText},
+            difficulty_code = #{difficultyCode},
+            created_by      = #{createdBy},
+            is_active       = #{isActive},
+            updated_at      = NOW()
+        WHERE problem_id = #{problemId}
+    </update>
+
+    <select id="findPracticeProblems" resultMap="PracticeProblemResultMap">
+        SELECT <include refid="columns" />
+        FROM practice_problems
+        WHERE subject_id = #{subjectId}
+          AND difficulty_code = #{difficultyCode}
+          AND is_active = 1
+        ORDER BY RAND()
+        LIMIT 10
+    </select>
 </mapper>

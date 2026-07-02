@@ -1,14 +1,15 @@
 package com.acorn.elearning.admin.form;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class LessonForm {
-    @NotBlank
-    private String skeletonValue = "TODO";
-    private String idempotencyToken;
-    private Long id;
+    private Long lessonId;
+    private Long nodeId;
+    private String title;
+    private String content;
+    private Integer sortOrder;
+    private Boolean isActive;
 }

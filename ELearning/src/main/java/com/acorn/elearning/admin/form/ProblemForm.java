@@ -1,14 +1,19 @@
 package com.acorn.elearning.admin.form;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class ProblemForm {
-    @NotBlank
-    private String skeletonValue = "TODO";
-    private String idempotencyToken;
-    private Long id;
+    private Long problemId;
+    private Long subjectId;
+    private Long nodeId;
+    private String problemType;
+    private String question;
+    private String answerText;
+    private String difficultyCode;
+    private Boolean isActive;
+    private String choices;
+    private String explanation;
 }

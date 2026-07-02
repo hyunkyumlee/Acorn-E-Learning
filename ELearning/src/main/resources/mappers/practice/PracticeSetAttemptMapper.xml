@@ -7,31 +7,34 @@
           <result property="..." column="..." />
       </resultMap>
     -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="PracticeSetAttemptResultMap">
-          SELECT /* DDL column list */
-          FROM practice_set_attempts
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="PracticeSetAttemptResultMap">
-          SELECT /* DDL column list */
-          FROM practice_set_attempts
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.practice.model.PracticeSetAttempt" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO practice_set_attempts (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.practice.model.PracticeSetAttempt">
-          UPDATE practice_set_attempts
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <insert id="insertAttempt" parameterType="com.acorn.elearning.practice.model.PracticeSetAttempt"
+            useGeneratedKeys="true" keyProperty="setAttemptId">
+        INSERT INTO practice_set_attempts (
+        user_id,
+        node_id,
+        total_count,
+        correct_count,
+        status,
+        passed,
+        created_at
+        ) VALUES (
+        #{userId},
+        #{nodeId},
+        #{totalCount},
+        #{correctCount},
+        #{status},
+        #{passed},
+        NOW()
+        )
+    </insert>
+
+    <update id="updateAttempt" parameterType="com.acorn.elearning.practice.model.PracticeSetAttempt">
+        UPDATE practice_set_attempts
+        SET correct_count = #{correctCount},
+        status = #{status},
+        passed = #{passed},
+        completed_at = NOW(),
+        updated_at = NOW()
+        WHERE set_attempt_id = #{setAttemptId}
+    </update>
 </mapper>

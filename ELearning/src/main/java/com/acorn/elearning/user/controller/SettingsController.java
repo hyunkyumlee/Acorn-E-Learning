@@ -1,13 +1,23 @@
 package com.acorn.elearning.user.controller;
 
+import com.acorn.elearning.payment.view.PaymentHistoryView;
+import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.service.UserActivityService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
 public class SettingsController {
+    private final UserActivityService userActivityService;
+
+    public SettingsController(UserActivityService userActivityService) {
+        this.userActivityService = userActivityService;
+    }
 
     @GetMapping("/settings")
     public String index(Model model) {
@@ -105,13 +115,18 @@ public class SettingsController {
     }
 
     @GetMapping("/settings/payment")
-    public String paymentHistory(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PaymentHistoryView view = settingsService.paymentHistory(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+    public String paymentHistory(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        PaymentHistoryView view = userActivityService.paymentHistoryView(sessionUser, page, size);
         model.addAttribute("screen", "settings/payment");
+        model.addAttribute("view", view);
         return "settings/payment";
     }
 

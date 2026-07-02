@@ -1,17 +1,213 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>문제 관리 | Knowva</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>일반 학습 문제 관리 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/problems.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>문제 관리</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/problems</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+
+<main class="page-shell admin-screen problem-manage-screen">
+  <section class="problem-manage-header">
+    <h1>일반 학습 문제 관리</h1>
+  </section>
+
+  <p class="problem-note">* 일반 문제는 AI 채점 미사용 - 등록된 정답/해설 기준으로 채점</p>
+
+  <section class="problem-toolbar">
+    <div class="problem-filter">
+      <select>
+        <option value="">과목</option>
+      </select>
+      <select>
+        <option value="">커리큘럼</option>
+      </select>
+      <select>
+        <option value="">문제 유형</option>
+        <option value="MULTIPLE_CHOICE">객관식</option>
+        <option value="FILL_BLANK">빈칸</option>
+        <option value="CODE_OUTPUT">코드 결과 예측</option>
+        <option value="SHORT_CODE">간단 코드 입력</option>
+      </select>
+      <select>
+        <option value="">난이도</option>
+        <option value="LOW">하</option>
+        <option value="MEDIUM">중</option>
+        <option value="HIGH">상</option>
+      </select>
+      <select>
+        <option value="">활성화 상태</option>
+        <option value="true">활성</option>
+        <option value="false">비활성</option>
+      </select>
+    </div>
+    <button type="button" class="problem-primary-button">+ 문제 등록</button>
+  </section>
+
+  <section class="problem-section">
+    <div class="problem-section-title">
+      <h2>문제 목록</h2>
+    </div>
+
+    <div class="problem-table-wrap">
+      <table class="problem-table">
+        <thead>
+        <tr>
+          <th>문제 ID</th>
+          <th>과목</th>
+          <th>커리큘럼</th>
+          <th>유형</th>
+          <th>문제 내용 요약</th>
+          <th>난이도</th>
+          <th>활성화</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="problem : ${problemList}">
+          <td th:text="${'#' + problem.problemId}">#001</td>
+          <td th:text="${problem.subjectName}">Java</td>
+          <td th:text="${problem.curriculumTitle}">변수와 자료형</td>
+          <td th:switch="${problem.problemType}">
+            <span th:case="'MULTIPLE_CHOICE'">객관식</span>
+            <span th:case="'FILL_BLANK'">빈칸</span>
+            <span th:case="'CODE_OUTPUT'">코드 결과 예측</span>
+            <span th:case="'SHORT_CODE'">간단 코드 입력</span>
+            <span th:case="*" th:text="${problem.problemType}">객관식</span>
+          </td>
+          <td class="problem-question" th:text="${problem.question}">Java에서 정수형 변수를 선언하는 키워드는?</td>
+          <td th:switch="${problem.difficultyCode}">
+            <span th:case="'LOW'">하</span>
+            <span th:case="'MEDIUM'">중</span>
+            <span th:case="'HIGH'">상</span>
+            <span th:case="*" th:text="${problem.difficultyCode}">하</span>
+          </td>
+          <td th:text="${problem.isActive} ? '활성' : '비활성'">활성</td>
+          <td>
+            <div class="problem-table-actions">
+              <button type="button"
+                      class="problem-table-button problem-edit-button"
+                      th:data-problem-id="${problem.problemId}"
+                      th:data-subject-id="${problem.subjectId}"
+                      th:data-node-id="${problem.nodeId}"
+                      th:data-problem-type="${problem.problemType}"
+                      th:data-question="${problem.question}"
+                      th:data-answer-text="${problem.answerText}"
+                      th:data-explanation="${problem.explanation}"
+                      th:data-difficulty-code="${problem.difficultyCode}"
+                      th:data-is-active="${problem.isActive}">
+                수정
+              </button>
+              <button type="button" class="problem-table-button">삭제</button>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(problemList)}">
+          <td colspan="8" class="problem-empty">등록된 문제가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="problem-form-panel">
+    <h2>문제 등록 / 수정 폼</h2>
+
+    <form method="post" action="/admin/problems" th:object="${problemForm}">
+      <div class="problem-form-layout">
+        <div class="problem-form-fields">
+          <input type="hidden" name="problemId" id="problemId">
+          <select name="problemType" id="problemType">
+            <option value="">문제 유형 선택 (객관식 / 빈칸 / 코드 결과 예측 / 간단 코드 입력)</option>
+            <option value="MULTIPLE_CHOICE">객관식</option>
+            <option value="FILL_BLANK">빈칸</option>
+            <option value="CODE_OUTPUT">코드 결과 예측</option>
+            <option value="SHORT_CODE">간단 코드 입력</option>
+          </select>
+
+          <textarea name="question" id="problemQuestion" class="problem-question-input" placeholder="문제 내용 입력"></textarea>
+
+          <textarea name="choices" class="problem-choice-input" placeholder="선택지 입력 영역"></textarea>
+
+          <div class="problem-form-row">
+            <input type="text" name="answerText" id="problemAnswerText" placeholder="정답 입력">
+            <select name="difficultyCode" id="problemDifficultyCode">
+              <option value="">난이도 선택</option>
+              <option value="LOW">하</option>
+              <option value="MEDIUM">중</option>
+              <option value="HIGH">상</option>
+            </select>
+          </div>
+
+          <div class="problem-form-row">
+            <select name="subjectId" id="problemSubjectId">
+              <option value="">과목 선택</option>
+              <option th:each="subject : ${subjectList}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
+            </select>
+            <select name="nodeId" id="problemNodeId">
+              <option value="">커리큘럼 선택</option>
+              <option th:each="node : ${curriculumList}" th:value="${node.nodeId}" th:text="${node.title}">Java 기초</option>
+            </select>
+          </div>
+
+          <div class="problem-form-row">
+            <select name="isActive" id="problemIsActive">
+              <option value="">활성화 상태</option>
+              <option value="true">활성</option>
+              <option value="false">비활성</option>
+            </select>
+          </div>
+
+          <div class="problem-form-actions">
+            <button type="submit" class="problem-primary-button">저장</button>
+            <button type="reset" class="problem-secondary-button">취소</button>
+            <button type="button" class="problem-secondary-button">삭제</button>
+          </div>
+        </div>
+
+        <textarea name="explanation" id="problemExplanation" class="problem-explanation-area" placeholder="해설 입력 영역"></textarea>
+      </div>
+    </form>
+  </section>
+</main>
+<script>
+  const problemTypeCodeMap = {
+    "객관식": "MULTIPLE_CHOICE",
+    "빈칸": "FILL_BLANK",
+    "코드 결과 예측": "CODE_OUTPUT",
+    "간단 코드 입력": "SHORT_CODE"
+  };
+
+  const difficultyCodeMap = {
+    "하": "LOW",
+    "중": "MEDIUM",
+    "상": "HIGH"
+  };
+
+  document.querySelectorAll(".problem-edit-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector("#problemId").value = button.dataset.problemId;
+      document.querySelector("#problemSubjectId").value = button.dataset.subjectId;
+      document.querySelector("#problemNodeId").value = button.dataset.nodeId;
+      document.querySelector("#problemType").value = problemTypeCodeMap[button.dataset.problemType] || button.dataset.problemType;
+      document.querySelector("#problemQuestion").value = button.dataset.question || "";
+      document.querySelector("#problemAnswerText").value = button.dataset.answerText || "";
+      document.querySelector("#problemExplanation").value = button.dataset.explanation || "";
+      document.querySelector("#problemDifficultyCode").value = difficultyCodeMap[button.dataset.difficultyCode] || button.dataset.difficultyCode;
+      document.querySelector("#problemIsActive").value = button.dataset.isActive;
+    });
+  });
+</script>
 </body>
 </html>

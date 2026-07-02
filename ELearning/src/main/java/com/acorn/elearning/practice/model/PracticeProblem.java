@@ -8,14 +8,14 @@
     @Setter
     public class PracticeProblem {
         private Long problemId;
-private Long subjectId;
-private Long nodeId;
-private String problemType;
-private String question;
-private String answerText;
-private String difficultyCode;
-private Long createdBy;
-private Boolean isActive;
-private LocalDateTime createdAt;
-private LocalDateTime updatedAt;
+        private Long subjectId;
+        private Long nodeId;
+        private String problemType;
+        private String question;
+        private String answerText;
+        private String difficultyCode;
+        private Long createdBy;
+        private Boolean isActive;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
     }

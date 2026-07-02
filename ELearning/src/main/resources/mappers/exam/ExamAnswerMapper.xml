@@ -1,37 +1,135 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.exam.mapper.ExamAnswerMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="ExamAnswerResultMap" type="com.acorn.elearning.exam.model.ExamAnswer">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="ExamAnswerResultMap">
-          SELECT /* DDL column list */
-          FROM exam_answers
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="ExamAnswerResultMap">
-          SELECT /* DDL column list */
-          FROM exam_answers
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.exam.model.ExamAnswer" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO exam_answers (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.exam.model.ExamAnswer">
-          UPDATE exam_answers
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="ExamAnswerResultMap" type="com.acorn.elearning.exam.model.ExamAnswer">
+        <id property="answerId" column="answer_id" />
+        <result property="examId" column="exam_id" />
+        <result property="aiProblemId" column="ai_problem_id" />
+        <result property="answerText" column="answer_text" />
+        <result property="passedCaseCount" column="passed_case_count" />
+        <result property="isCorrect" column="is_correct" />
+        <result property="aiReview" column="ai_review" />
+        <result property="testCaseResult" column="test_case_result" />
+        <result property="submittedAt" column="submitted_at" />
+        <result property="gradedAt" column="graded_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="ExamAnswerColumns">
+        answer_id,
+        exam_id,
+        ai_problem_id,
+        answer_text,
+        passed_case_count,
+        is_correct,
+        ai_review,
+        test_case_result,
+        submitted_at,
+        graded_at,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="ExamAnswerResultMap">
+        SELECT
+        <include refid="ExamAnswerColumns" />
+        FROM exam_answers
+        WHERE answer_id = #{id}
+    </select>
+
+    <select id="findByExamIdAndProblemId" resultMap="ExamAnswerResultMap">
+        SELECT
+        <include refid="ExamAnswerColumns" />
+        FROM exam_answers
+        WHERE exam_id = #{examId}
+          AND ai_problem_id = #{aiProblemId}
+    </select>
+
+    <select id="findByExamId" parameterType="long" resultMap="ExamAnswerResultMap">
+        SELECT
+        <include refid="ExamAnswerColumns" />
+        FROM exam_answers
+        WHERE exam_id = #{examId}
+        ORDER BY ai_problem_id ASC
+    </select>
+
+    <select id="findAll" resultMap="ExamAnswerResultMap">
+        SELECT
+        <include refid="ExamAnswerColumns" />
+        FROM exam_answers
+        ORDER BY answer_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.exam.model.ExamAnswer" useGeneratedKeys="true" keyProperty="answerId">
+        INSERT INTO exam_answers (
+            exam_id,
+            ai_problem_id,
+            answer_text,
+            passed_case_count,
+            is_correct,
+            ai_review,
+            test_case_result,
+            submitted_at,
+            graded_at
+        )
+        VALUES (
+            #{examId},
+            #{aiProblemId},
+            #{answerText},
+            #{passedCaseCount},
+            #{isCorrect},
+            #{aiReview},
+            CAST(#{testCaseResult} AS JSON),
+            #{submittedAt},
+            #{gradedAt}
+        )
+    </insert>
+
+    <insert id="upsertAnswer" parameterType="com.acorn.elearning.exam.model.ExamAnswer" useGeneratedKeys="true" keyProperty="answerId">
+        INSERT INTO exam_answers (
+            exam_id,
+            ai_problem_id,
+            answer_text,
+            submitted_at
+        )
+        VALUES (
+            #{examId},
+            #{aiProblemId},
+            #{answerText},
+            CURRENT_TIMESTAMP
+        )
+        ON DUPLICATE KEY UPDATE
+            answer_text = VALUES(answer_text),
+            submitted_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.exam.model.ExamAnswer">
+        UPDATE exam_answers
+        SET
+            exam_id = #{examId},
+            ai_problem_id = #{aiProblemId},
+            answer_text = #{answerText},
+            passed_case_count = #{passedCaseCount},
+            is_correct = #{isCorrect},
+            ai_review = #{aiReview},
+            test_case_result = CAST(#{testCaseResult} AS JSON),
+            submitted_at = #{submittedAt},
+            graded_at = #{gradedAt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE answer_id = #{answerId}
+    </update>
+
+    <update id="updateGradingResult" parameterType="com.acorn.elearning.exam.model.ExamAnswer">
+        UPDATE exam_answers
+        SET
+            passed_case_count = #{passedCaseCount},
+            is_correct = #{isCorrect},
+            ai_review = #{aiReview},
+            test_case_result = CAST(#{testCaseResult} AS JSON),
+            graded_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE answer_id = #{answerId}
+    </update>
 </mapper>

@@ -14,6 +14,26 @@
         <result property="updatedAt" column="updated_at" />
     </resultMap>
 
+    <resultMap id="PaymentHistoryItemResultMap" type="com.acorn.elearning.payment.model.PaymentHistoryItem">
+        <id property="paymentId" column="payment_id" />
+        <result property="orderNo" column="order_no" />
+        <result property="userId" column="user_id" />
+        <result property="productId" column="product_id" />
+        <result property="productCode" column="product_code" />
+        <result property="productName" column="product_name" />
+        <result property="paymentMethod" column="payment_method" />
+        <result property="paymentStatus" column="payment_status" />
+        <result property="amount" column="amount" />
+        <result property="paidAt" column="paid_at" />
+        <result property="paymentCreatedAt" column="payment_created_at" />
+        <result property="paymentUpdatedAt" column="payment_updated_at" />
+        <result property="grantId" column="grant_id" />
+        <result property="grantType" column="grant_type" />
+        <result property="grantStatus" column="grant_status" />
+        <result property="grantedAt" column="granted_at" />
+        <result property="expiresAt" column="expires_at" />
+    </resultMap>
+
     <sql id="DummyPaymentColumns">
         payment_id,
         order_no,
@@ -71,6 +91,41 @@
         WHERE user_id = #{userId}
         ORDER BY payment_id DESC
         LIMIT 1
+    </select>
+
+    <select id="findHistoryByUserId" resultMap="PaymentHistoryItemResultMap">
+        SELECT
+            dp.payment_id,
+            dp.order_no,
+            dp.user_id,
+            dp.product_id,
+            pp.product_code,
+            pp.product_name,
+            dp.payment_method,
+            dp.payment_status,
+            dp.amount,
+            dp.paid_at,
+            dp.created_at AS payment_created_at,
+            dp.updated_at AS payment_updated_at,
+            pg.grant_id,
+            pg.grant_type,
+            pg.status AS grant_status,
+            pg.granted_at,
+            pg.expires_at
+        FROM dummy_payments dp
+        LEFT JOIN payment_products pp ON pp.product_id = dp.product_id
+        LEFT JOIN premium_grants pg
+               ON pg.payment_id = dp.payment_id
+              AND pg.user_id = dp.user_id
+        WHERE dp.user_id = #{userId}
+        ORDER BY COALESCE(dp.paid_at, dp.created_at) DESC, dp.payment_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countHistoryByUserId" parameterType="long" resultType="long">
+        SELECT COUNT(*)
+        FROM dummy_payments
+        WHERE user_id = #{userId}
     </select>
 
     <insert id="insert" parameterType="com.acorn.elearning.payment.model.DummyPayment" useGeneratedKeys="true" keyProperty="paymentId">

@@ -1,0 +1,252 @@
+.theory-manage-screen {
+    padding: 22px 28px 28px;
+    background: #f6f7f9;
+    min-height: 100vh;
+}
+
+.theory-manage-header {
+    padding: 0 0 16px;
+}
+
+.theory-manage-header h1,
+.theory-section-title h2,
+.theory-form-panel h2 {
+    margin: 0;
+    color: #111827;
+}
+
+.theory-manage-header h1 {
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.theory-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.theory-filter {
+    display: grid;
+    grid-template-columns: repeat(4, 160px);
+    gap: 12px;
+}
+
+.theory-filter select,
+.theory-form-panel input,
+.theory-form-panel select,
+.theory-form-panel textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+}
+
+.theory-filter select {
+    height: 36px;
+    padding: 0 12px;
+}
+
+.theory-primary-button,
+.theory-secondary-button,
+.theory-table-button {
+    border-radius: 7px;
+    border: 1px solid #d1d5db;
+    cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.theory-primary-button {
+    height: 38px;
+    padding: 0 18px;
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
+}
+
+.theory-secondary-button {
+    height: 38px;
+    padding: 0 18px;
+    background: #ffffff;
+    color: #111827;
+}
+
+.theory-primary-button:hover {
+    background: #374151;
+}
+
+.theory-secondary-button:hover,
+.theory-table-button:hover {
+    background: #f3f4f6;
+}
+
+.theory-section {
+    margin-bottom: 28px;
+}
+
+.theory-section-title {
+    padding-bottom: 6px;
+}
+
+.theory-section-title h2,
+.theory-form-panel h2 {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.theory-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.theory-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+}
+
+.theory-table thead {
+    background: #eef0f2;
+}
+
+.theory-table th,
+.theory-table td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 11px 14px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+.theory-table th {
+    color: #374151;
+    font-weight: 800;
+}
+
+.theory-table td {
+    color: #1f2937;
+}
+
+.theory-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.theory-table-actions,
+.theory-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theory-table-button {
+    min-width: 46px;
+    height: 28px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 12px;
+}
+
+.theory-empty {
+    height: 76px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.theory-form-panel {
+    padding: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #eeeeef;
+}
+
+.theory-form-panel h2 {
+    margin-bottom: 16px;
+}
+
+.theory-form-panel form {
+    width: 100%;
+}
+
+.theory-form-layout {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(320px, 360px) minmax(520px, 1fr);
+    gap: 28px;
+    align-items: stretch;
+}
+
+.theory-form-fields {
+    display: flex;
+    min-height: 282px;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.theory-form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.theory-form-panel input,
+.theory-form-panel select {
+    box-sizing: border-box;
+    height: 38px;
+    padding: 0 12px;
+}
+
+.theory-form-panel textarea {
+    box-sizing: border-box;
+    min-height: 282px;
+    padding: 11px 12px;
+    resize: vertical;
+}
+
+.theory-content-area {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 260px;
+    height: 260px;
+    justify-self: stretch;
+}
+
+.theory-form-actions {
+    margin-top: auto;
+}
+
+@media (max-width: 1024px) {
+    .theory-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .theory-filter,
+    .theory-form-layout,
+    .theory-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .theory-manage-screen {
+        padding: 18px;
+    }
+
+    .theory-filter {
+        width: 100%;
+    }
+
+    .theory-form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
