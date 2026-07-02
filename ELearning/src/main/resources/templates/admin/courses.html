@@ -22,8 +22,10 @@
     <h1>과목 / 커리큘럼 관리</h1>
   </section>
 
-  <input type="radio" id="courseSubjectTab" name="courseManageTab" class="course-tab-input" checked>
-  <input type="radio" id="courseCurriculumTab" name="courseManageTab" class="course-tab-input">
+  <input type="radio" id="courseSubjectTab" name="courseManageTab" class="course-tab-input"
+         th:checked="${param.tab == null || param.tab[0] != 'curriculum'}">
+  <input type="radio" id="courseCurriculumTab" name="courseManageTab" class="course-tab-input"
+         th:checked="${param.tab != null && param.tab[0] == 'curriculum'}">
 
   <section class="course-tabs" aria-label="과목 커리큘럼 관리 탭">
     <label for="courseSubjectTab" class="course-tab-label">과목 관리</label>
@@ -33,8 +35,8 @@
   <section class="course-tab-panel course-subject-panel">
     <div class="course-toolbar">
       <div class="course-filter">
-        <input type="search" placeholder="과목명 검색">
-        <select>
+        <input type="search" id="searchSubject" placeholder="과목명 검색">
+        <select id="subjectStatus">
           <option value="">사용 여부</option>
           <option value="true">활성</option>
           <option value="false">비활성</option>
@@ -46,7 +48,7 @@
           <option value="ADVANCED">ADVANCED</option>
         </select>
       </div>
-      <button type="button" class="course-primary-button">+ 과목 등록</button>
+      <button type="button" class="course-primary-button subject-create-button">+ 과목 등록</button>
     </div>
 
     <section class="course-section">
@@ -68,8 +70,11 @@
           </thead>
 
           <tbody>
-          <tr th:each="subject : ${subjectList}">
-            <td th:text="${'#' + subject.subjectId}">#001</td>
+          <tr th:each="subject, stat : ${subjectList}" class="subject-row"
+              th:data-subject-name="${subject.subjectName}"
+              th:data-is-active="${subject.isActive}">
+
+            <td th:text="${'#' + stat.count}">#001</td>
             <td th:text="${subject.subjectName}">Java</td>
             <td th:text="${subject.description ?: '-'}">Java 기초 학습 과목</td>
             <td th:text="${subject.isActive} ? '활성' : '비활성'">활성</td>
@@ -84,7 +89,8 @@
                         th:data-is-active="${subject.isActive}">
                   수정
                 </button>
-                <button type="button" class="course-table-button">삭제</button>
+<!--                <button type="button" class="course-table-button"-->
+<!--                  th:data-subject-id="${subject.subjectId}">삭제</button>-->
               </div>
             </td>
           </tr>
@@ -115,7 +121,7 @@
         <div class="course-form-actions">
           <button type="submit" class="course-primary-button">저장</button>
           <button type="reset" class="course-secondary-button">취소</button>
-          <button type="button" class="course-secondary-button">삭제</button>
+<!--          <button type="button" class="course-secondary-button">삭제</button>-->
         </div>
       </form>
     </section>
@@ -124,12 +130,12 @@
   <section class="course-tab-panel course-curriculum-panel">
     <div class="course-toolbar">
       <div class="course-filter">
-        <input type="search" placeholder="커리큘럼명 검색">
-        <select>
+        <input type="search" id="searchCurriculum" placeholder="커리큘럼명 검색">
+        <select id="curriculumSubjectFilter">
           <option value="">과목 선택</option>
           <option th:each="subject : ${subjectList}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
         </select>
-        <select>
+        <select id="curriculumLevelFilter">
           <option value="">레벨</option>
           <option value="BEGINNER">BEGINNER</option>
           <option value="INTERMEDIATE">INTERMEDIATE</option>
@@ -149,7 +155,7 @@
           <thead>
           <tr>
             <th>노드 ID</th>
-            <th>과목 ID</th>
+            <th>과목명</th>
             <th>레벨</th>
             <th>타입</th>
             <th>제목</th>
@@ -159,9 +165,12 @@
           </thead>
 
           <tbody>
-          <tr th:each="node : ${curriculumList}">
+          <tr th:each="node : ${curriculumList}" class="curriculum-row"
+              th:data-title="${node.title}"
+              th:data-subject-id="${node.subjectId}"
+              th:data-level-code="${node.levelCode}">
             <td th:text="${'#' + node.nodeId}">#001</td>
-            <td th:text="${node.subjectId}">1</td>
+            <td th:text="${subjectNameMap[node.subjectId] ?: '-'}">Java</td>
             <td th:text="${node.levelCode}">BEGINNER</td>
             <td th:text="${node.nodeType}">LESSON</td>
             <td th:text="${node.title}">Java 기초</td>
@@ -180,7 +189,8 @@
                         th:data-is-active="${node.isActive}">
                   수정
                 </button>
-                <button type="button" class="course-table-button">삭제</button>
+<!--                <button type="button" class="course-table-button"-->
+<!--                        th:data-node-id="${node.nodeId}">삭제</button>-->
               </div>
             </td>
           </tr>
@@ -196,10 +206,20 @@
       <h2>커리큘럼 등록 / 수정 폼</h2>
 
       <form method="post" action="/admin/courses/curriculum-nodes" th:object="${curriculumNodeForm}">
-        <div class="course-form-row">
+        <div class="course-form-row course-curriculum-form-row">
           <input type="hidden" name="nodeId" id="curriculumNodeId">
-          <input type="number" name="subjectId" id="curriculumSubjectId" min="1" placeholder="과목 ID">
-          <input type="text" name="levelCode" id="curriculumLevelCode" placeholder="레벨 코드">
+          <select name="subjectId" id="curriculumSubjectId">
+            <option value="">과목 선택</option>
+            <option th:each="subject : ${subjectList}"
+                    th:value="${subject.subjectId}"
+                    th:text="${subject.subjectName}">Java</option>
+          </select>
+          <select name="levelCode" id="curriculumLevelCode">
+            <option value="">레벨 선택</option>
+            <option value="BEGINNER">BEGINNER</option>
+            <option value="INTERMEDIATE">INTERMEDIATE</option>
+            <option value="ADVANCED">ADVANCED</option>
+          </select>
           <select name="nodeType" id="curriculumNodeType">
             <option value="">노드 타입 선택</option>
             <option value="LESSON">LESSON</option>
@@ -208,7 +228,7 @@
           </select>
         </div>
 
-        <div class="course-form-row">
+        <div class="course-form-row course-curriculum-form-row">
           <input type="text" name="title" id="curriculumTitle" placeholder="커리큘럼명 입력">
           <input type="number" name="sortOrder" id="curriculumSortOrder" min="0" placeholder="정렬 순서">
           <select name="isActive" id="curriculumIsActive">
@@ -223,17 +243,73 @@
         <div class="course-form-actions">
           <button type="submit" class="course-primary-button">저장</button>
           <button type="reset" class="course-secondary-button">취소</button>
-          <button type="button" class="course-secondary-button">삭제</button>
+<!--          <button type="button" class="course-secondary-button">삭제</button>-->
         </div>
       </form>
     </section>
   </section>
 </main>
 <script>
+  const subjectNameInput = document.querySelector("#subjectName");
+
+  //필터 검색
+  function applySubjectFilters() {
+
+      const keyword = document.querySelector("#searchSubject").value.trim().toLowerCase();
+      const status = document.querySelector("#subjectStatus").value;
+
+
+      document.querySelectorAll(".subject-row").forEach((row) => {
+        const subjectName = (row.dataset.subjectName || "").toLowerCase();
+        const isActive = row.dataset.isActive;
+
+        const matchesName = subjectName.includes(keyword);
+        const matchesStatus = status === "" || isActive === status;
+
+        row.style.display = matchesName && matchesStatus ? "" : "none";
+      });
+  }
+
+  document.querySelector("#searchSubject")?.addEventListener("input", applySubjectFilters);
+  document.querySelector("#subjectStatus")?.addEventListener("change", applySubjectFilters);
+
+  function applyCurriculumFilters() {
+    const keyword = document.querySelector("#searchCurriculum").value.trim().toLowerCase();
+    const subjectId = document.querySelector("#curriculumSubjectFilter").value;
+    const levelCode = document.querySelector("#curriculumLevelFilter").value;
+
+    document.querySelectorAll(".curriculum-row").forEach((row) => {
+      const title = (row.dataset.title || "").toLowerCase();
+      const rowSubjectId = row.dataset.subjectId || "";
+      const rowLevelCode = row.dataset.levelCode || "";
+
+      const matchesTitle = title.includes(keyword);
+      const matchesSubject = subjectId === "" || rowSubjectId === subjectId;
+      const matchesLevel = levelCode === "" || rowLevelCode === levelCode;
+
+      row.style.display = matchesTitle && matchesSubject && matchesLevel ? "" : "none";
+    });
+  }
+
+  document.querySelector("#searchCurriculum")?.addEventListener("input", applyCurriculumFilters);
+  document.querySelector("#curriculumSubjectFilter")?.addEventListener("change", applyCurriculumFilters);
+  document.querySelector("#curriculumLevelFilter")?.addEventListener("change", applyCurriculumFilters);
+
+
+  document.querySelector(".subject-create-button")?.addEventListener("click", () => {
+    document.querySelector("#subjectId").value = "";
+    subjectNameInput.value = "";
+    document.querySelector("#description").value = "";
+    document.querySelector("#isActive").value = "";
+
+    subjectNameInput.scrollIntoView({ behavior: "smooth", block: "center" });
+    subjectNameInput.focus({ preventScroll: true });
+  });
+
   document.querySelectorAll(".subject-edit-button").forEach((button) => {
     button.addEventListener("click", () => {
       document.querySelector("#subjectId").value = button.dataset.subjectId;
-      document.querySelector("#subjectName").value = button.dataset.subjectName;
+      subjectNameInput.value = button.dataset.subjectName;
       document.querySelector("#description").value = button.dataset.description || "";
       document.querySelector("#isActive").value = button.dataset.isActive;
     });

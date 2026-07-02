@@ -26,26 +26,29 @@
 
   <section class="problem-toolbar">
     <div class="problem-filter">
-      <select>
+      <input type="search" id="searchProblem" placeholder="문제 내용 검색">
+      <select id="problemSubjectFilter">
         <option value="">과목</option>
+        <option th:each="subject : ${subjectList}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
       </select>
-      <select>
+      <select id="problemCurriculumFilter">
         <option value="">커리큘럼</option>
+        <option th:each="node : ${curriculumList}" th:value="${node.nodeId}" th:text="${node.title}">Java 기초</option>
       </select>
-      <select>
+      <select id="problemTypeFilter">
         <option value="">문제 유형</option>
         <option value="MULTIPLE_CHOICE">객관식</option>
         <option value="FILL_BLANK">빈칸</option>
         <option value="CODE_OUTPUT">코드 결과 예측</option>
         <option value="SHORT_CODE">간단 코드 입력</option>
       </select>
-      <select>
+      <select id="problemDifficultyFilter">
         <option value="">난이도</option>
         <option value="LOW">하</option>
         <option value="MEDIUM">중</option>
         <option value="HIGH">상</option>
       </select>
-      <select>
+      <select id="problemActiveFilter">
         <option value="">활성화 상태</option>
         <option value="true">활성</option>
         <option value="false">비활성</option>
@@ -75,7 +78,13 @@
         </thead>
 
         <tbody>
-        <tr th:each="problem : ${problemList}">
+        <tr th:each="problem : ${problemList}" class="problem-row"
+            th:data-subject-id="${problem.subjectId}"
+            th:data-node-id="${problem.nodeId}"
+            th:data-problem-type="${problem.problemType}"
+            th:data-question="${problem.question}"
+            th:data-difficulty-code="${problem.difficultyCode}"
+            th:data-is-active="${problem.isActive}">
           <td th:text="${'#' + problem.problemId}">#001</td>
           <td th:text="${problem.subjectName}">Java</td>
           <td th:text="${problem.curriculumTitle}">변수와 자료형</td>
@@ -109,7 +118,11 @@
                       th:data-is-active="${problem.isActive}">
                 수정
               </button>
-              <button type="button" class="problem-table-button">삭제</button>
+              <form method="post"
+                    th:action="@{/admin/problems/{problemId}/delete(problemId=${problem.problemId})}"
+                    onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                <button type="submit" class="problem-table-button">삭제</button>
+              </form>
             </div>
           </td>
         </tr>
@@ -157,7 +170,10 @@
             </select>
             <select name="nodeId" id="problemNodeId">
               <option value="">커리큘럼 선택</option>
-              <option th:each="node : ${curriculumList}" th:value="${node.nodeId}" th:text="${node.title}">Java 기초</option>
+              <option th:each="node : ${curriculumList}"
+                      th:value="${node.nodeId}"
+                      th:text="${node.title}"
+                      th:data-subject-id="${node.subjectId}">Java 기초</option>
             </select>
           </div>
 
@@ -195,17 +211,92 @@
     "상": "HIGH"
   };
 
+  function applyProblemFilters() {
+    const keyword = document.querySelector("#searchProblem").value.trim().toLowerCase();
+    const subjectId = document.querySelector("#problemSubjectFilter").value;
+    const nodeId = document.querySelector("#problemCurriculumFilter").value;
+    const problemType = document.querySelector("#problemTypeFilter").value;
+    const difficultyCode = document.querySelector("#problemDifficultyFilter").value;
+    const isActive = document.querySelector("#problemActiveFilter").value;
+
+    document.querySelectorAll(".problem-row").forEach((row) => {
+      const rowQuestion = (row.dataset.question || "").toLowerCase();
+      const rowSubjectId = row.dataset.subjectId || "";
+      const rowNodeId = row.dataset.nodeId || "";
+      const rowProblemType = row.dataset.problemType || "";
+      const rowDifficultyCode = row.dataset.difficultyCode || "";
+      const rowIsActive = row.dataset.isActive || "";
+
+      const matchesQuestion = rowQuestion.includes(keyword);
+      const matchesSubject = subjectId === "" || rowSubjectId === subjectId;
+      const matchesCurriculum = nodeId === "" || rowNodeId === nodeId;
+      const matchesType = problemType === "" || rowProblemType === problemType;
+      const matchesDifficulty = difficultyCode === "" || rowDifficultyCode === difficultyCode;
+      const matchesActive = isActive === "" || rowIsActive === isActive;
+
+      row.style.display = matchesQuestion && matchesSubject && matchesCurriculum && matchesType && matchesDifficulty && matchesActive ? "" : "none";
+    });
+  }
+
+  document.querySelector("#searchProblem")?.addEventListener("input", applyProblemFilters);
+  document.querySelector("#problemSubjectFilter")?.addEventListener("change", applyProblemFilters);
+  document.querySelector("#problemCurriculumFilter")?.addEventListener("change", applyProblemFilters);
+  document.querySelector("#problemTypeFilter")?.addEventListener("change", applyProblemFilters);
+  document.querySelector("#problemDifficultyFilter")?.addEventListener("change", applyProblemFilters);
+  document.querySelector("#problemActiveFilter")?.addEventListener("change", applyProblemFilters);
+
+  document.querySelector("#problemNodeId")?.addEventListener("change", (event) => {
+    const selectedOption = event.target.selectedOptions[0];
+    document.querySelector("#problemSubjectId").value = selectedOption?.dataset.subjectId || "";
+  });
+
+  function syncProblemCurriculumOptions() {
+    const selectedSubjectId = document.querySelector("#problemSubjectId").value;
+    const problemNodeSelect = document.querySelector("#problemNodeId");
+
+    problemNodeSelect.querySelectorAll("option").forEach((option) => {
+      option.hidden = selectedSubjectId !== "" && option.value !== "" && option.dataset.subjectId !== selectedSubjectId;
+    });
+
+    const selectedNode = problemNodeSelect.selectedOptions[0];
+    if (selectedNode?.hidden) {
+      problemNodeSelect.value = "";
+    }
+  }
+
+  document.querySelector("#problemSubjectId")?.addEventListener("change", syncProblemCurriculumOptions);
+
+  document.querySelector(".problem-primary-button")?.addEventListener("click", () => {
+    document.querySelector("#problemId").value = "";
+    document.querySelector("#problemSubjectId").value = "";
+    document.querySelector("#problemNodeId").value = "";
+    syncProblemCurriculumOptions();
+    document.querySelector("#problemType").value = "";
+    document.querySelector("#problemQuestion").value = "";
+    document.querySelector("#problemAnswerText").value = "";
+    document.querySelector("#problemExplanation").value = "";
+    document.querySelector("#problemDifficultyCode").value = "";
+    document.querySelector("#problemIsActive").value = "";
+
+    document.querySelector("#problemType").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.querySelector("#problemType").focus({ preventScroll: true });
+  });
+
   document.querySelectorAll(".problem-edit-button").forEach((button) => {
     button.addEventListener("click", () => {
       document.querySelector("#problemId").value = button.dataset.problemId;
       document.querySelector("#problemSubjectId").value = button.dataset.subjectId;
       document.querySelector("#problemNodeId").value = button.dataset.nodeId;
+      syncProblemCurriculumOptions();
       document.querySelector("#problemType").value = problemTypeCodeMap[button.dataset.problemType] || button.dataset.problemType;
       document.querySelector("#problemQuestion").value = button.dataset.question || "";
       document.querySelector("#problemAnswerText").value = button.dataset.answerText || "";
       document.querySelector("#problemExplanation").value = button.dataset.explanation || "";
       document.querySelector("#problemDifficultyCode").value = difficultyCodeMap[button.dataset.difficultyCode] || button.dataset.difficultyCode;
       document.querySelector("#problemIsActive").value = button.dataset.isActive;
+
+      document.querySelector("#problemType").scrollIntoView({ behavior: "smooth", block: "center" });
+      document.querySelector("#problemType").focus({ preventScroll: true });
     });
   });
 </script>
