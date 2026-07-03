@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>사용자 관리 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/adminUsers.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+<div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
+
+<main class="page-shell admin-screen admin-user-screen">
+  <section class="admin-user-header">
+    <h1>사용자 관리</h1>
+  </section>
+
+  <section class="admin-user-toolbar">
+    <div class="admin-user-filter">
+      <input type="search" id="searchUser" placeholder="이메일 / 닉네임 검색">
+      <select id="userSubjectFilter">
+        <option value="">관심 과목</option>
+        <option th:each="user : ${userList}"
+                th:if="${user.subjectName != null}"
+                th:value="${user.subjectName}"
+                th:text="${user.subjectName}">Java</option>
+      </select>
+      <select id="userGradeFilter">
+        <option value="">등급</option>
+        <option value="Bronze">Bronze</option>
+        <option value="Silver">Silver</option>
+        <option value="Gold">Gold</option>
+      </select>
+      <select id="userRoleFilter">
+        <option value="">권한</option>
+        <option value="ROLE_USER">ROLE_USER</option>
+        <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+      </select>
+      <select id="userStatusFilter">
+        <option value="">상태</option>
+        <option value="ACTIVE">정상</option>
+        <option value="SUSPENDED">정지</option>
+        <option value="WITHDRAWN">탈퇴</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="admin-user-section">
+    <div class="admin-user-section-title">
+      <h2>사용자 목록</h2>
+    </div>
+
+    <div class="admin-user-table-wrap">
+      <table class="admin-user-table">
+        <thead>
+        <tr>
+          <th>사용자 ID</th>
+          <th>이메일</th>
+          <th>닉네임</th>
+          <th>관심 과목</th>
+          <th>등급</th>
+          <th>점수</th>
+          <th>권한</th>
+          <th>가입일</th>
+          <th>상태</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="user, stat : ${userList}" class="admin-user-row"
+            th:data-user-id="${user.userId}"
+            th:data-email="${user.email}"
+            th:data-nickname="${user.nickname}"
+            th:data-subject-name="${user.subjectName}"
+            th:data-grade-code="${user.gradeCode}"
+            th:data-total-score="${user.totalScore}"
+            th:data-role="${user.role}"
+            th:data-created-at="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}"
+            th:data-status="${user.status}"
+            th:data-progress-count="${user.progressCount}"
+            th:data-completed-count="${user.completedCount}"
+            th:data-average-progress-rate="${user.averageProgressRate}"
+        >
+          <td th:text="${'#' + stat.count}">#001</td>
+          <td th:text="${user.email}">user01@email.com</td>
+          <td th:text="${user.nickname}">닉네임1</td>
+          <td th:text="${user.subjectName ?: '-'}">Java</td>
+          <td th:text="${user.gradeCode ?: '-'}">Silver</td>
+          <td th:text="${user.totalScore ?: 0}">1200</td>
+          <td th:text="${user.role}">ROLE_USER</td>
+          <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">2026-05-01</td>
+          <td th:text="${user.status == 'SUSPENDED' ? '정지' : (user.status == 'WITHDRAWN' ? '탈퇴' : '정상')}"
+              th:classappend="${user.status == 'SUSPENDED'} ? ' admin-user-status-danger'">정상</td>
+          <td>
+            <div class="admin-user-table-actions">
+              <button type="button"
+                      class="admin-user-table-button admin-user-detail-button"
+                      th:data-user-id="${user.userId}"
+                      th:data-email="${user.email}"
+                      th:data-nickname="${user.nickname}"
+                      th:data-subject-name="${user.subjectName}"
+                      th:data-grade-code="${user.gradeCode}"
+                      th:data-total-score="${user.totalScore}"
+                      th:data-role="${user.role}"
+                      th:data-created-at="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}"
+                      th:data-status="${user.status}"
+                      th:data-progress-count="${user.progressCount}"
+                      th:data-completed-count="${user.completedCount}"
+                      th:data-average-progress-rate="${user.averageProgressRate}"
+                  >
+                상세보기
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(userList)}">
+          <td colspan="10" class="admin-user-empty">등록된 사용자가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="admin-user-detail-panel">
+    <h2>사용자 상세 패널</h2>
+
+    <div class="admin-user-detail-top">
+      <input type="text" id="userProfileSummary" readonly
+             placeholder="프로필 정보 (이메일, 닉네임, 관심 과목, 가입일)">
+      <div class="admin-user-detail-actions">
+        <button type="button" class="admin-user-primary-button">계정 정지</button>
+        <button type="button" class="admin-user-secondary-button">정지 해제</button>
+        <button type="button" class="admin-user-secondary-button">권한 변경</button>
+      </div>
+    </div>
+
+    <input type="text" id="userLearningSummary" readonly placeholder="학습 진행률 요약">
+    <textarea id="userActivitySummary" readonly placeholder="작성 글 수 / 신고-제재 이력"></textarea>
+  </section>
+</main>
+
+<script>
+  function applyUserFilters() {
+    const keyword = document.querySelector("#searchUser").value.trim().toLowerCase();
+    const subjectName = document.querySelector("#userSubjectFilter").value;
+    const gradeCode = document.querySelector("#userGradeFilter").value;
+    const role = document.querySelector("#userRoleFilter").value;
+    const status = document.querySelector("#userStatusFilter").value;
+
+    document.querySelectorAll(".admin-user-row").forEach((row) => {
+      const email = (row.dataset.email || "").toLowerCase();
+      const nickname = (row.dataset.nickname || "").toLowerCase();
+      const rowSubjectName = row.dataset.subjectName || "";
+      const rowGradeCode = row.dataset.gradeCode || "";
+      const rowRole = row.dataset.role || "";
+      const rowStatus = row.dataset.status || "";
+
+      const matchesKeyword = email.includes(keyword) || nickname.includes(keyword);
+      const matchesSubject = subjectName === "" || rowSubjectName === subjectName;
+      const matchesGrade = gradeCode === "" || rowGradeCode === gradeCode;
+      const matchesRole = role === "" || rowRole === role;
+      const matchesStatus = status === "" || rowStatus === status;
+
+
+
+      row.style.display = matchesKeyword && matchesSubject && matchesGrade && matchesRole && matchesStatus ? "" : "none";
+    });
+  }
+
+  document.querySelector("#searchUser")?.addEventListener("input", applyUserFilters);
+  document.querySelector("#userSubjectFilter")?.addEventListener("change", applyUserFilters);
+  document.querySelector("#userGradeFilter")?.addEventListener("change", applyUserFilters);
+  document.querySelector("#userRoleFilter")?.addEventListener("change", applyUserFilters);
+  document.querySelector("#userStatusFilter")?.addEventListener("change", applyUserFilters);
+
+  document.querySelectorAll(".admin-user-detail-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const statusLabel = button.dataset.status === "SUSPENDED"
+          ? "정지"
+          : button.dataset.status === "WITHDRAWN" ? "탈퇴" : "정상";
+
+      const progressCount = button.dataset.progressCount || "0";
+      const completedCount = button.dataset.completedCount || "0";
+      const averageProgressRate = Math.round(Number(button.dataset.averageProgressRate || 0));
+
+      document.querySelector("#userProfileSummary").value =
+          `${button.dataset.email || "-"} / ${button.dataset.nickname || "-"} / ${button.dataset.subjectName || "-"} / ${button.dataset.createdAt || "-"}`;
+
+      document.querySelector("#userLearningSummary").value =
+              `진행 ${progressCount}개 / 완료 ${completedCount}개 / 평균 ${averageProgressRate}%`;
+
+      document.querySelector("#userActivitySummary").value =
+          "작성 글 수, 신고 내역, 관리자 제재 이력은 후속 데이터 연결 예정";
+
+      document.querySelector(".admin-user-detail-panel").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+</script>
+</body>
+</html>
