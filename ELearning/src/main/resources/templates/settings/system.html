@@ -8,9 +8,9 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="settings-screen" th:with="settings=${view}">
     <section class="figma-settings-page">
-      <a class="figma-logout" th:href="@{/login}">로그아웃</a>
       <aside class="figma-settings-sidebar">
         <h1>설정</h1>
         <nav aria-label="설정 메뉴">
@@ -20,6 +20,7 @@
           <a class="is-active" th:href="@{/settings/system}">시스템 설정</a>
           <a th:href="@{/settings/payment}">결제 정보</a>
         </nav>
+        <a class="figma-logout" th:href="@{/login}">로그아웃</a>
       </aside>
       <section class="figma-settings-main">
         <article class="figma-settings-panel">

@@ -10,12 +10,15 @@ public record UpdateProfileRequest(
         String nickname,
 
         @Size(max = 500, message = "학습 목표는 500자 이하로 입력해주세요.")
-        String learningGoal
+        String learningGoal,
+
+        Long primarySubjectId
 ) {
     public ProfileForm toForm() {
         ProfileForm form = new ProfileForm();
         form.setNickname(nickname);
         form.setLearningGoal(learningGoal);
+        form.setPrimarySubjectId(primarySubjectId);
         return form;
     }
 }
