@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.admin.mapper.AdminReportMapper">
+
+    <resultMap id="ReportItemResultMap"
+               type="com.acorn.elearning.admin.dto.response.ReportPageResponse$ReportItem">
+        <constructor>
+            <idArg name="reportId" column="report_id" javaType="java.lang.Long"/>
+            <arg name="reporterNickname" column="reporter_nickname" javaType="java.lang.String"/>
+            <arg name="targetType" column="target_type" javaType="java.lang.String"/>
+            <arg name="targetId" column="target_id" javaType="java.lang.Long"/>
+            <arg name="targetSummary" column="target_summary" javaType="java.lang.String"/>
+            <arg name="reasonCode" column="reason_code" javaType="java.lang.String"/>
+            <arg name="status" column="status" javaType="java.lang.String"/>
+            <arg name="createdAt" column="created_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findAll" resultMap="ReportItemResultMap">
+        SELECT
+            R.report_id, U.nickname AS reporter_nickname, R.target_type,
+            R.target_id, CONCAT(R.target_type, ' #', R.target_id) AS target_summary,
+            R.reason_code, R.status, R.created_at
+        FROM reports R
+        JOIN users U
+        ON R.reporter_id = U.user_id
+        ORDER BY R.created_at DESC
+    </select>
+
+</mapper>

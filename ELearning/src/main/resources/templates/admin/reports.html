@@ -1,18 +1,244 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>신고 관리 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/reports.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>신고 관리</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/reports</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+<div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
+
+<main class="page-shell admin-screen admin-report-screen">
+  <section class="admin-report-header">
+    <h1>신고 관리</h1>
+  </section>
+
+  <section class="admin-report-toolbar" aria-label="신고 검색 조건">
+    <select aria-label="신고 유형">
+      <option>신고 유형</option>
+      <option>게시글</option>
+      <option>댓글</option>
+    </select>
+    <select aria-label="처리 상태">
+      <option>처리 상태</option>
+      <option>대기</option>
+      <option>검토 중</option>
+      <option>처리 완료</option>
+    </select>
+    <input type="date" aria-label="검색 날짜">
+    <button type="button">검색</button>
+  </section>
+
+  <section class="admin-report-section" aria-label="신고 목록">
+    <h2>신고 목록</h2>
+    <div class="admin-report-table-wrap">
+      <table class="admin-report-table">
+        <thead>
+        <tr>
+          <th>신고 ID</th>
+          <th>신고자</th>
+          <th>신고 대상 유형</th>
+          <th>신고 대상</th>
+          <th>신고 사유</th>
+          <th>신고 일시</th>
+          <th>처리 상태</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="admin-report-row"
+            data-reporter="닉네임1"
+            data-type="게시글"
+            data-date="2026-06-01"
+            data-status="처리 완료"
+            data-target="Java 기초 공부 공유합니다"
+            data-reason="불건전한 내용 포함"
+            data-content="Java 기초 공부 공유합니다. 이어서 코드를 정리하고, 진도별 예시를 모아둔 게시글입니다.">
+          <td>#R001</td>
+          <td>닉네임1</td>
+          <td>게시글</td>
+          <td>Java 기초 공부 공유합니다</td>
+          <td>불건전한 내용 포함</td>
+          <td>2026-06-01</td>
+          <td><span class="admin-report-status is-done">처리 완료</span></td>
+          <td><button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button></td>
+        </tr>
+        <tr class="admin-report-row"
+            data-reporter="닉네임3"
+            data-type="댓글"
+            data-date="2026-06-02"
+            data-status="검토 중"
+            data-target="JOIN INNER JOIN 연습 댓글"
+            data-reason="욕설 및 비방"
+            data-content="JOIN INNER JOIN 연습 댓글에 부적절한 표현이 포함되어 신고되었습니다.">
+          <td>#R002</td>
+          <td>닉네임3</td>
+          <td>댓글</td>
+          <td>JOIN INNER JOIN 연습 댓글</td>
+          <td>욕설 및 비방</td>
+          <td>2026-06-02</td>
+          <td><span class="admin-report-status is-reviewing">검토 중</span></td>
+          <td><button type="button" class="admin-report-table-button admin-report-detail-button">처리하기</button></td>
+        </tr>
+        <tr class="admin-report-row"
+            data-reporter="닉네임2"
+            data-type="게시글"
+            data-date="2026-06-03"
+            data-status="검토 중"
+            data-target="오늘 코딩 일지 정리"
+            data-reason="광고성 게시물"
+            data-content="오늘 코딩 일지 정리 게시글에 광고성 링크와 반복 문구가 포함되어 신고되었습니다.">
+          <td>#R003</td>
+          <td>닉네임2</td>
+          <td>게시글</td>
+          <td>오늘 코딩 일지 정리</td>
+          <td>광고성 게시물</td>
+          <td>2026-06-03</td>
+          <td><span class="admin-report-status is-reviewing">검토 중</span></td>
+          <td><button type="button" class="admin-report-table-button admin-report-detail-button">처리하기</button></td>
+        </tr>
+        <tr class="admin-report-row"
+            data-reporter="닉네임5"
+            data-type="댓글"
+            data-date="2026-06-04"
+            data-status="처리 완료"
+            data-target="Python 스터디 같이 해요"
+            data-reason="스팸"
+            data-content="Python 스터디 모집 댓글에 동일한 홍보 문구가 반복되어 신고되었습니다.">
+          <td>#R004</td>
+          <td>닉네임5</td>
+          <td>댓글</td>
+          <td>Python 스터디 같이 해요</td>
+          <td>스팸</td>
+          <td>2026-06-04</td>
+          <td><span class="admin-report-status is-done">처리 완료</span></td>
+          <td><button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button></td>
+        </tr>
+        <tr class="admin-report-row"
+            data-reporter="닉네임4"
+            data-type="게시글"
+            data-date="2026-06-05"
+            data-status="반려"
+            data-target="부적절한 내용이 포함된 게시글"
+            data-reason="개인정보 노출"
+            data-content="게시글 본문에 개인정보로 보일 수 있는 내용이 포함되어 신고되었습니다.">
+          <td>#R005</td>
+          <td>닉네임4</td>
+          <td>게시글</td>
+          <td>부적절한 내용이 포함된 게시글</td>
+          <td>개인정보 노출</td>
+          <td>2026-06-05</td>
+          <td><span class="admin-report-status is-pending">반려</span></td>
+          <td><button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="admin-report-detail" aria-label="신고 상세 보기">
+    <h2>신고 상세 보기</h2>
+    <div class="admin-report-detail-card">
+      <dl class="admin-report-meta">
+        <div>
+          <dt>신고자</dt>
+          <dd id="reportDetailReporter">-</dd>
+        </div>
+        <div>
+          <dt>신고 유형</dt>
+          <dd id="reportDetailType">-</dd>
+        </div>
+        <div>
+          <dt>신고 일시</dt>
+          <dd id="reportDetailDate">-</dd>
+        </div>
+        <div>
+          <dt>처리 상태</dt>
+          <dd id="reportDetailStatus">-</dd>
+        </div>
+      </dl>
+
+      <div class="admin-report-content">
+        <h3>신고 대상 내용</h3>
+        <div class="admin-report-content-box">
+          <p id="reportDetailContent">목록에서 신고 항목을 선택하세요.</p>
+          <span id="reportDetailReason">신고 사유: -</span>
+        </div>
+      </div>
+
+      <div class="admin-report-process">
+        <h3>처리 결과 입력</h3>
+        <div class="admin-report-process-row">
+          <select aria-label="처리 상태 선택">
+            <option>처리 상태 선택</option>
+            <option>검토 중</option>
+            <option>처리 완료</option>
+            <option>반려</option>
+          </select>
+          <input type="text" placeholder="처리 메모를 입력하세요">
+          <button type="button">처리 확정</button>
+          <button type="button" class="admin-report-secondary-button" id="reportDetailClose">닫기</button>
+        </div>
+      </div>
+
+      <div class="admin-report-history">
+        <h3>처리 이력</h3>
+        <ul>
+          <li>2026-06-01 접수</li>
+          <li>2026-06-02 관리자 검토 시작</li>
+          <li>2026-06-03 처리 완료</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const detailPanel = document.querySelector(".admin-report-detail");
+  const reporter = document.querySelector("#reportDetailReporter");
+  const type = document.querySelector("#reportDetailType");
+  const date = document.querySelector("#reportDetailDate");
+  const status = document.querySelector("#reportDetailStatus");
+  const content = document.querySelector("#reportDetailContent");
+  const reason = document.querySelector("#reportDetailReason");
+  const closeButton = document.querySelector("#reportDetailClose");
+
+  document.querySelectorAll(".admin-report-detail-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest(".admin-report-row");
+
+      reporter.textContent = row.dataset.reporter || "-";
+      type.textContent = row.dataset.type || "-";
+      date.textContent = row.dataset.date || "-";
+      status.textContent = row.dataset.status || "-";
+      content.textContent = row.dataset.content || row.dataset.target || "-";
+      reason.textContent = `신고 사유: ${row.dataset.reason || "-"}`;
+
+      document.querySelectorAll(".admin-report-row").forEach((item) => item.classList.remove("is-selected"));
+      row.classList.add("is-selected");
+      detailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  closeButton?.addEventListener("click", () => {
+    reporter.textContent = "-";
+    type.textContent = "-";
+    date.textContent = "-";
+    status.textContent = "-";
+    content.textContent = "목록에서 신고 항목을 선택하세요.";
+    reason.textContent = "신고 사유: -";
+    document.querySelectorAll(".admin-report-row").forEach((item) => item.classList.remove("is-selected"));
+  });
+</script>
 </body>
 </html>

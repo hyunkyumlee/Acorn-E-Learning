@@ -1,5 +1,7 @@
 package com.acorn.elearning.admin.controller;
 
+import com.acorn.elearning.admin.service.AdminReportService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
+@RequiredArgsConstructor
 public class AdminReportController {
+
+    private final AdminReportService service;
+
 
     @GetMapping("/admin/reports")
     public String reports(Model model) {
@@ -16,6 +22,9 @@ public class AdminReportController {
         // AdminManagePageView view = adminReportService.reports(sessionUser);
         // model.addAttribute("view", view);
         // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+
+        model.addAttribute("reportPage", service.findPage());
+
         model.addAttribute("screen", "admin/reports");
         return "admin/reports";
     }
