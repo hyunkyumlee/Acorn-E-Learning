@@ -62,7 +62,7 @@ class AiExamServiceStatusTest {
         sessionMapper.activeSession = activeSession;
         AiExamService service = service(sessionMapper, new EmptyAiExamProblemMapper(), new EmptyExamAnswerMapper());
 
-        ExamSessionResponse response = service.create(user(), new CreateExamRequest(1L, "BEGINNER"));
+        ExamSessionResponse response = service.create(user(), new CreateExamRequest(1L, "BRONZE"));
 
         assertEquals(8L, response.examId());
         assertEquals(0, sessionMapper.insertCount);
@@ -107,7 +107,7 @@ class AiExamServiceStatusTest {
         ExamSession session = new ExamSession();
         session.setUserId(2L);
         session.setSubjectId(1L);
-        session.setLevelCode("BEGINNER");
+        session.setLevelCode("BRONZE");
         session.setTotalProblemCount(3);
         session.setCorrectCount(0);
         session.setRetryCount(0);

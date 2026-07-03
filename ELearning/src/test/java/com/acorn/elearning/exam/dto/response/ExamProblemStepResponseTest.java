@@ -42,7 +42,7 @@ class ExamProblemStepResponseTest {
         ExamSession session = new ExamSession();
         session.setExamId(10L);
         session.setSubjectId(1L);
-        session.setLevelCode("BEGINNER");
+        session.setLevelCode("BRONZE");
         session.setStatus("READY");
         session.setTotalProblemCount(1);
         session.setCorrectCount(0);
@@ -86,7 +86,7 @@ class ExamProblemStepResponseTest {
         ExamSession session = new ExamSession();
         session.setExamId(10L);
         session.setSubjectId(1L);
-        session.setLevelCode("BEGINNER");
+        session.setLevelCode("BRONZE");
         session.setStatus("READY");
         session.setTotalProblemCount(3);
         session.setCorrectCount(0);
@@ -124,7 +124,7 @@ class ExamProblemStepResponseTest {
         ExamSession session = new ExamSession();
         session.setExamId(10L);
         session.setSubjectId(1L);
-        session.setLevelCode("BEGINNER");
+        session.setLevelCode("BRONZE");
         session.setStatus("READY");
         session.setTotalProblemCount(3);
         session.setCorrectCount(0);

@@ -60,13 +60,49 @@
     activateCurrentNav();
 
     document.addEventListener("click", function (event) {
-      var button = event.target.closest("[data-theme-toggle]");
+      var button;
+      var expanded;
+      var nextTheme;
+      var profileButton = event.target.closest("[data-profile-menu]");
+      var profileMenu;
+      document.querySelectorAll(".profile-menu.is-open").forEach(function (menu) {
+        var trigger = menu.querySelector("[data-profile-menu]");
+        if (!menu.contains(event.target)) {
+          menu.classList.remove("is-open");
+          if (trigger) {
+            trigger.setAttribute("aria-expanded", "false");
+          }
+        }
+      });
+      if (profileButton) {
+        profileMenu = profileButton.closest(".profile-menu");
+        expanded = !profileMenu.classList.contains("is-open");
+        profileMenu.classList.toggle("is-open", expanded);
+        profileButton.setAttribute("aria-expanded", String(expanded));
+        return;
+      }
+
+      button = event.target.closest("[data-theme-toggle]");
       if (!button) {
         return;
       }
-      var nextTheme = root.dataset.theme === "knowva-ion-dark" ? "light" : "dark";
+      nextTheme = root.dataset.theme === "knowva-ion-dark" ? "light" : "dark";
       persistTheme(nextTheme);
       applyTheme(nextTheme);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") {
+        return;
+      }
+      document.querySelectorAll(".profile-menu.is-open").forEach(function (menu) {
+        var trigger = menu.querySelector("[data-profile-menu]");
+        menu.classList.remove("is-open");
+        if (trigger) {
+          trigger.setAttribute("aria-expanded", "false");
+          trigger.focus();
+        }
+      });
     });
   });
 })();

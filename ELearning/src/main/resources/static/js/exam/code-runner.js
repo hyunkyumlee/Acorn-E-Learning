@@ -6,14 +6,27 @@ import {oneDark} from "https://esm.sh/@codemirror/theme-one-dark";
 const form = document.querySelector("[data-code-run-form]");
 const runButton = document.querySelector("[data-code-run-button]");
 const resultPanel = document.querySelector("[data-code-run-result]");
+const finalSubmitModal = document.querySelector("[data-final-submit-modal]");
 
 if (form && runButton && resultPanel) {
   const textarea = form.querySelector("textarea[name='answerText']");
   const editorHost = form.querySelector("[data-code-editor]");
+  const submitButton = document.querySelector("[data-code-submit-button]");
   const statusText = resultPanel.querySelector("[data-code-run-status]");
   const timeText = resultPanel.querySelector("[data-code-run-time]");
   const detailText = resultPanel.querySelector("[data-code-run-detail]");
   let editorView = null;
+  const initialAnswerText = textarea?.value || "";
+  const alreadySubmitted = form.dataset.answerSubmitted === "true";
+
+  const updateSubmitState = (code) => {
+    if (!submitButton) {
+      return;
+    }
+    const changed = code !== initialAnswerText;
+    submitButton.disabled = alreadySubmitted && !changed;
+    submitButton.textContent = alreadySubmitted && !changed ? "제출됨" : (alreadySubmitted ? "다시 제출" : "제출");
+  };
   const insertSoftTab = (view) => {
     const hasSelection = view.state.selection.ranges.some((range) => !range.empty);
     if (hasSelection) {
@@ -67,6 +80,7 @@ if (form && runButton && resultPanel) {
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             textarea.value = update.state.doc.toString();
+            updateSubmitState(textarea.value);
           }
         }),
       ],
@@ -78,6 +92,8 @@ if (form && runButton && resultPanel) {
     });
     form.classList.add("is-enhanced");
   }
+  textarea?.addEventListener("input", () => updateSubmitState(textarea.value));
+  updateSubmitState(initialAnswerText);
 
   const syncTextarea = () => {
     if (editorView && textarea) {
@@ -112,7 +128,7 @@ if (form && runButton && resultPanel) {
     const code = syncTextarea();
     if (!code.trim()) {
       event.preventDefault();
-      renderResult("danger", "저장 불가", "-", "답안 코드가 필요합니다.");
+      renderResult("danger", "제출 불가", "-", "답안 코드가 필요합니다.");
       editorView?.focus();
     }
   });
@@ -153,5 +169,12 @@ if (form && runButton && resultPanel) {
     } finally {
       runButton.disabled = false;
     }
+  });
+}
+
+if (finalSubmitModal) {
+  const closeButton = finalSubmitModal.querySelector("[data-final-submit-close]");
+  closeButton?.addEventListener("click", () => {
+    finalSubmitModal.hidden = true;
   });
 }
