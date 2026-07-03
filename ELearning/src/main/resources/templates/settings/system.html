@@ -11,71 +11,76 @@
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="settings-screen" th:with="settings=${view}">
     <section class="figma-settings-page">
+      <div class="figma-settings-side">
       <aside class="figma-settings-sidebar">
-        <h1>설정</h1>
+        <h1 data-i18n="sidebarTitle">설정</h1>
         <nav aria-label="설정 메뉴">
-          <a th:href="@{/settings/profile}">회원 정보</a>
-          <a th:href="@{/settings/security}">이메일 / 비밀번호</a>
-          <a th:href="@{/settings/social}">연동된 소셜 계정</a>
-          <a class="is-active" th:href="@{/settings/system}">시스템 설정</a>
-          <a th:href="@{/settings/payment}">결제 정보</a>
+          <a th:href="@{/settings/profile}" data-i18n="profileNav">회원 정보</a>
+          <a th:href="@{/settings/security}" data-i18n="securityNav">이메일 / 비밀번호</a>
+          <a th:href="@{/settings/social}" data-i18n="socialNav">연동된 소셜 계정</a>
+          <a class="is-active" th:href="@{/settings/system}" data-i18n="systemNav">시스템 설정</a>
+          <a th:href="@{/settings/payment}" data-i18n="paymentNav">결제 정보</a>
         </nav>
-        <a class="figma-logout" th:href="@{/login}">로그아웃</a>
       </aside>
+        <form class="figma-settings-logout-form" method="post" th:action="@{/logout}">
+          <input type="hidden" name="redirect" value="/login">
+          <button class="figma-logout-button" type="submit" data-i18n="logout">로그아웃</button>
+        </form>
+      </div>
       <section class="figma-settings-main">
         <article class="figma-settings-panel">
-          <h1>시스템 설정</h1>
-          <p>편의 기능과 화면 표시 방식을 설정합니다.</p>
-          <p class="figma-flash" th:if="${message != null}" th:text="${message}">저장되었습니다.</p>
+          <h1 data-i18n="pageTitle">시스템 설정</h1>
+          <p data-i18n="pageDescription">편의 기능과 화면 표시 방식을 설정합니다.</p>
+          <p class="figma-flash" th:if="${message != null}" th:text="${message}" data-i18n="savedMessage">저장되었습니다.</p>
           <form class="figma-system-form" method="post" th:action="@{/settings/system}" th:object="${form}">
             <section class="figma-system-section">
-              <h2>편의 기능</h2>
+              <h2 data-i18n="convenienceTitle">편의 기능</h2>
               <div class="figma-system-list">
                 <div class="figma-system-row">
                   <div>
-                    <strong>다크 모드</strong>
-                    <span>어두운 테마로 화면을 표시합니다.</span>
+                    <strong data-i18n="darkModeTitle">다크 모드</strong>
+                    <span data-i18n="darkModeDescription">어두운 테마로 화면을 표시합니다.</span>
                     <small class="figma-field-error" th:if="${#fields.hasErrors('darkModeEnabled')}" th:errors="*{darkModeEnabled}">다크 모드 오류</small>
                   </div>
                   <label class="figma-toggle">
                     <input type="checkbox" th:field="*{darkModeEnabled}" data-system-theme-toggle>
                     <span></span>
-                    <em>다크 모드</em>
+                    <em data-i18n="darkModeTitle">다크 모드</em>
                   </label>
                 </div>
                 <div class="figma-system-row">
                   <div>
-                    <strong>학습 알림</strong>
-                    <span>오늘의 학습 알림을 받습니다.</span>
+                    <strong data-i18n="learningAlertTitle">학습 알림</strong>
+                    <span data-i18n="learningAlertDescription">오늘의 학습 알림을 받습니다.</span>
                     <small class="figma-field-error" th:if="${#fields.hasErrors('notificationEnabled')}" th:errors="*{notificationEnabled}">학습 알림 오류</small>
                   </div>
                   <label class="figma-toggle">
                     <input type="checkbox" th:field="*{notificationEnabled}">
                     <span></span>
-                    <em>학습 알림</em>
+                    <em data-i18n="learningAlertTitle">학습 알림</em>
                   </label>
                 </div>
                 <div class="figma-system-row">
                   <div>
-                    <strong>이메일 알림</strong>
-                    <span>주요 소식을 이메일로 받습니다.</span>
+                    <strong data-i18n="emailAlertTitle">이메일 알림</strong>
+                    <span data-i18n="emailAlertDescription">주요 소식을 이메일로 받습니다.</span>
                     <small class="figma-field-error" th:if="${#fields.hasErrors('reducedMotionEnabled')}" th:errors="*{reducedMotionEnabled}">이메일 알림 오류</small>
                   </div>
                   <label class="figma-toggle">
                     <input type="checkbox" th:field="*{reducedMotionEnabled}">
                     <span></span>
-                    <em>이메일 알림</em>
+                    <em data-i18n="emailAlertTitle">이메일 알림</em>
                   </label>
                 </div>
               </div>
             </section>
 
             <section class="figma-system-section figma-language-section">
-              <h2>언어 및 지역</h2>
+              <h2 data-i18n="languageTitle">언어 및 지역</h2>
               <label class="figma-language-row">
-                <strong>표시 언어</strong>
+                <strong data-i18n="displayLanguageTitle">표시 언어</strong>
                 <span>
-                  <select class="figma-field figma-language-select" th:field="*{displayLanguage}">
+                  <select class="figma-field figma-language-select" th:field="*{displayLanguage}" data-system-language-select>
                     <option value="KO">한국어</option>
                     <option value="EN">English</option>
                     <option value="JA">日本語</option>
@@ -86,7 +91,7 @@
               </label>
             </section>
 
-            <button class="figma-button primary figma-system-save" type="submit">저장</button>
+            <button class="figma-button primary figma-system-save" type="submit" data-i18n="saveButton">저장</button>
           </form>
         </article>
       </section>
@@ -111,6 +116,72 @@
       }
       toggle.addEventListener("change", function () {
         applyTheme(toggle.checked);
+      });
+    })();
+
+    (function () {
+      var languageSelect = document.querySelector("[data-system-language-select]");
+      if (!languageSelect) {
+        return;
+      }
+      var messages = {
+        KO: {
+          sidebarTitle: "설정",
+          profileNav: "회원 정보",
+          securityNav: "이메일 / 비밀번호",
+          socialNav: "연동된 소셜 계정",
+          systemNav: "시스템 설정",
+          paymentNav: "결제 정보",
+          logout: "로그아웃",
+          pageTitle: "시스템 설정",
+          pageDescription: "편의 기능과 화면 표시 방식을 설정합니다.",
+          savedMessage: "시스템 설정이 저장되었습니다.",
+          convenienceTitle: "편의 기능",
+          darkModeTitle: "다크 모드",
+          darkModeDescription: "어두운 테마로 화면을 표시합니다.",
+          learningAlertTitle: "학습 알림",
+          learningAlertDescription: "오늘의 학습 알림을 받습니다.",
+          emailAlertTitle: "이메일 알림",
+          emailAlertDescription: "주요 소식을 이메일로 받습니다.",
+          languageTitle: "언어 및 지역",
+          displayLanguageTitle: "표시 언어",
+          saveButton: "저장"
+        },
+        EN: {
+          sidebarTitle: "Settings",
+          profileNav: "Profile",
+          securityNav: "Email / Password",
+          socialNav: "Linked Social Accounts",
+          systemNav: "System Settings",
+          paymentNav: "Payment Info",
+          logout: "Log Out",
+          pageTitle: "System Settings",
+          pageDescription: "Set convenience features and display preferences.",
+          savedMessage: "System settings have been saved.",
+          convenienceTitle: "Convenience",
+          darkModeTitle: "Dark Mode",
+          darkModeDescription: "Display the screen with a dark theme.",
+          learningAlertTitle: "Learning Alerts",
+          learningAlertDescription: "Receive today's learning reminders.",
+          emailAlertTitle: "Email Notifications",
+          emailAlertDescription: "Receive important updates by email.",
+          languageTitle: "Language and Region",
+          displayLanguageTitle: "Display Language",
+          saveButton: "Save"
+        }
+      };
+      function applyLanguage(value) {
+        var dictionary = messages[value] || messages.KO;
+        document.querySelectorAll("[data-i18n]").forEach(function (node) {
+          var key = node.getAttribute("data-i18n");
+          if (dictionary[key]) {
+            node.textContent = dictionary[key];
+          }
+        });
+      }
+      applyLanguage(languageSelect.value);
+      languageSelect.addEventListener("change", function () {
+        applyLanguage(languageSelect.value);
       });
     })();
   </script>

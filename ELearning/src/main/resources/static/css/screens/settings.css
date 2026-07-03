@@ -25,30 +25,16 @@
   align-items: start;
 }
 
-.figma-logout {
-  display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  justify-content: center;
-  justify-self: stretch;
-  border: 1px solid var(--settings-line);
-  border-radius: var(--radius);
-  background: var(--settings-panel-strong);
-  color: var(--text);
-  padding: 0 18px;
-  font-weight: 900;
-  transition: transform 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out;
-}
-
-.figma-logout:hover {
-  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
-  background: var(--settings-primary-soft);
-  transform: translateY(-1px);
+.figma-settings-side {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
 }
 
 .figma-settings-sidebar {
-  position: sticky;
-  top: 96px;
+  position: relative;
   display: grid;
   align-content: start;
   gap: 16px;
@@ -57,14 +43,6 @@
   background: color-mix(in srgb, var(--surface) 78%, transparent);
   padding: 20px;
   box-shadow: var(--shadow-soft);
-}
-
-.figma-settings-sidebar::after {
-  width: 42px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--primary);
-  content: "";
 }
 
 .figma-settings-sidebar h1,
@@ -99,6 +77,36 @@
 .figma-settings-sidebar a.is-active,
 .figma-settings-sidebar a:hover {
   border-color: color-mix(in srgb, var(--primary) 28%, var(--line));
+  background: var(--settings-primary-soft);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.figma-settings-logout-form {
+  margin: 0;
+}
+
+.figma-logout-button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--settings-line);
+  border-radius: var(--radius);
+  background: var(--settings-panel-strong);
+  box-shadow: var(--shadow-soft);
+  color: var(--muted);
+  padding: 0 18px;
+  font: inherit;
+  font-weight: 950;
+  cursor: pointer;
+  transition: transform 160ms ease-out, border-color 160ms ease-out, background 160ms ease-out, color 160ms ease-out;
+}
+
+.figma-logout-button:hover,
+.figma-logout-button:focus-visible {
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
   background: var(--settings-primary-soft);
   color: var(--text);
   transform: translateY(-1px);
@@ -436,15 +444,15 @@ textarea.figma-field {
   transition: transform 160ms ease-out;
 }
 
-.figma-toggle input:checked + span {
+.figma-toggle input:checked ~ span {
   background: color-mix(in srgb, var(--text) 48%, var(--primary));
 }
 
-.figma-toggle input:checked + span::after {
+.figma-toggle input:checked ~ span::after {
   transform: translateX(20px);
 }
 
-.figma-toggle input:focus-visible + span {
+.figma-toggle input:focus-visible ~ span {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
@@ -565,8 +573,12 @@ textarea.figma-field {
     gap: 14px;
   }
 
-  .figma-settings-sidebar {
+  .figma-settings-side {
     position: static;
+    gap: 10px;
+  }
+
+  .figma-settings-sidebar {
     grid-template-columns: 1fr;
     gap: 10px;
   }
@@ -579,9 +591,8 @@ textarea.figma-field {
     padding: 0;
   }
 
-  .figma-logout {
-    justify-self: start;
-    min-width: 104px;
+  .figma-logout-button {
+    min-height: 48px;
   }
 
   .figma-settings-panel,
