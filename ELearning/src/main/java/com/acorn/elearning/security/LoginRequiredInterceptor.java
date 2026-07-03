@@ -35,7 +35,10 @@ public class LoginRequiredInterceptor implements HandlerInterceptor {
 
     private String encodedCurrentPath(HttpServletRequest request) {
         String queryString = request.getQueryString();
-        String currentPath = queryString == null ? request.getRequestURI() : request.getRequestURI() + "?" + queryString;
+        String currentPath = queryString == null
+                ? request.getRequestURI()
+                : request.getRequestURI() + "?" + queryString;
         return URLEncoder.encode(currentPath, StandardCharsets.UTF_8);
     }
+
 }
