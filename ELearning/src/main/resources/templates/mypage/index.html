@@ -14,16 +14,18 @@
       <header class="mypage-heading">
         <h1>마이페이지</h1>
         <p>나의 학습 활동과 기록을 한눈에 확인하세요.</p>
+        <p class="mypage-flash" th:if="${message != null}" th:text="${message}">저장되었습니다.</p>
       </header>
 
       <section class="mypage-profile-panel">
         <div class="mypage-profile-avatar" aria-label="프로필 아바타">
-          <span th:text="${view.user().nickname() == null || #strings.isEmpty(view.user().nickname()) ? 'K' : #strings.substring(view.user().nickname(), 0, 1)}">NL</span>
+          <img th:if="${view.user().profileImageUrl() != null && !#strings.isEmpty(view.user().profileImageUrl())}" th:src="${view.user().profileImageUrl()}" alt="">
+          <span th:if="${view.user().profileImageUrl() == null || #strings.isEmpty(view.user().profileImageUrl())}" th:text="${view.user().nickname() == null || #strings.isEmpty(view.user().nickname()) ? 'K' : #strings.substring(view.user().nickname(), 0, 1)}">NL</span>
         </div>
         <div class="mypage-profile-copy">
           <h2 th:text="${view.user().nickname() == null || #strings.isEmpty(view.user().nickname()) ? view.user().email() : view.user().nickname()}">이름</h2>
           <p th:text="${view.learning().learningGoal() == null || #strings.isEmpty(view.learning().learningGoal()) ? '꾸준히 성장하는 개발자가 되고 싶어요!' : view.learning().learningGoal()}">꾸준히 성장하는 개발자가 되고 싶어요!</p>
-          <a class="mini-button" th:href="@{/settings/profile}">프로필 편집</a>
+          <button class="mini-button" type="button" data-profile-modal-open>프로필 편집</button>
         </div>
         <div class="mypage-profile-divider"></div>
         <dl class="mypage-profile-meta">
@@ -33,14 +35,14 @@
           </div>
           <div>
             <dt>대표 과목</dt>
-            <dd>Java</dd>
+            <dd th:text="${view.learning().primarySubjectLabel()}">Java</dd>
           </div>
         </dl>
       </section>
 
       <section class="mypage-summary-grid">
         <article class="mypage-stat-card">
-          <span class="mypage-icon book" aria-hidden="true"></span>
+          <span class="mypage-icon flame" aria-hidden="true"></span>
           <div>
             <h2>연속 출석</h2>
             <strong th:text="${view.learning().streakLabel()}">10일</strong>
@@ -68,24 +70,22 @@
       <section class="mypage-section attendance-section">
         <div class="mypage-section-head">
           <h2>출석 캘린더</h2>
-          <div class="month-control"><span>2026년 6월</span><button type="button" aria-label="이전 달">&lt;</button><button type="button" aria-label="다음 달">&gt;</button></div>
+          <div class="month-control">
+            <span data-calendar-month-label th:text="${view.learning().initialCalendarLabel()}">2026년 6월</span>
+            <button type="button" aria-label="이전 달" data-calendar-prev>&lt;</button>
+            <button type="button" aria-label="다음 달" data-calendar-next>&gt;</button>
+          </div>
         </div>
         <div class="attendance-grid">
           <div class="calendar-box">
             <div class="calendar-orbit-head">
-              <strong>6월 출석</strong>
-              <span th:text="|${view.learning().streakLabel()} 연속|">10일 연속</span>
+              <strong data-calendar-title>6월 출석</strong>
+              <span data-calendar-count>0일 출석</span>
             </div>
             <div class="calendar-weekdays" aria-hidden="true">
               <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
             </div>
-            <div class="calendar-days" aria-label="2026년 6월 출석 캘린더">
-              <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span class="attended">6</span><span class="attended">7</span>
-              <span class="attended">8</span><span class="attended">9</span><span class="attended">10</span><span class="attended">11</span><span class="attended">12</span><span class="attended">13</span><span class="attended">14</span>
-              <span class="today attended">15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span>
-              <span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span>
-              <span>29</span><span>30</span><span class="muted" aria-hidden="true"></span><span class="muted" aria-hidden="true"></span><span class="muted" aria-hidden="true"></span><span class="muted" aria-hidden="true"></span><span class="muted" aria-hidden="true"></span>
-            </div>
+            <div class="calendar-days" aria-label="출석 캘린더" data-calendar-days></div>
           </div>
           <article class="streak-card">
             <span class="circle-icon streak" th:text="${view.learning().streakCount()}">10</span>
@@ -94,13 +94,13 @@
               <p>조금만 더 힘내요!</p>
             </div>
             <div class="attendance-progress">
-              <span>이번 달 출석률</span>
-              <div class="mini-progress"><i style="width:50%"></i></div>
-              <strong>50%</strong>
+              <span>선택 월 출석률</span>
+              <div class="mini-progress"><i data-calendar-progress style="width:0%"></i></div>
+              <strong data-calendar-rate>0%</strong>
             </div>
             <dl>
-              <dt>총 출석일</dt>
-              <dd>25일</dd>
+              <dt>선택 월 출석일</dt>
+              <dd data-calendar-total>0일</dd>
             </dl>
           </article>
         </div>
@@ -108,43 +108,40 @@
 
       <section class="mypage-detail-grid">
         <article class="mypage-section list-section">
-          <div class="mypage-section-head"><h2>최근 학습 현황</h2><a class="mini-button" th:href="@{/learning}">전체보기</a></div>
+          <div class="mypage-section-head"><h2>최근 학습 현황</h2><a class="mini-button" th:href="@{/mypage/learning}">전체보기</a></div>
           <div class="learning-status-list">
             <div class="learning-status-row">
-              <span class="language-thumb java">J</span>
+              <span class="language-thumb java"><img th:src="@{/assets/images/icons/subject/java.png}" alt="Java"></span>
               <strong>Java</strong>
-              <span>Lv.1</span>
               <div class="mini-progress"><i style="width:30%"></i></div>
               <b>30%</b>
             </div>
             <div class="learning-status-row">
-              <span class="language-thumb python">Py</span>
+              <span class="language-thumb python"><img th:src="@{/assets/images/icons/subject/python.png}" alt="Python"></span>
               <strong>Python</strong>
-              <span>Lv.3</span>
               <div class="mini-progress"><i style="width:80%"></i></div>
               <b>80%</b>
             </div>
             <div class="learning-status-row">
-              <span class="language-thumb sql">SQL</span>
+              <span class="language-thumb sql"><img th:src="@{/assets/images/icons/subject/sql.png}" alt="SQL"></span>
               <strong>SQL</strong>
-              <span>Lv.6</span>
               <div class="mini-progress"><i style="width:50%"></i></div>
               <b>50%</b>
             </div>
           </div>
         </article>
-        <article class="mypage-section list-section">
-          <div class="mypage-section-head"><h2>최근 시험 결과</h2><a class="mini-button" th:href="@{/exams/coding-test}">전체보기</a></div>
+        <article class="mypage-section list-section exam-summary-section">
+          <div class="mypage-section-head"><h2>최근 시험 결과</h2><button class="mini-button" type="button" data-exam-modal-open>전체보기</button></div>
           <div class="exam-result-list">
-            <div class="exam-result-row">
-              <strong>SQL</strong>
-              <span>Lv.5</span>
-              <b class="result-badge">합격</b>
+            <div class="exam-result-row" th:each="item : ${view.exam().previewItems()}">
+              <strong th:text="${item.subjectLabel()}">SQL</strong>
+              <span th:text="${item.levelLabel()}">Lv.5</span>
+              <b class="result-badge" th:classappend="| ${item.resultClass()}|" th:text="${item.resultLabel()}">합격</b>
             </div>
-            <div class="exam-result-row">
-              <strong>Python</strong>
-              <span>Lv.2</span>
-              <b class="result-badge">재시</b>
+            <div class="exam-result-row subtle" th:if="${view.exam().empty()}">
+              <strong>시험 결과 없음</strong>
+              <span>응시 후 결과가 표시됩니다.</span>
+              <b>-</b>
             </div>
           </div>
         </article>
@@ -154,27 +151,120 @@
         <h2>커뮤니티 활동</h2>
         <div class="community-activity-grid">
           <article class="community-activity-card">
-            <span class="mypage-icon heart" aria-hidden="true"></span>
-            <h3>좋아요 누른 글</h3>
-            <a class="mini-button" th:href="@{/community/board}">보기</a>
-            <strong>10개</strong>
-            <p>관심 있는 게시글 모음</p>
+            <div class="community-activity-card-head">
+              <div class="community-activity-title-group">
+                <span class="mypage-icon heart" aria-hidden="true"></span>
+                <h3>좋아요 누른 글</h3>
+              </div>
+              <a class="mini-button" th:href="@{/mypage/community/liked}">보기</a>
+            </div>
+            <div class="community-activity-card-body">
+              <strong>10개</strong>
+              <p>관심 있는 게시글 모음</p>
+            </div>
           </article>
           <article class="community-activity-card">
-            <span class="mypage-icon bookmark" aria-hidden="true"></span>
-            <h3>스크랩한 글</h3>
-            <a class="mini-button" th:href="@{/community/board}">보기</a>
-            <strong>10개</strong>
-            <p>나중에 다시 볼 글 모음</p>
+            <div class="community-activity-card-head">
+              <div class="community-activity-title-group">
+                <span class="mypage-icon bookmark" aria-hidden="true"></span>
+                <h3>스크랩한 글</h3>
+              </div>
+              <a class="mini-button" th:href="@{/mypage/community/scraps}">보기</a>
+            </div>
+            <div class="community-activity-card-body">
+              <strong>10개</strong>
+              <p>나중에 다시 볼 글 모음</p>
+            </div>
           </article>
           <article class="community-activity-card">
-            <span class="mypage-icon pencil" aria-hidden="true"></span>
-            <h3>작성한 글</h3>
-            <a class="mini-button" th:href="@{/community/profile}">보기</a>
-            <strong>10개</strong>
-            <p>내가 작성한 게시글</p>
+            <div class="community-activity-card-head">
+              <div class="community-activity-title-group">
+                <span class="mypage-icon pencil" aria-hidden="true"></span>
+                <h3>작성한 글</h3>
+              </div>
+              <a class="mini-button" th:href="@{/mypage/community/posts}">보기</a>
+            </div>
+            <div class="community-activity-card-body">
+              <strong>10개</strong>
+              <p>내가 작성한 게시글</p>
+            </div>
           </article>
         </div>
+      </section>
+
+      <section class="mypage-modal-backdrop" hidden data-profile-modal>
+        <form class="mypage-profile-modal" method="post" enctype="multipart/form-data" th:action="@{/mypage/profile}" th:object="${profileForm}">
+          <header>
+            <h2>프로필 편집</h2>
+            <button class="mypage-modal-close" type="button" data-profile-modal-close aria-label="닫기">×</button>
+          </header>
+          <div class="mypage-profile-modal-body">
+            <div class="mypage-profile-image-edit">
+              <div class="mypage-profile-preview">
+                <img data-profile-image-preview th:if="${view.user().profileImageUrl() != null && !#strings.isEmpty(view.user().profileImageUrl())}" th:src="${view.user().profileImageUrl()}" alt="">
+                <span data-profile-image-fallback th:classappend="${view.user().profileImageUrl() != null && !#strings.isEmpty(view.user().profileImageUrl()) ? 'is-hidden' : ''}" th:text="${view.user().nickname() == null || #strings.isEmpty(view.user().nickname()) ? 'K' : #strings.substring(view.user().nickname(), 0, 1)}">K</span>
+              </div>
+              <label class="mini-button">
+                사진 변경
+                <input class="profile-image-input" type="file" th:field="*{profileImage}" accept="image/png,image/jpeg,image/webp" data-profile-image-input>
+              </label>
+            </div>
+            <div class="mypage-profile-fields">
+              <label>
+                <strong>닉네임</strong>
+                <input class="mypage-field" type="text" th:field="*{nickname}" maxlength="50" autocomplete="nickname">
+              </label>
+              <label>
+                <strong>대표 과목</strong>
+                <select class="mypage-field" th:field="*{primarySubjectId}">
+                  <option th:value="1">Java</option>
+                  <option th:value="2">Python</option>
+                  <option th:value="3">Web</option>
+                  <option th:value="4">SQL</option>
+                </select>
+              </label>
+              <label>
+                <strong>소개글</strong>
+                <textarea class="mypage-field" th:field="*{learningGoal}" maxlength="500" rows="4"></textarea>
+              </label>
+            </div>
+          </div>
+          <footer>
+            <button class="mini-button" type="button" data-profile-modal-close>취소</button>
+            <button class="mini-button primary" type="submit">저장하기</button>
+          </footer>
+        </form>
+      </section>
+
+      <section class="mypage-modal-backdrop" hidden data-exam-modal>
+        <article class="exam-result-modal" role="dialog" aria-modal="true" aria-labelledby="exam-result-modal-title">
+          <header>
+            <h2 id="exam-result-modal-title">최근 시험 결과</h2>
+            <button class="mypage-modal-close" type="button" data-exam-modal-close aria-label="닫기">×</button>
+          </header>
+          <nav class="exam-filter-tabs" aria-label="시험 결과 필터">
+            <button class="is-active" type="button" data-exam-filter="ALL">전체</button>
+            <button type="button" data-exam-filter="PASS">합격</button>
+            <button type="button" data-exam-filter="RETRY">재시</button>
+          </nav>
+          <div class="exam-modal-list">
+            <article class="exam-modal-row" th:each="item : ${view.exam().items()}" th:attr="data-exam-result=${item.resultFilter()}">
+              <span class="exam-status-dot" th:classappend="| ${item.resultClass()}|" th:text="${item.resultLabel()}">합격</span>
+              <div class="exam-modal-main">
+                <strong th:text="${item.title()}">SQL Lv.5</strong>
+                <span><em>응시일</em> <b th:text="${item.submittedAtLabel()}">2026.06.14</b></span>
+              </div>
+              <div class="exam-modal-score">
+                <span>정답</span>
+                <strong th:text="${item.scoreLabel()}">2/3</strong>
+              </div>
+            </article>
+            <article class="exam-modal-empty" th:if="${view.exam().empty()}">
+              <strong>최근 시험 결과가 없습니다.</strong>
+              <p>시험에 응시하면 합격 여부와 점수가 여기에 표시됩니다.</p>
+            </article>
+          </div>
+        </article>
       </section>
     </section>
 
@@ -185,5 +275,203 @@
       </header>
     </section>
   </main>
+  <script th:if="${view != null}" th:inline="javascript">
+    (function () {
+      var attendanceDates = /*[[${view.learning().attendanceDates()}]]*/ [];
+      var selectedYear = /*[[${view.learning().initialCalendarYear()}]]*/ 2026;
+      var selectedMonth = /*[[${view.learning().initialCalendarMonth()}]]*/ 6;
+      var attendedSet = new Set(attendanceDates);
+      var monthLabel = document.querySelector("[data-calendar-month-label]");
+      var monthTitle = document.querySelector("[data-calendar-title]");
+      var monthCount = document.querySelector("[data-calendar-count]");
+      var calendarDays = document.querySelector("[data-calendar-days]");
+      var prevButton = document.querySelector("[data-calendar-prev]");
+      var nextButton = document.querySelector("[data-calendar-next]");
+      var progressBar = document.querySelector("[data-calendar-progress]");
+      var progressRate = document.querySelector("[data-calendar-rate]");
+      var attendanceTotal = document.querySelector("[data-calendar-total]");
+      var profileModal = document.querySelector("[data-profile-modal]");
+      var profileOpenButton = document.querySelector("[data-profile-modal-open]");
+      var profileCloseButtons = document.querySelectorAll("[data-profile-modal-close]");
+      var examModal = document.querySelector("[data-exam-modal]");
+      var examOpenButtons = document.querySelectorAll("[data-exam-modal-open]");
+      var examCloseButtons = document.querySelectorAll("[data-exam-modal-close]");
+      var examFilterButtons = document.querySelectorAll("[data-exam-filter]");
+      var examRows = document.querySelectorAll("[data-exam-result]");
+      var input = document.querySelector("[data-profile-image-input]");
+      var preview = document.querySelector("[data-profile-image-preview]");
+      var fallback = document.querySelector("[data-profile-image-fallback]");
+
+      function pad(value) {
+        return String(value).padStart(2, "0");
+      }
+
+      function dateKey(year, month, day) {
+        return year + "-" + pad(month) + "-" + pad(day);
+      }
+
+      function daysInMonth(year, month) {
+        return new Date(year, month, 0).getDate();
+      }
+
+      function monthText(year, month) {
+        return year + "년 " + month + "월";
+      }
+
+      function renderCalendar() {
+        if (!calendarDays) {
+          return;
+        }
+        var totalDays = daysInMonth(selectedYear, selectedMonth);
+        var firstDay = new Date(selectedYear, selectedMonth - 1, 1).getDay();
+        var leadingBlankCount = (firstDay + 6) % 7;
+        var attendedThisMonth = 0;
+        var today = new Date();
+        var todayKey = dateKey(today.getFullYear(), today.getMonth() + 1, today.getDate());
+
+        calendarDays.innerHTML = "";
+        for (var blankIndex = 0; blankIndex < leadingBlankCount; blankIndex += 1) {
+          var blank = document.createElement("span");
+          blank.className = "muted";
+          blank.setAttribute("aria-hidden", "true");
+          calendarDays.appendChild(blank);
+        }
+        for (var day = 1; day <= totalDays; day += 1) {
+          var key = dateKey(selectedYear, selectedMonth, day);
+          var dayCell = document.createElement("span");
+          dayCell.textContent = day;
+          if (attendedSet.has(key)) {
+            dayCell.classList.add("attended");
+            attendedThisMonth += 1;
+          }
+          if (key === todayKey) {
+            dayCell.classList.add("today");
+          }
+          calendarDays.appendChild(dayCell);
+        }
+        while (calendarDays.children.length % 7 !== 0) {
+          var trailingBlank = document.createElement("span");
+          trailingBlank.className = "muted";
+          trailingBlank.setAttribute("aria-hidden", "true");
+          calendarDays.appendChild(trailingBlank);
+        }
+
+        var rate = totalDays === 0 ? 0 : Math.round((attendedThisMonth / totalDays) * 100);
+        var label = monthText(selectedYear, selectedMonth);
+        if (monthLabel) {
+          monthLabel.textContent = label;
+        }
+        if (monthTitle) {
+          monthTitle.textContent = selectedMonth + "월 출석";
+        }
+        if (monthCount) {
+          monthCount.textContent = attendedThisMonth + "일 출석";
+        }
+        if (progressBar) {
+          progressBar.style.width = rate + "%";
+        }
+        if (progressRate) {
+          progressRate.textContent = rate + "%";
+        }
+        if (attendanceTotal) {
+          attendanceTotal.textContent = attendedThisMonth + "일";
+        }
+        calendarDays.setAttribute("aria-label", label + " 출석 캘린더");
+      }
+
+      if (prevButton) {
+        prevButton.addEventListener("click", function () {
+          selectedMonth -= 1;
+          if (selectedMonth < 1) {
+            selectedMonth = 12;
+            selectedYear -= 1;
+          }
+          renderCalendar();
+        });
+      }
+      if (nextButton) {
+        nextButton.addEventListener("click", function () {
+          selectedMonth += 1;
+          if (selectedMonth > 12) {
+            selectedMonth = 1;
+            selectedYear += 1;
+          }
+          renderCalendar();
+        });
+      }
+      renderCalendar();
+
+      function setupModal(modalElement, openButtons, closeButtons) {
+        if (!modalElement) {
+          return;
+        }
+        openButtons.forEach(function (button) {
+          button.addEventListener("click", function () {
+            modalElement.hidden = false;
+          });
+        });
+        closeButtons.forEach(function (button) {
+          button.addEventListener("click", function () {
+            modalElement.hidden = true;
+          });
+        });
+        modalElement.addEventListener("click", function (event) {
+          if (event.target === modalElement) {
+            modalElement.hidden = true;
+          }
+        });
+      }
+
+      setupModal(profileModal, profileOpenButton ? [profileOpenButton] : [], profileCloseButtons);
+      setupModal(examModal, examOpenButtons, examCloseButtons);
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key !== "Escape") {
+          return;
+        }
+        [profileModal, examModal].forEach(function (modalElement) {
+          if (modalElement && !modalElement.hidden) {
+            modalElement.hidden = true;
+          }
+        });
+      });
+
+      function applyExamFilter(filter) {
+        examFilterButtons.forEach(function (button) {
+          button.classList.toggle("is-active", button.dataset.examFilter === filter);
+        });
+        examRows.forEach(function (row) {
+          row.hidden = filter !== "ALL" && row.dataset.examResult !== filter;
+        });
+      }
+
+      examFilterButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          applyExamFilter(button.dataset.examFilter);
+        });
+      });
+
+      if (input) {
+        input.addEventListener("change", function () {
+          var file = input.files && input.files[0];
+          if (!file) {
+            return;
+          }
+          var imageUrl = URL.createObjectURL(file);
+          if (!preview) {
+            preview = document.createElement("img");
+            preview.setAttribute("data-profile-image-preview", "");
+            preview.alt = "";
+            document.querySelector(".mypage-profile-preview").prepend(preview);
+          }
+          preview.src = imageUrl;
+          preview.hidden = false;
+          if (fallback) {
+            fallback.classList.add("is-hidden");
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

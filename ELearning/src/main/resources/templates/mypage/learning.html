@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>최근 학습 현황 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/mypage.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+</head>
+<body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="page-shell mypage-screen learning-status-page">
+    <section class="mypage-page">
+      <header class="mypage-heading learning-status-heading">
+        <div class="learning-status-title-row">
+          <a class="learning-status-back" th:href="@{/mypage}" aria-label="마이페이지로 이동">←</a>
+          <div>
+            <h1>최근 학습 현황</h1>
+            <p>언어별 학습 진행 상황을 확인하세요.</p>
+          </div>
+        </div>
+      </header>
+
+      <nav class="learning-filter-tabs" aria-label="학습 과목 필터">
+        <a th:each="filter : ${view.filters()}"
+           th:href="@{/mypage/learning(subject=${filter.subject()}, page=0)}"
+           th:classappend="${filter.active()} ? 'is-active' : ''"
+           th:text="${filter.label()}">전체</a>
+      </nav>
+
+      <section class="learning-full-list" aria-label="최근 학습 현황 목록">
+        <article class="learning-full-row" th:each="item : ${view.items()}">
+          <span th:class="|language-thumb ${item.thumbClass()}|">
+            <img th:if="${item.thumbIconPath() != null}" th:src="${item.thumbIconPath()}" th:alt="${item.subjectName()}">
+            <span th:if="${item.thumbIconPath() == null}" th:text="${item.thumbLabel()}">J</span>
+          </span>
+          <div class="learning-full-main">
+            <strong th:text="${item.subjectName()}">Java</strong>
+            <dl>
+              <dt>현재 레벨</dt>
+              <dd th:text="${item.currentLevelLabel()}">BRONZE</dd>
+            </dl>
+          </div>
+          <div class="learning-full-progress">
+            <div class="learning-full-progress-head">
+              <span>진행률</span>
+              <strong th:text="${item.progressRateLabel()}">30%</strong>
+            </div>
+            <div class="mini-progress">
+              <i th:style="|width:${item.progressRate()}%|"></i>
+            </div>
+          </div>
+          <a class="mini-button primary learning-continue-button" th:href="${item.continueUrl()}">학습 계속하기</a>
+        </article>
+
+        <article class="learning-empty" th:if="${view.empty()}">
+          <strong>표시할 학습 현황이 없습니다.</strong>
+          <p>학습을 시작하면 과목별 진행률이 여기에 표시됩니다.</p>
+        </article>
+      </section>
+
+      <nav class="learning-pagination" aria-label="최근 학습 현황 페이지">
+        <a th:classappend="${view.first()} ? 'is-disabled' : ''"
+           th:href="@{/mypage/learning(subject=${view.selectedSubject()}, page=${view.previousPage()})}">이전</a>
+        <a th:each="pageNumber : ${view.pageNumbers()}"
+           th:href="@{/mypage/learning(subject=${view.selectedSubject()}, page=${pageNumber})}"
+           th:classappend="${pageNumber == view.page()} ? 'is-active' : ''"
+           th:text="${pageNumber + 1}">1</a>
+        <a th:classappend="${view.last()} ? 'is-disabled' : ''"
+           th:href="@{/mypage/learning(subject=${view.selectedSubject()}, page=${view.nextPage()})}">다음</a>
+      </nav>
+    </section>
+  </main>
+</body>
+</html>
