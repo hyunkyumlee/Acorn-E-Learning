@@ -6,6 +6,8 @@
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
+  <!-- 로드맵 등장 애니메이션 + 현재 노드 스크롤 (learning 화면 전용, transform/opacity·reduced-motion 대응) -->
+  <script defer th:src="@{/js/screens/learning-roadmap.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
@@ -88,36 +90,68 @@
           <a class="button primary" th:href="@{/exams/coding-test}">코딩테스트 응시</a>
         </section>
 
-        <!-- LearningRoadmap (행성 경로) -->
-        <section class="console-card roadmap-panel">
-          <h2 class="console-card-title">커리큘럼 로드맵 <small>(JAVA · <span th:text="${#lists.size(roadmap)}">0</span>개 노드)</small></h2>
+        <!-- LearningRoadmap (우주 로드맵 맵) -->
+        <!-- 카드 중첩 금지: 이 패널은 .console-card로 감싸지 않고(맵 stage 자체가 유일한 테두리 영역), 제목 + 맵 stage만 둔다. -->
+        <section class="roadmap-panel">
+          <h2 class="roadmap-panel-title">커리큘럼 로드맵 <small>(JAVA · <span th:text="${#lists.size(roadmap)}">0</span>개 노드)</small></h2>
           <p th:if="${#lists.isEmpty(roadmap)}" class="console-empty">로드맵 노드가 없습니다. (curriculum_nodes seed 확인)</p>
 
           <!--
-            행성 경로(듀오링고식). 노드 상태 = completedPlanets/planetCount(컨트롤러 계산) 기준.
-            - 행성(PLANET): planetNo<=완료수 → done(✓) / 다음 1개 → current / 그 외 → locked
-            - 게이트(GATE): 모든 행성 완료 시 ready, 아니면 locked
-            디자인 명세 v2.0: done=progress green / gate=quest warm / locked=muted. (색은 토큰만 사용)
+            우주 로드맵 = 세로로 긴 맵 SVG(1360×5080) 전체를 내부 스크롤 stage에 표시하고, 행성을 맵의 길 위 좌표(top/left %)에 얹는다.
+            - 배경 맵(dark/light 테마별 스왑)은 learning.css의 .roadmap-layer background-image에서 처리.
+            - 좌표(topArr/leftArr/sizeArr): 맵 길이 규칙적 S자라 상단→하단 균등+좌우 교차 배치하면 길 위에 얹힘. 노드 6개(planet5+gate) 기준.
+              멀티레벨로 노드가 6개를 넘으면 % 6으로 순환(후속 개선 대상).
+            - 노드 상태 = completedPlanets/planetCount(컨트롤러 계산). 상태는 색 + 텍스트 배지 병기(색만으로 구분 금지, 디자인명세 v2.0).
+              PLANET: planetNo<=완료수 → done / 다음 1개 → current / 그 외 → locked.  GATE: 전 행성 완료면 ready, 아니면 locked.
+            - 행성 아트: planetNo(1~5)로 planets/*.svg 매핑. 등장/스크롤은 learning-roadmap.js(transform/opacity, reduced-motion 대응).
           -->
-          <ol th:unless="${#lists.isEmpty(roadmap)}" class="roadmap" aria-label="커리큘럼 로드맵">
-            <li th:each="node : ${roadmap}"
-                class="roadmap-node"
-                th:classappend="${node.nodeType == 'GATE'
-                    ? (completedPlanets >= planetCount ? 'is-gate is-ready' : 'is-gate is-locked')
-                    : (node.planetNo <= completedPlanets ? 'is-done'
-                        : (node.planetNo == completedPlanets + 1 ? 'is-current' : 'is-locked'))}">
-              <span class="roadmap-orb" aria-hidden="true">
-                <span class="roadmap-orb-label"
-                      th:text="${node.nodeType == 'GATE' ? '★'
-                          : (node.planetNo <= completedPlanets ? '✓' : node.planetNo)}">1</span>
-              </span>
-              <div class="roadmap-body">
-                <span class="roadmap-level" th:text="${node.levelCode}">BRONZE</span>
-                <h3 class="roadmap-title" th:text="${node.title}">제목</h3>
-                <p class="roadmap-desc" th:text="${node.description}">설명</p>
-              </div>
-            </li>
-          </ol>
+          <div th:unless="${#lists.isEmpty(roadmap)}" class="roadmap-stage" data-roadmap-stage
+               th:with="planetArt=${ {'01_Earth','05_Flower_Planet','03_Gracier_Planet','04_Desert_Planet','09_Gear_Planet'} },
+                        topArr=${ {8,25,42,59,76,87} },
+                        leftArr=${ {30,66,30,66,30,64} },
+                        sizeArr=${ {38,38,38,38,38,34} }">
+            <!-- 스크롤 진행 게이지(맵 상단 고정). 스크롤한 만큼 채워짐 → 관성 슬라이드가 눈에 확실히 보이게. -->
+            <div class="roadmap-progress" aria-hidden="true"><i></i></div>
+            <div class="roadmap-layer">
+              <ol class="roadmap" aria-label="커리큘럼 로드맵 경로">
+                <!--
+                  navHref: 접근 가능한 노드만 링크. 완료/현재 행성 → 그 단원 학습(/learning/lessons/{nodeId},
+                  오늘의 미션 카드와 동일 패턴), 응시 가능 게이트 → 코딩테스트. 잠긴 노드는 null(클릭 불가).
+                  ※ 컨텍스트 경로 root 기준 raw path. 멀티레벨/노드-레슨 매핑 정밀화는 후속(현재 seed는 nodeId=lessonId).
+                -->
+                <li th:each="node,it : ${roadmap}"
+                    class="roadmap-node"
+                    th:classappend="${node.nodeType == 'GATE'
+                        ? (completedPlanets >= planetCount ? 'is-gate is-ready' : 'is-gate is-locked')
+                        : (node.planetNo <= completedPlanets ? 'is-done'
+                            : (node.planetNo == completedPlanets + 1 ? 'is-current' : 'is-locked'))}"
+                    th:style="'top:' + ${topArr[it.index % 6]} + '%;left:' + ${leftArr[it.index % 6]} + '%;width:' + ${sizeArr[it.index % 6]} + '%'"
+                    th:with="navHref=${node.nodeType == 'GATE'
+                        ? (completedPlanets >= planetCount ? '/exams/coding-test' : null)
+                        : (node.planetNo <= completedPlanets + 1 ? ('/learning/lessons/' + node.nodeId) : null)}">
+                  <a class="roadmap-node-link"
+                     th:classappend="${navHref == null} ? 'is-static' : ''"
+                     th:href="${navHref}"
+                     th:attr="aria-label=${navHref == null ? node.title + ' (잠김)' : node.title + ' — 학습으로 이동'}">
+                    <span class="roadmap-planet" aria-hidden="true">
+                      <img th:if="${node.nodeType != 'GATE'}" class="roadmap-planet-img"
+                           th:src="@{'/assets/images/planets/' + ${planetArt[(node.planetNo - 1) % 5]} + '.svg'}"
+                           alt="" loading="lazy" decoding="async">
+                      <img th:if="${node.nodeType == 'GATE'}" class="roadmap-gate-img"
+                           th:src="@{/assets/images/roadmap/gate.svg}"
+                           alt="" loading="lazy" decoding="async">
+                    </span>
+                    <span class="roadmap-badge"
+                          th:text="${node.nodeType == 'GATE'
+                              ? (completedPlanets >= planetCount ? '응시 가능' : '잠김')
+                              : (node.planetNo <= completedPlanets ? '✓ 완료'
+                                  : (node.planetNo == completedPlanets + 1 ? '● 학습 중' : '🔒 잠김'))}">상태</span>
+                    <span class="roadmap-label" th:text="${node.title}">제목</span>
+                  </a>
+                </li>
+              </ol>
+            </div>
+          </div>
         </section>
       </section>
 
