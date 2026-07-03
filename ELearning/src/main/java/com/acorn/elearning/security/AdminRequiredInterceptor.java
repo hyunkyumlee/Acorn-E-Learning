@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Component
 public class AdminRequiredInterceptor implements HandlerInterceptor {
     private final boolean enforce;
@@ -17,7 +20,7 @@ public class AdminRequiredInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         SessionUser sessionUser = currentUser(request);
-        if (!enforce || sessionUser != null && sessionUser.admin()) {
+        if (!enforce || (sessionUser != null && sessionUser.admin())) {
             return true;
         }
         response.sendRedirect("/error/403");
