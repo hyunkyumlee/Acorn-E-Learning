@@ -44,9 +44,7 @@ public class SettingsController {
         if (sessionUser == null) {
             return "redirect:/login";
         }
-        model.addAttribute("screen", "settings/index");
-        model.addAttribute("view", settingsService.index(sessionUser));
-        return "settings/index";
+        return "redirect:/settings/profile";
     }
 
     @GetMapping("/settings/profile")

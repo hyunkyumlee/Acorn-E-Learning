@@ -11,6 +11,7 @@
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="settings-screen">
     <section class="figma-settings-page">
+      <div class="figma-settings-side">
       <aside class="figma-settings-sidebar">
         <h1>설정</h1>
         <nav aria-label="설정 메뉴">
@@ -20,8 +21,12 @@
           <a th:href="@{/settings/system}">시스템 설정</a>
           <a th:href="@{/settings/payment}">결제 정보</a>
         </nav>
-        <a class="figma-logout" th:href="@{/login}">로그아웃</a>
       </aside>
+        <form class="figma-settings-logout-form" method="post" th:action="@{/logout}">
+          <input type="hidden" name="redirect" value="/login">
+          <button class="figma-logout-button" type="submit">로그아웃</button>
+        </form>
+      </div>
       <section class="figma-settings-main">
         <article class="figma-settings-panel">
           <h1>연동된 소셜 계정</h1>
