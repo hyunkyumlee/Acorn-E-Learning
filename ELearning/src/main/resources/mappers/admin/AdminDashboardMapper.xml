@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.admin.mapper.AdminDashboardMapper">
+
+
+    <select id="countTotalUsers" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+    </select>
+
+    <select id="countTodayLearning" resultType="long">
+        SELECT COUNT(*)
+        FROM learning_progress
+        WHERE DATE(COALESCE(updated_at, created_at)) = CURDATE()
+        OR DATE(completed_at) = CURDATE()
+    </select>
+
+
+    <select id="countTodaySubmissions" resultType="long">
+        SELECT COUNT(*)
+        FROM practice_submissions
+        WHERE DATE(created_at) = CURDATE()
+    </select>
+
+    <select id="countPendingReports" resultType="long">
+        SELECT COUNT(*)
+        FROM reports
+        WHERE status = 'PENDING'
+    </select>
+
+
+    <select id="findRecentReports" resultType="com.acorn.elearning.community.model.Report">
+        SELECT report_id, target_type, target_id,
+                reason_code, status, created_at
+        FROM reports
+        ORDER BY created_at DESC
+        LIMIT 5
+    </select>
+
+    <select id="findRecentNotices" resultType="com.acorn.elearning.admin.model.Notice">
+        SELECT notice_id, title, status, created_at
+        FROM notices
+        ORDER BY created_at DESC
+        LIMIT 5
+    </select>
+
+    <select id="findDailyLearningActivity" resultType="com.acorn.elearning.admin.dto.response.AdminChartPointResponse">
+        SELECT
+            label,
+            value,
+            0 AS percent
+        FROM (
+            SELECT
+                DATE_FORMAT(DATE(COALESCE(updated_at, created_at)), '%m/%d') AS label,
+                DATE(COALESCE(updated_at, created_at)) AS activity_date,
+                COUNT(*) AS value
+            FROM learning_progress
+            WHERE DATE(COALESCE(updated_at, created_at)) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            GROUP BY DATE(COALESCE(updated_at, created_at))
+        ) daily
+        ORDER BY activity_date
+    </select>
+
+    <select id="findSubjectCompletionCounts" resultType="com.acorn.elearning.admin.dto.response.AdminChartPointResponse">
+        SELECT
+            s.subject_name AS label,
+            COUNT(lp.progress_id) AS value,
+            0 AS percent
+        FROM subjects s
+        LEFT JOIN learning_progress lp
+            ON s.subject_id = lp.subject_id
+            AND (
+                lp.lesson_completed = 1
+                OR lp.practice_passed = 1
+                OR lp.completed_at IS NOT NULL
+            )
+        WHERE s.is_active = 1
+        GROUP BY s.subject_id, s.subject_name, s.sort_order
+        ORDER BY value DESC, s.sort_order ASC
+        LIMIT 7
+    </select>
+
+</mapper>

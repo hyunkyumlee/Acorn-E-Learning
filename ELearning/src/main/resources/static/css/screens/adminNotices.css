@@ -1,196 +1,248 @@
 
-.admin-screen {
-    padding: 32px;
-    background: #f8f8f8;
+.notice-manage-screen {
+    padding: 22px 28px 32px;
+    background: #f6f7f9;
     min-height: 100vh;
 }
 
-.admin-header,
-.admin-filter,
-.admin-table-section,
-.admin-form-section {
-    background: #fff;
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+.notice-manage-header {
+    padding: 0 0 16px;
 }
 
-/*제목*/
+.notice-manage-header h1,
+.notice-section-title h2,
+.notice-form-panel h2 {
+    margin: 0;
+    color: #111827;
+}
 
-.admin-header {
+.notice-manage-header h1 {
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.notice-toolbar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-}
-
-.admin-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-}
-
-.admin-header button {
-    background: #222;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.admin-header button:hover {
-    background: #444;
-}
-
-/* 검색 */
-
-.admin-filter {
-    display: flex;
+    justify-content: space-between;
     gap: 16px;
+    margin-bottom: 16px;
 }
 
-.admin-filter select {
-    width: 180px;
-    height: 42px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 0 10px;
-}
-
-
-
-.admin-table-section h2 {
-    margin-bottom: 20px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-thead {
-    background: #f3f4f6;
-}
-
-thead th {
-    padding: 14px;
-    font-weight: 600;
-    text-align: center;
-}
-
-tbody td {
-    padding: 14px;
-    border-bottom: 1px solid #ececec;
-    text-align: center;
-}
-
-tbody tr:hover {
-    background: #fafafa;
-}
-
-
-
-td button {
-    width: 60px;
-    height: 34px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: white;
-    cursor: pointer;
-}
-
-td button:first-child {
-    margin-right: 6px;
-}
-
-td button:hover {
-    background: #efefef;
-}
-
-
-
-.admin-form-section h2 {
-    margin-bottom: 20px;
-}
-
-.admin-form-section form {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.admin-form-section label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.admin-form-section input,
-.admin-form-section textarea,
-.admin-form-section select {
-    width: 100%;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 15px;
-}
-
-.admin-form-section textarea {
-    min-height: 240px;
-    resize: vertical;
-}
-
-.admin-form-section select {
-    width: 180px;
-}
-
-.admin-form-section form > div:last-child {
-    display: flex;
-    justify-content: flex-end;
+.notice-filter {
+    display: grid;
+    grid-template-columns: 220px 150px 150px;
     gap: 12px;
 }
 
-.admin-form-section button {
-    width: 110px;
-    height: 42px;
-    border: none;
-    border-radius: 8px;
+.notice-filter input,
+.notice-filter select,
+.notice-form-panel input,
+.notice-form-panel select,
+.notice-form-panel textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+}
+
+.notice-filter input,
+.notice-filter select,
+.notice-form-panel input,
+.notice-form-panel select {
+    height: 36px;
+    padding: 0 12px;
+}
+
+.notice-primary-button,
+.notice-secondary-button,
+.notice-table-button {
+    border-radius: 7px;
+    border: 1px solid #d1d5db;
     cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-.admin-form-section button[type="submit"] {
-    background: #222;
-    color: white;
+.notice-primary-button {
+    height: 38px;
+    padding: 0 18px;
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
 }
 
-.admin-form-section button[type="reset"] {
-    background: white;
-    border: 1px solid #ccc;
+.notice-primary-button:hover {
+    background: #374151;
 }
 
-/*반응형*/
+.notice-secondary-button,
+.notice-table-button {
+    background: #ffffff;
+    color: #111827;
+}
+
+.notice-secondary-button:hover,
+.notice-table-button:hover {
+    background: #f3f4f6;
+}
+
+.notice-section {
+    margin-bottom: 28px;
+}
+
+.notice-section-title {
+    padding-bottom: 6px;
+}
+
+.notice-section-title h2,
+.notice-form-panel h2 {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.notice-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.notice-table {
+    width: 100%;
+    min-width: 940px;
+    border-collapse: collapse;
+}
+
+.notice-table thead {
+    background: #eef0f2;
+}
+
+.notice-table th,
+.notice-table td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 11px 14px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+.notice-table th {
+    color: #374151;
+    font-weight: 800;
+}
+
+.notice-table td {
+    color: #1f2937;
+}
+
+.notice-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.notice-title-cell {
+    max-width: 360px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notice-status-active {
+    color: #111827;
+    font-weight: 800;
+}
+
+.notice-status-muted {
+    color: #6b7280;
+    font-weight: 700;
+}
+
+.notice-table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notice-table-button {
+    min-width: 52px;
+    height: 28px;
+    font-size: 12px;
+}
+
+.notice-empty {
+    height: 76px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.notice-form-panel {
+    padding: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #eeeeef;
+}
+
+.notice-form-panel h2 {
+    margin-bottom: 14px;
+}
+
+.notice-form-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 360px) minmax(420px, 1fr);
+    gap: 24px;
+    align-items: stretch;
+}
+
+.notice-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.notice-content-area {
+    min-height: 210px;
+    padding: 12px;
+    resize: vertical;
+}
+
+.notice-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.notice-form-actions .notice-primary-button,
+.notice-form-actions .notice-secondary-button {
+    min-width: 72px;
+}
 
 @media (max-width: 1024px) {
-
-    .admin-filter {
+    .notice-toolbar {
+        align-items: stretch;
         flex-direction: column;
     }
 
-    .admin-filter select {
-        width: 100%;
+    .notice-filter,
+    .notice-form-layout {
+        grid-template-columns: 1fr;
     }
 
-    .admin-header {
+    .notice-content-area {
+        min-height: 180px;
+    }
+}
+
+@media (max-width: 640px) {
+    .notice-manage-screen {
+        padding: 18px;
+    }
+
+    .notice-form-actions {
+        align-items: stretch;
         flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
-
-    .admin-form-section select {
-        width: 100%;
-    }
-
-    .admin-form-section form > div:last-child {
-        justify-content: flex-start;
     }
 }

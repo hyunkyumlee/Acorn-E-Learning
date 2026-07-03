@@ -1,10 +1,16 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>공지 관리 | Knowva</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>공지사항 관리 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
   <link rel="stylesheet" th:href="@{/css/screens/adminNotices.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
@@ -12,92 +18,123 @@
 <div th:replace="~{fragments/topbar :: topbar}"></div>
 <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
 
-<main class="page-shell admin-screen">
-
-  <!-- 제목 영역 -->
-  <section class="admin-header">
+<main class="page-shell admin-screen notice-manage-screen">
+  <section class="notice-manage-header">
     <h1>공지사항 관리</h1>
-    <button type="button">+ 공지사항 작성</button>
   </section>
 
-  <!-- 검색/필터 영역 -->
-  <section class="admin-filter">
-    <select>
-      <option>기간</option>
-    </select>
-
-    <select>
-      <option>공개 상태</option>
-      <option value="PUBLISHED">공개</option>
-      <option value="DRAFT">비공개</option>
-    </select>
+  <section class="notice-toolbar">
+    <div class="notice-filter">
+      <input type="search" id="searchNotice" placeholder="제목 검색">
+      <select id="noticePeriodFilter">
+        <option value="">기간</option>
+        <option value="today">오늘</option>
+        <option value="week">최근 7일</option>
+        <option value="month">최근 30일</option>
+      </select>
+      <select id="noticeStatusFilter">
+        <option value="">공개 상태</option>
+        <option value="PUBLISHED">공개</option>
+        <option value="DRAFT">비공개</option>
+      </select>
+    </div>
+    <button type="button" class="notice-primary-button">+ 공지사항 작성</button>
   </section>
 
-  <!-- 공지사항 목록 -->
-  <section class="admin-table-section">
-    <h2>공지사항 목록</h2>
+  <section class="notice-section">
+    <div class="notice-section-title">
+      <h2>공지사항 목록</h2>
+    </div>
 
-    <table>
-      <thead>
-      <tr>
-        <th>공지 ID</th>
-        <th>제목</th>
-        <th>작성자</th>
-        <th>게시일</th>
-        <th>조회수</th>
-        <th>상태</th>
-        <th>관리</th>
-      </tr>
-      </thead>
+    <div class="notice-table-wrap">
+      <table class="notice-table">
+        <thead>
+        <tr>
+          <th>공지 ID</th>
+          <th>제목</th>
+          <th>작성자</th>
+          <th>게시일</th>
+          <th>조회수</th>
+          <th>상태</th>
+          <th>관리</th>
+        </tr>
+        </thead>
 
-      <tbody>
-      <tr th:each="notice : ${noticeList}">
-        <td th:text="${notice.noticeId}">#N001</td>
-        <td th:text="${notice.title}">공지 제목</td>
-        <td th:text="${notice.writerId}">관리자</td>
-        <td th:text="${notice.publishedAt}">2026-06-01</td>
-        <td>-</td>
-        <td th:text="${notice.status}">공개</td>
-        <td>
-          <button type="button">수정</button>
-          <button type="button">삭제</button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+        <tbody>
+        <tr th:each="notice : ${noticeList}" class="notice-row"
+            th:data-title="${notice.title}"
+            th:data-status="${notice.status}">
+          <td th:text="${'#N' + notice.noticeId}">#N001</td>
+          <td class="notice-title-cell" th:text="${notice.title}">공지 제목</td>
+          <td th:text="${notice.writerId}">관리자</td>
+          <td th:text="${notice.publishedAt != null ? #temporals.format(notice.publishedAt, 'yyyy-MM-dd') : '-'}">2026-06-01</td>
+          <td>-</td>
+          <td th:text="${notice.status == 'PUBLISHED' ? '공개' : '비공개'}"
+              th:classappend="${notice.status == 'PUBLISHED'} ? ' notice-status-active' : ' notice-status-muted'">공개</td>
+          <td>
+            <div class="notice-table-actions">
+              <button type="button" class="notice-table-button">수정</button>
+              <button type="button" class="notice-table-button">삭제</button>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(noticeList)}">
+          <td colspan="7" class="notice-empty">등록된 공지사항이 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
-  <!-- 등록 / 수정 폼 -->
-  <section class="admin-form-section">
+  <section class="notice-form-panel">
     <h2>공지사항 등록 / 수정</h2>
 
     <form method="post" action="/admin/notices">
-      <div>
-        <label>제목</label>
-        <input type="text" name="title" placeholder="공지사항 제목을 입력하세요">
-      </div>
+      <div class="notice-form-layout">
+        <div class="notice-form-fields">
+          <input type="text" name="title" id="noticeTitle" placeholder="공지사항 제목 입력">
+          <select name="status" id="noticeStatus">
+            <option value="">공개 여부 선택</option>
+            <option value="PUBLISHED">공개</option>
+            <option value="DRAFT">비공개</option>
+          </select>
 
-      <div>
-        <label>내용</label>
-        <textarea name="content" placeholder="공지사항 내용을 입력하세요"></textarea>
-      </div>
+          <div class="notice-form-actions">
+            <button type="submit" class="notice-primary-button">저장</button>
+            <button type="reset" class="notice-secondary-button">취소</button>
+            <button type="button" class="notice-secondary-button">삭제</button>
+          </div>
+        </div>
 
-      <div>
-        <label>공개 여부</label>
-        <select name="status">
-          <option value="PUBLISHED">공개</option>
-          <option value="DRAFT">비공개</option>
-        </select>
-      </div>
-
-      <div>
-        <button type="submit">저장</button>
-        <button type="reset">취소</button>
+        <textarea name="content" id="noticeContent" class="notice-content-area" placeholder="공지사항 내용을 입력하세요"></textarea>
       </div>
     </form>
   </section>
 
 </main>
+<script>
+  function applyNoticeFilters() {
+    const keyword = document.querySelector("#searchNotice").value.trim().toLowerCase();
+    const status = document.querySelector("#noticeStatusFilter").value;
+
+    document.querySelectorAll(".notice-row").forEach((row) => {
+      const rowTitle = (row.dataset.title || "").toLowerCase();
+      const rowStatus = row.dataset.status || "";
+
+      const matchesKeyword = rowTitle.includes(keyword);
+      const matchesStatus = status === "" || rowStatus === status;
+
+      row.style.display = matchesKeyword && matchesStatus ? "" : "none";
+    });
+  }
+
+  document.querySelector("#searchNotice")?.addEventListener("input", applyNoticeFilters);
+  document.querySelector("#noticeStatusFilter")?.addEventListener("change", applyNoticeFilters);
+
+  document.querySelector(".notice-primary-button")?.addEventListener("click", () => {
+    document.querySelector(".notice-form-panel").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.querySelector("#noticeTitle")?.focus();
+  });
+</script>
 </body>
 </html>
-
