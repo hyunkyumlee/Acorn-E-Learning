@@ -11,4 +11,7 @@ public interface UserMapper {
     List<User> findAll();
     int insert(User model);
     int update(User model);
+
+    //정하 - auth 용 nickname 중복 검사 추가
+    boolean existByNickname(@Param("nickname") String nickname);
 }
