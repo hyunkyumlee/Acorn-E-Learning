@@ -1,15 +1,31 @@
 package com.acorn.elearning.learning.controller;
 
 import com.acorn.elearning.common.response.ApiResponse;
+import com.acorn.elearning.learning.dto.response.LessonBookmarkPageResponse;
+import com.acorn.elearning.learning.dto.response.LessonBookmarkResponse;
+import com.acorn.elearning.learning.service.LessonService;
+import com.acorn.elearning.security.SessionUser;
 import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 @RestController
 public class LearningApiController {
+
+    // 로그인/세션 미연결 구간 dev fallback 사용자(샘플 learner)
+    private static final SessionUser DEV_FALLBACK_USER =
+            new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
+
+    private final LessonService lessonService;
+
+    public LearningApiController(LessonService lessonService) {
+        this.lessonService = lessonService;
+    }
 
     @GetMapping("/api/subjects")
     public ApiResponse<Map<String, Object>> subjects() {
@@ -58,32 +74,29 @@ public class LearningApiController {
     }
 
     @PostMapping("/api/lessons/{lessonId}/bookmark")
-    public ApiResponse<Map<String, Object>> bookmark(@PathVariable Long lessonId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // LessonBookmarkForm form = request body 또는 form binding 값으로 받으세요.
-        // LessonBookmarkResponse response = lessonService.bookmark(sessionUser, form, lessonId);
-        // return ApiResponse.success(response);
-        return ok("LEARN-006");
+    public ApiResponse<LessonBookmarkResponse> bookmark(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long lessonId) {
+        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        return ApiResponse.success(lessonService.addBookmark(user, lessonId));
     }
 
     @DeleteMapping("/api/lessons/{lessonId}/bookmark")
-    public ApiResponse<Map<String, Object>> deleteBookmark(@PathVariable Long lessonId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // DeleteBookmarkForm form = request body 또는 form binding 값으로 받으세요.
-        // LessonBookmarkResponse response = lessonService.deleteBookmark(sessionUser, form, lessonId);
-        // return ApiResponse.success(response);
-        return ok("LEARN-006");
+    public ApiResponse<LessonBookmarkResponse> deleteBookmark(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long lessonId) {
+        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        return ApiResponse.success(lessonService.removeBookmark(user, lessonId));
     }
 
     @GetMapping("/api/lessons/bookmarks")
-    public ApiResponse<Map<String, Object>> bookmarks() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // LessonBookmarkResponse response = lessonService.bookmarks(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("LEARN-007");
+    public ApiResponse<LessonBookmarkPageResponse> bookmarks(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam(name = "subjectId", required = false) Long subjectId,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
+        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        return ApiResponse.success(lessonService.getBookmarks(user, subjectId, page, size));
     }
 
     @GetMapping("/api/level-tests/questions")
