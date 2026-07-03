@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로그인 테스트 | Knowva</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      max-width: 480px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 0.5rem; }
+    .hint { font-size: 0.875rem; color: #666; margin: 0 0 1rem; }
+    .panel {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .panel h2 { font-size: 1rem; margin: 0 0 0.75rem; }
+    .status-line { font-weight: bold; margin: 0 0 0.75rem; }
+    .status-line.is-in { color: #0a7; }
+    .status-line.is-out { color: #888; }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .field span { font-size: 0.875rem; }
+    .field input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .session-dl { margin: 0; }
+    .session-dl dt {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+    .session-dl dt:first-child { margin-top: 0; }
+    .session-dl dd { margin: 0.125rem 0 0; font-weight: 500; }
+    .actions { margin-top: 0.5rem; }
+    .actions button {
+      width: 100%;
+      padding: 0.625rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: 1px solid #333;
+      border-radius: 4px;
+      background: #fff;
+    }
+    .actions button[type="submit"]:hover { background: #f5f5f5; }
+    .error { color: #c00; margin-bottom: 0.75rem; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+
+<h1>로그인 테스트</h1>
+<p class="hint">개발용 — session attribute <code>LOGIN_USER</code> 확인</p>
+
+<p class="error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
+
+<section class="panel" th:with="sessionUser=${session.LOGIN_USER}">
+
+  <h2>현재 세션</h2>
+
+  <p th:if="${sessionUser != null}"
+     class="status-line is-in"
+     th:text="'현재 상태: 로그인 (' + ${sessionUser.email()} + ')'">
+    현재 상태: 로그인
+  </p>
+  <p th:unless="${sessionUser != null}" class="status-line is-out">
+    현재 상태: 로그아웃
+  </p>
+
+  <dl class="session-dl" th:if="${sessionUser != null}">
+    <dt>아이디 (email)</dt>
+    <dd th:text="${sessionUser.email()}">learner@knowva.local</dd>
+    <dt>nickname</dt>
+    <dd th:text="${sessionUser.nickname()}">닉네임</dd>
+    <dt>role</dt>
+    <dd th:text="${sessionUser.role()}">ROLE_USER</dd>
+    <dt>userId</dt>
+    <dd th:text="${sessionUser.userId()}">2</dd>
+  </dl>
+  <p th:unless="${sessionUser != null}" class="hint" style="margin:0;">
+    로그인하면 아이디 · role · userId가 여기 표시됩니다.
+  </p>
+
+  <!-- 비로그인: 아이디·비밀번호 + 로그인 버튼 -->
+  <form th:if="${sessionUser == null}"
+        th:action="@{/login}"
+        th:object="${loginForm}"
+        method="post">
+    <input type="hidden" name="redirect" value="/auth/testlogin">
+    <label class="field">
+      <span>아이디 (email)</span>
+      <input type="email" th:field="*{email}" placeholder="learner@knowva.local" autocomplete="username">
+    </label>
+    <label class="field">
+      <span>비밀번호</span>
+      <input type="password" th:field="*{password}" placeholder="Knowva1234!" autocomplete="current-password">
+    </label>
+    <div class="actions">
+      <button type="submit">로그인</button>
+    </div>
+  </form>
+
+  <!-- 로그인됨: 같은 자리에 로그아웃 버튼 -->
+  <form th:if="${sessionUser != null}" th:action="@{/logout}" method="post">
+    <input type="hidden" name="redirect" value="/auth/testlogin">
+    <div class="actions">
+      <button type="submit">로그아웃</button>
+    </div>
+  </form>
+
+  <p class="hint" th:if="${sessionUser == null}" style="margin:0.75rem 0 0;">
+    샘플: learner@knowva.local / Knowva1234!
+  </p>
+
+</section>
+
+</body>
+</html>
