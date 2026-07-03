@@ -14,13 +14,14 @@ public class GuestOnlyInterceptor implements HandlerInterceptor {
         this.enforce = enforce;
     }
 
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         SessionUser sessionUser = currentUser(request);
         if (!enforce || sessionUser == null) {
             return true;
         }
-        response.sendRedirect(sessionUser.admin() ? "/admin" : "/learning");
+        response.sendRedirect(sessionUser.defaultRedirectPath());
         return false;
     }
 

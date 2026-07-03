@@ -20,9 +20,9 @@ public class PracticeSetCompleteForm {
     @NotNull
     private Long setAttemptId;
 
-    // 2. 제출한 답안 리스트 (PracticeAnswerForm의 리스트)
+    // 2. 제출한 답안 리스트 (PracticeAnswerForm 내부 클래스 SingleAnswer의 리스트)
     @NotEmpty
-    private List<PracticeAnswerForm> answers;
+    private List<PracticeAnswerForm.SingleAnswer> answers;
 
     // 3.중복 제출 방지용 --기존필드 유지
     private String idempotencyToken;
