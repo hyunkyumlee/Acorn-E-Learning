@@ -1,8 +1,10 @@
 package com.acorn.elearning.practice.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.acorn.elearning.practice.dto.response.PracticeAnswerResultResponse;
+import com.acorn.elearning.practice.dto.response.PracticeSetResponse;
 import com.acorn.elearning.practice.form.CreatePracticeSetForm;
 import com.acorn.elearning.practice.form.PracticeAnswerForm;
 import com.acorn.elearning.practice.form.PracticeSetCompleteForm;
@@ -44,7 +46,7 @@ public class PracticeService {
         this.scoreService = scoreService;
     }
 
-
+    //문제조회
     @Transactional
     public PracticeSetView createPracticeSet(SessionUser user, CreatePracticeSetForm form) {
 
@@ -76,7 +78,7 @@ public class PracticeService {
         @Transactional
         public PracticeAnswerResultResponse submitAnswers(SessionUser user, PracticeSetCompleteForm completeForm) {
                 Long setAttemptId = completeForm.getSetAttemptId();
-                List<PracticeAnswerForm> answerList = completeForm.getAnswers();
+                List<PracticeAnswerForm.SingleAnswer> answerList = completeForm.getAnswers();
 
         // 1. 세트 이력 조회 (DB에서 subjectId를 포함한 attempt 객체를 가져옴)
         PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
@@ -85,7 +87,7 @@ public class PracticeService {
         int correctCount = 0;
 
         // 2. 답안 채점 및 기록
-        for (PracticeAnswerForm answerForm : answerList) {
+        for (PracticeAnswerForm.SingleAnswer answerForm : answerList) {
             PracticeProblem problem = problemService.getProblem(answerForm.getProblemId());
             boolean isCorrect = problem.getAnswerText().equals(answerForm.getSubmittedAnswer());
 
@@ -119,13 +121,40 @@ public class PracticeService {
             // 4. 점수 처리 (모델에서 바로 가져온 subjectId 사용)
             scoreService.giveScore(
                     user.userId(),
-                    attempt.getSubjectId(), // 👈 모델에서 직접 조회
+                    attempt.getSubjectId(), // 모델에서 직접 조회
                     10,
                     "PRACTICE_COMPLETE",
                     completeForm.getIdempotencyToken()
             );
 
             return PracticeAnswerResultResponse.from(correctCount, answerList.size());
+        }
+
+        //다음단원이동여부
+        @Transactional
+        public PracticeSetResponse completeSet(SessionUser user, Long setAttemptId) {
+            PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
+                    .orElseThrow(() -> new RuntimeException("세트를 찾을 수 없습니다."));
+
+            // 1. 상태 처리
+            if (!"COMPLETED".equals(attempt.getStatus())) {
+                attempt.setStatus("COMPLETED");
+                practiceSetAttemptMapper.updateAttempt(attempt);
+            }
+
+            // 2. 이동 경로 로직
+            boolean isTestStep = (attempt.getSubjectId() == 5);
+            String nextPath = isTestStep ? "/learning/test/start" : "/learning/practice/next/" + (attempt.getSubjectId() + 1);
+
+            // 3. 데이터를 Map에 담기
+            Map<String, Object> data = Map.of(
+                    "passed", attempt.getPassed(),
+                    "nextPath", nextPath,
+                    "isTestStep", isTestStep
+            );
+
+            // 4. 기존 응답 객체 반환
+            return PracticeSetResponse.success(data);
         }
 
 }
