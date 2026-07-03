@@ -26,64 +26,52 @@
   <section class="admin-dashboard-summary" aria-label="관리자 주요 지표">
     <article class="admin-dashboard-stat">
       <span>전체 사용자 수</span>
-      <strong>2,847</strong>
-      <small>+ 12% 지난달 대비</small>
+      <strong th:text="${totalUserCount}">0</strong>
     </article>
     <article class="admin-dashboard-stat">
-      <span>오늘 학습량</span>
-      <strong>153</strong>
-      <small>+ 8% 어제 대비</small>
+      <span>오늘 학습 수</span>
+      <strong th:text="${todayLearningCount}">0</strong>
     </article>
     <article class="admin-dashboard-stat">
-      <span>오늘 문제풀이 수</span>
-      <strong>1,024</strong>
-      <small>+ 15% 어제 대비</small>
+      <span>오늘 문제 제출 수</span>
+      <strong th:text="${todaySubmissionCount}">0</strong>
     </article>
     <article class="admin-dashboard-stat">
       <span>신고 대기 수</span>
-      <strong>5</strong>
-      <small>처리 대기 중</small>
+      <strong th:text="${pendingReportCount}">0</strong>
     </article>
   </section>
 
-  <section class="admin-dashboard-analytics" aria-label="사용량 및 학습 통계">
+  <section class="admin-dashboard-analytics" aria-label="학습 통계">
     <article class="admin-dashboard-card admin-dashboard-chart-card">
       <div class="admin-dashboard-card-head">
-        <h2>일별 사용자 접속률</h2>
-        <div class="admin-dashboard-period">
-          <span>오늘</span>
-          <span class="is-active">7일</span>
-          <span>30일</span>
-        </div>
+        <h2>일별 학습 활동</h2>
       </div>
-      <div class="admin-dashboard-chart" aria-label="일별 사용자 접속률 막대 그래프">
-        <div class="admin-dashboard-bar" style="--bar-height: 42%"><i></i><span>6/9</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 66%"><i></i><span>6/10</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 34%"><i></i><span>6/11</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 78%"><i></i><span>6/12</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 56%"><i></i><span>6/13</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 86%"><i></i><span>6/14</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 70%"><i></i><span>6/15</span></div>
+      <div class="admin-dashboard-chart" aria-label="일별 학습 활동 막대 그래프">
+        <div th:each="point : ${dailyLearningChart}"
+             class="admin-dashboard-bar"
+             th:style="'--bar-height: ' + ${point.percent} + '%'">
+          <strong class="admin-dashboard-bar-value" th:text="${point.value}">0</strong>
+          <i th:if="${point.value > 0}"></i>
+          <span th:text="${point.label}">06/29</span>
+        </div>
+        <p th:if="${#lists.isEmpty(dailyLearningChart)}">표시할 데이터가 없습니다.</p>
       </div>
     </article>
 
     <article class="admin-dashboard-card admin-dashboard-chart-card">
       <div class="admin-dashboard-card-head">
         <h2>과목별 학습 완료 수</h2>
-        <div class="admin-dashboard-period">
-          <span>오늘</span>
-          <span class="is-active">7일</span>
-          <span>30일</span>
-        </div>
       </div>
-      <div class="admin-dashboard-chart" aria-label="과목별 학습 완료 수 막대 그래프">
-        <div class="admin-dashboard-bar" style="--bar-height: 50%"><i></i><span>Java</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 72%"><i></i><span>Python</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 28%"><i></i><span>SQL</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 64%"><i></i><span>HTML/CSS</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 82%"><i></i><span>JS</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 44%"><i></i><span>자료구조</span></div>
-        <div class="admin-dashboard-bar" style="--bar-height: 60%"><i></i><span>알고리즘</span></div>
+      <div class="admin-dashboard-chart admin-dashboard-chart-centered" aria-label="과목별 학습 완료 수 막대 그래프">
+        <div th:each="point : ${subjectCompleteChart}"
+             class="admin-dashboard-bar"
+             th:style="'--bar-height: ' + ${point.percent} + '%'">
+          <strong class="admin-dashboard-bar-value" th:text="${point.value}">0</strong>
+          <i th:if="${point.value > 0}"></i>
+          <span th:text="${point.label}">Java</span>
+        </div>
+        <p th:if="${#lists.isEmpty(subjectCompleteChart)}">표시할 데이터가 없습니다.</p>
       </div>
     </article>
   </section>
@@ -112,23 +100,18 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td>#R001</td>
-            <td>Java 게시글 부적절한 사용</td>
-            <td>처리 완료</td>
-            <td>06/15</td>
+          <tr th:each="report : ${recentReports}">
+            <td th:text="${'#R' + report.reportId}">#R001</td>
+            <td th:text="${(report.targetType == 'POST' ? '게시글' : (report.targetType == 'COMMENT' ? '댓글' : report.targetType))
+              + ' / ' +
+              (report.reasonCode == 'SPAM' ? '스팸' : (report.reasonCode == 'ABUSE' ? '부적절한 내용' : (report.reasonCode == 'AD' ? '광고' : report.reasonCode)))}">
+              게시글 / 스팸
+            </td>
+            <td th:text="${report.status == 'PENDING' ? '대기' : (report.status == 'RESOLVED' ? '처리 완료' : report.status)}">처리 완료</td>
+            <td th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'MM/dd') : '-'}">06/15</td>
           </tr>
-          <tr>
-            <td>#R002</td>
-            <td>욕설 댓글 신고</td>
-            <td>검토 중</td>
-            <td>06/14</td>
-          </tr>
-          <tr>
-            <td>#R003</td>
-            <td>광고성 게시물 신고</td>
-            <td>대기</td>
-            <td>06/13</td>
+          <tr th:if="${#lists.isEmpty(recentReports)}">
+            <td colspan="4">최근 신고 목록이 없습니다.</td>
           </tr>
           </tbody>
         </table>
@@ -148,23 +131,14 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td>#N001</td>
-            <td>KNOWVA 이용약관 변경 안내</td>
-            <td>공개</td>
-            <td>06/15</td>
+          <tr th:each="notice : ${recentNotices}">
+            <td th:text="${'#N' + notice.noticeId}">#N001</td>
+            <td th:text="${notice.title}">KNOWVA 이용약관 변경 안내</td>
+            <td th:text="${notice.status == 'PUBLISHED' ? '공개' : '비공개'}">공개</td>
+            <td th:text="${notice.createdAt != null ? #temporals.format(notice.createdAt, 'MM/dd') : '-'}">06/15</td>
           </tr>
-          <tr>
-            <td>#N002</td>
-            <td>6월 시스템 점검 안내</td>
-            <td>공개</td>
-            <td>06/10</td>
-          </tr>
-          <tr>
-            <td>#N003</td>
-            <td>신규 과목 업데이트 안내</td>
-            <td>공개</td>
-            <td>06/05</td>
+          <tr th:if="${#lists.isEmpty(recentNotices)}">
+            <td colspan="4">최근에 등록된 공지사항이 없습니다.</td>
           </tr>
           </tbody>
         </table>
