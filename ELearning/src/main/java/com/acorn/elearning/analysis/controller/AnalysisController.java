@@ -1,8 +1,10 @@
 package com.acorn.elearning.analysis.controller;
 
 import com.acorn.elearning.analysis.dto.request.GenerateAnalysisRequest;
+import com.acorn.elearning.analysis.dto.response.AnalysisDashboardResponse;
 import com.acorn.elearning.analysis.dto.response.AnalysisReportResponse;
 import com.acorn.elearning.analysis.form.GenerateAnalysisForm;
+import com.acorn.elearning.analysis.service.AnalysisDashboardService;
 import com.acorn.elearning.analysis.service.AiAnalysisService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.validation.Valid;
@@ -18,9 +20,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class AnalysisController {
     private final AiAnalysisService aiAnalysisService;
+    private final AnalysisDashboardService analysisDashboardService;
 
-    public AnalysisController(AiAnalysisService aiAnalysisService) {
+    public AnalysisController(AiAnalysisService aiAnalysisService, AnalysisDashboardService analysisDashboardService) {
         this.aiAnalysisService = aiAnalysisService;
+        this.analysisDashboardService = analysisDashboardService;
     }
 
     @GetMapping("/analysis")
@@ -31,9 +35,11 @@ public class AnalysisController {
         if (sessionUser == null) {
             return "redirect:/login";
         }
+        AnalysisDashboardResponse dashboard = analysisDashboardService.dashboard(sessionUser);
         model.addAttribute("screen", "analysis/index");
         model.addAttribute("form", new GenerateAnalysisForm());
-        model.addAttribute("report", aiAnalysisService.latest(sessionUser));
+        model.addAttribute("dashboard", dashboard);
+        model.addAttribute("report", dashboard.report());
         return "analysis/index";
     }
 
@@ -49,8 +55,10 @@ public class AnalysisController {
             return "redirect:/login";
         }
         if (bindingResult.hasErrors()) {
+            AnalysisDashboardResponse dashboard = analysisDashboardService.dashboard(sessionUser);
             model.addAttribute("screen", "analysis/index");
-            model.addAttribute("report", aiAnalysisService.latest(sessionUser));
+            model.addAttribute("dashboard", dashboard);
+            model.addAttribute("report", dashboard.report());
             return "analysis/index";
         }
         AnalysisReportResponse report = aiAnalysisService.generate(sessionUser, new GenerateAnalysisRequest(form.getExamId()));

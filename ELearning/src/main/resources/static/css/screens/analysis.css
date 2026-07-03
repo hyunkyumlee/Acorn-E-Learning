@@ -20,12 +20,23 @@
 .analysis-generate-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
   gap: var(--space-3);
   align-items: end;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   padding: var(--space-4);
+}
+
+.analysis-generate-form label {
+  min-width: 0;
+}
+
+.analysis-generate-form .button {
+  white-space: nowrap;
 }
 
 .analysis-summary {
@@ -35,6 +46,7 @@
 .analysis-summary article,
 .analysis-result-metrics article {
   display: grid;
+  min-width: 0;
   gap: var(--space-1);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -48,6 +60,12 @@
   color: var(--muted);
   font-size: 13px;
   font-weight: 750;
+}
+
+.analysis-summary small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .analysis-summary strong,
@@ -110,6 +128,7 @@
 
 .analysis-bar-chart i {
   display: block;
+  position: relative;
   flex: 1;
   min-width: 18px;
   border-radius: var(--radius) var(--radius) 0 0;
@@ -120,8 +139,65 @@
   );
 }
 
+.analysis-bar-chart i span {
+  position: absolute;
+  right: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(50%);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .analysis-result-metrics {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysis-result-metrics strong {
+  font-size: 20px;
+  word-break: keep-all;
+}
+
+.analysis-progress-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.analysis-progress-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.32fr) minmax(0, 1fr) 54px;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.analysis-progress-row span {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 750;
+  word-break: keep-all;
+}
+
+.analysis-progress-row strong {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 850;
+  text-align: right;
+}
+
+.analysis-progress-track {
+  height: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.analysis-progress-track i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--success));
 }
 
 .analysis-lock {
@@ -168,5 +244,32 @@
   .analysis-premium-grid,
   .analysis-result-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .analysis-progress-row {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-progress-row strong {
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  .analysis-head h1 {
+    font-size: 30px;
+    line-height: 1.15;
+  }
+
+  .analysis-head p {
+    overflow-wrap: anywhere;
+  }
+
+  .analysis-generate-form {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-generate-form .button {
+    width: 100%;
   }
 }
