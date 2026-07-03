@@ -1,10 +1,13 @@
 package com.acorn.elearning.user.dto.response;
 
+import com.acorn.elearning.exam.model.ExamSession;
 import com.acorn.elearning.learning.model.AttendanceRecord;
 import com.acorn.elearning.learning.model.LearningProgress;
+import com.acorn.elearning.learning.model.LevelTestAttempt;
 import com.acorn.elearning.payment.dto.response.PremiumAccessResponse;
 import com.acorn.elearning.payment.model.DummyPayment;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.model.User;
 import com.acorn.elearning.user.model.UserLearningProfile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,6 +15,8 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -19,20 +24,26 @@ public record MyPageSummaryResponse(
         UserSummary user,
         PremiumSummary premium,
         LearningSummary learning,
+        ExamSummary exam,
         PaymentSummary latestPayment
 ) {
     public static MyPageSummaryResponse of(
             SessionUser sessionUser,
+            User user,
             PremiumAccessResponse premiumAccess,
             UserLearningProfile learningProfile,
             AttendanceRecord latestAttendance,
+            List<AttendanceRecord> attendanceRecords,
             List<LearningProgress> progressItems,
+            List<ExamSession> examSessions,
+            List<LevelTestAttempt> levelTestAttempts,
             DummyPayment latestPayment
     ) {
         return new MyPageSummaryResponse(
-                UserSummary.from(sessionUser),
+                UserSummary.from(sessionUser, user),
                 PremiumSummary.from(premiumAccess),
-                LearningSummary.from(learningProfile, latestAttendance, progressItems),
+                LearningSummary.from(learningProfile, latestAttendance, attendanceRecords, progressItems),
+                ExamSummary.from(examSessions, levelTestAttempts),
                 PaymentSummary.from(latestPayment)
         );
     }
@@ -42,15 +53,20 @@ public record MyPageSummaryResponse(
             String email,
             String nickname,
             String role,
+            String profileImageUrl,
             String roleLabel
     ) {
-        public static UserSummary from(SessionUser sessionUser) {
+        public static UserSummary from(SessionUser sessionUser, User user) {
+            String email = user == null ? sessionUser.email() : user.getEmail();
+            String nickname = user == null ? sessionUser.nickname() : user.getNickname();
+            String role = user == null ? sessionUser.role() : user.getRole();
             return new UserSummary(
                     sessionUser.userId(),
-                    sessionUser.email(),
-                    sessionUser.nickname(),
-                    sessionUser.role(),
-                    roleLabel(sessionUser.role())
+                    email,
+                    nickname,
+                    role,
+                    user == null ? null : user.getProfileImageUrl(),
+                    roleLabel(role)
             );
         }
 
@@ -114,14 +130,24 @@ public record MyPageSummaryResponse(
             String totalScoreLabel,
             String streakLabel,
             String latestAttendanceLabel,
-            String averageProgressRateLabel
+            String averageProgressRateLabel,
+            String primarySubjectLabel,
+            List<String> attendanceDates,
+            int initialCalendarYear,
+            int initialCalendarMonth,
+            String initialCalendarLabel
     ) {
         public static LearningSummary from(
                 UserLearningProfile learningProfile,
                 AttendanceRecord latestAttendance,
+                List<AttendanceRecord> attendanceRecords,
                 List<LearningProgress> progressItems
         ) {
             List<LearningProgress> safeProgressItems = progressItems == null ? List.of() : progressItems;
+            List<String> safeAttendanceDates = attendanceDates(attendanceRecords);
+            LocalDate initialCalendarDate = latestAttendance == null || latestAttendance.getAttendanceDate() == null
+                    ? LocalDate.now()
+                    : latestAttendance.getAttendanceDate();
             BigDecimal averageProgressRate = averageProgressRate(safeProgressItems);
             int streakCount = latestAttendance == null || latestAttendance.getStreakCount() == null
                     ? 0
@@ -142,8 +168,26 @@ public record MyPageSummaryResponse(
                     totalScore == null ? "0점" : totalScore + "점",
                     streakCount + "일",
                     latestAttendance == null ? "-" : formatDate(latestAttendance.getAttendanceDate()),
-                    averageProgressRate.setScale(0, RoundingMode.HALF_UP) + "%"
+                    averageProgressRate.setScale(0, RoundingMode.HALF_UP) + "%",
+                    subjectLabel(learningProfile == null ? null : learningProfile.getPrimarySubjectId()),
+                    safeAttendanceDates,
+                    initialCalendarDate.getYear(),
+                    initialCalendarDate.getMonthValue(),
+                    yearMonthLabel(initialCalendarDate)
             );
+        }
+
+        private static List<String> attendanceDates(List<AttendanceRecord> attendanceRecords) {
+            if (attendanceRecords == null || attendanceRecords.isEmpty()) {
+                return List.of();
+            }
+            return attendanceRecords.stream()
+                    .map(AttendanceRecord::getAttendanceDate)
+                    .filter(date -> date != null)
+                    .distinct()
+                    .sorted(Comparator.naturalOrder())
+                    .map(LocalDate::toString)
+                    .toList();
         }
 
         private static int completedCount(List<LearningProgress> progressItems) {
@@ -164,6 +208,125 @@ public record MyPageSummaryResponse(
             }
             BigDecimal total = rates.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
             return total.divide(BigDecimal.valueOf(rates.size()), 2, RoundingMode.HALF_UP);
+        }
+    }
+
+    private static String subjectLabel(Long subjectId) {
+        if (subjectId == null) {
+            return "설정 안 됨";
+        }
+        if (subjectId == 1L) {
+            return "Java";
+        }
+        if (subjectId == 2L) {
+            return "Python";
+        }
+        if (subjectId == 3L) {
+            return "Web";
+        }
+        if (subjectId == 4L) {
+            return "SQL";
+        }
+        return "주 과목 #" + subjectId;
+    }
+
+    public record ExamSummary(
+            List<ExamResultItem> items,
+            List<ExamResultItem> previewItems,
+            boolean empty
+    ) {
+        public static ExamSummary from(
+                List<ExamSession> examSessions,
+                List<LevelTestAttempt> levelTestAttempts
+        ) {
+            List<ExamResultItem> items = new ArrayList<>();
+            if (examSessions != null) {
+                examSessions.stream()
+                        .map(ExamResultItem::from)
+                        .forEach(items::add);
+            }
+            if (levelTestAttempts != null) {
+                levelTestAttempts.stream()
+                        .map(ExamResultItem::from)
+                        .forEach(items::add);
+            }
+            List<ExamResultItem> sortedItems = items.stream()
+                    .sorted(Comparator.comparing(ExamResultItem::submittedAtForSort).reversed())
+                    .toList();
+            return new ExamSummary(
+                    sortedItems,
+                    sortedItems.stream().limit(2).toList(),
+                    sortedItems.isEmpty()
+            );
+        }
+    }
+
+    public record ExamResultItem(
+            String title,
+            String subjectLabel,
+            String levelLabel,
+            String resultLabel,
+            String resultFilter,
+            String resultClass,
+            String submittedAtLabel,
+            String scoreLabel,
+            LocalDateTime submittedAtForSort
+    ) {
+        private static final LocalDateTime EMPTY_DATE = LocalDateTime.MIN;
+
+        public static ExamResultItem from(ExamSession session) {
+            boolean passed = "PASSED".equals(session.getResultStatus());
+            String levelLabel = levelLabel(session.getLevelCode());
+            String subject = MyPageSummaryResponse.subjectLabel(session.getSubjectId());
+            return new ExamResultItem(
+                    subject + " " + levelLabel,
+                    subject,
+                    levelLabel,
+                    resultLabel(passed),
+                    passed ? "PASS" : "RETRY",
+                    passed ? "pass" : "retry",
+                    formatDate(session.getSubmittedAt()),
+                    scoreLabel(session.getCorrectCount(), session.getTotalProblemCount()),
+                    session.getSubmittedAt() == null ? EMPTY_DATE : session.getSubmittedAt()
+            );
+        }
+
+        public static ExamResultItem from(LevelTestAttempt attempt) {
+            boolean passed = passed(attempt.getCorrectCount(), attempt.getTotalCount());
+            String levelLabel = levelLabel(attempt.getResultLevelCode());
+            String subject = MyPageSummaryResponse.subjectLabel(attempt.getSubjectId());
+            return new ExamResultItem(
+                    subject + " " + levelLabel,
+                    subject,
+                    levelLabel,
+                    resultLabel(passed),
+                    passed ? "PASS" : "RETRY",
+                    passed ? "pass" : "retry",
+                    formatDate(attempt.getSubmittedAt()),
+                    scoreLabel(attempt.getCorrectCount(), attempt.getTotalCount()),
+                    attempt.getSubmittedAt() == null ? EMPTY_DATE : attempt.getSubmittedAt()
+            );
+        }
+
+        private static boolean passed(Integer correctCount, Integer totalCount) {
+            if (correctCount == null || totalCount == null || totalCount == 0) {
+                return false;
+            }
+            return correctCount * 100 >= totalCount * 60;
+        }
+
+        private static String resultLabel(boolean passed) {
+            return passed ? "합격" : "재시";
+        }
+
+        private static String levelLabel(String levelCode) {
+            return hasText(levelCode) ? "Lv." + levelCode : "Lv.-";
+        }
+
+        private static String scoreLabel(Integer correctCount, Integer totalCount) {
+            int correct = correctCount == null ? 0 : correctCount;
+            int total = totalCount == null ? 0 : totalCount;
+            return correct + "/" + total;
         }
     }
 
@@ -238,6 +401,14 @@ public record MyPageSummaryResponse(
 
     private static String formatDateTime(LocalDateTime value) {
         return value == null ? "-" : value.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
+    }
+
+    private static String formatDate(LocalDateTime value) {
+        return value == null ? "-" : value.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    }
+
+    private static String yearMonthLabel(LocalDate value) {
+        return value == null ? "-" : value.format(DateTimeFormatter.ofPattern("yyyy년 M월"));
     }
 
     private static boolean hasText(String value) {

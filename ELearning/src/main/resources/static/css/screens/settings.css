@@ -5,7 +5,10 @@
   --settings-soft: color-mix(in srgb, var(--surface-soft) 76%, var(--surface));
   --settings-primary-soft: color-mix(in srgb, var(--primary) 12%, var(--surface));
   --settings-danger-soft: color-mix(in srgb, var(--danger) 10%, var(--surface));
-  min-height: 100vh;
+  width: min(1160px, calc(100% - 40px));
+  min-height: calc(100vh - 104px);
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 34px) 0 44px;
 }
 
 .settings-screen *,
@@ -17,21 +20,17 @@
 .figma-settings-page {
   position: relative;
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr);
-  min-height: 100vh;
-  gap: 20px;
-  padding: 20px;
+  grid-template-columns: 238px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
 }
 
 .figma-logout {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 2;
   display: inline-flex;
   min-height: 38px;
   align-items: center;
   justify-content: center;
+  justify-self: stretch;
   border: 1px solid var(--settings-line);
   border-radius: var(--radius);
   background: var(--settings-panel-strong);
@@ -48,6 +47,8 @@
 }
 
 .figma-settings-sidebar {
+  position: sticky;
+  top: 96px;
   display: grid;
   align-content: start;
   gap: 16px;
@@ -56,6 +57,14 @@
   background: color-mix(in srgb, var(--surface) 78%, transparent);
   padding: 20px;
   box-shadow: var(--shadow-soft);
+}
+
+.figma-settings-sidebar::after {
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--primary);
+  content: "";
 }
 
 .figma-settings-sidebar h1,
@@ -97,7 +106,7 @@
 
 .figma-settings-main {
   min-width: 0;
-  padding: 68px clamp(20px, 3vw, 44px) 30px;
+  padding: 0;
 }
 
 .figma-settings-panel,
@@ -111,8 +120,9 @@
 
 .figma-settings-panel {
   display: grid;
-  min-height: calc(100vh - 128px);
+  min-height: 560px;
   align-content: start;
+  gap: 8px;
   padding: clamp(22px, 3vw, 36px);
 }
 
@@ -527,12 +537,16 @@ textarea.figma-field {
 }
 
 @media (max-width: 1180px) {
+  .settings-screen {
+    width: min(100% - 28px, 1080px);
+  }
+
   .figma-settings-page {
-    grid-template-columns: 176px minmax(0, 1fr);
+    grid-template-columns: 196px minmax(0, 1fr);
   }
 
   .figma-settings-sidebar {
-    padding: 24px 16px;
+    padding: 18px 16px;
   }
 
   .figma-social-grid {
@@ -541,28 +555,33 @@ textarea.figma-field {
 }
 
 @media (max-width: 760px) {
+  .settings-screen {
+    width: min(100% - 24px, 680px);
+    padding-top: 16px;
+  }
+
   .figma-settings-page {
     grid-template-columns: 1fr;
-    padding: 14px;
+    gap: 14px;
   }
 
   .figma-settings-sidebar {
     position: static;
-    grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+    grid-template-columns: 1fr;
     gap: 10px;
   }
 
-  .figma-settings-sidebar h1 {
-    grid-column: 1 / -1;
+  .figma-settings-sidebar nav {
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   }
 
   .figma-settings-main {
-    padding: 64px 0 0;
+    padding: 0;
   }
 
   .figma-logout {
-    top: 10px;
-    right: 12px;
+    justify-self: start;
+    min-width: 104px;
   }
 
   .figma-settings-panel,

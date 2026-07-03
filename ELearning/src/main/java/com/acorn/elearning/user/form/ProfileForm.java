@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -14,4 +15,8 @@ public class ProfileForm {
 
     @Size(max = 500, message = "학습 목표는 500자 이하로 입력해주세요.")
     private String learningGoal;
+
+    private Long primarySubjectId;
+
+    private MultipartFile profileImage;
 }
