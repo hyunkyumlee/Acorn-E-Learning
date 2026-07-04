@@ -1,64 +1,89 @@
 package com.acorn.elearning.practice.controller;
 
+import com.acorn.elearning.practice.form.WrongAnswerRetryForm;
+import com.acorn.elearning.practice.service.WrongAnswerService;
+import com.acorn.elearning.practice.view.WrongAnswerDetailView;
+import com.acorn.elearning.practice.view.WrongAnswerPageView;
+import com.acorn.elearning.practice.view.WrongAnswerSummaryView;
+import com.acorn.elearning.security.SessionUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class ReviewController {
 
+    final WrongAnswerService wrongAnswerService;
+
+    public ReviewController(WrongAnswerService wrongAnswerService) {
+        this.wrongAnswerService = wrongAnswerService;
+    }
+
+    // 1. 오답 요약 페이지
     @GetMapping("/learning/review")
-    public String summary(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // WrongAnswerSummaryView view = wrongAnswerService.summary(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+    public String summary(
+            @SessionAttribute("user") SessionUser sessionUser,
+            Model model) {
+
+        WrongAnswerSummaryView view = wrongAnswerService.summary(sessionUser);
+
+        model.addAttribute("view", view);
         model.addAttribute("screen", "learning/review");
         return "learning/review";
     }
 
     @GetMapping("/learning/review/list")
-    public String list(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // WrongAnswerPageView view = wrongAnswerService.list(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+    public String list(
+            @SessionAttribute("user") SessionUser sessionUser,
+            Model model) {
+
+        WrongAnswerPageView view = wrongAnswerService.list(sessionUser);
+        model.addAttribute("view", view);
         model.addAttribute("screen", "learning/review-list");
         return "learning/review-list";
     }
 
+
     @GetMapping("/learning/review/{wrongAnswerId}")
-    public String detail(@PathVariable Long wrongAnswerId, Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // WrongAnswerSummaryView view = wrongAnswerService.detail(sessionUser, wrongAnswerId);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+    public String detail(@PathVariable Long wrongAnswerId,
+                         @SessionAttribute("user") SessionUser sessionUser,
+                         Model model) {
+        WrongAnswerDetailView view = wrongAnswerService.detail(sessionUser, wrongAnswerId);
+        model.addAttribute("view", view);
         model.addAttribute("screen", "learning/review");
         return "learning/review";
     }
 
     @PostMapping("/learning/review/{wrongAnswerId}/retry")
-    public String retry(@PathVariable Long wrongAnswerId) {
+    public String retry(@PathVariable Long wrongAnswerId,
+                        @SessionAttribute("user") SessionUser sessionUser,
+                        @Validated @ModelAttribute("form") WrongAnswerRetryForm form,
+                        BindingResult bindingResult,
+                        RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            // 검증 실패 시 다시 상세 페이지로 (모델 데이터 복구 필요 시 처리)
+            return "learning/review";
+        }
+        wrongAnswerService.retry(sessionUser, form, wrongAnswerId);
+        redirectAttributes.addFlashAttribute("message", "재시도 처리가 완료되었습니다.");
+        return "redirect:/learning/review/" + wrongAnswerId;
+    }
+
+
+    @PostMapping("/learning/review/{wrongAnswerId}/reviewed")
+    public String markReviewed(@PathVariable Long wrongAnswerId,
+                               @SessionAttribute("user") SessionUser sessionUser,
+                               RedirectAttributes redirectAttributes) {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "learning/review"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // wrongAnswerService.retry(sessionUser, form);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+        // if (bindingResult.hasErrors()) { return "/learning/review"; }
+
+        wrongAnswerService.markReviewed(sessionUser, wrongAnswerId);
+        redirectAttributes.addFlashAttribute("message", "검토 완료되었습니다.");
         return "redirect:/learning/review";
     }
 
-    @PostMapping("/learning/review/{wrongAnswerId}/reviewed")
-    public String markReviewed(@PathVariable Long wrongAnswerId) {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "/learning/review"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // wrongAnswerService.markReviewed(sessionUser, form, wrongAnswerId);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
-        return "redirect:/learning/review";
-    }
 }
