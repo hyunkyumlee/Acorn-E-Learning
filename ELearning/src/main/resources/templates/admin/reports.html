@@ -1,18 +1,235 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>신고 관리 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/reports.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>신고 관리</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/reports</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+<div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
+
+<main class="page-shell admin-screen admin-report-screen">
+  <section class="admin-report-header">
+    <h1>신고 관리</h1>
+  </section>
+
+  <section class="admin-report-toolbar" aria-label="신고 검색 조건">
+    <select id="reportTypeFilter" aria-label="신고 유형">
+      <option value="">신고 유형</option>
+      <option value="게시글">게시글</option>
+      <option value="댓글">댓글</option>
+    </select>
+    <select id="reportStatusFilter" aria-label="처리 상태">
+      <option value="">처리 상태</option>
+      <option value="대기">대기</option>
+      <option value="검토 중">검토 중</option>
+      <option value="처리 완료">처리 완료</option>
+      <option value="반려">반려</option>
+    </select>
+    <input type="date" id="reportDateFilter" aria-label="검색 날짜">
+    <button type="button" id="reportSearchButton">검색</button>
+  </section>
+
+  <section class="admin-report-section" aria-label="신고 목록">
+    <h2>신고 목록</h2>
+    <div class="admin-report-table-wrap">
+      <table class="admin-report-table">
+        <thead>
+        <tr>
+          <th>신고 ID</th>
+          <th>신고자</th>
+          <th>신고 대상 유형</th>
+          <th>신고 대상</th>
+          <th>신고 사유</th>
+          <th>신고 일시</th>
+          <th>처리 상태</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="report : ${reportPage.reports}"
+            class="admin-report-row"
+            th:data-report-id="${report.reportId}"
+            th:data-reporter="${report.reporterNickname}"
+            th:data-type="${report.targetTypeLabel()}"
+            th:data-date="${report.createdAt != null ? #temporals.format(report.createdAt, 'MM/dd') : '-'}"
+            th:data-full-date="${report.createdAt != null ? #temporals.format(report.createdAt, 'yyyy-MM-dd') : ''}"
+            th:data-status-code="${report.status}"
+            th:data-status="${report.statusLabel()}"
+            th:data-target="${report.targetSummary}"
+            th:data-reason="${report.reasonLabel()}"
+            th:data-content="${report.targetSummary}">
+          <td th:text="${'#R' + report.reportId}">#R001</td>
+          <td th:text="${report.reporterNickname}">닉네임1</td>
+          <td th:text="${report.targetTypeLabel()}">게시글</td>
+          <td th:text="${report.targetSummary}">신고 대상</td>
+          <td th:text="${report.reasonLabel()}">신고 사유</td>
+          <td th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'MM/dd') : '-'}">07/04</td>
+          <td>
+            <span class="admin-report-status"
+                  th:classappend="${report.statusClass()}"
+                  th:text="${report.statusLabel()}">처리 완료</span>
+          </td>
+          <td>
+            <button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(reportPage.reports)}">
+          <td colspan="8" class="admin-report-empty">등록된 신고가 없습니다.</td>
+        </tr>
+        <tr class="admin-report-filter-empty is-hidden">
+          <td colspan="8" class="admin-report-empty">조건에 맞는 신고가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="admin-report-detail" aria-label="신고 상세 보기">
+    <h2>신고 상세 보기</h2>
+    <div class="admin-report-detail-card">
+      <dl class="admin-report-meta">
+        <div>
+          <dt>신고자</dt>
+          <dd id="reportDetailReporter">-</dd>
+        </div>
+        <div>
+          <dt>신고 유형</dt>
+          <dd id="reportDetailType">-</dd>
+        </div>
+        <div>
+          <dt>신고 일시</dt>
+          <dd id="reportDetailDate">-</dd>
+        </div>
+        <div>
+          <dt>처리 상태</dt>
+          <dd id="reportDetailStatus">-</dd>
+        </div>
+      </dl>
+
+      <div class="admin-report-content">
+        <h3>신고 대상 내용</h3>
+        <div class="admin-report-content-box">
+          <p id="reportDetailContent">목록에서 신고 항목을 선택하세요.</p>
+          <span id="reportDetailReason">신고 사유: -</span>
+        </div>
+      </div>
+
+      <div class="admin-report-process">
+        <h3>처리 결과 입력</h3>
+        <form id="reportHandleForm" method="post" action="/admin/reports/0" class="admin-report-process-row">
+          <select name="status" id="reportHandleStatus" aria-label="처리 상태 선택" required>
+            <option value="">처리 상태 선택</option>
+            <option value="PENDING">대기</option>
+            <option value="IN_PROGRESS">검토 중</option>
+            <option value="RESOLVED">처리 완료</option>
+            <option value="REJECTED">반려</option>
+          </select>
+          <input type="text" name="memo" placeholder="처리 메모를 입력하세요">
+          <button type="submit" id="reportHandleSubmit" disabled>처리 확정</button>
+          <button type="button" class="admin-report-secondary-button" id="reportDetailClose">닫기</button>
+        </form>
+      </div>
+
+      <div class="admin-report-history">
+        <h3>처리 이력</h3>
+        <ul>
+          <li>상세보기를 선택하면 처리 대상 신고가 지정됩니다.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const detailPanel = document.querySelector(".admin-report-detail");
+  const reporter = document.querySelector("#reportDetailReporter");
+  const type = document.querySelector("#reportDetailType");
+  const date = document.querySelector("#reportDetailDate");
+  const status = document.querySelector("#reportDetailStatus");
+  const content = document.querySelector("#reportDetailContent");
+  const reason = document.querySelector("#reportDetailReason");
+  const closeButton = document.querySelector("#reportDetailClose");
+  const handleForm = document.querySelector("#reportHandleForm");
+  const handleStatus = document.querySelector("#reportHandleStatus");
+  const handleSubmit = document.querySelector("#reportHandleSubmit");
+  const typeFilter = document.querySelector("#reportTypeFilter");
+  const statusFilter = document.querySelector("#reportStatusFilter");
+  const dateFilter = document.querySelector("#reportDateFilter");
+  const searchButton = document.querySelector("#reportSearchButton");
+  const filterEmptyRow = document.querySelector(".admin-report-filter-empty");
+
+  const resetDetail = () => {
+    reporter.textContent = "-";
+    type.textContent = "-";
+    date.textContent = "-";
+    status.textContent = "-";
+    content.textContent = "목록에서 신고 항목을 선택하세요.";
+    reason.textContent = "신고 사유: -";
+    handleStatus.value = "";
+    handleForm.action = "/admin/reports/0";
+    handleSubmit.disabled = true;
+    document.querySelectorAll(".admin-report-row").forEach((item) => item.classList.remove("is-selected"));
+  };
+
+  document.querySelectorAll(".admin-report-detail-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest(".admin-report-row");
+      const reportId = row.dataset.reportId;
+
+      reporter.textContent = row.dataset.reporter || "-";
+      type.textContent = row.dataset.type || "-";
+      date.textContent = row.dataset.date || "-";
+      status.textContent = row.dataset.status || "-";
+      content.textContent = row.dataset.content || row.dataset.target || "-";
+      reason.textContent = `신고 사유: ${row.dataset.reason || "-"}`;
+      handleStatus.value = row.dataset.statusCode || "";
+      handleForm.action = `/admin/reports/${reportId}`;
+      handleSubmit.disabled = !reportId;
+
+      document.querySelectorAll(".admin-report-row").forEach((item) => item.classList.remove("is-selected"));
+      row.classList.add("is-selected");
+      detailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  closeButton?.addEventListener("click", () => {
+    resetDetail();
+  });
+
+  searchButton?.addEventListener("click", () => {
+    const selectedType = typeFilter.value;
+    const selectedStatus = statusFilter.value;
+    const selectedDate = dateFilter.value;
+    let visibleCount = 0;
+
+    document.querySelectorAll(".admin-report-row").forEach((row) => {
+      const matchesType = selectedType === "" || row.dataset.type === selectedType;
+      const matchesStatus = selectedStatus === "" || row.dataset.status === selectedStatus;
+      const matchesDate = selectedDate === "" || row.dataset.fullDate === selectedDate;
+      const visible = matchesType && matchesStatus && matchesDate;
+
+      row.hidden = !visible;
+      if (!visible) {
+        row.classList.remove("is-selected");
+      } else {
+        visibleCount += 1;
+      }
+    });
+
+    filterEmptyRow?.classList.toggle("is-hidden", visibleCount > 0);
+    resetDetail();
+  });
+</script>
 </body>
 </html>
