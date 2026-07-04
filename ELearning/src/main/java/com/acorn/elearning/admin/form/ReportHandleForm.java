@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 public class ReportHandleForm {
     @NotBlank
-    private String skeletonValue = "TODO";
-    private String idempotencyToken;
-    private Long id;
+    private String status;
+    private String memo;
 }
