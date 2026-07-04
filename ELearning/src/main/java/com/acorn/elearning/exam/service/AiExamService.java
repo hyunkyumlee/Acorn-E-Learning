@@ -22,6 +22,7 @@ import com.acorn.elearning.exam.model.ExamAnswer;
 import com.acorn.elearning.exam.model.ExamSession;
 import com.acorn.elearning.exam.service.AiGeneratedProblemParser.GeneratedProblem;
 import com.acorn.elearning.exam.service.ExamLearningScopeService.ExamLearningScope;
+import com.acorn.elearning.exam.support.ExamStarterCodeResolver;
 import com.acorn.elearning.security.SessionUser;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -199,6 +200,7 @@ public class AiExamService {
             answer.setAiReview(aiReviewService.reviewAnswer(
                     answer.getAnswerId(),
                     problem.getPrompt(),
+                    ExamStarterCodeResolver.starterCode(problem),
                     answer.getAnswerText(),
                     executionResult));
             examAnswerMapper.updateGradingResult(answer);

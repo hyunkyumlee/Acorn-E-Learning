@@ -31,18 +31,28 @@
       <div class="exam-action-row">
         <a class="button primary" th:href="@{/analysis}">AI 분석 보기</a>
         <a class="button" th:href="@{/exams/coding-test}">다시 응시</a>
+        <a class="button" th:href="@{/learning}">학습 화면으로</a>
       </div>
     </section>
 
     <section class="exam-review-list" th:if="${result != null}">
       <article th:each="answer : ${result.answers()}" class="exam-review-card">
-        <div>
+        <header>
           <span class="exam-state-badge" th:classappend="${answer.correct()} ? ' is-complete' : ' is-warning'"
                 th:text="${answer.correct()} ? '정답' : '재확인'">정답</span>
           <h2 th:text="'문제 ID ' + ${answer.aiProblemId()}">문제 ID</h2>
           <p th:text="${answer.passedCaseCount()} + '개 테스트케이스 통과'">0개 테스트케이스 통과</p>
+        </header>
+        <div class="exam-review-body">
+          <section class="exam-review-section">
+            <h3>AI 해설</h3>
+            <p th:text="${#strings.isEmpty(answer.explanation()) ? '해설이 아직 생성되지 않았습니다.' : answer.explanation()}">해설</p>
+          </section>
+          <section class="exam-review-section">
+            <h3>코드 리뷰</h3>
+            <p th:text="${#strings.isEmpty(answer.codeReview()) ? '코드 리뷰가 아직 생성되지 않았습니다.' : answer.codeReview()}">코드 리뷰</p>
+          </section>
         </div>
-        <pre th:text="${answer.aiReview()}">리뷰가 아직 없습니다.</pre>
       </article>
     </section>
   </main>

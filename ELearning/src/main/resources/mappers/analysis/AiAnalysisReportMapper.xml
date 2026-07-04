@@ -51,6 +51,16 @@
         LIMIT 1
     </select>
 
+    <select id="findByExamIdAndUserId" resultMap="AiAnalysisReportResultMap">
+        SELECT
+        <include refid="AiAnalysisReportColumns" />
+        FROM ai_analysis_reports
+        WHERE exam_id = #{examId}
+          AND user_id = #{userId}
+        ORDER BY report_id DESC
+        LIMIT 1
+    </select>
+
     <select id="findByUserId" parameterType="long" resultMap="AiAnalysisReportResultMap">
         SELECT
         <include refid="AiAnalysisReportColumns" />
