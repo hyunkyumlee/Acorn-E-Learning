@@ -10,7 +10,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class GuestOnlyInterceptor implements HandlerInterceptor {
     private final boolean enforce;
 
-    public GuestOnlyInterceptor(@Value("${knowva.security.enforce:false}") boolean enforce) {
+    public GuestOnlyInterceptor(@Value("${knowva.security.enforce:true}") boolean enforce) {
         this.enforce = enforce;
     }
 

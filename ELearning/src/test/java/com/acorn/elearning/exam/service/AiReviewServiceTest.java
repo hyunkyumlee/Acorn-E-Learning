@@ -41,13 +41,15 @@ class AiReviewServiceTest {
 
         ChatGptRequest request = client.capturedRequest;
         assertNotNull(request);
-        assertEquals("exam-review-v2", request.promptVersion());
+        assertEquals("exam-review-v3", request.promptVersion());
         assertEquals(starterCode, request.payload().get("starterCode"));
         assertEquals(submittedCode, request.payload().get("submittedCode"));
         assertFalse(request.payload().containsKey("answerText"));
         assertSame(executionResult, request.payload().get("testCaseExecution"));
         assertTrue(request.payload().get("instruction").toString().contains("starterCode는 시스템이 제공한 기본 구조"));
+        assertTrue(request.payload().get("instruction").toString().contains("좋은 점은 테스트를 통과한 사용자 구현 로직이 있을 때만"));
         assertTrue(request.payload().get("reviewRules").toString().contains("사용자 작성물로 평가하지 않습니다"));
+        assertTrue(request.payload().get("reviewRules").toString().contains("칭찬 없이 누락된 계산"));
     }
 
     private static class CapturingChatGptApiClient extends ChatGptApiClient {

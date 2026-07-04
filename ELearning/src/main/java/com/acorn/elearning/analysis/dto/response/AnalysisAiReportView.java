@@ -1,5 +1,6 @@
 package com.acorn.elearning.analysis.dto.response;
 
+import com.acorn.elearning.common.ai.AiGeneratedTextSanitizer;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -23,7 +24,7 @@ public record AnalysisAiReportView(
         return new AnalysisAiReportView(
                 true,
                 "분석 완료",
-                fallback(report.freeSummary(), ""),
+                AiGeneratedTextSanitizer.cleanUserFacingAiText(fallback(report.freeSummary(), "")),
                 sections(report.premiumDetail(), objectMapper));
     }
 
@@ -53,7 +54,10 @@ public record AnalysisAiReportView(
     }
 
     private static void addSection(List<Section> sections, JsonNode node, String title, String badge) {
-        List<String> items = textItems(node);
+        List<String> items = textItems(node).stream()
+                .map(AiGeneratedTextSanitizer::cleanUserFacingAiText)
+                .filter(item -> !item.isBlank())
+                .toList();
         if (!items.isEmpty()) {
             sections.add(new Section(title, badge, items));
         }

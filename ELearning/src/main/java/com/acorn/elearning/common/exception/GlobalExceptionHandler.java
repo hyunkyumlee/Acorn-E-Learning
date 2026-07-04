@@ -10,6 +10,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -53,6 +54,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.status())
                 .body(ApiResponse.fail(errorCode.message(), errorCode.code(), "요청 본문을 읽을 수 없습니다."));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException() {
+        ErrorCode errorCode = ErrorCode.COMMON_NOT_FOUND;
+        return ResponseEntity
+                .status(errorCode.status())
+                .body(ApiResponse.fail(errorCode.message(), errorCode.code(), errorCode.message()));
     }
 
     @ExceptionHandler(Exception.class)

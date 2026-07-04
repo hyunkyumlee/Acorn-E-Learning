@@ -1,7 +1,4 @@
-import {basicSetup, EditorView} from "https://esm.sh/codemirror";
-import {indentLess, indentMore} from "https://esm.sh/@codemirror/commands";
-import {java} from "https://esm.sh/@codemirror/lang-java";
-import {oneDark} from "https://esm.sh/@codemirror/theme-one-dark";
+import {basicSetup, EditorView, indentLess, indentMore, java, oneDark} from "../vendor/codemirror.bundle.js";
 
 const form = document.querySelector("[data-code-run-form]");
 const runButton = document.querySelector("[data-code-run-button]");

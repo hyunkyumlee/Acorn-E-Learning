@@ -14,7 +14,6 @@ import com.acorn.elearning.common.ai.ChatGptRequest;
 import com.acorn.elearning.common.ai.ChatGptResponse;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
-import com.acorn.elearning.exam.mapper.ExamAnswerMapper;
 import com.acorn.elearning.exam.mapper.ExamSessionMapper;
 import com.acorn.elearning.exam.model.AiRequestLog;
 import com.acorn.elearning.exam.model.ExamSession;
@@ -26,6 +25,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,21 +36,21 @@ public class AiAnalysisService {
     private static final Logger log = LoggerFactory.getLogger(AiAnalysisService.class);
     private static final String TARGET_TYPE = "ANALYSIS_REPORT";
     private static final int TREND_LIMIT = 7;
+    private static final int REPORT_LOCK_STRIPES = 64;
 
     private final AiAnalysisReportMapper aiAnalysisReportMapper;
     private final AnalysisDashboardMapper analysisDashboardMapper;
     private final ExamSessionMapper examSessionMapper;
-    private final ExamAnswerMapper examAnswerMapper;
     private final PaymentAccessService paymentAccessService;
     private final ChatGptApiClient chatGptApiClient;
     private final AiRequestLogService aiRequestLogService;
     private final ObjectMapper objectMapper;
+    private final Object[] reportLocks = initializeReportLocks();
 
     public AiAnalysisService(
             AiAnalysisReportMapper aiAnalysisReportMapper,
             AnalysisDashboardMapper analysisDashboardMapper,
             ExamSessionMapper examSessionMapper,
-            ExamAnswerMapper examAnswerMapper,
             PaymentAccessService paymentAccessService,
             ChatGptApiClient chatGptApiClient,
             AiRequestLogService aiRequestLogService,
@@ -59,7 +59,6 @@ public class AiAnalysisService {
         this.aiAnalysisReportMapper = aiAnalysisReportMapper;
         this.analysisDashboardMapper = analysisDashboardMapper;
         this.examSessionMapper = examSessionMapper;
-        this.examAnswerMapper = examAnswerMapper;
         this.paymentAccessService = paymentAccessService;
         this.chatGptApiClient = chatGptApiClient;
         this.aiRequestLogService = aiRequestLogService;
@@ -78,61 +77,52 @@ public class AiAnalysisService {
     @Transactional(readOnly = true)
     public boolean latestRefreshRequired(SessionUser sessionUser) {
         Long userId = requireUserId(sessionUser);
-        AnalysisExamSummary latestExam = analysisDashboardMapper.findLatestGradedExamSummary(userId).orElse(null);
-        if (latestExam == null || latestExam.getExamId() == null) {
-            return false;
-        }
-        AiAnalysisReport report = aiAnalysisReportMapper.findByExamIdAndUserId(latestExam.getExamId(), userId).orElse(null);
-        return needsAutoRefresh(report);
+        return analysisDashboardMapper.findLatestGradedExamSummary(userId)
+                .map(AnalysisExamSummary::getExamId)
+                .map(examId -> aiAnalysisReportMapper.findByExamIdAndUserId(examId, userId).isEmpty())
+                .orElse(false);
     }
 
     @Transactional(noRollbackFor = BusinessException.class)
     public AnalysisAutoRefreshResponse refreshLatestIfRequired(SessionUser sessionUser) {
         Long userId = requireUserId(sessionUser);
-        AnalysisExamSummary latestExam = analysisDashboardMapper.findLatestGradedExamSummary(userId).orElse(null);
-        if (latestExam == null || latestExam.getExamId() == null) {
-            return AnalysisAutoRefreshResponse.skipped(null);
-        }
-        return refreshReportIfRequired(userId, latestExam.getExamId());
+        return analysisDashboardMapper.findLatestGradedExamSummary(userId)
+                .map(AnalysisExamSummary::getExamId)
+                .map(examId -> refreshReportIfRequired(userId, examId))
+                .orElseGet(() -> AnalysisAutoRefreshResponse.skipped(null));
     }
 
     @Transactional(noRollbackFor = BusinessException.class)
     public AnalysisReportResponse generate(SessionUser sessionUser, GenerateAnalysisRequest request) {
         Long userId = requireUserId(sessionUser);
         ExamSession session = requireExam(userId, request.examId());
-        AiAnalysisReport report = new AiAnalysisReport();
-        report.setUserId(userId);
-        report.setExamId(session.getExamId());
-        report.setStatus("PENDING");
-        report.setRetryCount(0);
-        aiAnalysisReportMapper.insert(report);
-        generateContent(report, session);
-        return AnalysisReportResponse.from(report);
+        synchronized (reportLock(userId, session.getExamId())) {
+            AiAnalysisReport existingReport = aiAnalysisReportMapper.findByExamIdAndUserId(session.getExamId(), userId)
+                    .orElse(null);
+            if (existingReport != null) {
+                return AnalysisReportResponse.from(existingReport);
+            }
+            AiAnalysisReport report = pendingReport(userId, session);
+            generateContent(report, session);
+            return AnalysisReportResponse.from(report);
+        }
     }
 
     private AnalysisAutoRefreshResponse refreshReportIfRequired(Long userId, Long examId) {
-        AiAnalysisReport report = aiAnalysisReportMapper.findByExamIdAndUserId(examId, userId).orElse(null);
-        if (!needsAutoRefresh(report)) {
-            return AnalysisAutoRefreshResponse.skipped(report == null ? null : AnalysisReportResponse.from(report));
+        synchronized (reportLock(userId, examId)) {
+            AiAnalysisReport report = aiAnalysisReportMapper.findByExamIdAndUserId(examId, userId).orElse(null);
+            if (report != null) {
+                return AnalysisAutoRefreshResponse.skipped(AnalysisReportResponse.from(report));
+            }
+            ExamSession session = requireExam(userId, examId);
+            AiAnalysisReport targetReport = pendingReport(userId, session);
+            try {
+                generateContent(targetReport, session);
+            } catch (BusinessException exception) {
+                log.warn("AI 분석 자동 갱신에 실패했습니다. examId={}", examId, exception);
+            }
+            return AnalysisAutoRefreshResponse.attempted(AnalysisReportResponse.from(targetReport));
         }
-        ExamSession session = requireExam(userId, examId);
-        AiAnalysisReport targetReport = report == null ? pendingReport(userId, session) : pendingRetryReport(report);
-        try {
-            generateContent(targetReport, session);
-        } catch (BusinessException exception) {
-            log.warn("AI 분석 자동 갱신에 실패했습니다. examId={}", examId, exception);
-        }
-        return AnalysisAutoRefreshResponse.attempted(AnalysisReportResponse.from(targetReport));
-    }
-
-    private boolean needsAutoRefresh(AiAnalysisReport report) {
-        if (report == null) {
-            return true;
-        }
-        if ("SUCCESS".equals(report.getStatus()) || "PENDING".equals(report.getStatus())) {
-            return false;
-        }
-        return "FAILED".equals(report.getStatus()) && number(report.getRetryCount()) < 1;
     }
 
     private AiAnalysisReport pendingReport(Long userId, ExamSession session) {
@@ -142,14 +132,6 @@ public class AiAnalysisService {
         report.setStatus("PENDING");
         report.setRetryCount(0);
         aiAnalysisReportMapper.insert(report);
-        return report;
-    }
-
-    private AiAnalysisReport pendingRetryReport(AiAnalysisReport report) {
-        report.setStatus("PENDING");
-        report.setRetryCount(number(report.getRetryCount()) + 1);
-        report.setAnalysisErrorCode(null);
-        aiAnalysisReportMapper.update(report);
         return report;
     }
 
@@ -203,15 +185,26 @@ public class AiAnalysisService {
                 한국어 존댓말로 전체 누적 코딩테스트 분석을 JSON으로 작성해 주세요.
                 필드는 freeSummary, premiumDetail을 사용해 주세요.
                 freeSummary는 2문장 이내로 작성하고, 문장 끝은 '~입니다', '~합니다'처럼 존댓말로 작성해 주세요.
-                premiumDetail은 strengths, weaknesses, nextActions 배열을 포함해 주세요.
+                premiumDetail은 strengths, weaknesses, nextActions 배열만 포함해 주세요.
+                premiumDetail의 각 배열 항목은 화면 bullet로 표시되므로 짧은 관찰 문장으로 작성하고 코드블록은 넣지 마세요.
                 사용자가 지금까지 채점 완료한 모든 코딩테스트 데이터를 기준으로 분석해 주세요.
                 학습 진행, 일반 문제 풀이, 일반 오답노트는 분석 근거로 사용하지 마세요.
+                codingAnswerSummaries에는 starterCode와 submittedCode가 함께 포함됩니다.
+                starterCode는 시스템이 제공한 기본 구조이고, submittedCode가 사용자가 제출한 코드입니다.
+                starterCode와 submittedCode를 비교해 사용자가 추가하거나 바꾼 풀이 로직만 강점·약점 근거로 삼아 주세요.
                 사용자가 작성하지 않은 기본 코드 구조나 입력 처리 틀을 사용자의 강점으로 칭찬하지 마세요.
+                strengths는 정답 처리된 제출, 테스트케이스 통과 기록, 사용자가 직접 작성한 조건/반복/계산/출력 로직이 안정적일 때만 작성해 주세요.
+                입력값 읽기, 변수 선언, 배열 선언, import, Scanner, class/main 구조, close 호출, TODO 주석 제거 여부는 starterCode에 포함될 수 있으므로 strengths에 넣지 마세요.
+                correct가 false이거나 passedCaseCount가 0인 답안은 강점이 아니라 weaknesses 또는 nextActions의 근거로만 사용해 주세요.
+                submittedCode가 starterCode와 거의 같거나 TODO 주변 핵심 로직이 비어 있으면 핵심 로직 누락으로 판단해 주세요.
+                codingMistakeStats는 전체 누적 코딩테스트의 반복 실수 유형입니다. 문제별 나열보다 반복 패턴과 우선순위를 요약해 주세요.
+                nextActions는 다음 코딩테스트 전에 바로 실행할 수 있는 행동으로 작성해 주세요.
                 '시험' 대신 '코딩테스트'라는 표현을 사용해 주세요.
                 """);
         payload.put("premiumActive", premiumActive);
-        payload.put("latestCodingTest", session);
-        payload.put("latestCodingTestAnswers", examAnswerMapper.findByExamId(session.getExamId()));
+        payload.put("analysisScope", Map.of(
+                "type", "ALL_GRADED_CODING_TESTS",
+                "anchorExamId", session.getExamId()));
         payload.put("codingTestAggregate", analysisDashboardMapper.findCodingExamAggregateByUser(userId)
                 .orElseGet(AnalysisCodingExamAggregate::new));
         payload.put("allCodingTests", analysisDashboardMapper.findAllGradedExamSummariesByUser(userId));
@@ -222,7 +215,7 @@ public class AiAnalysisService {
         payload.put("codingMistakeStats", analysisDashboardMapper.findCodingMistakeStatsByUser(userId));
         return new ChatGptRequest(
                 "exam-analysis",
-                "analysis-v2",
+                "analysis-v3",
                 payload);
     }
 
@@ -267,5 +260,16 @@ public class AiAnalysisService {
 
     private int number(Integer value) {
         return value == null ? 0 : value;
+    }
+
+    private Object reportLock(Long userId, Long examId) {
+        int index = Math.floorMod(Objects.hash(userId, examId), reportLocks.length);
+        return reportLocks[index];
+    }
+
+    private Object[] initializeReportLocks() {
+        return java.util.stream.IntStream.range(0, REPORT_LOCK_STRIPES)
+                .mapToObj(index -> new Object())
+                .toArray(Object[]::new);
     }
 }

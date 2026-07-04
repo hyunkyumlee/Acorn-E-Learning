@@ -17,8 +17,10 @@ public class AiReviewService {
             필드는 explanation, codeReview만 사용하세요.
             starterCode는 시스템이 제공한 기본 구조이며 사용자가 작성한 코드로 평가하지 마세요.
             import, Scanner 입력, class/main 구조, TODO 주석처럼 starterCode에 이미 있던 부분은 칭찬하거나 분석하지 마세요.
-            submittedCode에서 starterCode 대비 실제로 구현된 로직과 출력 결과만 리뷰하세요.
-            구현이 비어 있거나 TODO가 남아 있으면 핵심 로직이 빠졌다고 직접 안내하세요.
+            submittedCode에서 starterCode 대비 사용자가 추가하거나 수정한 계산, 조건, 반복, 배열 처리, 출력 결과만 리뷰하세요.
+            좋은 점은 테스트를 통과한 사용자 구현 로직이 있을 때만 작성하세요.
+            구현이 비어 있거나 TODO만 남아 있으면 좋은 점을 쓰지 말고 핵심 로직이 빠졌다고 직접 안내하세요.
+            "Scanner 입력은 올바릅니다", "기본 구조는 잘 작성했습니다"처럼 starterCode에 포함된 내용을 칭찬하지 마세요.
             """;
 
     private final ChatGptApiClient chatGptApiClient;
@@ -38,7 +40,7 @@ public class AiReviewService {
     ) {
         ChatGptRequest request = new ChatGptRequest(
                 "exam-answer-review",
-                "exam-review-v2",
+                "exam-review-v3",
                 Map.of(
                         "instruction", REVIEW_INSTRUCTION,
                         "problem", prompt,
@@ -47,6 +49,8 @@ public class AiReviewService {
                         "reviewRules", List.of(
                                 "starterCode는 시스템 제공 코드입니다.",
                                 "기본 구조, 입력 처리, import는 starterCode에 있으면 사용자 작성물로 평가하지 않습니다.",
+                                "좋은 점은 사용자가 작성한 계산, 조건, 반복, 배열 처리, 출력 코드가 실제 테스트를 통과한 경우에만 작성합니다.",
+                                "구현이 비어 있으면 칭찬 없이 누락된 계산, 조건, 출력 중 무엇을 채워야 하는지 안내합니다.",
                                 "코드 리뷰는 submittedCode의 구현 로직과 테스트 실패 원인 중심으로 작성합니다."),
                         "testCaseExecution", executionResult));
         AiRequestLog log = aiRequestLogService.start(TARGET_TYPE, answerId, "EXPLANATION_REVIEW", request);

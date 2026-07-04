@@ -12,7 +12,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class LoginRequiredInterceptor implements HandlerInterceptor {
     private final boolean enforce;
 
-    public LoginRequiredInterceptor(@Value("${knowva.security.enforce:false}") boolean enforce) {
+    public LoginRequiredInterceptor(@Value("${knowva.security.enforce:true}") boolean enforce) {
         this.enforce = enforce;
     }
 

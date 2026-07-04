@@ -12,6 +12,8 @@ public class AnalysisCodingAnswerSummary {
     private String levelCode;
     private Integer problemNo;
     private String prompt;
+    private String starterCode;
+    private String submittedCode;
     private Integer passedCaseCount;
     private Boolean correct;
     private String aiReview;

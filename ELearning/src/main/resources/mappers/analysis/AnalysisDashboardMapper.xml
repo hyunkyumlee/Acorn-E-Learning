@@ -97,6 +97,8 @@
         <result property="levelCode" column="level_code" />
         <result property="problemNo" column="problem_no" />
         <result property="prompt" column="prompt" />
+        <result property="starterCode" column="starter_code" />
+        <result property="submittedCode" column="submitted_code" />
         <result property="passedCaseCount" column="passed_case_count" />
         <result property="correct" column="is_correct" />
         <result property="aiReview" column="ai_review" />
@@ -164,6 +166,8 @@
             es.level_code,
             p.problem_no,
             p.prompt,
+            JSON_UNQUOTE(JSON_EXTRACT(p.ai_raw_response, CONCAT('$.problems[', p.problem_no - 1, '].starterCode'))) AS starter_code,
+            ea.answer_text AS submitted_code,
             COALESCE(ea.passed_case_count, 0) AS passed_case_count,
             COALESCE(ea.is_correct, 0) AS is_correct,
             ea.ai_review,
