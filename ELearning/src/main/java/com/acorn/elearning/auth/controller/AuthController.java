@@ -24,12 +24,20 @@ public class AuthController {
         this.sessionService = sessionService;
     }
 
+    //testhtml 용
     @GetMapping("/auth/testlogin")
     public String testLoginForm(HttpSession session, Model model) {
         model.addAttribute("loginForm", new LoginForm());
         model.addAttribute("sessionUser", currentUser(session));
         return "auth/testlogin";
     }
+    @GetMapping("/auth/testsignup")
+    public String testSignupForm(HttpSession session, Model model) {
+        model.addAttribute("signupForm", new SignupForm());
+        model.addAttribute("sessionUser", currentUser(session));
+        return "auth/testsignup";
+    }
+    //------------
 
     @GetMapping("/login")
     public String loginForm(
@@ -41,6 +49,7 @@ public class AuthController {
             return "redirect:" + safeRedirect(redirect, sessionUser.defaultRedirectPath());
         }
         model.addAttribute("loginForm", new LoginForm());
+        model.addAttribute("redirect", redirect);
         model.addAttribute("screen", "auth/login");
         return "auth/login";
     }
@@ -51,24 +60,27 @@ public class AuthController {
             @Valid @ModelAttribute("loginForm") LoginForm loginForm,
             BindingResult bindingResult,
             @RequestParam(required = false) String redirect,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            Model model) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "입력값을 확인해주세요.");
-            return "redirect:" + safeRedirect(redirect, "/login");
+            model.addAttribute("redirect", redirect);
+            return "auth/login";
         }
         try {
             authService.login(session, loginForm);
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            return "redirect:" + safeRedirect(redirect, "/login");
+            if (redirect != null && !redirect.isBlank()) {
+                redirectAttributes.addAttribute("redirect", redirect);
+            }
+            return "redirect:/login";
         }
         // redirect 없으면 role별 home — admin → /admin
         return "redirect:" + safeRedirect(redirect, sessionUserRedirect(session));
     }
 
     @GetMapping("/signup")
-    public String signupForm(HttpSession session, Model model) {
-        SessionUser sessionUser = currentUser(session);
+    public String signupForm(@SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser, Model model) {
         if (sessionUser != null) {
             return "redirect:" + sessionUser.defaultRedirectPath();
         }
@@ -78,8 +90,24 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public String signup() {
-        return "redirect:/learning/onboarding";
+    public String signup(
+            HttpSession session,
+            @Valid @ModelAttribute("signupForm") SignupForm signupForm,
+            BindingResult bindingResult,
+            @RequestParam(required = false) String redirect,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            return "auth/signup";
+        }
+        try {
+            authService.signup(session, signupForm);
+            redirectAttributes.addFlashAttribute("successMessage", "회원가입이 완료되었습니다. 로그인해 주세요.");
+            return "redirect:" + safeRedirect(redirect, "/login");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/signup";
+        }
     }
 
     @PostMapping("/logout")

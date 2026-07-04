@@ -1,6 +1,7 @@
 package com.acorn.elearning.auth.controller;
 
 import com.acorn.elearning.auth.dto.request.LoginRequest;
+import com.acorn.elearning.auth.dto.request.SignupRequest;
 import com.acorn.elearning.auth.dto.response.UserSessionResponse;
 import com.acorn.elearning.auth.service.AuthService;
 import com.acorn.elearning.auth.service.SessionService;
@@ -24,9 +25,10 @@ public class AuthApiController {
         this.sessionService = sessionService;
     }
 
-    @PostMapping("/api/auth/signup")
-    public ApiResponse<UserSessionResponse> signup() {
-        return ApiResponse.success(null);
+     @PostMapping("/api/auth/signup")
+    public ApiResponse<UserSessionResponse> signup(HttpSession session, @Valid @RequestBody SignupRequest request) {
+        UserSessionResponse response = authService.signup(session, request);
+        return ApiResponse.success(response);
     }
 
     @PostMapping("/api/auth/login")
