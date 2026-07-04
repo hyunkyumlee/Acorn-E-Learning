@@ -1,5 +1,6 @@
 package com.acorn.elearning.learning.controller;
 
+import com.acorn.elearning.learning.dto.response.LessonBookmarkResponse;
 import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.learning.service.LessonService;
 import com.acorn.elearning.learning.view.LessonProgressView;
@@ -20,11 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class CurriculumController {
 
-    /**
-     * 개발용 fallback 사용자: 로그인/세션은 1번(auth) 담당이라 구현 전까지 세션이 비어 있다.
-     * 세션이 없으면 샘플데이터의 learner(userId=2, 누비학습자)로 확인한다.
-     * (LearningController/LevelTestController와 동일 패턴 — 로그인/세션이 붙으면 자연히 미사용)
-     */
+    // 로그인/세션 미연결 구간 dev fallback 사용자(샘플 learner)
     private static final SessionUser DEV_FALLBACK_USER =
             new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
 
@@ -37,10 +34,12 @@ public class CurriculumController {
     }
 
     @GetMapping("/learning/lessons/{lessonId}")
-    public String lessonDetail(@PathVariable Long lessonId, Model model) {
-        // TODO(후속 curriculum-read 브랜치) SessionUser로 진행률/북마크 상태도 함께 조회한다.
-        // 현재는 lessons 테이블에서 단일 lesson 상세를 조회해 표시한다.
+    public String lessonDetail(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long lessonId, Model model) {
+        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
         model.addAttribute("lesson", curriculumService.getLessonDetail(lessonId));
+        model.addAttribute("bookmarked", lessonService.isBookmarked(user, lessonId));
         model.addAttribute("screen", "learning/curriculum");
         return "learning/curriculum";
     }
@@ -64,8 +63,14 @@ public class CurriculumController {
     }
 
     @PostMapping("/learning/lessons/{lessonId}/bookmark")
-    public String bookmark(@PathVariable Long lessonId) {
-        // TODO(후속 lesson-bookmark 브랜치) LessonService.bookmark(sessionUser, lessonId) 구현.
+    public String bookmark(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long lessonId,
+            RedirectAttributes redirectAttributes) {
+        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        LessonBookmarkResponse result = lessonService.toggleBookmark(user, lessonId);
+        redirectAttributes.addFlashAttribute("message",
+                result.bookmarked() ? "북마크에 추가했어요." : "북마크를 해제했어요.");
         return "redirect:/learning/lessons/" + lessonId;
     }
 }
