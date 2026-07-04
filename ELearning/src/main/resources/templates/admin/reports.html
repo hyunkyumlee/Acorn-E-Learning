@@ -24,19 +24,20 @@
   </section>
 
   <section class="admin-report-toolbar" aria-label="신고 검색 조건">
-    <select aria-label="신고 유형">
-      <option>신고 유형</option>
-      <option>게시글</option>
-      <option>댓글</option>
+    <select id="reportTypeFilter" aria-label="신고 유형">
+      <option value="">신고 유형</option>
+      <option value="게시글">게시글</option>
+      <option value="댓글">댓글</option>
     </select>
-    <select aria-label="처리 상태">
-      <option>처리 상태</option>
-      <option>대기</option>
-      <option>검토 중</option>
-      <option>처리 완료</option>
+    <select id="reportStatusFilter" aria-label="처리 상태">
+      <option value="">처리 상태</option>
+      <option value="대기">대기</option>
+      <option value="검토 중">검토 중</option>
+      <option value="처리 완료">처리 완료</option>
+      <option value="반려">반려</option>
     </select>
-    <input type="date" aria-label="검색 날짜">
-    <button type="button">검색</button>
+    <input type="date" id="reportDateFilter" aria-label="검색 날짜">
+    <button type="button" id="reportSearchButton">검색</button>
   </section>
 
   <section class="admin-report-section" aria-label="신고 목록">
@@ -56,90 +57,38 @@
         </tr>
         </thead>
         <tbody>
-        <tr class="admin-report-row"
-            data-reporter="닉네임1"
-            data-type="게시글"
-            data-date="2026-06-01"
-            data-status="처리 완료"
-            data-target="Java 기초 공부 공유합니다"
-            data-reason="불건전한 내용 포함"
-            data-content="Java 기초 공부 공유합니다. 이어서 코드를 정리하고, 진도별 예시를 모아둔 게시글입니다.">
-          <td>#R001</td>
-          <td>닉네임1</td>
-          <td>게시글</td>
-          <td>Java 기초 공부 공유합니다</td>
-          <td>불건전한 내용 포함</td>
-          <td>2026-06-01</td>
-          <td><span class="admin-report-status is-done">처리 완료</span></td>
-          <td><button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button></td>
+        <tr th:each="report : ${reportPage.reports}"
+            class="admin-report-row"
+            th:data-report-id="${report.reportId}"
+            th:data-reporter="${report.reporterNickname}"
+            th:data-type="${report.targetTypeLabel()}"
+            th:data-date="${report.createdAt != null ? #temporals.format(report.createdAt, 'MM/dd') : '-'}"
+            th:data-full-date="${report.createdAt != null ? #temporals.format(report.createdAt, 'yyyy-MM-dd') : ''}"
+            th:data-status-code="${report.status}"
+            th:data-status="${report.statusLabel()}"
+            th:data-target="${report.targetSummary}"
+            th:data-reason="${report.reasonLabel()}"
+            th:data-content="${report.targetSummary}">
+          <td th:text="${'#R' + report.reportId}">#R001</td>
+          <td th:text="${report.reporterNickname}">닉네임1</td>
+          <td th:text="${report.targetTypeLabel()}">게시글</td>
+          <td th:text="${report.targetSummary}">신고 대상</td>
+          <td th:text="${report.reasonLabel()}">신고 사유</td>
+          <td th:text="${report.createdAt != null ? #temporals.format(report.createdAt, 'MM/dd') : '-'}">07/04</td>
+          <td>
+            <span class="admin-report-status"
+                  th:classappend="${report.statusClass()}"
+                  th:text="${report.statusLabel()}">처리 완료</span>
+          </td>
+          <td>
+            <button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button>
+          </td>
         </tr>
-        <tr class="admin-report-row"
-            data-reporter="닉네임3"
-            data-type="댓글"
-            data-date="2026-06-02"
-            data-status="검토 중"
-            data-target="JOIN INNER JOIN 연습 댓글"
-            data-reason="욕설 및 비방"
-            data-content="JOIN INNER JOIN 연습 댓글에 부적절한 표현이 포함되어 신고되었습니다.">
-          <td>#R002</td>
-          <td>닉네임3</td>
-          <td>댓글</td>
-          <td>JOIN INNER JOIN 연습 댓글</td>
-          <td>욕설 및 비방</td>
-          <td>2026-06-02</td>
-          <td><span class="admin-report-status is-reviewing">검토 중</span></td>
-          <td><button type="button" class="admin-report-table-button admin-report-detail-button">처리하기</button></td>
+        <tr th:if="${#lists.isEmpty(reportPage.reports)}">
+          <td colspan="8" class="admin-report-empty">등록된 신고가 없습니다.</td>
         </tr>
-        <tr class="admin-report-row"
-            data-reporter="닉네임2"
-            data-type="게시글"
-            data-date="2026-06-03"
-            data-status="검토 중"
-            data-target="오늘 코딩 일지 정리"
-            data-reason="광고성 게시물"
-            data-content="오늘 코딩 일지 정리 게시글에 광고성 링크와 반복 문구가 포함되어 신고되었습니다.">
-          <td>#R003</td>
-          <td>닉네임2</td>
-          <td>게시글</td>
-          <td>오늘 코딩 일지 정리</td>
-          <td>광고성 게시물</td>
-          <td>2026-06-03</td>
-          <td><span class="admin-report-status is-reviewing">검토 중</span></td>
-          <td><button type="button" class="admin-report-table-button admin-report-detail-button">처리하기</button></td>
-        </tr>
-        <tr class="admin-report-row"
-            data-reporter="닉네임5"
-            data-type="댓글"
-            data-date="2026-06-04"
-            data-status="처리 완료"
-            data-target="Python 스터디 같이 해요"
-            data-reason="스팸"
-            data-content="Python 스터디 모집 댓글에 동일한 홍보 문구가 반복되어 신고되었습니다.">
-          <td>#R004</td>
-          <td>닉네임5</td>
-          <td>댓글</td>
-          <td>Python 스터디 같이 해요</td>
-          <td>스팸</td>
-          <td>2026-06-04</td>
-          <td><span class="admin-report-status is-done">처리 완료</span></td>
-          <td><button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button></td>
-        </tr>
-        <tr class="admin-report-row"
-            data-reporter="닉네임4"
-            data-type="게시글"
-            data-date="2026-06-05"
-            data-status="반려"
-            data-target="부적절한 내용이 포함된 게시글"
-            data-reason="개인정보 노출"
-            data-content="게시글 본문에 개인정보로 보일 수 있는 내용이 포함되어 신고되었습니다.">
-          <td>#R005</td>
-          <td>닉네임4</td>
-          <td>게시글</td>
-          <td>부적절한 내용이 포함된 게시글</td>
-          <td>개인정보 노출</td>
-          <td>2026-06-05</td>
-          <td><span class="admin-report-status is-pending">반려</span></td>
-          <td><button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button></td>
+        <tr class="admin-report-filter-empty is-hidden">
+          <td colspan="8" class="admin-report-empty">조건에 맞는 신고가 없습니다.</td>
         </tr>
         </tbody>
       </table>
@@ -178,25 +127,24 @@
 
       <div class="admin-report-process">
         <h3>처리 결과 입력</h3>
-        <div class="admin-report-process-row">
-          <select aria-label="처리 상태 선택">
-            <option>처리 상태 선택</option>
-            <option>검토 중</option>
-            <option>처리 완료</option>
-            <option>반려</option>
+        <form id="reportHandleForm" method="post" action="/admin/reports/0" class="admin-report-process-row">
+          <select name="status" id="reportHandleStatus" aria-label="처리 상태 선택" required>
+            <option value="">처리 상태 선택</option>
+            <option value="PENDING">대기</option>
+            <option value="IN_PROGRESS">검토 중</option>
+            <option value="RESOLVED">처리 완료</option>
+            <option value="REJECTED">반려</option>
           </select>
-          <input type="text" placeholder="처리 메모를 입력하세요">
-          <button type="button">처리 확정</button>
+          <input type="text" name="memo" placeholder="처리 메모를 입력하세요">
+          <button type="submit" id="reportHandleSubmit" disabled>처리 확정</button>
           <button type="button" class="admin-report-secondary-button" id="reportDetailClose">닫기</button>
-        </div>
+        </form>
       </div>
 
       <div class="admin-report-history">
         <h3>처리 이력</h3>
         <ul>
-          <li>2026-06-01 접수</li>
-          <li>2026-06-02 관리자 검토 시작</li>
-          <li>2026-06-03 처리 완료</li>
+          <li>상세보기를 선택하면 처리 대상 신고가 지정됩니다.</li>
         </ul>
       </div>
     </div>
@@ -212,10 +160,32 @@
   const content = document.querySelector("#reportDetailContent");
   const reason = document.querySelector("#reportDetailReason");
   const closeButton = document.querySelector("#reportDetailClose");
+  const handleForm = document.querySelector("#reportHandleForm");
+  const handleStatus = document.querySelector("#reportHandleStatus");
+  const handleSubmit = document.querySelector("#reportHandleSubmit");
+  const typeFilter = document.querySelector("#reportTypeFilter");
+  const statusFilter = document.querySelector("#reportStatusFilter");
+  const dateFilter = document.querySelector("#reportDateFilter");
+  const searchButton = document.querySelector("#reportSearchButton");
+  const filterEmptyRow = document.querySelector(".admin-report-filter-empty");
+
+  const resetDetail = () => {
+    reporter.textContent = "-";
+    type.textContent = "-";
+    date.textContent = "-";
+    status.textContent = "-";
+    content.textContent = "목록에서 신고 항목을 선택하세요.";
+    reason.textContent = "신고 사유: -";
+    handleStatus.value = "";
+    handleForm.action = "/admin/reports/0";
+    handleSubmit.disabled = true;
+    document.querySelectorAll(".admin-report-row").forEach((item) => item.classList.remove("is-selected"));
+  };
 
   document.querySelectorAll(".admin-report-detail-button").forEach((button) => {
     button.addEventListener("click", () => {
       const row = button.closest(".admin-report-row");
+      const reportId = row.dataset.reportId;
 
       reporter.textContent = row.dataset.reporter || "-";
       type.textContent = row.dataset.type || "-";
@@ -223,6 +193,9 @@
       status.textContent = row.dataset.status || "-";
       content.textContent = row.dataset.content || row.dataset.target || "-";
       reason.textContent = `신고 사유: ${row.dataset.reason || "-"}`;
+      handleStatus.value = row.dataset.statusCode || "";
+      handleForm.action = `/admin/reports/${reportId}`;
+      handleSubmit.disabled = !reportId;
 
       document.querySelectorAll(".admin-report-row").forEach((item) => item.classList.remove("is-selected"));
       row.classList.add("is-selected");
@@ -231,13 +204,31 @@
   });
 
   closeButton?.addEventListener("click", () => {
-    reporter.textContent = "-";
-    type.textContent = "-";
-    date.textContent = "-";
-    status.textContent = "-";
-    content.textContent = "목록에서 신고 항목을 선택하세요.";
-    reason.textContent = "신고 사유: -";
-    document.querySelectorAll(".admin-report-row").forEach((item) => item.classList.remove("is-selected"));
+    resetDetail();
+  });
+
+  searchButton?.addEventListener("click", () => {
+    const selectedType = typeFilter.value;
+    const selectedStatus = statusFilter.value;
+    const selectedDate = dateFilter.value;
+    let visibleCount = 0;
+
+    document.querySelectorAll(".admin-report-row").forEach((row) => {
+      const matchesType = selectedType === "" || row.dataset.type === selectedType;
+      const matchesStatus = selectedStatus === "" || row.dataset.status === selectedStatus;
+      const matchesDate = selectedDate === "" || row.dataset.fullDate === selectedDate;
+      const visible = matchesType && matchesStatus && matchesDate;
+
+      row.hidden = !visible;
+      if (!visible) {
+        row.classList.remove("is-selected");
+      } else {
+        visibleCount += 1;
+      }
+    });
+
+    filterEmptyRow?.classList.toggle("is-hidden", visibleCount > 0);
+    resetDetail();
   });
 </script>
 </body>

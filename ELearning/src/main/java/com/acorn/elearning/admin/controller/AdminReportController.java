@@ -1,5 +1,6 @@
 package com.acorn.elearning.admin.controller;
 
+import com.acorn.elearning.admin.form.ReportHandleForm;
 import com.acorn.elearning.admin.service.AdminReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -30,12 +31,13 @@ public class AdminReportController {
     }
 
     @PostMapping("/admin/reports/{reportId}")
-    public String handle(@PathVariable Long reportId) {
+    public String handle(@PathVariable Long reportId, ReportHandleForm form) {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "admin/reports"; }
         // SessionUser sessionUser = currentSessionUser();
         // adminCommunityService.handle(sessionUser, form);
         // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+        service.handle(reportId, form);
         return "redirect:/admin/reports";
     }
 }
