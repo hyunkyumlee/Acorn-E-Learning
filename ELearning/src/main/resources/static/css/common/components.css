@@ -251,6 +251,11 @@
   place-items: center;
 }
 
+.guest-header .theme-toggle:hover,
+.guest-header .theme-toggle[aria-pressed="true"] {
+  transform: none;
+}
+
 .theme-symbol svg {
   position: absolute;
   color: currentColor;

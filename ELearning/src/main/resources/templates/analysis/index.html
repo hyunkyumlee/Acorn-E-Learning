@@ -16,15 +16,14 @@
         <h1>AI 분석 리포트</h1>
         <p>누적 학습과 코딩 테스트 기록을 바탕으로 지금 점검할 흐름을 보여드립니다.</p>
       </div>
-      <form th:action="@{/analysis}" th:object="${form}" method="post" class="analysis-generate-form" data-analysis-loading>
-        <input type="hidden" name="examId" th:value="${dashboard.latestExam().examId()}">
+      <div class="analysis-auto-status">
         <div>
           <span>분석 기준</span>
           <strong th:text="${dashboard.hasExam() ? dashboard.latestExam().title() : '채점 완료 코딩 테스트 없음'}">최근 코딩 테스트</strong>
           <small th:text="${dashboard.hasExam() ? dashboard.latestExam().gradedAtLabel() : '코딩 테스트를 완료하면 분석을 만들 수 있습니다.'}">응시일</small>
         </div>
-        <button type="submit" class="button primary" th:disabled="${not dashboard.hasExam()}">최근 코딩 테스트 분석하기</button>
-      </form>
+        <b>자동 갱신</b>
+      </div>
     </section>
 
     <section class="analysis-summary" aria-label="기본 분석 요약">
@@ -212,31 +211,10 @@
       </article>
     </section>
 
-    <div class="analysis-loading-modal" data-analysis-loading-modal hidden>
-      <div role="status" aria-live="polite">
-        <span class="analysis-loading-spinner" aria-hidden="true"></span>
-        <strong>분석을 만들고 있습니다</strong>
-        <p>최근 코딩 테스트와 학습 기록을 정리하는 중입니다.</p>
-      </div>
-    </div>
-
     <section class="analysis-failure" th:if="${report != null and report.status() == 'FAILED'}">
       <strong>AI 분석 생성 실패</strong>
-      <p>분석 재시도 또는 기본 분석 화면으로 돌아갈 수 있습니다.</p>
-      <form th:action="@{/analysis/{reportId}/retry(reportId=${report.reportId()})}" method="post">
-        <button type="submit" class="button primary">분석 재시도</button>
-      </form>
+      <p>기본 누적 분석은 계속 표시됩니다. 다음 코딩 테스트가 채점되면 AI 분석을 다시 생성합니다.</p>
     </section>
   </main>
-  <script>
-    document.querySelectorAll('[data-analysis-loading]').forEach((form) => {
-      form.addEventListener('submit', () => {
-        const modal = document.querySelector('[data-analysis-loading-modal]');
-        if (modal) {
-          modal.hidden = false;
-        }
-      });
-    });
-  </script>
 </body>
 </html>

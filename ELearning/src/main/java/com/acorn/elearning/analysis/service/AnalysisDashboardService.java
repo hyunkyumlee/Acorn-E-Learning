@@ -70,10 +70,13 @@ public class AnalysisDashboardService {
     }
 
     private AnalysisExamSummary dashboardExam(Long userId, AnalysisReportResponse report) {
-        if (report != null) {
-            return analysisDashboardMapper.findExamSummary(userId, report.examId())
-                    .orElse(null);
+        AnalysisExamSummary latestExam = analysisDashboardMapper.findLatestGradedExamSummary(userId).orElse(null);
+        if (latestExam != null) {
+            return latestExam;
         }
-        return analysisDashboardMapper.findLatestGradedExamSummary(userId).orElse(null);
+        if (report != null) {
+            return analysisDashboardMapper.findExamSummary(userId, report.examId()).orElse(null);
+        }
+        return null;
     }
 }
