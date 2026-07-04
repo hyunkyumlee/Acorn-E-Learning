@@ -27,6 +27,11 @@
       <form class="lesson-actions" th:action="@{/learning/lessons/{id}/complete(id=${lesson.lessonId})}" method="post">
         <button type="submit" class="button primary">이론 완료</button>
       </form>
+
+      <!-- 북마크 토글(POST). 현재 상태에 따라 추가/해제 후 같은 화면으로 redirect. -->
+      <form class="lesson-actions" th:action="@{/learning/lessons/{id}/bookmark(id=${lesson.lessonId})}" method="post">
+        <button type="submit" class="button" th:text="${bookmarked} ? '★ 북마크 해제' : '☆ 북마크'">☆ 북마크</button>
+      </form>
     </section>
 
     <section class="panel" th:if="${lesson == null}">

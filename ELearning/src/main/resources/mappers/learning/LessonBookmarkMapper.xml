@@ -9,6 +9,17 @@
         <result property="createdAt" column="created_at" />
     </resultMap>
 
+    <resultMap id="LessonBookmarkItemMap" type="com.acorn.elearning.learning.view.LessonBookmarkItemView">
+        <id property="bookmarkId" column="bookmark_id" />
+        <result property="lessonId" column="lesson_id" />
+        <result property="lessonTitle" column="lesson_title" />
+        <result property="nodeId" column="node_id" />
+        <result property="nodeTitle" column="node_title" />
+        <result property="subjectId" column="subject_id" />
+        <result property="levelCode" column="level_code" />
+        <result property="bookmarkedAt" column="bookmarked_at" />
+    </resultMap>
+
     <sql id="columns">
         bookmark_id, user_id, lesson_id, created_at
     </sql>
@@ -25,6 +36,12 @@
         ORDER BY created_at DESC, bookmark_id DESC
     </select>
 
+    <select id="findByUserAndLesson" resultMap="LessonBookmarkResultMap">
+        SELECT <include refid="columns" />
+        FROM lesson_bookmarks
+        WHERE user_id = #{userId} AND lesson_id = #{lessonId}
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.LessonBookmark"
             useGeneratedKeys="true" keyProperty="bookmarkId">
         INSERT INTO lesson_bookmarks (user_id, lesson_id)
@@ -37,5 +54,37 @@
             lesson_id = #{lessonId}
         WHERE bookmark_id = #{bookmarkId}
     </update>
+
+    <delete id="deleteByUserAndLesson">
+        DELETE FROM lesson_bookmarks
+        WHERE user_id = #{userId} AND lesson_id = #{lessonId}
+    </delete>
+
+    <select id="countByUser" resultType="long">
+        SELECT COUNT(*)
+        FROM lesson_bookmarks lb
+        JOIN lessons l ON l.lesson_id = lb.lesson_id
+        JOIN curriculum_nodes cn ON cn.node_id = l.node_id
+        WHERE lb.user_id = #{userId}
+        <if test="subjectId != null"> AND cn.subject_id = #{subjectId} </if>
+    </select>
+
+    <select id="findPageByUser" resultMap="LessonBookmarkItemMap">
+        SELECT lb.bookmark_id AS bookmark_id,
+               lb.lesson_id   AS lesson_id,
+               l.title        AS lesson_title,
+               cn.node_id     AS node_id,
+               cn.title       AS node_title,
+               cn.subject_id  AS subject_id,
+               cn.level_code  AS level_code,
+               lb.created_at  AS bookmarked_at
+        FROM lesson_bookmarks lb
+        JOIN lessons l ON l.lesson_id = lb.lesson_id
+        JOIN curriculum_nodes cn ON cn.node_id = l.node_id
+        WHERE lb.user_id = #{userId}
+        <if test="subjectId != null"> AND cn.subject_id = #{subjectId} </if>
+        ORDER BY lb.created_at DESC, lb.bookmark_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
 
 </mapper>
