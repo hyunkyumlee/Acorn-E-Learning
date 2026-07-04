@@ -3,11 +3,12 @@
 }
 
 .analysis-head,
-.analysis-summary,
-.analysis-grid,
-.analysis-premium-grid,
-.analysis-chart-grid,
-.analysis-result-metrics,
+	  .analysis-summary,
+	  .analysis-grid,
+	  .analysis-premium-grid,
+  .analysis-chart-grid,
+	  .analysis-subject-grid,
+  .analysis-result-metrics,
 .analysis-recommendations {
   display: grid;
   gap: var(--space-4);
@@ -112,6 +113,10 @@
   align-items: stretch;
 }
 
+.analysis-subject-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
 .analysis-card,
 .analysis-failure {
   display: grid;
@@ -197,6 +202,7 @@
 }
 
 .analysis-premium-insights,
+.analysis-ai-sections,
 .analysis-mistake-list,
 .analysis-weak-list,
 .analysis-radar-values {
@@ -209,6 +215,7 @@
 }
 
 .analysis-premium-insights article,
+.analysis-ai-sections section,
 .analysis-mistake-list article,
 .analysis-pie-card {
   display: grid;
@@ -218,6 +225,46 @@
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface-soft) 46%, var(--surface));
   padding: var(--space-4);
+}
+
+.analysis-ai-report {
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--line));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent),
+    color-mix(in srgb, var(--surface) 94%, transparent);
+}
+
+.analysis-ai-sections {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysis-ai-sections section {
+  align-content: start;
+}
+
+.analysis-ai-sections section > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.analysis-ai-sections section > strong {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.analysis-ai-sections ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 18px;
+}
+
+.analysis-ai-sections li {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .analysis-radar-layout {
@@ -504,6 +551,114 @@
   background: linear-gradient(90deg, var(--primary), var(--success));
 }
 
+.analysis-subject-card {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 7%, transparent), transparent),
+    color-mix(in srgb, var(--surface) 92%, transparent);
+  padding: var(--space-4);
+}
+
+.analysis-subject-grid.is-premium .analysis-subject-card {
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--line));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 9%, transparent), transparent),
+    color-mix(in srgb, var(--surface-soft) 44%, var(--surface));
+}
+
+.analysis-subject-title {
+  display: flex;
+  min-width: 0;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.analysis-subject-title span {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+  padding: 4px 8px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.analysis-subject-title strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.analysis-subject-row {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 54px;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.analysis-subject-row span,
+.analysis-subject-row strong {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.analysis-subject-row b {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.analysis-subject-card > small {
+  display: block;
+  border-left: 3px solid var(--primary);
+  padding-left: var(--space-3);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.analysis-subject-score {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.analysis-subject-score span {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  padding: var(--space-3);
+}
+
+.analysis-subject-score b {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.analysis-subject-score small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
 .analysis-lock {
   display: grid;
   justify-items: start;
@@ -541,26 +696,85 @@
   background: color-mix(in srgb, var(--danger) 8%, var(--surface));
 }
 
+.analysis-loading-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.analysis-loading-modal[hidden] {
+  display: none;
+}
+
+.analysis-loading-modal > div {
+  display: grid;
+  width: min(360px, calc(100vw - 40px));
+  justify-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-elevated);
+  text-align: center;
+}
+
+.analysis-loading-modal strong {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.analysis-loading-modal p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.analysis-loading-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid color-mix(in srgb, var(--primary) 22%, var(--line));
+  border-top-color: var(--primary);
+  border-radius: 999px;
+  animation: analysis-spin 820ms linear infinite;
+}
+
+@keyframes analysis-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 900px) {
   .analysis-head,
   .analysis-summary,
   .analysis-grid,
   .analysis-premium-grid,
   .analysis-chart-grid,
+  .analysis-subject-grid,
   .analysis-result-metrics,
   .analysis-premium-insights,
+  .analysis-ai-sections,
   .analysis-mistake-list,
   .analysis-radar-layout {
     grid-template-columns: 1fr;
   }
 
   .analysis-progress-row,
-  .analysis-weak-row {
+  .analysis-weak-row,
+  .analysis-subject-row,
+  .analysis-subject-score {
     grid-template-columns: 1fr;
   }
 
   .analysis-progress-row strong,
-  .analysis-weak-row b {
+  .analysis-weak-row b,
+  .analysis-subject-row b {
     text-align: left;
   }
 }

@@ -117,14 +117,15 @@
 
     <section class="exam-loading-modal"
              data-exam-loading-modal
-             hidden
-             aria-hidden="true"
+             data-editor-loading-modal
+             th:hidden="${exam == null or step == null}"
+             th:attr="aria-hidden=${exam == null or step == null ? 'true' : 'false'}"
              aria-labelledby="exam-loading-title">
       <div class="exam-loading-card" role="dialog" aria-modal="true">
         <div class="exam-loading-spinner" aria-hidden="true"></div>
         <span class="exam-state-badge">처리 중</span>
-        <h2 id="exam-loading-title" data-exam-loading-title>처리 중입니다</h2>
-        <p data-exam-loading-message>잠시만 기다려 주세요.</p>
+        <h2 id="exam-loading-title" data-exam-loading-title>코드 에디터 준비 중입니다</h2>
+        <p data-exam-loading-message>CodeMirror를 불러오고 입력 환경을 여는 중입니다.</p>
         <div class="exam-loading-progress" aria-hidden="true"><span></span></div>
       </div>
     </section>

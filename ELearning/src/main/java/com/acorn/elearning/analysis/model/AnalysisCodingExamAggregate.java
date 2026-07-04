@@ -10,4 +10,5 @@ public class AnalysisCodingExamAggregate {
     private Integer passedExamCount;
     private Integer totalProblemCount;
     private Integer correctCount;
+    private Integer retryCount;
 }

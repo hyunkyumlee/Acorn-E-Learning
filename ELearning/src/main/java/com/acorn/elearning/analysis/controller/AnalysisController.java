@@ -27,11 +27,12 @@ public class AnalysisController {
         if (sessionUser == null) {
             return "redirect:/login";
         }
-        aiAnalysisService.refreshLatestIfRequired(sessionUser);
+        boolean autoRefreshRequired = aiAnalysisService.latestRefreshRequired(sessionUser);
         AnalysisDashboardResponse dashboard = analysisDashboardService.dashboard(sessionUser);
         model.addAttribute("screen", "analysis/index");
         model.addAttribute("dashboard", dashboard);
         model.addAttribute("report", dashboard.report());
+        model.addAttribute("autoRefreshRequired", autoRefreshRequired);
         return "analysis/index";
     }
 

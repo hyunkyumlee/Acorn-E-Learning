@@ -18,6 +18,8 @@ if (form && runButton && resultPanel) {
   let editorView = null;
   const initialAnswerText = textarea?.value || "";
   const alreadySubmitted = form.dataset.answerSubmitted === "true";
+  const notifyEditorReady = () => document.dispatchEvent(new CustomEvent("knowva:code-editor-ready"));
+  const notifyEditorFailed = () => document.dispatchEvent(new CustomEvent("knowva:code-editor-failed"));
 
   const updateSubmitState = (code) => {
     if (!submitButton) {
@@ -70,27 +72,35 @@ if (form && runButton && resultPanel) {
   });
 
   if (textarea && editorHost) {
-    editorView = new EditorView({
-      doc: textarea.value,
-      extensions: [
-        basicSetup,
-        java(),
-        oneDark,
-        knowvaEditorTheme,
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            textarea.value = update.state.doc.toString();
-            updateSubmitState(textarea.value);
-          }
-        }),
-      ],
-      parent: editorHost,
-    });
-    editorHost.addEventListener("keydown", handleEditorTab, true);
-    editorHost.addEventListener("mousedown", () => {
-      requestAnimationFrame(() => editorView?.focus());
-    });
-    form.classList.add("is-enhanced");
+    try {
+      editorView = new EditorView({
+        doc: textarea.value,
+        extensions: [
+          basicSetup,
+          java(),
+          oneDark,
+          knowvaEditorTheme,
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged) {
+              textarea.value = update.state.doc.toString();
+              updateSubmitState(textarea.value);
+            }
+          }),
+        ],
+        parent: editorHost,
+      });
+      editorHost.addEventListener("keydown", handleEditorTab, true);
+      editorHost.addEventListener("mousedown", () => {
+        requestAnimationFrame(() => editorView?.focus());
+      });
+      form.classList.add("is-enhanced");
+      requestAnimationFrame(() => requestAnimationFrame(notifyEditorReady));
+    } catch (error) {
+      notifyEditorFailed();
+      throw error;
+    }
+  } else {
+    notifyEditorReady();
   }
   textarea?.addEventListener("input", () => updateSubmitState(textarea.value));
   updateSubmitState(initialAnswerText);

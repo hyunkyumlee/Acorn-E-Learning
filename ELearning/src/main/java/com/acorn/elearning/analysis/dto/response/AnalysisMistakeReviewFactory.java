@@ -24,7 +24,7 @@ final class AnalysisMistakeReviewFactory {
                             description(mistakeType, stat.getSamplePrompt()),
                             occurrenceCount,
                             affectedExamCount,
-                            occurrenceCount + "회 · " + affectedExamCount + "개 코딩 테스트에서 발생",
+                            occurrenceCount + "회 · " + affectedExamCount + "개 코딩테스트에서 발생",
                             action(mistakeType),
                             maxOccurrenceCount == 0 ? 0 : percent(occurrenceCount, maxOccurrenceCount));
                 })
