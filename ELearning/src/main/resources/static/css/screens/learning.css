@@ -126,6 +126,16 @@
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
+/* 과목칩 전체를 링크로: 칩을 꽉 채우고 텍스트 색/장식은 칩 톤을 상속(밑줄 없음). */
+.subject-chip-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
 /* ----- ProgressSummary ----- */
 .summary-grid {
   display: grid;
@@ -323,7 +333,8 @@
      (페이지 전체는 안 건드림. reduce면 네이티브 스크롤.) */
 .roadmap-stage {
   position: relative;
-  height: min(72vh, 820px);
+  /* 중앙이 로드맵 전용이 되어 세로로 더 길게(오늘의 미션 카드는 사이드바로 이동). */
+  height: min(82vh, 960px);
   overflow-y: auto;
   overflow-x: hidden;
   border-radius: var(--radius);
@@ -511,41 +522,56 @@
     drop-shadow(0 0 22px color-mix(in srgb, var(--primary) 55%, transparent));
 }
 
-/* 잠김: 포털이 잠든 듯 채도/명도 낮춤(행성 잠금과 동일 톤) */
+/* 잠김: 포털이 잠든 듯 채도/명도 더 낮추고 살짝 축소(행성 잠금보다 눈에 덜 띄게) */
 .roadmap-node.is-gate.is-locked .roadmap-gate-img {
-  filter: grayscale(0.28) brightness(0.86) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.4));
-  opacity: 0.94;
+  filter: grayscale(0.5) brightness(0.66) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+  opacity: 0.9;
+  transform: scale(0.9);
+  transform-origin: center;
 }
 
 /* ----- 상태 배지(색 + 텍스트 병기) : 행성 위 pill ----- */
 .roadmap-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   border-radius: var(--radius-pill);
-  padding: 2px 9px;
+  padding: 3px 10px;
   font-size: 11px;
   font-weight: 800;
+  letter-spacing: 0.01em;
   white-space: nowrap;
   border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
   color: var(--muted);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+/* 상태 점(색만으로 구분 금지: 점 + 텍스트 병기). 점 색 = 상태색(currentColor) */
+.roadmap-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
 }
 
 .roadmap-node.is-done .roadmap-badge {
-  background: var(--success);
-  color: #fff;
-  border-color: transparent;
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 15%, var(--surface));
+  border-color: color-mix(in srgb, var(--success) 34%, var(--line));
 }
 
 .roadmap-node.is-current .roadmap-badge {
-  background: var(--primary);
-  color: color-mix(in srgb, var(--accent) 82%, black);
-  border-color: transparent;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 15%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--line));
 }
 
 .roadmap-node.is-ready .roadmap-badge {
-  background: var(--warning);
-  color: color-mix(in srgb, #2a1d00 80%, black);
-  border-color: transparent;
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 18%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 38%, var(--line));
 }
 
 /* ----- 노드 제목 라벨(맵 위 가독성: 반투명 pill + 그림자) ----- */
@@ -564,6 +590,127 @@
 
 .roadmap-node.is-locked .roadmap-label {
   color: var(--muted);
+}
+
+/* ----- 행성 hover/focus 카드: 지그재그 빈 쪽에 상태태그·이름·설명·CTA. 참고 카드 구조를 charcoal 토큰으로 재해석 ----- */
+.roadmap-card {
+  position: absolute;
+  top: 50%;
+  width: 236px;
+  max-width: 62vw;
+  display: grid;
+  gap: 9px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.55);
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%) scale(0.96);
+  transition: opacity 150ms ease, transform 200ms cubic-bezier(0.34, 1.2, 0.5, 1);
+  z-index: 20;
+}
+/* 행성이 좌측(card-right) → 카드 오른쪽 / 우측(card-left) → 카드 왼쪽. 둘 다 중앙 쪽으로 열려 화면 밖으로 안 나감.
+   간격을 넉넉히(26px) 두어 행성과 카드가 붙어 보이지 않게. */
+.roadmap-node.card-right .roadmap-card { left: calc(100% + 26px); }
+.roadmap-node.card-left  .roadmap-card { right: calc(100% + 26px); }
+/* 행성↔카드 사이 투명 브릿지: 넓어진 간격을 덮어 마우스 이동 시 hover 안 끊기게 */
+.roadmap-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+}
+.roadmap-node.card-right .roadmap-card::before { left: -30px; }
+.roadmap-node.card-left  .roadmap-card::before { right: -30px; }
+
+.roadmap-node:hover .roadmap-card,
+.roadmap-node:focus-within .roadmap-card {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1);
+}
+
+/* 카드 상단 상태 태그 pill (참고: 카드 내 레벨/상태 pill). 색은 노드 상태 기준. */
+.roadmap-card-tag {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  border: 1px solid var(--line);
+}
+.roadmap-card-tag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.roadmap-node.is-done .roadmap-card-tag {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--success) 30%, var(--line));
+}
+.roadmap-node.is-current .roadmap-card-tag {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--line));
+}
+.roadmap-node.is-ready .roadmap-card-tag {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 16%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 34%, var(--line));
+}
+
+.roadmap-card-title {
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1.3;
+  color: var(--text);
+  word-break: keep-all;
+}
+.roadmap-card-desc {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  word-break: keep-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* CTA는 참고처럼 카드 폭을 꽉 채운 버튼 */
+.roadmap-card-cta {
+  justify-self: stretch;
+  width: 100%;
+  margin-top: 3px;
+  font-size: 13px;
+  padding: 9px 14px;
+  text-align: center;
+}
+.roadmap-card-locked {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-card { transition: none; transform: translateY(-50%); }
+  .roadmap-node:hover .roadmap-card,
+  .roadmap-node:focus-within .roadmap-card { transform: translateY(-50%); }
 }
 
 /* =========================================================================
@@ -737,4 +884,14 @@
   margin-top: var(--space-5);
   display: flex;
   gap: var(--space-2);
+}
+
+/* 북마크 토글 버튼: 리본 아이콘 + 라벨 가로 정렬. 아이콘 채움 여부로 상태 구분. */
+.bookmark-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bookmark-toggle .bookmark-icon {
+  flex: none;
 }
