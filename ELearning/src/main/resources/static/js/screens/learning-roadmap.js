@@ -60,6 +60,33 @@
     stage.addEventListener("scroll", updateProgress, { passive: true });
     updateProgress();
 
+    /* ---- 2a-2) 로드맵을 맨 아래까지 내리면 페이지도 맨 아래로 "착" 붙이기 ----
+       내부 stage는 화면보다 커서 하단이 뷰포트 밖으로 나간다. 맵 끝(게이트)까지
+       왔을 때 페이지를 문서 하단으로 스냅하면 stage 전체가 화면에 들어와 게이트가 다 보인다.
+       내부 스크롤은 그대로 두고(따로 동작), "끝에 도달"한 순간에만 1회 페이지를 정렬한다. */
+    var snappedBottom = false;
+    function snapPageToRoadmapEnd() {
+      var m = stage.scrollHeight - stage.clientHeight;
+      if (m <= 0) {
+        return;
+      }
+      // 맵 끝에 "가까워지면"(마지막 구간 진입) 미리 페이지를 하단으로 정렬한다.
+      // 내부 관성 글라이드(EASE 0.06)가 완전히 끝나길 기다리지 않아 반응이 자연스럽게 따라온다.
+      var lead = Math.max(140, m * 0.2);
+      if (stage.scrollTop >= m - lead) {
+        if (!snappedBottom) {
+          snappedBottom = true;
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: prefersReduced ? "auto" : "smooth",
+          });
+        }
+      } else {
+        snappedBottom = false; // 끝 구간에서 벗어나면 다시 스냅 가능하도록 해제
+      }
+    }
+    stage.addEventListener("scroll", snapPageToRoadmapEnd, { passive: true });
+
     /* ---- 2b) 관성 스무스 스크롤 (stage 휠 전용) ---- */
     var smoothTo = null; // 현재 노드 이동에서 재사용
 

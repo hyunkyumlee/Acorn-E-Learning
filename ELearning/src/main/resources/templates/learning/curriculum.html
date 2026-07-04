@@ -10,7 +10,8 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Learning</span><h1>이론 학습</h1><p>lessons 테이블에서 단일 lesson 상세를 DB에서 읽어 표시합니다.</p></section>
+    <!-- 화면 설명 문구 제거(팀장 지침: 기능 구현되면 삭제). 제목만 유지. -->
+    <section class="page-heading"><span class="eyebrow">Learning</span><h1>이론 학습</h1></section>
 
     <!-- 이론 완료(LEARN-005) 후 redirect flash 메시지 -->
     <p class="flash-message" th:if="${message != null}" th:text="${message}">처리되었습니다.</p>
@@ -30,7 +31,16 @@
 
       <!-- 북마크 토글(POST). 현재 상태에 따라 추가/해제 후 같은 화면으로 redirect. -->
       <form class="lesson-actions" th:action="@{/learning/lessons/{id}/bookmark(id=${lesson.lessonId})}" method="post">
-        <button type="submit" class="button" th:text="${bookmarked} ? '★ 북마크 해제' : '☆ 북마크'">☆ 북마크</button>
+        <!-- 별표 대신 북마크 리본 아이콘: 채움(fill)=북마크됨 / 외곽선(none)=미북마크 -->
+        <button type="submit" class="button bookmark-toggle" th:classappend="${bookmarked} ? ' is-bookmarked' : ''"
+                th:attr="aria-label=${bookmarked} ? '북마크 해제' : '북마크 추가'">
+          <svg class="bookmark-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"
+               th:attr="fill=${bookmarked} ? 'currentColor' : 'none'"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path>
+          </svg>
+          <span th:text="${bookmarked} ? '북마크됨' : '북마크'">북마크</span>
+        </button>
       </form>
     </section>
 
