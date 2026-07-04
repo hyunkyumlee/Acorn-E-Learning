@@ -1,7 +1,7 @@
 package com.acorn.elearning.analysis.dto.response;
 
 import com.acorn.elearning.analysis.model.AnalysisCodingMistakeStat;
-import com.acorn.elearning.analysis.model.AnalysisExamProblemResult;
+import com.acorn.elearning.analysis.model.AnalysisCodingExamAggregate;
 import com.acorn.elearning.analysis.model.AnalysisExamSummary;
 import com.acorn.elearning.analysis.model.AnalysisLearningProgressStat;
 import com.acorn.elearning.analysis.model.AnalysisPracticeSummary;
@@ -55,7 +55,7 @@ public record AnalysisDashboardResponse(
             boolean premiumActive,
             AnalysisReportResponse report,
             AnalysisExamSummary latestExam,
-            List<AnalysisExamProblemResult> problemResults,
+            AnalysisCodingExamAggregate codingExamAggregate,
             List<AnalysisCodingMistakeStat> mistakeStats,
             List<AnalysisExamSummary> recentExams,
             List<AnalysisLearningProgressStat> progressStats,
@@ -63,7 +63,8 @@ public record AnalysisDashboardResponse(
             AnalysisWrongAnswerSummary wrongAnswerSummary,
             List<AnalysisWrongAnswerNodeStat> wrongNodeStats
     ) {
-        int examScoreRate = percent(latestExam.getCorrectCount(), latestExam.getTotalProblemCount());
+        int latestExamScoreRate = percent(latestExam.getCorrectCount(), latestExam.getTotalProblemCount());
+        int codingTestRate = percent(codingExamAggregate.getCorrectCount(), codingExamAggregate.getTotalProblemCount());
         int progressRate = averageProgress(progressStats);
         int practiceRate = practiceSummary.getAverageCorrectRate() == null
                 ? 0
@@ -75,27 +76,28 @@ public record AnalysisDashboardResponse(
                 true,
                 premiumActive,
                 report,
-                ExamOverview.from(latestExam, examScoreRate),
+                ExamOverview.from(latestExam, latestExamScoreRate),
                 List.of(
                         new Metric("학습 진행", progressRate + "%", completedProgressLabel(progressStats)),
                         new Metric("일반 문제 정답률", practiceRate + "%", practiceCorrectLabel(practiceSummary)),
-                        new Metric("코딩 테스트 정답률", examScoreRate + "%", correctLabel(latestExam)),
+                        new Metric("코딩 테스트 정답률", codingTestRate + "%", codingTestCorrectLabel(codingExamAggregate)),
                         new Metric("열린 오답", openWrongAnswers + "개", wrongAnswerLabel(wrongAnswerSummary))
                 ),
-                freeSummary(report, latestExam, problemResults, weakPoint),
+                freeSummary(latestExam, codingExamAggregate, codingTestRate, weakPoint),
                 weakPoint,
-                recommendation(weakPoint, examScoreRate, openWrongAnswers),
+                recommendation(weakPoint, codingTestRate, openWrongAnswers),
                 trendPoints(recentExams),
                 progressPoints(progressStats),
                 AnalysisDashboardDetail.from(
                         latestExam,
+                        codingExamAggregate,
                         mistakeStats,
                         practiceSummary,
                         wrongAnswerSummary,
                         wrongNodeStats,
                         weakPoint,
                         progressRate,
-                        examScoreRate,
+                        codingTestRate,
                         practiceRate,
                         openWrongAnswers)
         );
@@ -140,20 +142,17 @@ public record AnalysisDashboardResponse(
     public record ProgressPoint(String label, int progressRate, boolean completed) {}
 
     private static String freeSummary(
-            AnalysisReportResponse report,
             AnalysisExamSummary exam,
-            List<AnalysisExamProblemResult> problemResults,
+            AnalysisCodingExamAggregate codingExamAggregate,
+            int codingTestRate,
             String weakPoint
     ) {
-        if (report != null && report.freeSummary() != null && !report.freeSummary().isBlank()) {
-            return report.freeSummary();
-        }
-        long correctProblems = problemResults.stream()
-                .filter(result -> Boolean.TRUE.equals(result.getCorrect()))
-                .count();
-        return "최근 " + fallback(exam.getSubjectName(), "학습") + " " + fallback(exam.getLevelCode(), "-")
-                + " 코딩 테스트에서 " + correctProblems + "개 문제를 통과했습니다. "
-                + weakPoint + " 영역을 먼저 점검하면 다음 코딩 테스트 안정성이 올라갑니다.";
+        return fallback(exam.getSubjectName(), "학습") + " " + fallback(exam.getLevelCode(), "-")
+                + " 누적 코딩 테스트 정답률은 " + codingTestRate + "%입니다. "
+                + number(codingExamAggregate.getTotalExamCount()) + "회 응시에서 "
+                + number(codingExamAggregate.getCorrectCount()) + " / "
+                + number(codingExamAggregate.getTotalProblemCount()) + "문제를 맞혔고, "
+                + weakPoint + " 흐름을 먼저 점검하면 다음 코딩 테스트 안정성이 올라갑니다.";
     }
 
     private static List<TrendPoint> trendPoints(List<AnalysisExamSummary> recentExams) {
@@ -191,15 +190,15 @@ public record AnalysisDashboardResponse(
                 .orElse("뚜렷한 약점 없음");
     }
 
-    static String recommendation(String weakPoint, int examScoreRate, int openWrongAnswers) {
+    static String recommendation(String weakPoint, int codingTestRate, int openWrongAnswers) {
         if (openWrongAnswers > 0) {
             return weakPoint + " 오답을 먼저 복습해 주세요.";
         }
-        if (examScoreRate < 70) {
-            return "최근 코딩 테스트 정답률이 낮습니다. 문제 풀이보다 이론 복습을 먼저 진행해 주세요.";
+        if (codingTestRate < 70) {
+            return "누적 코딩 테스트 정답률이 낮습니다. 문제 풀이보다 이론 복습을 먼저 진행해 주세요.";
         }
-        if (examScoreRate < 100) {
-            return "최근 코딩 테스트의 틀린 문제를 다시 실행해 보고 다음 단원으로 넘어가세요.";
+        if (codingTestRate < 100) {
+            return "누적 코딩 테스트의 반복 실수 유형을 다시 확인한 뒤 다음 단원으로 넘어가세요.";
         }
         return "현재 흐름이 좋습니다. 다음 레벨 학습으로 넘어가도 좋습니다.";
     }
@@ -221,6 +220,12 @@ public record AnalysisDashboardResponse(
 
     private static String correctLabel(AnalysisExamSummary exam) {
         return number(exam.getCorrectCount()) + " / " + number(exam.getTotalProblemCount()) + " 정답";
+    }
+
+    private static String codingTestCorrectLabel(AnalysisCodingExamAggregate aggregate) {
+        return "누적 " + number(aggregate.getTotalExamCount()) + "회 · "
+                + number(aggregate.getCorrectCount()) + " / "
+                + number(aggregate.getTotalProblemCount()) + " 정답";
     }
 
     private static int averageProgress(List<AnalysisLearningProgressStat> progressStats) {

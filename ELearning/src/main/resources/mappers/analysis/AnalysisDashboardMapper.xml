@@ -19,26 +19,19 @@
         <result property="createdAt" column="created_at" />
     </resultMap>
 
-    <resultMap id="AnalysisExamProblemResultMap" type="com.acorn.elearning.analysis.model.AnalysisExamProblemResult">
-        <id property="answerId" column="answer_id" />
-        <result property="examId" column="exam_id" />
-        <result property="aiProblemId" column="ai_problem_id" />
-        <result property="problemNo" column="problem_no" />
-        <result property="prompt" column="prompt" />
-        <result property="passedCaseCount" column="passed_case_count" />
-        <result property="correct" column="is_correct" />
-        <result property="aiReview" column="ai_review" />
-        <result property="testCaseResult" column="test_case_result" />
-        <result property="submittedAt" column="submitted_at" />
-        <result property="gradedAt" column="graded_at" />
-    </resultMap>
-
     <resultMap id="AnalysisCodingMistakeStatResultMap" type="com.acorn.elearning.analysis.model.AnalysisCodingMistakeStat">
         <id property="mistakeType" column="mistake_type" />
         <result property="occurrenceCount" column="occurrence_count" />
         <result property="affectedExamCount" column="affected_exam_count" />
         <result property="samplePrompt" column="sample_prompt" />
         <result property="latestOccurredAt" column="latest_occurred_at" />
+    </resultMap>
+
+    <resultMap id="AnalysisCodingExamAggregateResultMap" type="com.acorn.elearning.analysis.model.AnalysisCodingExamAggregate">
+        <result property="totalExamCount" column="total_exam_count" />
+        <result property="passedExamCount" column="passed_exam_count" />
+        <result property="totalProblemCount" column="total_problem_count" />
+        <result property="correctCount" column="correct_count" />
     </resultMap>
 
     <resultMap id="AnalysisLearningProgressStatResultMap" type="com.acorn.elearning.analysis.model.AnalysisLearningProgressStat">
@@ -125,25 +118,6 @@
         LIMIT #{limit}
     </select>
 
-    <select id="findProblemResults" parameterType="long" resultMap="AnalysisExamProblemResultMap">
-        SELECT
-            ea.answer_id,
-            p.exam_id,
-            p.ai_problem_id,
-            p.problem_no,
-            p.prompt,
-            COALESCE(ea.passed_case_count, 0) AS passed_case_count,
-            COALESCE(ea.is_correct, 0) AS is_correct,
-            ea.ai_review,
-            ea.test_case_result,
-            ea.submitted_at,
-            ea.graded_at
-        FROM ai_exam_problems p
-        LEFT JOIN exam_answers ea ON ea.ai_problem_id = p.ai_problem_id
-        WHERE p.exam_id = #{examId}
-        ORDER BY p.problem_no ASC
-    </select>
-
     <select id="findCodingMistakeStats" resultMap="AnalysisCodingMistakeStatResultMap">
         SELECT
             mistake_type,
@@ -193,6 +167,18 @@
         GROUP BY mistake_type
         ORDER BY occurrence_count DESC, latest_occurred_at DESC
         LIMIT 5
+    </select>
+
+    <select id="findCodingExamAggregate" resultMap="AnalysisCodingExamAggregateResultMap">
+        SELECT
+            COUNT(*) AS total_exam_count,
+            COALESCE(SUM(CASE WHEN es.result_status = 'PASSED' THEN 1 ELSE 0 END), 0) AS passed_exam_count,
+            COALESCE(SUM(es.total_problem_count), 0) AS total_problem_count,
+            COALESCE(SUM(es.correct_count), 0) AS correct_count
+        FROM exam_sessions es
+        WHERE es.user_id = #{userId}
+          AND es.subject_id = #{subjectId}
+          AND es.status = 'GRADED'
     </select>
 
     <select id="findLearningProgressStats" resultMap="AnalysisLearningProgressStatResultMap">

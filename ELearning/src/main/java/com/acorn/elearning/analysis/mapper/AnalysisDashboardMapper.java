@@ -1,7 +1,7 @@
 package com.acorn.elearning.analysis.mapper;
 
+import com.acorn.elearning.analysis.model.AnalysisCodingExamAggregate;
 import com.acorn.elearning.analysis.model.AnalysisCodingMistakeStat;
-import com.acorn.elearning.analysis.model.AnalysisExamProblemResult;
 import com.acorn.elearning.analysis.model.AnalysisExamSummary;
 import com.acorn.elearning.analysis.model.AnalysisLearningProgressStat;
 import com.acorn.elearning.analysis.model.AnalysisPracticeSummary;
@@ -25,9 +25,12 @@ public interface AnalysisDashboardMapper {
             @Param("limit") int limit
     );
 
-    List<AnalysisExamProblemResult> findProblemResults(Long examId);
-
     List<AnalysisCodingMistakeStat> findCodingMistakeStats(
+            @Param("userId") Long userId,
+            @Param("subjectId") Long subjectId
+    );
+
+    Optional<AnalysisCodingExamAggregate> findCodingExamAggregate(
             @Param("userId") Long userId,
             @Param("subjectId") Long subjectId
     );

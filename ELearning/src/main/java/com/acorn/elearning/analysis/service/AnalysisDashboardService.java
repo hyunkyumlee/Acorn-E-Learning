@@ -4,6 +4,7 @@ import com.acorn.elearning.analysis.dto.response.AnalysisDashboardResponse;
 import com.acorn.elearning.analysis.dto.response.AnalysisReportResponse;
 import com.acorn.elearning.analysis.mapper.AiAnalysisReportMapper;
 import com.acorn.elearning.analysis.mapper.AnalysisDashboardMapper;
+import com.acorn.elearning.analysis.model.AnalysisCodingExamAggregate;
 import com.acorn.elearning.analysis.model.AnalysisExamSummary;
 import com.acorn.elearning.analysis.model.AnalysisPracticeSummary;
 import com.acorn.elearning.analysis.model.AnalysisWrongAnswerSummary;
@@ -44,12 +45,14 @@ public class AnalysisDashboardService {
                 .orElseGet(AnalysisPracticeSummary::new);
         AnalysisWrongAnswerSummary wrongAnswerSummary = analysisDashboardMapper.findWrongAnswerSummary(userId, subjectId)
                 .orElseGet(AnalysisWrongAnswerSummary::new);
+        AnalysisCodingExamAggregate codingExamAggregate = analysisDashboardMapper.findCodingExamAggregate(userId, subjectId)
+                .orElseGet(AnalysisCodingExamAggregate::new);
 
         return AnalysisDashboardResponse.from(
                 premiumActive,
                 report,
                 exam,
-                analysisDashboardMapper.findProblemResults(exam.getExamId()),
+                codingExamAggregate,
                 analysisDashboardMapper.findCodingMistakeStats(userId, subjectId),
                 analysisDashboardMapper.findRecentGradedExamSummaries(userId, subjectId, TREND_LIMIT),
                 analysisDashboardMapper.findLearningProgressStats(userId, subjectId),

@@ -1,5 +1,6 @@
 package com.acorn.elearning.analysis.dto.response;
 
+import com.acorn.elearning.analysis.model.AnalysisCodingExamAggregate;
 import com.acorn.elearning.analysis.model.AnalysisCodingMistakeStat;
 import com.acorn.elearning.analysis.model.AnalysisExamSummary;
 import com.acorn.elearning.analysis.model.AnalysisPracticeSummary;
@@ -29,13 +30,14 @@ public record AnalysisDashboardDetail(
 
     public static AnalysisDashboardDetail from(
             AnalysisExamSummary latestExam,
+            AnalysisCodingExamAggregate codingExamAggregate,
             List<AnalysisCodingMistakeStat> mistakeStats,
             AnalysisPracticeSummary practiceSummary,
             AnalysisWrongAnswerSummary wrongAnswerSummary,
             List<AnalysisWrongAnswerNodeStat> wrongNodeStats,
             String weakPoint,
             int progressRate,
-            int examScoreRate,
+            int codingTestRate,
             int practiceRate,
             int openWrongAnswers
     ) {
@@ -45,9 +47,9 @@ public record AnalysisDashboardDetail(
         return new AnalysisDashboardDetail(
                 weakNodePoints(wrongNodeStats),
                 AnalysisMistakeReviewFactory.from(mistakeStats),
-                premiumInsights(latestExam, practiceSummary, wrongAnswerSummary, weakPoint, examScoreRate, practiceRate, openWrongAnswers),
-                pieCharts(latestExam, practiceSummary, wrongAnswerSummary, examScoreRate, practiceRate, wrongAnswerResolvedRate),
-                radarChart(progressRate, practiceRate, examScoreRate, wrongAnswerResolvedRate, openWrongAnswers));
+                premiumInsights(latestExam, codingExamAggregate, practiceSummary, wrongAnswerSummary, weakPoint, codingTestRate, practiceRate, openWrongAnswers),
+                AnalysisDashboardChartFactory.pieCharts(codingExamAggregate, practiceSummary, wrongAnswerSummary, codingTestRate, practiceRate, wrongAnswerResolvedRate),
+                radarChart(progressRate, practiceRate, codingTestRate, wrongAnswerResolvedRate, openWrongAnswers));
     }
 
     public record WeakNodePoint(String label, int totalWrongCount, int openCount, int intensity) {}
@@ -102,18 +104,19 @@ public record AnalysisDashboardDetail(
 
     private static List<PremiumInsight> premiumInsights(
             AnalysisExamSummary latestExam,
+            AnalysisCodingExamAggregate codingExamAggregate,
             AnalysisPracticeSummary practiceSummary,
             AnalysisWrongAnswerSummary wrongAnswerSummary,
             String weakPoint,
-            int examScoreRate,
+            int codingTestRate,
             int practiceRate,
             int openWrongAnswers
     ) {
         return List.of(
                 new PremiumInsight(
                         "현재 강점",
-                        strengthDescription(latestExam, examScoreRate, practiceRate),
-                        examScoreRate >= 70 ? "안정" : "보강"),
+                        strengthDescription(latestExam, codingExamAggregate, codingTestRate, practiceRate),
+                        codingTestRate >= 70 ? "안정" : "보강"),
                 new PremiumInsight(
                         "집중 보강",
                         weakPoint + " 흐름을 먼저 복습하면 다음 코딩 테스트 안정성이 올라갑니다.",
@@ -125,62 +128,30 @@ public record AnalysisDashboardDetail(
                         practiceRate + "%"),
                 new PremiumInsight(
                         "다음 액션",
-                        AnalysisDashboardResponse.recommendation(weakPoint, examScoreRate, openWrongAnswers),
+                        AnalysisDashboardResponse.recommendation(weakPoint, codingTestRate, openWrongAnswers),
                         "추천")
         );
     }
 
-    private static String strengthDescription(AnalysisExamSummary exam, int examScoreRate, int practiceRate) {
+    private static String strengthDescription(AnalysisExamSummary exam, AnalysisCodingExamAggregate codingExamAggregate, int codingTestRate, int practiceRate) {
         String subjectName = fallback(exam.getSubjectName(), "최근 과목");
-        if (examScoreRate >= 90) {
-            return subjectName + " 코딩 테스트 정답률이 높습니다. 다음 레벨로 넘어갈 준비가 되어 있습니다.";
+        if (codingTestRate >= 90) {
+            return subjectName + " 누적 코딩 테스트 정답률이 높습니다. "
+                    + number(codingExamAggregate.getTotalExamCount()) + "회 응시 기준으로 다음 레벨 준비가 되어 있습니다.";
         }
-        if (examScoreRate >= 70) {
-            return subjectName + " 핵심 흐름은 잡혀 있습니다. 틀린 문제만 빠르게 좁히면 됩니다.";
+        if (codingTestRate >= 70) {
+            return subjectName + " 핵심 흐름은 잡혀 있습니다. 누적 실패 유형만 빠르게 좁히면 됩니다.";
         }
         if (practiceRate >= 70) {
-            return "일반 문제풀이 흐름은 괜찮지만 코딩 테스트 적용에서 흔들림이 있습니다.";
+            return "일반 문제풀이 흐름은 괜찮지만 누적 코딩 테스트 적용에서 흔들림이 있습니다.";
         }
         return "기초 개념과 문제풀이 리듬을 함께 다시 잡는 것이 좋습니다.";
-    }
-
-    private static List<PieChart> pieCharts(
-            AnalysisExamSummary latestExam,
-            AnalysisPracticeSummary practiceSummary,
-            AnalysisWrongAnswerSummary wrongAnswerSummary,
-            int examScoreRate,
-            int practiceRate,
-            int wrongAnswerResolvedRate
-    ) {
-        return List.of(
-                new PieChart(
-                        "일반 문제 정답률",
-                        practiceRate,
-                        "정답",
-                        "오답",
-                        number(practiceSummary.getCorrectProblems()) + " / "
-                                + number(practiceSummary.getTotalProblems()) + " 정답"),
-                new PieChart(
-                        "코딩 테스트 정답률",
-                        examScoreRate,
-                        "정답",
-                        "오답",
-                        number(latestExam.getCorrectCount()) + " / "
-                                + number(latestExam.getTotalProblemCount()) + " 정답"),
-                new PieChart(
-                        "오답 복습 해결률",
-                        wrongAnswerResolvedRate,
-                        "해결",
-                        "대기",
-                        number(wrongAnswerSummary.getSolvedWrongAnswers()) + " / "
-                                + number(wrongAnswerSummary.getTotalWrongAnswers()) + " 해결")
-        );
     }
 
     private static RadarChart radarChart(
             int progressRate,
             int practiceRate,
-            int examScoreRate,
+            int codingTestRate,
             int wrongAnswerResolvedRate,
             int openWrongAnswers
     ) {
@@ -188,7 +159,7 @@ public record AnalysisDashboardDetail(
         List<RadarAxis> axes = List.of(
                 radarAxis("학습 진행", progressRate, 0),
                 radarAxis("일반 문제", practiceRate, 1),
-                radarAxis("코딩 테스트", examScoreRate, 2),
+                radarAxis("코딩 테스트", codingTestRate, 2),
                 radarAxis("오답 해결", wrongAnswerResolvedRate, 3),
                 radarAxis("복습 균형", reviewBalance, 4)
         );
