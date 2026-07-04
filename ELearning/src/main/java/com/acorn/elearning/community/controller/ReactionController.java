@@ -1,31 +1,74 @@
 package com.acorn.elearning.community.controller;
 
+import com.acorn.elearning.community.service.ReactionService;
+import com.acorn.elearning.security.SessionUser;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class ReactionController {
+    private final ReactionService reactionService;
+
+    public ReactionController(ReactionService reactionService) {
+        this.reactionService = reactionService;
+    }
 
     @PostMapping("/community/posts/{postId}/likes")
-    public String like(@PathVariable Long postId) {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "/community/board"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // reactionService.like(sessionUser, form, postId);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
-        return "redirect:/community/board";
+    public String like(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long postId,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        reactionService.like(sessionUser, postId);
+        redirectAttributes.addFlashAttribute("message", "좋아요를 눌렀습니다.");
+        return "redirect:/community/posts/" + postId;
+    }
+
+    @PostMapping("/community/posts/{postId}/likes/delete")
+    public String unlike(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long postId,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        reactionService.unlike(sessionUser, postId);
+        redirectAttributes.addFlashAttribute("message", "좋아요를 취소했습니다.");
+        return "redirect:/community/posts/" + postId;
     }
 
     @PostMapping("/community/posts/{postId}/scraps")
-    public String scrap(@PathVariable Long postId) {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "/community/board"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // reactionService.scrap(sessionUser, form, postId);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
-        return "redirect:/community/board";
+    public String scrap(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long postId,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        reactionService.scrap(sessionUser, postId);
+        redirectAttributes.addFlashAttribute("message", "스크랩했습니다.");
+        return "redirect:/community/posts/" + postId;
+    }
+
+    @PostMapping("/community/posts/{postId}/scraps/delete")
+    public String unscrap(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long postId,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        reactionService.unscrap(sessionUser, postId);
+        redirectAttributes.addFlashAttribute("message", "스크랩을 취소했습니다.");
+        return "redirect:/community/posts/" + postId;
     }
 }

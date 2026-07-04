@@ -1,7 +1,13 @@
 package com.acorn.elearning.community.dto.response;
 
-import java.util.Map;
+import com.acorn.elearning.community.model.Comment;
+import com.acorn.elearning.community.model.CommunityPost;
+import java.util.List;
 
-public record CommunityProfileResponse(String status, Map<String, Object> data) {
-    public static CommunityProfileResponse stub() { return new CommunityProfileResponse("SKELETON", Map.of()); }
+public record CommunityProfileResponse(
+        List<CommunityPost> myPosts,
+        List<Comment> myComments,
+        List<CommunityPost> likedPosts,
+        List<CommunityPost> scrapedPosts
+) {
 }

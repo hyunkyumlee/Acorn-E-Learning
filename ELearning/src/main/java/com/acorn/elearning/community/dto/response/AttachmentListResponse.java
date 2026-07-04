@@ -1,7 +1,7 @@
 package com.acorn.elearning.community.dto.response;
 
-import java.util.Map;
+import com.acorn.elearning.community.model.PostAttachment;
+import java.util.List;
 
-public record AttachmentListResponse(String status, Map<String, Object> data) {
-    public static AttachmentListResponse stub() { return new AttachmentListResponse("SKELETON", Map.of()); }
+public record AttachmentListResponse(List<PostAttachment> attachments) {
 }

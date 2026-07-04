@@ -1,7 +1,9 @@
 package com.acorn.elearning.community.dto.response;
 
-import java.util.Map;
+import com.acorn.elearning.community.model.Report;
 
-public record ReportResponse(String status, Map<String, Object> data) {
-    public static ReportResponse stub() { return new ReportResponse("SKELETON", Map.of()); }
+public record ReportResponse(Long reportId, String targetType, Long targetId, String status) {
+    public static ReportResponse from(Report report) {
+        return new ReportResponse(report.getReportId(), report.getTargetType(), report.getTargetId(), report.getStatus());
+    }
 }

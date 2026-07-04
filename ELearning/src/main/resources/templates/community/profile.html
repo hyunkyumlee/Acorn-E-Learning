@@ -1,17 +1,75 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>커뮤니티 프로필 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/community.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/community.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell community-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>커뮤니티 프로필</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>community/profile</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="page-heading">
+      <span class="eyebrow">Community</span>
+      <h1>커뮤니티 프로필</h1>
+      <p>내가 작성하거나 반응한 커뮤니티 활동을 확인할 수 있어.</p>
+    </section>
+
+    <section class="panel community-panel" th:if="${view != null}">
+      <div class="community-panel-header">
+        <div>
+          <h2>내 커뮤니티 활동</h2>
+          <p>작성 글, 댓글, 좋아요, 스크랩을 한 화면에서 확인해.</p>
+        </div>
+        <a class="button" th:href="@{/community/board}">목록</a>
+      </div>
+
+      <div class="community-profile-grid">
+        <section class="community-subsection">
+          <h3>내가 쓴 글</h3>
+          <ul class="community-list compact">
+            <li th:each="post : ${view.myPosts}">
+              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">글</a>
+            </li>
+            <li th:if="${#lists.isEmpty(view.myPosts)}" class="community-empty">작성한 글이 없습니다.</li>
+          </ul>
+        </section>
+        <section class="community-subsection">
+          <h3>내가 쓴 댓글</h3>
+          <ul class="community-list compact">
+            <li th:each="comment : ${view.myComments}">
+              <a th:href="@{/community/posts/{id}(id=${comment.postId})}" th:text="${comment.content}">댓글</a>
+            </li>
+            <li th:if="${#lists.isEmpty(view.myComments)}" class="community-empty">작성한 댓글이 없습니다.</li>
+          </ul>
+        </section>
+        <section class="community-subsection">
+          <h3>좋아요한 글</h3>
+          <ul class="community-list compact">
+            <li th:each="post : ${view.likedPosts}">
+              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">글</a>
+            </li>
+            <li th:if="${#lists.isEmpty(view.likedPosts)}" class="community-empty">좋아요한 글이 없습니다.</li>
+          </ul>
+        </section>
+        <section class="community-subsection">
+          <h3>스크랩한 글</h3>
+          <ul class="community-list compact">
+            <li th:each="post : ${view.scrapedPosts}">
+              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">글</a>
+            </li>
+            <li th:if="${#lists.isEmpty(view.scrapedPosts)}" class="community-empty">스크랩한 글이 없습니다.</li>
+          </ul>
+        </section>
+      </div>
+    </section>
   </main>
 </body>
 </html>

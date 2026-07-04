@@ -1,17 +1,94 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>콘텐츠 추천 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/community.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/community.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell community-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>콘텐츠 추천</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>community/recommendations</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="page-heading">
+      <span class="eyebrow">Content</span>
+      <h1>콘텐츠 추천</h1>
+      <p>과목, 콘텐츠 유형, 추천 slot 기준으로 활성 추천 콘텐츠를 조회할 수 있어.</p>
+    </section>
+
+    <section class="panel community-panel">
+      <div class="community-panel-header">
+        <div>
+          <h2>추천 조건</h2>
+          <p>필터를 비우면 전체 추천 콘텐츠를 조회해.</p>
+        </div>
+      </div>
+      <form method="get" th:action="@{/community/recommendations}" class="community-filter recommendations-filter">
+        <label>과목 ID
+          <input name="subjectId" type="number" th:value="${view.subjectId}">
+        </label>
+        <label>콘텐츠 유형
+          <select name="contentType">
+            <option value="">전체</option>
+            <option value="ARTICLE" th:selected="${view.contentType == 'ARTICLE'}">Article</option>
+            <option value="DOCS" th:selected="${view.contentType == 'DOCS'}">Docs</option>
+            <option value="VIDEO" th:selected="${view.contentType == 'VIDEO'}">Video</option>
+            <option value="COURSE" th:selected="${view.contentType == 'COURSE'}">Course</option>
+          </select>
+        </label>
+        <label>추천 slot
+          <select name="slot">
+            <option value="">전체</option>
+            <option value="BEGINNER" th:selected="${view.slot == 'BEGINNER'}">Beginner</option>
+            <option value="REFERENCE" th:selected="${view.slot == 'REFERENCE'}">Reference</option>
+            <option value="TRENDING" th:selected="${view.slot == 'TRENDING'}">Trending</option>
+          </select>
+        </label>
+        <button class="button primary" type="submit">조회</button>
+      </form>
+    </section>
+
+    <section class="panel community-panel">
+      <div class="community-panel-header">
+        <div>
+          <h2>추천 콘텐츠</h2>
+          <p><span th:text="${view.total + '개'}">0개</span>의 콘텐츠가 있어.</p>
+        </div>
+      </div>
+      <div class="community-table-wrap">
+        <table class="community-table">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>과목</th>
+            <th>제목</th>
+            <th>유형</th>
+            <th>Slot</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="item : ${view.recommendations}">
+            <td th:text="${item.contentId}">1</td>
+            <td th:text="${item.subjectId}">1</td>
+            <td class="community-title-cell">
+              <a th:href="${item.url}" target="_blank" rel="noopener" th:text="${item.title}">추천 콘텐츠</a>
+            </td>
+            <td><span class="community-badge" th:text="${item.contentType}">ARTICLE</span></td>
+            <td th:text="${item.recommendationSlot}">BEGINNER</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(view.recommendations)}">
+            <td colspan="5" class="community-empty">추천 콘텐츠가 없습니다.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
 </body>
 </html>

@@ -1,37 +1,71 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.community.mapper.PostAttachmentMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="PostAttachmentResultMap" type="com.acorn.elearning.community.model.PostAttachment">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="PostAttachmentResultMap">
-          SELECT /* DDL column list */
-          FROM post_attachments
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="PostAttachmentResultMap">
-          SELECT /* DDL column list */
-          FROM post_attachments
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.community.model.PostAttachment" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO post_attachments (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.community.model.PostAttachment">
-          UPDATE post_attachments
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+
+
+
+    <resultMap id="PostAttachmentResultMap" type="com.acorn.elearning.community.model.PostAttachment">
+        <id property="attachmentId" column="attachment_id" />
+        <result property="postId" column="post_id" />
+        <result property="uploaderId" column="uploader_id" />
+        <result property="originalName" column="original_name" />
+        <result property="storedName" column="stored_name" />
+        <result property="filePath" column="file_path" />
+        <result property="fileSize" column="file_size" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <sql id="columns">
+        attachment_id, post_id, uploader_id, original_name, stored_name, file_path, file_size, created_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="PostAttachmentResultMap">
+        SELECT <include refid="columns" />
+        FROM post_attachments
+        WHERE attachment_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="PostAttachmentResultMap">
+        SELECT <include refid="columns" />
+        FROM post_attachments
+        ORDER BY attachment_id DESC
+    </select>
+
+    <select id="findByPostId" resultMap="PostAttachmentResultMap">
+        SELECT <include refid="columns" />
+        FROM post_attachments
+        WHERE post_id = #{postId}
+        ORDER BY attachment_id ASC
+    </select>
+
+    <select id="countByPostId" resultType="int">
+        SELECT COUNT(*)
+        FROM post_attachments
+        WHERE post_id = #{postId}
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.community.model.PostAttachment"
+            useGeneratedKeys="true" keyProperty="attachmentId">
+        INSERT INTO post_attachments (
+            post_id, uploader_id, original_name, stored_name, file_path, file_size
+        )
+        VALUES (
+            #{postId}, #{uploaderId}, #{originalName}, #{storedName}, #{filePath}, #{fileSize}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.community.model.PostAttachment">
+        UPDATE post_attachments
+        SET original_name = #{originalName},
+            stored_name = #{storedName},
+            file_path = #{filePath},
+            file_size = #{fileSize}
+        WHERE attachment_id = #{attachmentId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM post_attachments
+        WHERE attachment_id = #{attachmentId}
+    </delete>
 </mapper>

@@ -1,16 +1,39 @@
 package com.acorn.elearning.content.service;
 
+import com.acorn.elearning.content.dto.response.ContentRecommendationListResponse;
+import com.acorn.elearning.content.mapper.ContentRecommendationMapper;
 import java.util.Map;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ContentRecommendationService {
+    private final ContentRecommendationMapper contentRecommendationMapper;
+
+    public ContentRecommendationService(ContentRecommendationMapper contentRecommendationMapper) {
+        this.contentRecommendationMapper = contentRecommendationMapper;
+    }
+
     public Map<String, Object> stub(String action) {
-        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // Object entity = domainMapper.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
-        // domainMapper.update(applyForm(entity, form));
-        // return Map.of("result", entity);
-        return Map.of("action", action, "status", "SKELETON");
+        return Map.of("action", action, "status", "IMPLEMENTED");
+    }
+
+    @Transactional(readOnly = true)
+    public ContentRecommendationListResponse recommendations(Long subjectId, String contentType, String slot) {
+        String normalizedContentType = normalize(contentType);
+        String normalizedSlot = normalize(slot);
+        return ContentRecommendationListResponse.of(
+                contentRecommendationMapper.findActive(subjectId, normalizedContentType, normalizedSlot),
+                subjectId,
+                normalizedContentType,
+                normalizedSlot
+        );
+    }
+
+    private String normalize(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim().toUpperCase();
     }
 }
