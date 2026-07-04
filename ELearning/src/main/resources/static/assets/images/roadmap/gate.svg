@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 224" role="img" aria-label="다음 차원으로 가는 관문">
+  <!--
+    Knowva 로드맵 Gate = "다른 차원으로 가는 아치형 포털". 무테 플랫 벡터 + 약한 그라데이션 + 파스텔.
+    구성: 받침(floor) 위에 선 아치 문틀 + 내부(노을빛 하늘 · 달 · 별 · 부드러운 구름층).
+    조잡한 고리행성/계단은 제거하고 레퍼런스(맑은 아치+하늘+구름)처럼 깔끔하게.
+    상태색(잠김/응시가능)은 learning.css의 CSS 필터로 처리.
+  -->
+  <defs>
+    <linearGradient id="kvGateSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b3566"/>
+      <stop offset="0.42" stop-color="#6e6098"/>
+      <stop offset="0.72" stop-color="#ec9fb0"/>
+      <stop offset="1" stop-color="#fbe3ce"/>
+    </linearGradient>
+    <linearGradient id="kvGateFrame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9dbf5"/>
+      <stop offset="1" stop-color="#f3d1e1"/>
+    </linearGradient>
+    <radialGradient id="kvGateMoon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff6dc"/>
+      <stop offset="0.45" stop-color="#ffeccb" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffeccb" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="kvGateHorizon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff1d6" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#fff1d6" stop-opacity="0"/>
+    </radialGradient>
+    <g id="kvGateSpark">
+      <path d="M0,-1 C0,-0.3 0.3,0 1,0 C0.3,0 0,0.3 0,1 C0,0.3 -0.3,0 -1,0 C-0.3,0 0,-0.3 0,-1 Z" fill="#fdf7e6"/>
+    </g>
+    <path id="kvGateCloud" d="M0,0 L0,-6 Q1,-15 11,-15 Q15,-25 27,-21 Q36,-30 47,-22 Q59,-25 61,-13 Q73,-14 73,-4 L73,0 Z"/>
+    <clipPath id="kvGateOp">
+      <path d="M34,210 L34,96 A66,66 0 0 1 166,96 L166,210 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- 받침(floor): 아치가 딛고 선 바닥 → 밑이 잘려 보이지 않게 -->
+  <rect x="16" y="205" width="168" height="13" rx="5" fill="#d0b9ea"/>
+  <rect x="16" y="205" width="168" height="5" rx="2.5" fill="#e6d8f4"/>
+
+  <!-- 문틀(무테 플랫): 바깥 rim → 메인 frame -->
+  <path d="M20,210 L20,96 A80,80 0 0 1 180,96 L180,210 Z" fill="#d3bce9"/>
+  <path d="M26,210 L26,96 A74,74 0 0 1 174,96 L174,210 Z" fill="url(#kvGateFrame)"/>
+
+  <!-- 포털 내부(다른 차원) -->
+  <g clip-path="url(#kvGateOp)">
+    <rect x="32" y="0" width="136" height="210" fill="url(#kvGateSky)"/>
+
+    <!-- 달빛 -->
+    <circle cx="100" cy="66" r="26" fill="url(#kvGateMoon)"/>
+    <circle cx="100" cy="66" r="11" fill="#fff3d6"/>
+
+    <!-- 별(플랫 4각 스파클) — 위쪽 어두운 영역에만 -->
+    <use href="#kvGateSpark" transform="translate(62,58) scale(3)" opacity="0.95"/>
+    <use href="#kvGateSpark" transform="translate(142,52) scale(2.6)" opacity="0.9"/>
+    <use href="#kvGateSpark" transform="translate(70,92) scale(1.8)" opacity="0.8"/>
+    <use href="#kvGateSpark" transform="translate(134,86) scale(2.2)" opacity="0.85"/>
+    <use href="#kvGateSpark" transform="translate(104,40) scale(1.6)" opacity="0.75"/>
+
+    <!-- 지평선 빛(다른 세계의 빛) -->
+    <ellipse cx="100" cy="150" rx="62" ry="26" fill="url(#kvGateHorizon)"/>
+
+    <!-- 부드러운 구름층(무테 플랫, 겹겹이) — 문 안쪽 아래를 채우고 바닥을 부드럽게 -->
+    <use href="#kvGateCloud" transform="translate(38,204) scale(1.7)" fill="#c9b6e6" opacity="0.92"/>
+    <use href="#kvGateCloud" transform="translate(30,212) scale(1.25)" fill="#f2c3d3" opacity="0.95"/>
+    <use href="#kvGateCloud" transform="translate(96,214) scale(1.35)" fill="#fbe8d5"/>
+    <use href="#kvGateCloud" transform="translate(70,210) scale(1.0)" fill="#fdf0e4"/>
+  </g>
+</svg>
