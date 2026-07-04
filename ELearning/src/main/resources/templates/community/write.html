@@ -1,17 +1,64 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>글 작성 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/community.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/community.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell community-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>글 작성</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>community/write</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p><form method="post"><input type="hidden" name="_csrf" value="TODO-CSRF"><input type="hidden" name="idempotencyToken" value="TODO-IDEMPOTENCY"><button class="button primary" type="submit">Submit</button></form></section>
+    <section class="page-heading">
+      <span class="eyebrow">Community</span>
+      <h1>글 작성</h1>
+      <p>게시글을 작성하고 첨부 파일 metadata를 함께 등록할 수 있어.</p>
+    </section>
+
+    <section class="panel community-panel community-form-panel">
+      <div class="community-panel-header">
+        <div>
+          <h2>게시글 작성</h2>
+          <p>제목, 과목, 게시판, 내용을 입력해서 등록해.</p>
+        </div>
+        <a class="button" th:href="@{/community/board}">목록</a>
+      </div>
+
+      <form method="post" th:action="@{/community/posts}" th:object="${form}" enctype="multipart/form-data" class="community-form">
+        <div class="community-form-grid">
+          <label class="wide">제목
+            <input th:field="*{title}" maxlength="200" required>
+          </label>
+          <label>과목 ID
+            <input th:field="*{subjectId}" type="number" required>
+          </label>
+          <label>게시판
+            <select th:field="*{boardType}" required>
+              <option value="FREE">자유</option>
+              <option value="QUESTION">질문</option>
+              <option value="STUDY_LOG">공부 일지</option>
+            </select>
+          </label>
+          <label class="wide">내용
+            <textarea th:field="*{content}" rows="12" required></textarea>
+          </label>
+          <label class="wide">첨부 파일
+            <input th:field="*{files}" type="file" multiple>
+          </label>
+        </div>
+        <div class="community-actions right">
+          <a class="button" th:href="@{/community/board}">취소</a>
+          <button class="button primary" type="submit">등록</button>
+        </div>
+      </form>
+    </section>
   </main>
 </body>
 </html>

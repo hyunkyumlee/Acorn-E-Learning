@@ -1,37 +1,86 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.community.mapper.PostScrapMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="PostScrapResultMap" type="com.acorn.elearning.community.model.PostScrap">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="PostScrapResultMap">
-          SELECT /* DDL column list */
-          FROM post_scraps
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="PostScrapResultMap">
-          SELECT /* DDL column list */
-          FROM post_scraps
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.community.model.PostScrap" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO post_scraps (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.community.model.PostScrap">
-          UPDATE post_scraps
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+
+
+
+    <resultMap id="PostScrapResultMap" type="com.acorn.elearning.community.model.PostScrap">
+        <id property="scrapId" column="scrap_id" />
+        <result property="postId" column="post_id" />
+        <result property="userId" column="user_id" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <resultMap id="CommunityPostResultMap" type="com.acorn.elearning.community.model.CommunityPost">
+        <id property="postId" column="post_id" />
+        <result property="writerId" column="writer_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="boardType" column="board_type" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="likeCount" column="like_count" />
+        <result property="commentCount" column="comment_count" />
+        <result property="scrapCount" column="scrap_count" />
+        <result property="status" column="status" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+
+    <sql id="columns">
+        scrap_id, post_id, user_id, created_at
+    </sql>
+
+    <sql id="postColumns">
+        p.post_id, p.writer_id, p.subject_id, p.board_type, p.title, p.content,
+        p.like_count, p.comment_count, p.scrap_count, p.status, p.created_at, p.updated_at, p.deleted_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="PostScrapResultMap">
+        SELECT <include refid="columns" />
+        FROM post_scraps
+        WHERE scrap_id = #{id}
+    </select>
+
+    <select id="findByPostIdAndUserId" resultMap="PostScrapResultMap">
+        SELECT <include refid="columns" />
+        FROM post_scraps
+        WHERE post_id = #{postId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="findAll" resultMap="PostScrapResultMap">
+        SELECT <include refid="columns" />
+        FROM post_scraps
+        ORDER BY scrap_id DESC
+    </select>
+
+    <select id="findPostsByUserId" resultMap="CommunityPostResultMap">
+        SELECT <include refid="postColumns" />
+        FROM post_scraps s
+        JOIN community_posts p ON p.post_id = s.post_id
+        WHERE s.user_id = #{userId}
+          AND p.status = 'ACTIVE'
+          AND p.deleted_at IS NULL
+        ORDER BY s.scrap_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.community.model.PostScrap"
+            useGeneratedKeys="true" keyProperty="scrapId">
+        INSERT INTO post_scraps (post_id, user_id)
+        VALUES (#{postId}, #{userId})
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.community.model.PostScrap">
+        UPDATE post_scraps
+        SET post_id = #{postId}, user_id = #{userId}
+        WHERE scrap_id = #{scrapId}
+    </update>
+
+    <delete id="deleteByPostIdAndUserId">
+        DELETE FROM post_scraps
+        WHERE post_id = #{postId}
+          AND user_id = #{userId}
+    </delete>
 </mapper>

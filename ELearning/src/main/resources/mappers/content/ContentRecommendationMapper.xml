@@ -1,37 +1,73 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.content.mapper.ContentRecommendationMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="ContentRecommendationResultMap" type="com.acorn.elearning.content.model.ContentRecommendation">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="ContentRecommendationResultMap">
-          SELECT /* DDL column list */
-          FROM content_recommendations
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="ContentRecommendationResultMap">
-          SELECT /* DDL column list */
-          FROM content_recommendations
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.content.model.ContentRecommendation" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO content_recommendations (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.content.model.ContentRecommendation">
-          UPDATE content_recommendations
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+
+
+
+    <resultMap id="ContentRecommendationResultMap" type="com.acorn.elearning.content.model.ContentRecommendation">
+        <id property="contentId" column="content_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="title" column="title" />
+        <result property="url" column="url" />
+        <result property="contentType" column="content_type" />
+        <result property="recommendationSlot" column="recommendation_slot" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        content_id, subject_id, title, url, content_type, recommendation_slot, is_active, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="ContentRecommendationResultMap">
+        SELECT <include refid="columns" />
+        FROM content_recommendations
+        WHERE content_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="ContentRecommendationResultMap">
+        SELECT <include refid="columns" />
+        FROM content_recommendations
+        ORDER BY subject_id ASC, recommendation_slot ASC, content_id DESC
+    </select>
+
+    <select id="findActive" resultMap="ContentRecommendationResultMap">
+        SELECT <include refid="columns" />
+        FROM content_recommendations
+        WHERE is_active = 1
+        <if test="subjectId != null">
+            AND subject_id = #{subjectId}
+        </if>
+        <if test="contentType != null and contentType != ''">
+            AND content_type = #{contentType}
+        </if>
+        <if test="slot != null and slot != ''">
+            AND recommendation_slot = #{slot}
+        </if>
+        ORDER BY subject_id ASC, recommendation_slot ASC, content_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.content.model.ContentRecommendation"
+            useGeneratedKeys="true" keyProperty="contentId">
+        INSERT INTO content_recommendations (
+            subject_id, title, url, content_type, recommendation_slot, is_active
+        )
+        VALUES (
+            #{subjectId}, #{title}, #{url}, #{contentType}, #{recommendationSlot}, #{isActive}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.content.model.ContentRecommendation">
+        UPDATE content_recommendations
+        SET subject_id = #{subjectId},
+            title = #{title},
+            url = #{url},
+            content_type = #{contentType},
+            recommendation_slot = #{recommendationSlot},
+            is_active = #{isActive},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE content_id = #{contentId}
+    </update>
 </mapper>

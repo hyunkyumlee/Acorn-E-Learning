@@ -1,7 +1,27 @@
 package com.acorn.elearning.content.dto.response;
 
-import java.util.Map;
+import com.acorn.elearning.content.model.ContentRecommendation;
+import java.util.List;
 
-public record ContentRecommendationListResponse(String status, Map<String, Object> data) {
-    public static ContentRecommendationListResponse stub() { return new ContentRecommendationListResponse("SKELETON", Map.of()); }
+public record ContentRecommendationListResponse(
+        List<ContentRecommendation> recommendations,
+        Long subjectId,
+        String contentType,
+        String slot,
+        int total
+) {
+    public static ContentRecommendationListResponse of(
+            List<ContentRecommendation> recommendations,
+            Long subjectId,
+            String contentType,
+            String slot
+    ) {
+        return new ContentRecommendationListResponse(
+                recommendations,
+                subjectId,
+                contentType,
+                slot,
+                recommendations.size()
+        );
+    }
 }
