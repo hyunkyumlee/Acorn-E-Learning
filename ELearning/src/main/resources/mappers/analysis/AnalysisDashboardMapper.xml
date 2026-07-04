@@ -33,6 +33,14 @@
         <result property="gradedAt" column="graded_at" />
     </resultMap>
 
+    <resultMap id="AnalysisCodingMistakeStatResultMap" type="com.acorn.elearning.analysis.model.AnalysisCodingMistakeStat">
+        <id property="mistakeType" column="mistake_type" />
+        <result property="occurrenceCount" column="occurrence_count" />
+        <result property="affectedExamCount" column="affected_exam_count" />
+        <result property="samplePrompt" column="sample_prompt" />
+        <result property="latestOccurredAt" column="latest_occurred_at" />
+    </resultMap>
+
     <resultMap id="AnalysisLearningProgressStatResultMap" type="com.acorn.elearning.analysis.model.AnalysisLearningProgressStat">
         <id property="nodeId" column="node_id" />
         <result property="nodeTitle" column="node_title" />
@@ -134,6 +142,57 @@
         LEFT JOIN exam_answers ea ON ea.ai_problem_id = p.ai_problem_id
         WHERE p.exam_id = #{examId}
         ORDER BY p.problem_no ASC
+    </select>
+
+    <select id="findCodingMistakeStats" resultMap="AnalysisCodingMistakeStatResultMap">
+        SELECT
+            mistake_type,
+            COUNT(*) AS occurrence_count,
+            COUNT(DISTINCT exam_id) AS affected_exam_count,
+            SUBSTRING_INDEX(
+                GROUP_CONCAT(sample_prompt ORDER BY occurred_at DESC SEPARATOR ' || '),
+                ' || ',
+                1
+            ) AS sample_prompt,
+            MAX(occurred_at) AS latest_occurred_at
+        FROM (
+            SELECT
+                es.exam_id,
+                CASE
+                    WHEN COALESCE(ea.ai_review, '') LIKE '%출력%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%형식%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%공백%'
+                        THEN 'OUTPUT_FORMAT'
+                    WHEN p.prompt LIKE '%배열%'
+                      OR p.prompt LIKE '%문자열%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%배열%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%문자열%'
+                        THEN 'ARRAY_STRING'
+                    WHEN p.prompt LIKE '%조건%'
+                      OR p.prompt LIKE '%반복%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%조건%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%반복%'
+                      OR LOWER(COALESCE(ea.ai_review, '')) LIKE '%if%'
+                      OR LOWER(COALESCE(ea.ai_review, '')) LIKE '%for%'
+                        THEN 'CONTROL_FLOW'
+                    WHEN COALESCE(ea.passed_case_count, 0) = 0
+                        THEN 'MISSING_CORE_LOGIC'
+                    ELSE 'EDGE_CASE'
+                END AS mistake_type,
+                p.prompt AS sample_prompt,
+                COALESCE(ea.graded_at, ea.submitted_at, ea.created_at) AS occurred_at
+            FROM exam_sessions es
+            JOIN ai_exam_problems p ON p.exam_id = es.exam_id
+            JOIN exam_answers ea ON ea.exam_id = es.exam_id
+                                AND ea.ai_problem_id = p.ai_problem_id
+            WHERE es.user_id = #{userId}
+              AND es.subject_id = #{subjectId}
+              AND es.status = 'GRADED'
+              AND COALESCE(ea.is_correct, 0) = 0
+        ) classified
+        GROUP BY mistake_type
+        ORDER BY occurrence_count DESC, latest_occurred_at DESC
+        LIMIT 5
     </select>
 
     <select id="findLearningProgressStats" resultMap="AnalysisLearningProgressStatResultMap">

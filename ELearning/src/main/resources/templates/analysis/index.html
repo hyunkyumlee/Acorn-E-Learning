@@ -12,22 +12,24 @@
   <main class="page-shell analysis-screen">
     <section class="analysis-head">
       <div>
-        <span class="eyebrow">SR-009 · AI Analysis</span>
+        <span class="eyebrow">Learning Insight</span>
         <h1>AI 분석 리포트</h1>
-        <p>기본 분석은 무료로 제공하고, Premium 상세 분석은 결제 상태에 따라 열립니다.</p>
+        <p>최근 학습과 코딩 테스트 기록을 바탕으로 지금 점검할 흐름을 보여드립니다.</p>
       </div>
-      <form th:action="@{/analysis}" th:object="${form}" method="post" class="analysis-generate-form">
-        <label>
-          <span>시험 ID</span>
-          <input type="number" th:field="*{examId}" min="1" required>
-        </label>
-        <button type="submit" class="button primary">분석 생성</button>
+      <form th:action="@{/analysis}" th:object="${form}" method="post" class="analysis-generate-form" data-analysis-loading>
+        <input type="hidden" name="examId" th:value="${dashboard.latestExam().examId()}">
+        <div>
+          <span>분석 기준</span>
+          <strong th:text="${dashboard.hasExam() ? dashboard.latestExam().title() : '채점 완료 코딩 테스트 없음'}">최근 코딩 테스트</strong>
+          <small th:text="${dashboard.hasExam() ? dashboard.latestExam().gradedAtLabel() : '코딩 테스트를 완료하면 분석을 만들 수 있습니다.'}">응시일</small>
+        </div>
+        <button type="submit" class="button primary" th:disabled="${not dashboard.hasExam()}">최근 코딩 테스트 분석하기</button>
       </form>
     </section>
 
     <section class="analysis-summary" aria-label="기본 분석 요약">
       <article th:each="metric : ${dashboard.metrics()}">
-        <span th:text="${metric.label()}">시험 정답률</span>
+        <span th:text="${metric.label()}">코딩 테스트 정답률</span>
         <strong th:text="${metric.value()}">0%</strong>
         <small th:text="${metric.note()}">분석 기준</small>
       </article>
@@ -36,17 +38,17 @@
     <section class="analysis-grid">
       <article class="analysis-card">
         <div class="analysis-card-head">
-          <h2>시험 성장 흐름</h2>
+          <h2>코딩 테스트 성장 흐름</h2>
           <span th:text="${#lists.isEmpty(dashboard.trend()) ? '기록 없음' : '최근 ' + #lists.size(dashboard.trend()) + '회'}">최근 7회</span>
         </div>
-        <div class="analysis-bar-chart" th:if="${not #lists.isEmpty(dashboard.trend())}" aria-label="시험 성장 흐름">
+        <div class="analysis-bar-chart" th:if="${not #lists.isEmpty(dashboard.trend())}" aria-label="코딩 테스트 성장 흐름">
           <i th:each="point : ${dashboard.trend()}"
              th:style="|height:${point.scoreRate()}%|"
              th:title="|${point.label()} · ${point.scoreRate()}% · ${point.resultStatus()}|">
             <span th:text="${point.scoreRate()}">0</span>
           </i>
         </div>
-        <p th:if="${#lists.isEmpty(dashboard.trend())}">채점 완료된 시험 기록이 쌓이면 성장 흐름을 표시합니다.</p>
+        <p th:if="${#lists.isEmpty(dashboard.trend())}">채점 완료된 코딩 테스트 기록이 쌓이면 성장 흐름을 표시합니다.</p>
       </article>
 
       <article class="analysis-card">
@@ -59,8 +61,8 @@
 
       <article class="analysis-card analysis-card-wide">
         <div class="analysis-card-head">
-          <h2>최근 응시 테스트</h2>
-          <span th:text="${dashboard.latestExam().title()}">최근 시험 없음</span>
+          <h2>최근 코딩 테스트</h2>
+          <span th:text="${dashboard.latestExam().title()}">최근 코딩 테스트 없음</span>
         </div>
         <div class="analysis-result-metrics">
           <article><span>과목 / 레벨</span><strong th:text="|${dashboard.latestExam().subjectName()} · ${dashboard.latestExam().levelCode()}|">Java · BRONZE</strong></article>
@@ -68,7 +70,7 @@
           <article><span>정답</span><strong th:text="${dashboard.latestExam().correctLabel()}">0 / 0</strong></article>
           <article><span>상태</span><strong th:text="${dashboard.latestExam().statusLabel()}">대기</strong></article>
           <article><span>응시일</span><strong th:text="${dashboard.latestExam().gradedAtLabel()}">-</strong></article>
-          <article><span>추천</span><strong th:text="${dashboard.recommendation()}">시험 완료 후 표시</strong></article>
+          <article><span>추천</span><strong th:text="${dashboard.recommendation()}">코딩 테스트 완료 후 표시</strong></article>
         </div>
       </article>
 
@@ -91,30 +93,132 @@
     </section>
 
     <section class="analysis-premium-grid">
-      <article class="analysis-card" th:classappend="${report != null and report.premiumDetail() != null} ? '' : ' is-locked'">
+      <article class="analysis-card analysis-premium-panel" th:classappend="${dashboard.premiumActive() ? '' : ' is-locked'}">
         <div class="analysis-card-head">
-          <h2>AI PREMIUM 분석</h2>
-          <span th:text="${dashboard.premiumActive()} ? '활성' : '잠금'">잠금</span>
+          <h2>Premium 상세 분석</h2>
+          <span th:text="${dashboard.premiumActive() ? '활성' : '잠금'}">잠금</span>
         </div>
-        <div th:if="${not dashboard.premiumActive() or report == null or report.premiumDetail() == null}" class="analysis-lock">
-          <strong>Premium 분석 잠금상태</strong>
-          <p>강점, 취약점, 오답 분석, AI 추천 로드맵은 Premium에서 확인합니다.</p>
+        <div th:if="${not dashboard.premiumActive()}" class="analysis-lock">
+          <strong>상세 분석 잠금</strong>
+          <p>정답률 분포, 취약 구간, 실수 유형 분석과 추천 로드맵을 한 화면에서 확인할 수 있습니다.</p>
           <a class="button primary" th:href="@{/analysis/payment}">결제하기</a>
         </div>
-        <pre th:if="${dashboard.premiumActive() and report != null and report.premiumDetail() != null}" th:text="${report.premiumDetail()}">Premium 상세 분석</pre>
+        <div th:if="${dashboard.premiumActive()}" class="analysis-premium-insights">
+          <article th:each="insight : ${dashboard.detail().premiumInsights()}">
+            <span th:text="${insight.badge()}">추천</span>
+            <strong th:text="${insight.title()}">현재 강점</strong>
+            <p th:text="${insight.description()}">상세 분석 내용</p>
+          </article>
+        </div>
       </article>
 
-      <article class="analysis-card">
+      <article class="analysis-card analysis-card-wide" th:if="${dashboard.premiumActive()}">
         <div class="analysis-card-head">
-          <h2>추천 학습</h2>
-          <span>Roadmap</span>
+          <h2>학습 균형 레이더</h2>
+          <span>한눈에 보기</span>
         </div>
-        <div class="analysis-recommendations">
-          <a class="button" th:href="@{/learning/review}">오답 복습하기</a>
-          <a class="button primary" th:href="@{/learning}">다음 단원 학습하기</a>
+        <div class="analysis-radar-layout">
+          <div class="analysis-radar-wrap">
+            <svg class="analysis-radar" viewBox="0 0 220 220" role="img" aria-label="학습 균형 분석">
+              <circle cx="110" cy="110" r="84"></circle>
+              <circle cx="110" cy="110" r="63"></circle>
+              <circle cx="110" cy="110" r="42"></circle>
+              <circle cx="110" cy="110" r="21"></circle>
+              <line x1="110" y1="110"
+                    th:each="axis : ${dashboard.detail().radarChart().axes()}"
+                    th:attr="x2=${axis.x()}, y2=${axis.y()}"></line>
+              <polygon th:attr="points=${dashboard.detail().radarChart().polygonPoints()}"></polygon>
+              <text th:each="axis : ${dashboard.detail().radarChart().axes()}"
+                    th:attr="x=${axis.labelX()}, y=${axis.labelY()}"
+                    th:text="${axis.label()}">지표</text>
+            </svg>
+          </div>
+          <div class="analysis-radar-values">
+            <span th:each="axis : ${dashboard.detail().radarChart().axes()}">
+              <b th:text="${axis.label()}">지표</b>
+              <strong th:text="|${axis.value()}%|">0%</strong>
+            </span>
+          </div>
         </div>
       </article>
+
+      <article class="analysis-card analysis-card-wide" th:if="${dashboard.premiumActive()}">
+        <div class="analysis-card-head">
+          <h2>정답률 분석</h2>
+          <span>상세 지표</span>
+        </div>
+        <div class="analysis-chart-grid">
+          <article class="analysis-pie-card" th:each="chart : ${dashboard.detail().pieCharts()}">
+            <div class="analysis-pie" th:style="|--rate:${chart.primaryRate()}%|">
+              <strong th:text="|${chart.primaryRate()}%|">0%</strong>
+            </div>
+            <div>
+              <span th:text="${chart.title()}">정답률</span>
+              <p th:text="${chart.caption()}">0 / 0 정답</p>
+              <small th:text="|${chart.primaryLabel()} · ${chart.secondaryLabel()}|">정답 · 오답</small>
+            </div>
+          </article>
+        </div>
+      </article>
+
+      <article class="analysis-card" th:if="${dashboard.premiumActive()}">
+        <div class="analysis-card-head">
+          <h2>오답 집중 구간</h2>
+          <span th:text="${#lists.isEmpty(dashboard.detail().weakNodes()) ? '기록 없음' : '단원별'}">단원별</span>
+        </div>
+        <div class="analysis-weak-list" th:if="${not #lists.isEmpty(dashboard.detail().weakNodes())}">
+          <div class="analysis-weak-row" th:each="node : ${dashboard.detail().weakNodes()}">
+            <div>
+              <strong th:text="${node.label()}">단원</strong>
+              <span th:text="|열린 오답 ${node.openCount()}개|">열린 오답 0개</span>
+            </div>
+            <div class="analysis-progress-track" aria-hidden="true">
+              <i th:style="|width:${node.intensity()}%|"></i>
+            </div>
+            <b th:text="|${node.totalWrongCount()}회|">0회</b>
+          </div>
+        </div>
+        <p th:if="${#lists.isEmpty(dashboard.detail().weakNodes())}">아직 누적된 오답 구간이 없습니다.</p>
+        <div class="analysis-recommendations">
+          <a class="button" th:href="@{/learning/review}">오답 복습하기</a>
+        </div>
+      </article>
+
+      <article class="analysis-card analysis-card-wide" th:if="${dashboard.premiumActive()}">
+        <div class="analysis-card-head">
+          <h2>실수 유형 분석</h2>
+          <span th:text="${#lists.isEmpty(dashboard.detail().mistakeReviews()) ? '기록 없음' : '누적 코딩 테스트'}">누적 코딩 테스트</span>
+        </div>
+        <div class="analysis-mistake-list" th:if="${not #lists.isEmpty(dashboard.detail().mistakeReviews())}">
+          <article th:each="mistake : ${dashboard.detail().mistakeReviews()}"
+                   th:classappend="${mistake.intensity() >= 70 ? ' is-hot' : ' is-watch'}">
+            <div class="analysis-mistake-top">
+              <span th:text="${mistake.badge()}">유형</span>
+              <strong th:text="|${mistake.occurrenceCount()}회|">0회</strong>
+            </div>
+            <h3 th:text="${mistake.title()}">출력 형식 불일치</h3>
+            <p th:text="${mistake.description()}">실수 유형 설명</p>
+            <div class="analysis-mistake-meter" aria-hidden="true">
+              <i th:style="|width:${mistake.intensity()}%|"></i>
+            </div>
+            <div class="analysis-mistake-meta">
+              <span>영향 범위</span>
+              <strong th:text="${mistake.impactLabel()}">0회 · 0개 코딩 테스트에서 발생</strong>
+            </div>
+            <small class="analysis-mistake-action" th:text="${mistake.actionLabel()}">다음 행동</small>
+          </article>
+        </div>
+        <p th:if="${#lists.isEmpty(dashboard.detail().mistakeReviews())}">틀린 코딩 테스트 답안이 쌓이면 반복되는 실수 유형을 표시합니다.</p>
+      </article>
     </section>
+
+    <div class="analysis-loading-modal" data-analysis-loading-modal hidden>
+      <div role="status" aria-live="polite">
+        <span class="analysis-loading-spinner" aria-hidden="true"></span>
+        <strong>분석을 만들고 있습니다</strong>
+        <p>최근 코딩 테스트와 학습 기록을 정리하는 중입니다.</p>
+      </div>
+    </div>
 
     <section class="analysis-failure" th:if="${report != null and report.status() == 'FAILED'}">
       <strong>AI 분석 생성 실패</strong>
@@ -124,5 +228,15 @@
       </form>
     </section>
   </main>
+  <script>
+    document.querySelectorAll('[data-analysis-loading]').forEach((form) => {
+      form.addEventListener('submit', () => {
+        const modal = document.querySelector('[data-analysis-loading-modal]');
+        if (modal) {
+          modal.hidden = false;
+        }
+      });
+    });
+  </script>
 </body>
 </html>

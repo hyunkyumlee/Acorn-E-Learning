@@ -155,7 +155,7 @@ public class AiAnalysisService {
 
     private ExamSession requireExam(Long userId, Long examId) {
         return examSessionMapper.findByIdAndUserId(examId, userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "AI 시험을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "AI 코딩 테스트를 찾을 수 없습니다."));
     }
 
     private AiAnalysisReport requireReport(Long userId, Long reportId) {

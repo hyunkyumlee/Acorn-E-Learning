@@ -50,6 +50,7 @@ public class AnalysisDashboardService {
                 report,
                 exam,
                 analysisDashboardMapper.findProblemResults(exam.getExamId()),
+                analysisDashboardMapper.findCodingMistakeStats(userId, subjectId),
                 analysisDashboardMapper.findRecentGradedExamSummaries(userId, subjectId, TREND_LIMIT),
                 analysisDashboardMapper.findLearningProgressStats(userId, subjectId),
                 practiceSummary,
