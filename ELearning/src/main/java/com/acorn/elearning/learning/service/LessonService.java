@@ -2,30 +2,28 @@ package com.acorn.elearning.learning.service;
 
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
+import com.acorn.elearning.learning.dto.response.LessonBookmarkPageResponse;
+import com.acorn.elearning.learning.dto.response.LessonBookmarkResponse;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
 import com.acorn.elearning.learning.mapper.LearningProgressMapper;
+import com.acorn.elearning.learning.mapper.LessonBookmarkMapper;
 import com.acorn.elearning.learning.mapper.LessonMapper;
 import com.acorn.elearning.learning.mapper.UserLevelUnlockMapper;
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
 import com.acorn.elearning.learning.model.Lesson;
+import com.acorn.elearning.learning.model.LessonBookmark;
 import com.acorn.elearning.learning.view.LessonProgressView;
 import com.acorn.elearning.security.SessionUser;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 이론 lesson(SR-005) 서비스. 현재 브랜치 범위 = completeLesson(LEARN-005) 완료 처리.
- *
- * completeLesson은 <b>learning_progress만 write</b>한다. (출석 X)
- *   ⚠️ 출석(attendance_records) 기록은 이 흐름이 아니라 "문제풀이 세트 7/10 통과"(SR-006, 3번 흐름)에서
- *      일어난다. DB 명세 v1.4 attendance_records 비고: "KST 기준 10문제 세트 7/10 이상 1일 1회 인정."
- *      + qualified_set_attempt_id → practice_set_attempts FK. (분담범위 §6의 옛 예시코드는 명세로 정정됨)
- *      출석 write owner는 여전히 2번이지만 트리거 위치는 practice → 3번이 AttendanceService를 호출하는 교차 계약.
- *
- * 채점/점수: 이론 완료는 score_events를 지급하지 않는다(점수는 3번 ScoreService 소관).
+ * 이론 lesson 완료 처리 + 레슨 북마크 서비스.
+ * completeLesson은 learning_progress만 write한다(출석/점수는 이 흐름에서 다루지 않음).
  */
 @Service
 public class LessonService {
@@ -38,15 +36,18 @@ public class LessonService {
     private final CurriculumNodeMapper curriculumNodeMapper;
     private final LearningProgressMapper learningProgressMapper;
     private final UserLevelUnlockMapper userLevelUnlockMapper;
+    private final LessonBookmarkMapper lessonBookmarkMapper;
 
     public LessonService(LessonMapper lessonMapper,
                          CurriculumNodeMapper curriculumNodeMapper,
                          LearningProgressMapper learningProgressMapper,
-                         UserLevelUnlockMapper userLevelUnlockMapper) {
+                         UserLevelUnlockMapper userLevelUnlockMapper,
+                         LessonBookmarkMapper lessonBookmarkMapper) {
         this.lessonMapper = lessonMapper;
         this.curriculumNodeMapper = curriculumNodeMapper;
         this.learningProgressMapper = learningProgressMapper;
         this.userLevelUnlockMapper = userLevelUnlockMapper;
+        this.lessonBookmarkMapper = lessonBookmarkMapper;
     }
 
     /**
@@ -78,7 +79,7 @@ public class LessonService {
                 .orElse(null);
 
         // 409: 이미 이론을 완료한 단원(재완료 방지).
-        // TODO(공통 owner 이현겸): 전용 코드 LEARNING-ALREADY-COMPLETED 신설 시 교체. 지금은 409 상태만 맞춰 재사용.
+        // TODO: 전용 코드 신설 시 교체. 지금은 공통 409 재사용.
         if (progress != null && Boolean.TRUE.equals(progress.getLessonCompleted())) {
             throw new BusinessException(ErrorCode.COMMON_IDEMPOTENCY_CONFLICT, "이미 완료한 학습입니다.");
         }
@@ -126,5 +127,72 @@ public class LessonService {
         }
 
         return new LessonProgressView(node.getNodeId(), true, rate.intValue(), nextAction, nextNodeId);
+    }
+
+    /** LEARN-006: 레슨 북마크 추가. 레슨 없으면 404, 이미 북마크면 409. */
+    @Transactional
+    public LessonBookmarkResponse addBookmark(SessionUser user, Long lessonId) {
+        Long userId = user.userId();
+        lessonMapper.findById(lessonId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "레슨을 찾을 수 없습니다."));
+        if (lessonBookmarkMapper.findByUserAndLesson(userId, lessonId).isPresent()) {
+            throw new BusinessException(ErrorCode.COMMON_IDEMPOTENCY_CONFLICT, "이미 북마크한 레슨입니다.");
+        }
+        LessonBookmark bookmark = new LessonBookmark();
+        bookmark.setUserId(userId);
+        bookmark.setLessonId(lessonId);
+        lessonBookmarkMapper.insert(bookmark);
+        return new LessonBookmarkResponse(lessonId, true);
+    }
+
+    /** LEARN-006: 레슨 북마크 해제. 레슨 없으면 404. 없는 북마크 삭제는 그대로 성공 처리. */
+    @Transactional
+    public LessonBookmarkResponse removeBookmark(SessionUser user, Long lessonId) {
+        Long userId = user.userId();
+        lessonMapper.findById(lessonId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "레슨을 찾을 수 없습니다."));
+        lessonBookmarkMapper.deleteByUserAndLesson(userId, lessonId);
+        return new LessonBookmarkResponse(lessonId, false);
+    }
+
+    /** LEARN-007: 내 북마크 목록(과목 필터 optional, page/size 페이지네이션). */
+    @Transactional(readOnly = true)
+    public LessonBookmarkPageResponse getBookmarks(SessionUser user, Long subjectId, int page, int size) {
+        Long userId = user.userId();
+        int safePage = Math.max(page, 1);
+        int safeSize = (size < 1) ? 20 : Math.min(size, 100);
+        int offset = (safePage - 1) * safeSize;
+
+        long total = lessonBookmarkMapper.countByUser(userId, subjectId);
+        List<LessonBookmarkPageResponse.Item> items = lessonBookmarkMapper
+                .findPageByUser(userId, subjectId, safeSize, offset).stream()
+                .map(v -> new LessonBookmarkPageResponse.Item(
+                        v.getLessonId(), v.getLessonTitle(), v.getNodeId(), v.getNodeTitle(),
+                        v.getSubjectId(), v.getLevelCode(), v.getBookmarkedAt()))
+                .toList();
+        return new LessonBookmarkPageResponse(total, safePage, safeSize, items);
+    }
+
+    /** 레슨 북마크 여부(화면 버튼 상태 표시용). */
+    @Transactional(readOnly = true)
+    public boolean isBookmarked(SessionUser user, Long lessonId) {
+        return lessonBookmarkMapper.findByUserAndLesson(user.userId(), lessonId).isPresent();
+    }
+
+    /** 화면 버튼용 북마크 토글: 있으면 해제, 없으면 추가. 레슨 없으면 404. */
+    @Transactional
+    public LessonBookmarkResponse toggleBookmark(SessionUser user, Long lessonId) {
+        lessonMapper.findById(lessonId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "레슨을 찾을 수 없습니다."));
+        Long userId = user.userId();
+        if (lessonBookmarkMapper.findByUserAndLesson(userId, lessonId).isPresent()) {
+            lessonBookmarkMapper.deleteByUserAndLesson(userId, lessonId);
+            return new LessonBookmarkResponse(lessonId, false);
+        }
+        LessonBookmark bookmark = new LessonBookmark();
+        bookmark.setUserId(userId);
+        bookmark.setLessonId(lessonId);
+        lessonBookmarkMapper.insert(bookmark);
+        return new LessonBookmarkResponse(lessonId, true);
     }
 }
