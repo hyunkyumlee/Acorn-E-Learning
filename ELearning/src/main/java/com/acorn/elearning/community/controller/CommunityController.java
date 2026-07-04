@@ -1,20 +1,23 @@
 package com.acorn.elearning.community.controller;
 
+import com.acorn.elearning.community.form.PostSearchCondition;
+import com.acorn.elearning.community.service.PostService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class CommunityController {
+    private final PostService postService;
+
+    public CommunityController(PostService postService) {
+        this.postService = postService;
+    }
 
     @GetMapping("/community")
     public String home(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // PostPageView view = communityService.home(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
         model.addAttribute("screen", "community/index");
+        model.addAttribute("view", postService.page(new PostSearchCondition()));
         return "community/index";
     }
 }

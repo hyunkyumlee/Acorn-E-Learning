@@ -1,20 +1,28 @@
 package com.acorn.elearning.content.controller;
 
+import com.acorn.elearning.content.service.ContentRecommendationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ContentController {
+    private final ContentRecommendationService contentRecommendationService;
+
+    public ContentController(ContentRecommendationService contentRecommendationService) {
+        this.contentRecommendationService = contentRecommendationService;
+    }
 
     @GetMapping("/community/recommendations")
-    public String recommendations(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // ContentRecommendationView view = contentService.recommendations(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
+    public String recommendations(
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) String contentType,
+            @RequestParam(required = false, name = "slot") String slot,
+            Model model
+    ) {
         model.addAttribute("screen", "community/recommendations");
+        model.addAttribute("view", contentRecommendationService.recommendations(subjectId, contentType, slot));
         return "community/recommendations";
     }
 }

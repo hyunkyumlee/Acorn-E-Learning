@@ -1,17 +1,94 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>커뮤니티 목록 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/community.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/community.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell community-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>커뮤니티 목록</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>community/board</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="page-heading">
+      <span class="eyebrow">Community</span>
+      <h1>커뮤니티 목록</h1>
+      <p>게시글을 검색하고 최신순 또는 인기순으로 확인할 수 있어.</p>
+    </section>
+
+    <section class="panel community-panel">
+      <div class="community-panel-header">
+        <div>
+          <h2>게시글 목록</h2>
+          <p>과목, 게시판, 키워드 기준으로 원하는 글을 찾을 수 있어.</p>
+        </div>
+        <a class="button primary" th:href="@{/community/write}">글쓰기</a>
+      </div>
+
+      <form method="get" th:action="@{/community/board}" class="community-filter">
+        <label>과목 ID
+          <input name="subjectId" type="number" th:value="${condition.subjectId}">
+        </label>
+        <label>게시판
+          <select name="boardType">
+            <option value="">전체</option>
+            <option value="FREE" th:selected="${condition.boardType == 'FREE'}">자유</option>
+            <option value="QUESTION" th:selected="${condition.boardType == 'QUESTION'}">질문</option>
+            <option value="STUDY_LOG" th:selected="${condition.boardType == 'STUDY_LOG'}">공부 일지</option>
+          </select>
+        </label>
+        <label>검색
+          <input name="keyword" th:value="${condition.keyword}" placeholder="제목 또는 내용">
+        </label>
+        <label>정렬
+          <select name="sort">
+            <option value="latest" th:selected="${condition.sort == null or condition.sort == 'latest'}">최신순</option>
+            <option value="hot" th:selected="${condition.sort == 'hot'}">인기순</option>
+          </select>
+        </label>
+        <button class="button" type="submit">검색</button>
+      </form>
+
+      <div class="community-table-wrap">
+        <table class="community-table">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>게시판</th>
+            <th>제목</th>
+            <th>좋아요</th>
+            <th>댓글</th>
+            <th>스크랩</th>
+            <th>작성일</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="post : ${view.posts}">
+            <td th:text="${post.postId}">1</td>
+            <td>
+              <span class="community-badge" th:text="${post.boardType == 'FREE' ? '자유' : (post.boardType == 'QUESTION' ? '질문' : (post.boardType == 'STUDY_LOG' ? '공부 일지' : post.boardType))}">자유</span>
+            </td>
+            <td class="community-title-cell">
+              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">제목</a>
+            </td>
+            <td th:text="${post.likeCount}">0</td>
+            <td th:text="${post.commentCount}">0</td>
+            <td th:text="${post.scrapCount}">0</td>
+            <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(view.posts)}">
+            <td colspan="7" class="community-empty">게시글이 없습니다.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
 </body>
 </html>

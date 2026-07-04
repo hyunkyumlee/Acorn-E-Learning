@@ -1,37 +1,158 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.community.mapper.CommunityPostMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="CommunityPostResultMap" type="com.acorn.elearning.community.model.CommunityPost">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="CommunityPostResultMap">
-          SELECT /* DDL column list */
-          FROM community_posts
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="CommunityPostResultMap">
-          SELECT /* DDL column list */
-          FROM community_posts
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.community.model.CommunityPost" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO community_posts (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.community.model.CommunityPost">
-          UPDATE community_posts
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+
+
+
+    <resultMap id="CommunityPostResultMap" type="com.acorn.elearning.community.model.CommunityPost">
+        <id property="postId" column="post_id" />
+        <result property="writerId" column="writer_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="boardType" column="board_type" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="likeCount" column="like_count" />
+        <result property="commentCount" column="comment_count" />
+        <result property="scrapCount" column="scrap_count" />
+        <result property="status" column="status" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="deletedAt" column="deleted_at" />
+    </resultMap>
+
+    <sql id="columns">
+        post_id, writer_id, subject_id, board_type, title, content,
+        like_count, comment_count, scrap_count, status, created_at, updated_at, deleted_at
+    </sql>
+
+    <sql id="activeFilter">
+        status = 'ACTIVE' AND deleted_at IS NULL
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="CommunityPostResultMap">
+        SELECT <include refid="columns" />
+        FROM community_posts
+        WHERE post_id = #{id}
+    </select>
+
+    <select id="findActiveById" parameterType="long" resultMap="CommunityPostResultMap">
+        SELECT <include refid="columns" />
+        FROM community_posts
+        WHERE post_id = #{id}
+          AND <include refid="activeFilter" />
+    </select>
+
+    <select id="findAll" resultMap="CommunityPostResultMap">
+        SELECT <include refid="columns" />
+        FROM community_posts
+        WHERE <include refid="activeFilter" />
+        ORDER BY post_id DESC
+    </select>
+
+    <select id="findPage" resultMap="CommunityPostResultMap">
+        SELECT <include refid="columns" />
+        FROM community_posts
+        WHERE <include refid="activeFilter" />
+        <if test="condition.subjectId != null">
+            AND subject_id = #{condition.subjectId}
+        </if>
+        <if test="condition.boardType != null and condition.boardType != ''">
+            AND board_type = #{condition.boardType}
+        </if>
+        <if test="condition.keyword != null and condition.keyword != ''">
+            AND (title LIKE CONCAT('%', #{condition.keyword}, '%')
+                 OR content LIKE CONCAT('%', #{condition.keyword}, '%'))
+        </if>
+        <choose>
+            <when test="condition.hotSort()">
+                ORDER BY (like_count + comment_count + scrap_count) DESC, post_id DESC
+            </when>
+            <otherwise>
+                ORDER BY post_id DESC
+            </otherwise>
+        </choose>
+        LIMIT #{condition.normalizedSize} OFFSET #{condition.offset}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM community_posts
+        WHERE <include refid="activeFilter" />
+        <if test="condition.subjectId != null">
+            AND subject_id = #{condition.subjectId}
+        </if>
+        <if test="condition.boardType != null and condition.boardType != ''">
+            AND board_type = #{condition.boardType}
+        </if>
+        <if test="condition.keyword != null and condition.keyword != ''">
+            AND (title LIKE CONCAT('%', #{condition.keyword}, '%')
+                 OR content LIKE CONCAT('%', #{condition.keyword}, '%'))
+        </if>
+    </select>
+
+    <select id="findByWriterId" resultMap="CommunityPostResultMap">
+        SELECT <include refid="columns" />
+        FROM community_posts
+        WHERE writer_id = #{writerId}
+          AND <include refid="activeFilter" />
+        ORDER BY post_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.community.model.CommunityPost"
+            useGeneratedKeys="true" keyProperty="postId">
+        INSERT INTO community_posts (
+            writer_id, subject_id, board_type, title, content, status
+        )
+        VALUES (
+            #{writerId}, #{subjectId}, #{boardType}, #{title}, #{content}, #{status}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.community.model.CommunityPost">
+        UPDATE community_posts
+        SET subject_id = #{subjectId},
+            board_type = #{boardType},
+            title = #{title},
+            content = #{content},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE post_id = #{postId}
+          AND status = 'ACTIVE'
+          AND deleted_at IS NULL
+    </update>
+
+    <update id="softDelete">
+        UPDATE community_posts
+        SET status = 'DELETED',
+            deleted_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE post_id = #{postId}
+          AND writer_id = #{writerId}
+          AND status = 'ACTIVE'
+          AND deleted_at IS NULL
+    </update>
+
+    <update id="incrementLikeCount">
+        UPDATE community_posts SET like_count = like_count + 1 WHERE post_id = #{postId}
+    </update>
+
+    <update id="decrementLikeCount">
+        UPDATE community_posts SET like_count = GREATEST(like_count - 1, 0) WHERE post_id = #{postId}
+    </update>
+
+    <update id="incrementScrapCount">
+        UPDATE community_posts SET scrap_count = scrap_count + 1 WHERE post_id = #{postId}
+    </update>
+
+    <update id="decrementScrapCount">
+        UPDATE community_posts SET scrap_count = GREATEST(scrap_count - 1, 0) WHERE post_id = #{postId}
+    </update>
+
+    <update id="incrementCommentCount">
+        UPDATE community_posts SET comment_count = comment_count + 1 WHERE post_id = #{postId}
+    </update>
+
+    <update id="decrementCommentCount">
+        UPDATE community_posts SET comment_count = GREATEST(comment_count - 1, 0) WHERE post_id = #{postId}
+    </update>
 </mapper>

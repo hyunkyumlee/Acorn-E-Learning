@@ -1,1 +1,343 @@
-.community-screen .panel { border-left: 4px solid var(--accent); }
+.community-screen {
+  max-width: 1180px;
+}
+
+.community-screen .panel {
+  border-left: 4px solid var(--accent);
+}
+
+.community-panel {
+  gap: var(--space-5);
+}
+
+.community-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.community-panel-header h2 {
+  font-size: 24px;
+  font-weight: 850;
+}
+
+.community-panel-header p {
+  margin-top: var(--space-1);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.community-screen form {
+  max-width: none;
+}
+
+.community-filter {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(150px, 0.9fr) minmax(220px, 1.4fr) minmax(150px, 0.9fr) auto;
+  align-items: end;
+  gap: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface-soft) 52%, transparent);
+  padding: var(--space-4);
+}
+
+.recommendations-filter {
+  grid-template-columns: minmax(140px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) auto;
+}
+
+.community-filter label,
+.community-form label {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--text);
+  font-weight: 750;
+}
+
+.community-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.community-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.community-table th,
+.community-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 13px 14px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.community-table th {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.community-table tbody tr:hover {
+  background: color-mix(in srgb, var(--surface-soft) 62%, transparent);
+}
+
+.community-title-cell {
+  width: 36%;
+  font-weight: 800;
+}
+
+.community-title-cell a:hover,
+.community-list a:hover {
+  color: var(--primary);
+}
+
+.community-badge {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--line));
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  padding: 3px 10px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.community-empty {
+  color: var(--muted);
+  text-align: center;
+}
+
+.community-form-panel {
+  max-width: 880px;
+}
+
+.community-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.community-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.community-form-grid .wide {
+  grid-column: 1 / -1;
+}
+
+.community-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.community-actions form {
+  display: block;
+}
+
+.community-actions.right {
+  justify-content: flex-end;
+}
+
+.button.danger {
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--line));
+  color: var(--danger);
+}
+
+.community-post-body {
+  min-height: 180px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  padding: var(--space-5);
+  line-height: 1.7;
+}
+
+.community-stats-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border-block: 1px solid var(--line);
+  padding: var(--space-4) 0;
+}
+
+.community-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.community-stats span {
+  display: inline-flex;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  padding: 8px 12px;
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.community-stats strong {
+  color: var(--text);
+}
+
+.community-subsection {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.community-subsection h3 {
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.community-list,
+.community-comments {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.community-list li,
+.community-comments li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  padding: var(--space-3);
+}
+
+.community-comments li.is-reply {
+  margin-left: var(--space-5);
+  border-left: 3px solid color-mix(in srgb, var(--primary) 42%, var(--line));
+}
+
+.community-comment-main {
+  display: grid;
+  width: 100%;
+  gap: var(--space-3);
+}
+
+.community-inline-form {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.community-inline-form summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.community-inline-form summary::-webkit-details-marker {
+  display: none;
+}
+
+.community-inline-form form {
+  display: grid;
+  min-width: min(420px, 100%);
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.community-inline-form textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.community-list.compact li {
+  min-height: 48px;
+}
+
+.community-comment-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.community-comment-form textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.community-comments p {
+  margin: var(--space-2) 0;
+  line-height: 1.5;
+}
+
+.community-comments small {
+  color: var(--muted);
+}
+
+.community-report-form {
+  justify-self: end;
+}
+
+.community-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 920px) {
+  .community-filter,
+  .recommendations-filter {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .community-filter .button,
+  .recommendations-filter .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 680px) {
+  .community-panel-header,
+  .community-stats-actions,
+  .community-list li,
+  .community-comments li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .community-filter,
+  .recommendations-filter,
+  .community-form-grid,
+  .community-comment-form,
+  .community-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .community-actions,
+  .community-actions.right,
+  .community-report-form {
+    justify-content: stretch;
+    justify-self: stretch;
+  }
+
+  .community-actions .button,
+  .community-actions form,
+  .community-report-form .button,
+  .community-panel-header .button {
+    width: 100%;
+  }
+
+  .community-comments li.is-reply {
+    margin-left: 0;
+  }
+}
