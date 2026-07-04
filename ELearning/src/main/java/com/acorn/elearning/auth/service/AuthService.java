@@ -10,9 +10,8 @@ import com.acorn.elearning.auth.model.LoginUserRow;
 import com.acorn.elearning.auth.model.UserCredential;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
+import com.acorn.elearning.payment.service.PaymentAccessService;
 import com.acorn.elearning.security.SessionUser;
-import java.util.Map;
-
 import com.acorn.elearning.user.mapper.UserLearningProfileMapper;
 import com.acorn.elearning.user.mapper.UserMapper;
 import com.acorn.elearning.user.mapper.UserSettingMapper;
@@ -34,14 +33,16 @@ public class AuthService {
     private final UserMapper userMapper;
     private final UserSettingMapper userSettingMapper;
     private final UserLearningProfileMapper userLearningProfileMapper;
+    private final PaymentAccessService paymentAccessService;
 
-    public AuthService(UserCredentialMapper userCredentialMapper, SessionService sessionService, PasswordEncoder passwordEncoder, UserMapper userMapper, UserSettingMapper userSettingMapper, UserLearningProfileMapper userLearningProfileMapper) {
+    public AuthService(UserCredentialMapper userCredentialMapper, SessionService sessionService, PasswordEncoder passwordEncoder, UserMapper userMapper, UserSettingMapper userSettingMapper, UserLearningProfileMapper userLearningProfileMapper, PaymentAccessService paymentAccessService) {
         this.userCredentialMapper = userCredentialMapper;
         this.sessionService = sessionService;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.userSettingMapper = userSettingMapper;
         this.userLearningProfileMapper = userLearningProfileMapper;
+        this.paymentAccessService = paymentAccessService;
     }
 
     public UserSessionResponse login(HttpSession session, LoginForm form) {
@@ -71,8 +72,7 @@ public class AuthService {
     }
 
     private SessionUser toSessionUser(LoginUserRow row) {
-        //MVP 임시 : premium 연동 전까지 false 고정
-        boolean premiumActive = false;
+        boolean premiumActive = paymentAccessService.hasPremiumAccess(row.getUserId());
         return new SessionUser( row.getUserId(), row.getEmail(), row.getNickname(), row.getRole(), premiumActive);
     }
 

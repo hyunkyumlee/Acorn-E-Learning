@@ -20,7 +20,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(guestOnlyInterceptor).addPathPatterns("/login", "/signup");
-        registry.addInterceptor(loginRequiredInterceptor).addPathPatterns("/learning/**", "/exams/**", "/analysis/**", "/community/**", "/payments/**", "/mypage", "/ranking", "/settings/**");
+        registry.addInterceptor(loginRequiredInterceptor).addPathPatterns(
+                "/learning/**",
+                "/exams/**",
+                "/analysis/**",
+                "/api/analyses",
+                "/api/analyses/**",
+                "/community/**",
+                "/payments/**",
+                "/mypage",
+                "/ranking",
+                "/settings/**");
         registry.addInterceptor(adminRequiredInterceptor).addPathPatterns("/admin/**");
     }
 }

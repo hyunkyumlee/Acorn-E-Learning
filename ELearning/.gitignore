@@ -38,3 +38,6 @@ out/
 
 # Local user uploads
 /uploads/
+
+# Node frontend tooling
+node_modules/

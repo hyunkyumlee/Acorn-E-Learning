@@ -1,5 +1,6 @@
 package com.acorn.elearning.exam.dto.response;
 
+import com.acorn.elearning.common.ai.AiGeneratedTextSanitizer;
 import com.acorn.elearning.exam.model.ExamAnswer;
 import com.acorn.elearning.exam.model.ExamSession;
 import java.util.List;
@@ -56,8 +57,8 @@ public record ExamResultResponse(
             }
             try {
                 JsonNode node = OBJECT_MAPPER.readTree(rawReview);
-                String explanation = node.path("explanation").asText("");
-                String codeReview = node.path("codeReview").asText("");
+                String explanation = AiGeneratedTextSanitizer.removeStarterCodePraise(node.path("explanation").asText(""));
+                String codeReview = AiGeneratedTextSanitizer.removeStarterCodePraise(node.path("codeReview").asText(""));
                 if (!explanation.isBlank() || !codeReview.isBlank()) {
                     return new ReviewText(explanation, codeReview);
                 }
