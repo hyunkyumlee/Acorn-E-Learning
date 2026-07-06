@@ -27,12 +27,13 @@ public record CommunityActivityPageResponse(
 ) {
     private static final int PAGE_SIZE = 2;
 
-    public static CommunityActivityPageResponse of(String type, String category, String query, int page) {
+    public static CommunityActivityPageResponse of(String type, String category, String query, int page, List<PostItem> items) {
         String safeType = normalizeType(type);
         String safeCategory = normalizeCategory(category);
         String safeQuery = query == null ? "" : query.trim();
         PageConfig config = config(safeType);
-        List<PostItem> filteredItems = samples(safeType).stream()
+        List<PostItem> sourceItems = items == null ? List.of() : items;
+        List<PostItem> filteredItems = sourceItems.stream()
                 .filter(item -> "ALL".equals(safeCategory) || item.category().equals(safeCategory))
                 .filter(item -> matches(item, safeQuery))
                 .toList();
@@ -69,7 +70,7 @@ public record CommunityActivityPageResponse(
                 filter(path, "ALL", "전체", selectedCategory, query),
                 filter(path, "FREE", "자유", selectedCategory, query),
                 filter(path, "QUESTION", "질문", selectedCategory, query),
-                filter(path, "INFO", "정보", selectedCategory, query)
+                filter(path, "STUDY_LOG", "공부 일지", selectedCategory, query)
         );
     }
 
@@ -89,7 +90,7 @@ public record CommunityActivityPageResponse(
         }
         String loweredQuery = query.toLowerCase(Locale.ROOT);
         return item.title().toLowerCase(Locale.ROOT).contains(loweredQuery)
-                || item.excerpt().toLowerCase(Locale.ROOT).contains(loweredQuery);
+                || safeText(item.excerpt()).toLowerCase(Locale.ROOT).contains(loweredQuery);
     }
 
     private static String normalizeType(String type) {
@@ -100,7 +101,10 @@ public record CommunityActivityPageResponse(
     }
 
     private static String normalizeCategory(String category) {
-        if ("FREE".equalsIgnoreCase(category) || "QUESTION".equalsIgnoreCase(category) || "INFO".equalsIgnoreCase(category)) {
+        if ("INFO".equalsIgnoreCase(category)) {
+            return "STUDY_LOG";
+        }
+        if ("FREE".equalsIgnoreCase(category) || "QUESTION".equalsIgnoreCase(category) || "STUDY_LOG".equalsIgnoreCase(category)) {
             return category.toUpperCase(Locale.ROOT);
         }
         return "ALL";
@@ -129,60 +133,16 @@ public record CommunityActivityPageResponse(
         };
     }
 
-    private static List<PostItem> samples(String type) {
-        return switch (type) {
-            case "SCRAPS" -> List.of(
-                    post("QUESTION", "질문", "반복문이 헷갈려요", "for문과 while문의 차이를 잘 모르겠어요. 예시로 설명해주실 수 있을까요?", "Java 질문 게시판", "작성자", "2026.06.14", 12, 2),
-                    post("FREE", "자유", "오늘 SQL 테스트 합격했어요!", "SQL Lv.5 입력 후기 남겨요! 모두 화이팅", "자유 게시판", "작성자", "2026.06.14", 8, 3),
-                    post("INFO", "정보", "JOIN 정리 자료 공유", "INNER JOIN과 LEFT JOIN을 한 번에 비교해봤어요.", "정보 게시판", "작성자", "2026.06.12", 16, 5),
-                    post("QUESTION", "질문", "Python 리스트 질문 있어요", "append와 extend 차이를 예제로 알고 싶어요.", "Python 질문 게시판", "작성자", "2026.06.10", 5, 4)
-            );
-            case "POSTS" -> List.of(
-                    post("QUESTION", "질문", "Python 리스트 질문 있어요", "", "질문 게시판", "작성일", "2026.06.10", 5, 4),
-                    post("FREE", "자유", "SQL Lv.5 합격 후기", "", "자유 게시판", "작성일", "2026.06.11", 10, 2),
-                    post("INFO", "정보", "Java 컬렉션 정리", "", "정보 게시판", "작성일", "2026.06.12", 7, 1),
-                    post("FREE", "자유", "오늘 학습 루틴 공유", "", "자유 게시판", "작성일", "2026.06.13", 3, 0)
-            );
-            default -> List.of(
-                    post("QUESTION", "질문", "반복문이 헷갈려요", "for문과 while문의 차이를 잘 모르겠어요. 예시로 설명해주실 수 있을까요?", "Java 질문 게시판", "작성자", "2026.06.14", 12, 2),
-                    post("FREE", "자유", "오늘 SQL 테스트 합격했어요!", "SQL Lv.5 입력 후기 남겨요! 모두 화이팅", "자유 게시판", "작성자", "2026.06.14", 8, 3),
-                    post("INFO", "정보", "면접 질문 복습 자료", "자주 나오는 Java 기초 질문을 정리했어요.", "정보 게시판", "작성자", "2026.06.12", 9, 1),
-                    post("FREE", "자유", "공부 일지 공유", "오늘은 SQL JOIN 문제를 풀었어요.", "자유 게시판", "작성자", "2026.06.11", 4, 2)
-            );
-        };
-    }
-
-    private static PostItem post(
-            String category,
-            String categoryLabel,
-            String title,
-            String excerpt,
-            String boardLabel,
-            String authorLabel,
-            String dateLabel,
-            int likeCount,
-            int commentCount
-    ) {
-        return new PostItem(
-                category,
-                categoryLabel,
-                title,
-                excerpt,
-                boardLabel,
-                authorLabel,
-                dateLabel,
-                likeCount,
-                commentCount,
-                "/community/detail"
-        );
-    }
-
     private static String url(String path, String category, String query, int page) {
         return path + "?category=" + encode(category) + "&q=" + encode(query == null ? "" : query) + "&page=" + page;
     }
 
     private static String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    private static String safeText(String value) {
+        return value == null ? "" : value;
     }
 
     private record PageConfig(String path, String title, String description, String markerClass) {
@@ -195,6 +155,7 @@ public record CommunityActivityPageResponse(
     }
 
     public record PostItem(
+            Long postId,
             String category,
             String categoryLabel,
             String title,
