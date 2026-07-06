@@ -9,4 +9,5 @@ public interface NoticeMapper {
     List<Notice> findAll();
     int insert(Notice model);
     int update(Notice model);
+    int deleteById(Long noticeId);
 }

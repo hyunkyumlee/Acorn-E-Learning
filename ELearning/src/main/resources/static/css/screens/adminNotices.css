@@ -180,44 +180,88 @@
 }
 
 .notice-form-panel {
-    padding: 18px;
+    padding: 14px 16px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
-    background: #eeeeef;
+    background: #ffffff;
+}
+
+.notice-form-panel form {
+    width: 100%;
+    max-width: none;
 }
 
 .notice-form-panel h2 {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .notice-form-layout {
-    display: grid;
-    grid-template-columns: minmax(260px, 360px) minmax(420px, 1fr);
-    gap: 24px;
-    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: none;
 }
 
 .notice-form-fields {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
+    width: 100%;
+    max-width: none;
+}
+
+.notice-form-fields label {
+    color: #4b5563;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.notice-form-panel input,
+.notice-form-panel select,
+.notice-form-panel textarea {
+    border: 0;
+    background: #f5f6f9;
+}
+
+.notice-form-panel select {
+    max-width: 180px;
+}
+
+#noticeTitle,
+#noticeContent {
+    display: block;
+    width: 100%;
+    max-width: none;
+}
+
+#noticeStatus {
+    width: 180px;
+}
+
+.notice-form-panel input:focus,
+.notice-form-panel select:focus,
+.notice-form-panel textarea:focus {
+    outline: 2px solid #b8e5ee;
+    outline-offset: 0;
 }
 
 .notice-content-area {
-    min-height: 210px;
+    min-height: 180px;
     padding: 12px;
     resize: vertical;
 }
 
 .notice-form-actions {
     display: flex;
+    justify-content: flex-end;
     gap: 10px;
-    margin-top: auto;
+    margin-top: 6px;
 }
 
 .notice-form-actions .notice-primary-button,
 .notice-form-actions .notice-secondary-button {
-    min-width: 72px;
+    min-width: 110px;
 }
 
 @media (max-width: 1024px) {
