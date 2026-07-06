@@ -1,12 +1,13 @@
 package com.acorn.elearning.admin.service;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import com.acorn.elearning.admin.mapper.NoticeMapper;
+import com.acorn.elearning.admin.model.AdminOperationLog;
 import com.acorn.elearning.admin.model.Notice;
+import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 public class AdminNoticeService {
 
     private final NoticeMapper mapper;
+
+    private final AdminLogService adminLogService;
 
     public List<Notice> findAll(){
 
@@ -25,27 +28,53 @@ public class AdminNoticeService {
         return mapper.findById(id);
     }
 
-    public int insert(Notice model) {
-        return mapper.insert(model);
+    private AdminOperationLog operationLog(SessionUser sessionUser, String actionType, String targetType, Long targetId) {
+        AdminOperationLog log = new AdminOperationLog();
+        log.setAdminId(requireAdminId(sessionUser));
+        log.setActionType(actionType);
+        log.setTargetType(targetType);
+        log.setTargetId(targetId);
+        log.setResultStatus("SUCCESS");
+        log.setCreatedAt(LocalDateTime.now());
+        return log;
     }
 
-    public int update(Notice model) {
-        return mapper.update(model);
+    private Long requireAdminId(SessionUser sessionUser) {
+        if (sessionUser == null || sessionUser.userId() == null){
+            throw new IllegalStateException("로그인한 관리자 정보가 없습니다.");
+        }
+        return sessionUser.userId();
+    }
+
+    public int insert(Notice model, SessionUser sessionUser) {
+        Long adminId = requireAdminId(sessionUser);
+        model.setWriterId(adminId);
+
+        int inserted = mapper.insert(model);
+        if (inserted == 1) {
+            adminLogService.insert(operationLog(sessionUser, "NOTICE_CREATE", "NOTICE", model.getNoticeId()));
+        }
+
+        return inserted;
+    }
+
+    public int update(Notice model, SessionUser sessionUser) {
+        int updated = mapper.update(model);
+        if (updated == 1) {
+            adminLogService.insert(operationLog(sessionUser, "NOTICE_UPDATE", "NOTICE", model.getNoticeId()));
+        }
+
+        return updated;
+    }
+
+    public int delete(Long noticeId, SessionUser sessionUser) {
+        int deleted = mapper.deleteById(noticeId);
+        if (deleted == 1) {
+            adminLogService.insert(operationLog(sessionUser, "NOTICE_DELETE", "NOTICE", noticeId));
+        }
+
+        return deleted;
     }
 
 
-
-    public Map<String, Object> stub(String action) {
-        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-        // SessionUser admin = currentAdminSessionUser();
-        // Object target = targetMapper.findById(targetId).orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
-        // targetMapper.update(applyStatusOrForm(target, form));
-        // adminOperationLogMapper.insert(AdminOperationLog.changed(admin.userId(), target));
-        // return Map.of("result", "updated");
-
-
-
-
-        return Map.of("action", action, "status", "SKELETON");
-    }
 }

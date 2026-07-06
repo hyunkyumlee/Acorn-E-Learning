@@ -38,7 +38,7 @@
         <option value="DRAFT">비공개</option>
       </select>
     </div>
-    <button type="button" class="notice-primary-button">+ 공지사항 작성</button>
+    <button type="button" id="noticeCreateButton" class="notice-primary-button">+ 공지사항 작성</button>
   </section>
 
   <section class="notice-section">
@@ -63,18 +63,25 @@
         <tbody>
         <tr th:each="notice : ${noticeList}" class="notice-row"
             th:data-title="${notice.title}"
-            th:data-status="${notice.status}">
-          <td th:text="${'#N' + notice.noticeId}">#N001</td>
+            th:data-status="${notice.status}"
+            th:data-date="${notice.publishedAt != null ? #temporals.format(notice.publishedAt, 'yyyy-MM-dd') : ''}">
+          <td th:text="${'#' + notice.noticeId}">#N001</td>
           <td class="notice-title-cell" th:text="${notice.title}">공지 제목</td>
-          <td th:text="${notice.writerId}">관리자</td>
+          <td th:text="${notice.writerNickname != null and !#strings.isEmpty(notice.writerNickname) ? notice.writerNickname : '관리자'}">관리자</td>
           <td th:text="${notice.publishedAt != null ? #temporals.format(notice.publishedAt, 'yyyy-MM-dd') : '-'}">2026-06-01</td>
           <td>-</td>
           <td th:text="${notice.status == 'PUBLISHED' ? '공개' : '비공개'}"
               th:classappend="${notice.status == 'PUBLISHED'} ? ' notice-status-active' : ' notice-status-muted'">공개</td>
           <td>
             <div class="notice-table-actions">
-              <button type="button" class="notice-table-button">수정</button>
-              <button type="button" class="notice-table-button">삭제</button>
+              <button type="button" class="notice-table-button notice-edit-button"
+                      th:data-notice-id="${notice.noticeId}"
+                      th:data-title="${notice.title}"
+                      th:data-content="${notice.content}"
+                      th:data-status="${notice.status}">
+                      수정</button>
+              <button type="button" class="notice-table-button notice-delete-button"
+                      th:data-notice-id="${notice.noticeId}">삭제</button>
             </div>
           </td>
         </tr>
@@ -89,26 +96,31 @@
   <section class="notice-form-panel">
     <h2>공지사항 등록 / 수정</h2>
 
-    <form method="post" action="/admin/notices">
+    <form method="post" id="noticeForm" action="/admin/notices">
       <div class="notice-form-layout">
         <div class="notice-form-fields">
-          <input type="text" name="title" id="noticeTitle" placeholder="공지사항 제목 입력">
+          <label for="noticeTitle">제목</label>
+          <input type="text" name="title" id="noticeTitle" placeholder="공지사항 제목을 입력하세요" required>
+
+          <label for="noticeContent">내용</label>
+          <textarea name="content" id="noticeContent" class="notice-content-area" placeholder="공지사항 내용을 입력하세요" required></textarea>
+
+          <label for="noticeStatus" required>공개 여부</label>
           <select name="status" id="noticeStatus">
             <option value="">공개 여부 선택</option>
             <option value="PUBLISHED">공개</option>
             <option value="DRAFT">비공개</option>
           </select>
-
-          <div class="notice-form-actions">
-            <button type="submit" class="notice-primary-button">저장</button>
-            <button type="reset" class="notice-secondary-button">취소</button>
-            <button type="button" class="notice-secondary-button">삭제</button>
-          </div>
         </div>
 
-        <textarea name="content" id="noticeContent" class="notice-content-area" placeholder="공지사항 내용을 입력하세요"></textarea>
+        <div class="notice-form-actions">
+          <button type="submit" id="noticeSubmitButton" class="notice-primary-button">저장</button>
+          <button type="button" id="noticeCancelButton" class="notice-secondary-button">취소</button>
+          <button type="button" id="noticeDeleteButton" class="notice-secondary-button" disabled>삭제</button>
+        </div>
       </div>
     </form>
+    <form method="post" id="noticeDeleteForm"></form>
   </section>
 
 </main>
@@ -116,24 +128,121 @@
   function applyNoticeFilters() {
     const keyword = document.querySelector("#searchNotice").value.trim().toLowerCase();
     const status = document.querySelector("#noticeStatusFilter").value;
+    const period = document.querySelector("#noticePeriodFilter").value;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     document.querySelectorAll(".notice-row").forEach((row) => {
       const rowTitle = (row.dataset.title || "").toLowerCase();
       const rowStatus = row.dataset.status || "";
+      const rowDate = row.dataset.date ? new Date(row.dataset.date) : null;
 
       const matchesKeyword = rowTitle.includes(keyword);
       const matchesStatus = status === "" || rowStatus === status;
+      let matchesPeriod = true;
 
-      row.style.display = matchesKeyword && matchesStatus ? "" : "none";
+      if (period !== "") {
+        if (!rowDate) {
+          matchesPeriod = false;
+        } else {
+          rowDate.setHours(0, 0, 0, 0);
+          const diffDays = Math.floor((today - rowDate) / 86400000);
+
+          if (period === "today") {
+            matchesPeriod = diffDays === 0;
+          } else if (period === "week") {
+            matchesPeriod = diffDays >= 0 && diffDays <= 7;
+          } else if (period === "month") {
+            matchesPeriod = diffDays >= 0 && diffDays <= 30;
+          }
+        }
+      }
+
+      row.style.display = matchesKeyword && matchesStatus && matchesPeriod ? "" : "none";
     });
   }
 
   document.querySelector("#searchNotice")?.addEventListener("input", applyNoticeFilters);
+  document.querySelector("#noticePeriodFilter")?.addEventListener("change", applyNoticeFilters);
   document.querySelector("#noticeStatusFilter")?.addEventListener("change", applyNoticeFilters);
 
-  document.querySelector(".notice-primary-button")?.addEventListener("click", () => {
-    document.querySelector(".notice-form-panel").scrollIntoView({ behavior: "smooth", block: "center" });
-    document.querySelector("#noticeTitle")?.focus();
+  const noticeForm = document.querySelector("#noticeForm");
+  const noticeTitle = document.querySelector("#noticeTitle");
+  const noticeStatus = document.querySelector("#noticeStatus");
+  const noticeContent = document.querySelector("#noticeContent");
+  const noticeSubmitButton = document.querySelector("#noticeSubmitButton");
+  const noticeDeleteButton = document.querySelector("#noticeDeleteButton");
+  const noticeDeleteForm = document.querySelector("#noticeDeleteForm");
+  const noticeFormPanel = document.querySelector(".notice-form-panel");
+  let selectedNoticeId = "";
+
+  function resetNoticeForm() {
+    noticeForm.action = "/admin/notices";
+    noticeTitle.value = "";
+    noticeStatus.value = "";
+    noticeContent.value = "";
+    noticeSubmitButton.textContent = "저장";
+    noticeDeleteButton.disabled = true;
+    selectedNoticeId = "";
+  }
+
+  function focusNoticeForm() {
+    noticeFormPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    noticeTitle.focus();
+  }
+
+  document.querySelector("#noticeCreateButton")?.addEventListener("click", () => {
+    resetNoticeForm();
+    focusNoticeForm();
+  });
+
+  document.querySelector("#noticeCancelButton")?.addEventListener("click", () => {
+    resetNoticeForm();
+  });
+
+  noticeForm?.addEventListener("submit", (event) => {
+    if (!confirm("공지사항을 저장하시겠습니까?")) {
+      event.preventDefault();
+    }
+  });
+
+  function submitNoticeDelete(noticeId) {
+    if (!noticeId) {
+      return;
+    }
+
+    if (!confirm("공지사항을 삭제하시겠습니까?")) {
+      return;
+    }
+
+    noticeDeleteForm.action = `/admin/notices/${noticeId}/delete`;
+    noticeDeleteForm.submit();
+  }
+
+  document.querySelectorAll(".notice-delete-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      submitNoticeDelete(button.dataset.noticeId);
+    });
+  });
+
+  noticeDeleteButton?.addEventListener("click", () => {
+    submitNoticeDelete(selectedNoticeId);
+  });
+
+  document.querySelectorAll(".notice-edit-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const noticeId = button.dataset.noticeId;
+
+      noticeForm.action = `/admin/notices/${noticeId}`;
+      noticeTitle.value = button.dataset.title || "";
+      noticeStatus.value = button.dataset.status || "";
+      noticeContent.value = button.dataset.content || "";
+      noticeSubmitButton.textContent = "저장";
+      noticeDeleteButton.disabled = false;
+      selectedNoticeId = noticeId;
+
+      focusNoticeForm();
+    });
   });
 </script>
 </body>

@@ -8,11 +8,12 @@
     @Setter
     public class Notice {
         private Long noticeId;
-private Long writerId;
-private String title;
-private String content;
-private String status;
-private LocalDateTime publishedAt;
-private LocalDateTime createdAt;
-private LocalDateTime updatedAt;
+        private Long writerId;
+        private String writerNickname;
+        private String title;
+        private String content;
+        private String status;
+        private LocalDateTime publishedAt;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
     }

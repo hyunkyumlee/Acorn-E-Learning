@@ -1,91 +1,66 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.admin.mapper.NoticeMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="NoticeResultMap" type="com.acorn.elearning.admin.model.Notice">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
+
 
     <resultMap id="NoticeResultMap" type="com.acorn.elearning.admin.model.Notice">
         <id property= "noticeId" column="notice_id" />
 
         <result property="writerId" column="writer_id" />
+        <result property="writerNickname" column="writer_nickname" />
         <result property="title" column="title" />
         <result property="content" column="content" />
         <result property="status" column="status" />
-        <result property="publishedAt" column="published_at " />
-        <result property="createdAt" column="created_at " />
-        <result property="updatedAt" column="updated_at " />
+        <result property="publishedAt" column="published_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
     </resultMap>
 
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="NoticeResultMap">
-          SELECT /* DDL column list */
-          FROM notices
-          WHERE id = #{id}
-      </select>
-    -->
 
     <select id="findById" resultMap="NoticeResultMap">
-        SELECT NOTICE_ID, WRITER_ID, TITLE, CONTENT, PUBLISHED_AT, STATUS
-        FROM NOTICES
-        WHERE NOTICE_ID = #{id}
+        SELECT n.notice_id, n.writer_id, u.nickname AS writer_nickname,
+               n.title, n.content, n.published_at, n.status,
+               n.created_at, n.updated_at
+        FROM notices n
+        LEFT JOIN users u
+            ON n.writer_id = u.user_id
+        WHERE n.notice_id = #{id}
     </select>
 
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="NoticeResultMap">
-          SELECT /* DDL column list */
-          FROM notices
-          ORDER BY id DESC
-      </select>
-    -->
 
     <select id="findAll" resultMap="NoticeResultMap">
-        SELECT N.NOTICE_ID, N.TITLE, U.NICKNAME, N.PUBLISHED_AT, N.STATUS
-        FROM NOTICES N
-        JOIN USERS U
-        ON N.WRITER_ID = U.USER_ID
-        ORDER BY NOTICE_ID
+        SELECT n.notice_id, n.writer_id, u.nickname AS writer_nickname, n.title,
+        n.content, n.status, n.published_at, n.created_at, n.updated_at
+        FROM notices n
+        LEFT JOIN users u ON n.writer_id = u.user_id
+        ORDER BY n.notice_id DESC
     </select>
 
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO notices (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
 
-    <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="id">
+
+    <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="noticeId">
         INSERT INTO notices (
-        writer_id,
-        title,
-        content,
-        status
+            writer_id, title, content, status
         )
         VALUES (
-        #{writerId},
-        #{title},
-        #{content},
-        #{status}
+            #{writerId},
+            #{title},
+            #{content},
+            #{status}
         )
     </insert>
-
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.admin.model.Notice">
-          UPDATE notices
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
 
     <update id="update" parameterType="com.acorn.elearning.admin.model.Notice">
         UPDATE notices
         SET title = #{title},
         content = #{content},
         status = #{status},
-        update_at = NOW()
-        WHERE NOTICE_ID = #{notice_Id}
+        updated_at = NOW()
+        WHERE NOTICE_ID = #{noticeId}
     </update>
+
+    <delete id="deleteById">
+        DELETE FROM notices
+        WHERE notice_id = #{noticeId}
+    </delete>
 </mapper>
