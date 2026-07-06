@@ -35,7 +35,10 @@
       </nav>
 
       <section class="community-activity-post-list" aria-label="커뮤니티 활동 목록">
-        <article class="community-post-card" th:each="item : ${view.items()}" th:classappend="${view.type() == 'POSTS'} ? ' written' : ''">
+        <article class="community-post-card"
+                 th:each="item : ${view.items()}"
+                 th:classappend="${view.type() == 'POSTS'} ? ' written' : ''"
+                 th:attr="data-post-id=${item.postId()}">
           <span class="community-post-category" th:text="${item.categoryLabel()}">질문</span>
           <div class="community-post-body">
             <h2 th:text="${item.title()}">반복문이 헷갈려요</h2>
@@ -60,6 +63,10 @@
           <strong>표시할 게시글이 없습니다.</strong>
           <p>검색어나 필터를 바꾸면 다른 게시글을 확인할 수 있어요.</p>
         </article>
+        <article class="learning-empty community-client-empty" hidden data-client-empty>
+          <strong>표시할 게시글이 없습니다.</strong>
+          <p>좋아요를 다시 누르면 이 목록에 게시글이 표시됩니다.</p>
+        </article>
       </section>
 
       <div class="community-list-actions">
@@ -76,15 +83,157 @@
       </nav>
     </section>
   </main>
+  <div class="community-undo-toast" role="status" aria-live="polite" hidden data-like-undo-toast>
+    <span>좋아요가 해제되었습니다.</span>
+    <button type="button" data-like-undo-button>되돌리기</button>
+  </div>
   <script>
     (function () {
+      var toast = document.querySelector("[data-like-undo-toast]");
+      var undoButton = document.querySelector("[data-like-undo-button]");
+      var emptyState = document.querySelector("[data-client-empty]");
+      var pending = null;
+      var toastTimer = null;
+      var reactionPath = "likes";
+
+      function updateButton(button, active) {
+        button.classList.toggle("is-empty", !active);
+        button.setAttribute("aria-pressed", String(active));
+        button.setAttribute("aria-label", active ? button.dataset.activeLabel : button.dataset.emptyLabel);
+      }
+
+      function updateEmptyState() {
+        if (!emptyState) {
+          return;
+        }
+        var hasVisiblePost = Array.from(document.querySelectorAll(".community-post-card"))
+          .some(function (card) {
+            return !card.hidden;
+          });
+        emptyState.hidden = hasVisiblePost;
+      }
+
+      function requestReaction(row, method) {
+        var postId = row.dataset.postId;
+        if (!postId) {
+          return Promise.reject(new Error("postId is missing."));
+        }
+        return window.fetch("/api/community/posts/" + encodeURIComponent(postId) + "/" + reactionPath, {
+          method: method,
+          credentials: "same-origin",
+          headers: {
+            "Accept": "application/json"
+          }
+        }).then(function (response) {
+          if (!response.ok) {
+            throw new Error("Reaction request failed.");
+          }
+          return response.json().catch(function () {
+            return {};
+          });
+        });
+      }
+
+      function restoreRow(row, button) {
+        row.hidden = false;
+        row.classList.remove("is-removing");
+        updateButton(button, true);
+        updateEmptyState();
+      }
+
+      function hideToast() {
+        if (toast) {
+          toast.hidden = true;
+        }
+        if (toastTimer) {
+          window.clearTimeout(toastTimer);
+          toastTimer = null;
+        }
+      }
+
+      function settlePending() {
+        if (!pending) {
+          return;
+        }
+        window.clearTimeout(pending.hideTimer);
+        pending.row.hidden = true;
+        pending.row.classList.remove("is-removing");
+        pending = null;
+        updateEmptyState();
+      }
+
+      function showToast() {
+        if (!toast) {
+          return;
+        }
+        toast.hidden = false;
+        if (toastTimer) {
+          window.clearTimeout(toastTimer);
+        }
+        toastTimer = window.setTimeout(function () {
+          pending = null;
+          hideToast();
+        }, 5000);
+      }
+
       document.querySelectorAll("[data-activity-toggle]").forEach(function (button) {
         button.addEventListener("click", function () {
-          var empty = button.classList.toggle("is-empty");
-          button.setAttribute("aria-pressed", String(!empty));
-          button.setAttribute("aria-label", empty ? button.dataset.emptyLabel : button.dataset.activeLabel);
+          var row = button.closest(".community-post-card");
+          if (!row || button.classList.contains("is-empty")) {
+            return;
+          }
+          settlePending();
+          updateButton(button, false);
+          row.classList.add("is-removing");
+          var nextPending = {
+            row: row,
+            button: button,
+            undoRequested: false,
+            failed: false,
+            hideTimer: window.setTimeout(function () {
+              row.hidden = true;
+              row.classList.remove("is-removing");
+              updateEmptyState();
+            }, 180)
+          };
+          nextPending.removePromise = requestReaction(row, "DELETE").catch(function (error) {
+            nextPending.failed = true;
+            if (!nextPending.undoRequested) {
+              restoreRow(row, button);
+              hideToast();
+              window.alert("좋아요 해제에 실패했습니다. 다시 시도해주세요.");
+            }
+            throw error;
+          });
+          pending = nextPending;
+          showToast();
         });
       });
+
+      if (undoButton) {
+        undoButton.addEventListener("click", function () {
+          if (!pending) {
+            hideToast();
+            return;
+          }
+          window.clearTimeout(pending.hideTimer);
+          pending.undoRequested = true;
+          var current = pending;
+          restoreRow(current.row, current.button);
+          pending = null;
+          hideToast();
+          current.removePromise.then(function () {
+            return requestReaction(current.row, "POST");
+          }).catch(function () {
+            if (!current.failed) {
+              current.row.hidden = true;
+              updateButton(current.button, false);
+              updateEmptyState();
+              window.alert("좋아요 되돌리기에 실패했습니다. 새로고침 후 다시 확인해주세요.");
+            }
+          });
+        });
+      }
     })();
   </script>
 </body>

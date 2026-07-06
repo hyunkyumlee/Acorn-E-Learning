@@ -1363,6 +1363,12 @@ textarea.mypage-field {
   border-radius: var(--radius);
   background: var(--mypage-card);
   padding: 18px 20px;
+  transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+.community-post-card.is-removing {
+  opacity: 0;
+  transform: translateX(12px);
 }
 
 .community-post-card.written {
@@ -1494,6 +1500,51 @@ textarea.mypage-field {
 .community-list-actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.community-client-empty[hidden],
+.community-undo-toast[hidden] {
+  display: none;
+}
+
+.community-undo-toast {
+  position: fixed;
+  right: clamp(18px, 4vw, 48px);
+  bottom: clamp(18px, 4vw, 42px);
+  z-index: 80;
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--mypage-line-strong);
+  border-radius: var(--radius);
+  background: var(--mypage-card-strong);
+  box-shadow: 0 18px 46px color-mix(in srgb, black 22%, transparent);
+  color: var(--text);
+  padding: 10px 12px 10px 16px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.community-undo-toast button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 54%, var(--mypage-line));
+  border-radius: var(--radius);
+  background: var(--mypage-primary-soft);
+  color: var(--text);
+  padding: 0 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.community-undo-toast button:hover,
+.community-undo-toast button:focus-visible {
+  border-color: color-mix(in srgb, var(--primary) 76%, var(--mypage-line));
+  background: color-mix(in srgb, var(--primary) 18%, var(--surface));
 }
 
 .community-activity-pagination {
@@ -1666,5 +1717,12 @@ textarea.mypage-field {
   .community-post-card,
   .community-post-card.written {
     grid-template-columns: 1fr;
+  }
+
+  .community-undo-toast {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    justify-content: space-between;
   }
 }
