@@ -1,17 +1,64 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>오답 목록 | Knowva</title>
+
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
-  <script defer th:src="@{/js/common/theme.js}"></script>
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/learning.css}">
 </head>
+
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>오답 목록</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>learning/review-list</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+
+<main class="page-shell learning-screen">
+  <section class="practice-header">
+    <h1 th:text="${view.title()}">오답 목록</h1>
+    <p>틀린 문제를 확인하고 다시 학습해보세요.</p>
+  </section>
+
+  <section class="practice-body">
+    <div class="practice-footer">
+      <a th:href="@{/learning}">학습 메인으로</a>
+      <a th:href="@{/learning/review}">오답 요약 보기</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(view.attributes()['wrongAnswers'])}">
+      <p>아직 저장된 오답이 없습니다.</p>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(view.attributes()['wrongAnswers'])}">
+      <div th:each="item : ${view.attributes()['wrongAnswers']}">
+        <article>
+          <h2 th:text="${item['question']}">문제 내용</h2>
+
+          <p>
+            문제 ID:
+            <span th:text="${item['problemId']}">1</span>
+          </p>
+
+          <p>
+            오답 횟수:
+            <span th:text="${item['wrongCount']}">1</span>
+          </p>
+
+          <p>
+            상태:
+            <span th:text="${item['reviewStatus']}">PENDING</span>
+          </p>
+
+          <a th:href="@{|/learning/review/${item['wrongAnswerId']}|}">상세 보기</a>
+        </article>
+        <hr>
+      </div>
+    </div>
+  </section>
+</main>
 </body>
 </html>

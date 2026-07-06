@@ -23,6 +23,7 @@ import com.acorn.elearning.exam.model.ExamSession;
 import com.acorn.elearning.exam.service.AiGeneratedProblemParser.GeneratedProblem;
 import com.acorn.elearning.exam.service.ExamLearningScopeService.ExamLearningScope;
 import com.acorn.elearning.exam.support.ExamStarterCodeResolver;
+import com.acorn.elearning.learning.service.UnlockService;
 import com.acorn.elearning.security.SessionUser;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -50,6 +51,7 @@ public class AiExamService {
     private final ExamLearningScopeService examLearningScopeService;
     private final AiGeneratedProblemParser generatedProblemParser;
     private final ObjectMapper objectMapper;
+    private final UnlockService unlockService;
 
     public AiExamService(
             ExamSessionMapper examSessionMapper,
@@ -60,7 +62,8 @@ public class AiExamService {
             TestCaseExecutionService testCaseExecutionService,
             AiReviewService aiReviewService,
             ExamLearningScopeService examLearningScopeService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            UnlockService unlockService
     ) {
         this.examSessionMapper = examSessionMapper;
         this.aiExamProblemMapper = aiExamProblemMapper;
@@ -72,6 +75,7 @@ public class AiExamService {
         this.examLearningScopeService = examLearningScopeService;
         this.generatedProblemParser = new AiGeneratedProblemParser(objectMapper);
         this.objectMapper = objectMapper;
+        this.unlockService = unlockService;
     }
 
     @Transactional(readOnly = true)
@@ -215,6 +219,12 @@ public class AiExamService {
         session.setSubmittedAt(LocalDateTime.now());
         session.setGradedAt(LocalDateTime.now());
         examSessionMapper.updateResult(session);
+
+        // 통과(2/3 이상) 시 다음 레벨 unlock.
+        if (correctCount >= PASS_COUNT) {
+            unlockService.unlockNextLevel(
+                    session.getUserId(), session.getSubjectId(), session.getLevelCode(), session.getExamId());
+        }
     }
 
     private void saveGeneratedProblems(Long examId, String content, ExamLearningScope learningScope) {

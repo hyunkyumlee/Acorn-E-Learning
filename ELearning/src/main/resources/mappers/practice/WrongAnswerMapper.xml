@@ -42,13 +42,33 @@
         SELECT * FROM wrong_answers WHERE wrong_answer_id = #{wrongAnswerId}
     </select>
 
+    <select id="findByUserIdAndProblemId"
+            resultMap="WrongAnswerResultMap">
+        SELECT *
+        FROM wrong_answers
+        WHERE user_id = #{userId}
+        AND problem_id = #{problemId}
+    </select>
+
     <select id="findAllWrongAnswersByUserId" resultMap="WrongAnswerResultMap">
         SELECT * FROM wrong_answers WHERE user_id = #{userId} ORDER BY created_at DESC
     </select>
 
-    <update id="updateWrongAnswer" parameterType="long">
+    <update id="markWrongAnswerSolved"
+            parameterType="long">
         UPDATE wrong_answers
         SET review_status = 'SOLVED',
+        updated_at = NOW()
+        WHERE wrong_answer_id = #{wrongAnswerId}
+    </update>
+
+    <update id="updateWrongAnswerOnNewMistake"
+            parameterType="com.acorn.elearning.practice.model.WrongAnswer">
+        UPDATE wrong_answers
+        SET last_submission_id = #{lastSubmissionId},
+        wrong_count = #{wrongCount},
+        review_status = #{reviewStatus},
+        retry_bonus_awarded = #{retryBonusAwarded},
         updated_at = NOW()
         WHERE wrong_answer_id = #{wrongAnswerId}
     </update>
