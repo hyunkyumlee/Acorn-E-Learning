@@ -151,8 +151,9 @@ public class WrongAnswerService {
 
         PracticeProblem problem = practiceProblemMapper.findById(wrongAnswer.getProblemId())
                 .orElseThrow(() -> new RuntimeException("문제를 찾을 수 없습니다."));
-
-        boolean isCorrect = problem.getAnswerText().equals(form.getSubmittedAnswer());
+        
+        boolean isCorrect = normalizeAnswer(problem.getAnswerText())
+                .equals(normalizeAnswer(form.getSubmittedAnswer()));
 
         Optional<PracticeSubmission> existingSubmission =
                 practiceSubmissionMapper.findBySetAttemptIdAndProblemIdAndContext(
@@ -204,5 +205,9 @@ public class WrongAnswerService {
         }
 
         return wrongAnswer;
+    }
+
+    private String normalizeAnswer(String value) {
+        return value == null ? "" : value.replaceAll("\\s+", "");
     }
 }

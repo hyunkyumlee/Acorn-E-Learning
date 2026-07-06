@@ -1,0 +1,229 @@
+/* =========================================================================
+   Practice Screen
+   - learning.css는 수정하지 않고 practice 화면 전용 스타일만 정의
+   - 문제풀이 화면을 하나의 큰 카드 블록 안에 배치
+   ========================================================================= */
+
+.practice-header,
+.practice-body {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.practice-header {
+    gap: var(--space-2);
+}
+
+.practice-eyebrow {
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.practice-header h1 {
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1.15;
+}
+
+.practice-header p:not(.practice-eyebrow) {
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+/* practice 본문 폭을 카드형 레이아웃에 맞게 조정 */
+.practice-body {
+    max-width: 1280px;
+}
+
+/* 시작 / 문제 / 완료 화면 공통 카드 */
+.practice-problem-card,
+.practice-intro,
+.practice-complete {
+    display: grid;
+    gap: var(--space-5);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    box-shadow: var(--shadow-soft);
+    padding: var(--space-8);
+}
+
+/* 문제 메타 */
+.practice-problem-meta {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+/* 문제유형 */
+.practice-problem-type {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+}
+
+/* 문제 제목 */
+.practice-problem-card h2,
+.practice-intro h2,
+.practice-complete h2 {
+    font-size: 24px;
+    font-weight: 850;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+/* 진행바 */
+.practice-body progress {
+    width: 100%;
+    height: 10px;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--surface-soft);
+}
+
+.practice-body progress::-webkit-progress-bar {
+    background: var(--surface-soft);
+    border-radius: var(--radius-pill);
+}
+
+.practice-body progress::-webkit-progress-value {
+    border-radius: var(--radius-pill);
+    background: var(--primary);
+}
+
+.practice-body progress::-moz-progress-bar {
+    border-radius: var(--radius-pill);
+    background: var(--primary);
+}
+
+/* form */
+.practice-body form {
+    max-width: none;
+    display: grid;
+    gap: var(--space-4);
+}
+
+/* 텍스트 입력 */
+.practice-body textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+/* 객관식 보기 */
+.practice-body label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    padding: 12px 14px;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: border-color 160ms ease-out, background 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+.practice-body label:hover {
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
+    background: var(--surface-soft);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.practice-body input[type="radio"] {
+    width: auto;
+    flex: none;
+    margin-top: 3px;
+    accent-color: var(--primary);
+}
+
+/* 결과 카드 */
+.practice-result {
+    display: grid;
+    gap: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    padding: var(--space-5);
+}
+
+.practice-result p,
+.practice-complete p,
+.practice-intro p {
+    line-height: 1.6;
+}
+
+.practice-result strong,
+.practice-complete strong {
+    color: var(--accent);
+}
+
+/* 버튼/링크 영역 */
+.practice-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+    margin-top: var(--space-3);
+}
+
+.practice-footer a,
+.practice-footer button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    padding: 10px 14px;
+    color: var(--text);
+    font-weight: 750;
+    transition: background 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
+}
+
+.practice-footer a:hover,
+.practice-footer button:hover {
+    border-color: color-mix(in srgb, var(--primary) 36%, var(--line));
+    background: var(--surface-soft);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 15%, transparent);
+    transform: translateY(-1px);
+}
+
+/* 주요 액션 버튼 살짝 강조 */
+.practice-footer a:last-child,
+.practice-footer button[type="submit"] {
+    border-color: color-mix(in srgb, var(--primary) 34%, var(--line));
+}
+
+/* 모바일 대응은 일단 유지 */
+@media (max-width: 640px) {
+    .practice-header h1 {
+        font-size: 26px;
+    }
+
+    .practice-problem-card h2,
+    .practice-intro h2,
+    .practice-complete h2 {
+        font-size: 20px;
+    }
+
+    .practice-problem-card,
+    .practice-intro,
+    .practice-complete {
+        padding: var(--space-5);
+    }
+
+    .practice-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .practice-footer a,
+    .practice-footer button {
+        width: 100%;
+    }
+}

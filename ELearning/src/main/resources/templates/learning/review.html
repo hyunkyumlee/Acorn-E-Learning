@@ -12,6 +12,9 @@
   <link rel="stylesheet" th:href="@{/css/common/components.css}">
   <link rel="stylesheet" th:href="@{/css/common/themes.css}">
   <link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+
+  <!-- 추가: review 전용 css -->
+  <link rel="stylesheet" th:href="@{/css/screens/review.css}">
 </head>
 
 <body>
@@ -70,7 +73,9 @@
 
         <p>
           상태:
-          <span th:text="${view.attributes()['reviewStatus']}">PENDING</span>
+          <span class="review-status"
+                th:classappend="${view.attributes()['reviewStatus'] == 'SOLVED'} ? ' is-solved' : ' is-pending'"
+                th:text="${view.attributes()['reviewStatus']}">PENDING</span>
         </p>
 
         <p>

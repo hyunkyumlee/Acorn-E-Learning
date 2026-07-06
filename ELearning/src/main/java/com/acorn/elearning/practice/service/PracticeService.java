@@ -110,7 +110,10 @@ public class PracticeService {
         // 2. 답안 채점 및 기록
         for (PracticeAnswerForm.SingleAnswer answerForm : answerList) {
             PracticeProblem problem = problemService.getProblem(answerForm.getProblemId());
-            boolean isCorrect = problem.getAnswerText().equals(answerForm.getSubmittedAnswer());
+
+            boolean isCorrect = normalizeAnswer(problem.getAnswerText())
+                    .equals(normalizeAnswer(answerForm.getSubmittedAnswer()));
+
 
             PracticeSubmission submission = new PracticeSubmission();
             submission.setSetAttemptId(setAttemptId);
@@ -191,5 +194,9 @@ public class PracticeService {
             // 4. 기존 응답 객체 반환
             return PracticeSetResponse.success(data);
         }
+
+    private String normalizeAnswer(String value) {
+        return value == null ? "" : value.replaceAll("\\s+", "");
+    }
 
 }

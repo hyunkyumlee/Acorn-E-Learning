@@ -12,6 +12,9 @@
   <link rel="stylesheet" th:href="@{/css/common/components.css}">
   <link rel="stylesheet" th:href="@{/css/common/themes.css}">
   <link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+
+  <!-- 추가: review 전용 css -->
+  <link rel="stylesheet" th:href="@{/css/screens/review.css}">
 </head>
 
 <body>
@@ -30,12 +33,14 @@
     </div>
 
     <div th:if="${#lists.isEmpty(view.attributes()['wrongAnswers'])}">
-      <p>아직 저장된 오답이 없습니다.</p>
+      <!-- 수정: 빈 상태 문구 스타일링용 class 추가 -->
+      <p class="review-empty">아직 저장된 오답이 없습니다.</p>
     </div>
 
-    <div th:if="${!#lists.isEmpty(view.attributes()['wrongAnswers'])}">
-      <div th:each="item : ${view.attributes()['wrongAnswers']}">
-        <article>
+    <div th:if="${!#lists.isEmpty(view.attributes()['wrongAnswers'])}" class="review-grid-shell">
+      <div class="review-grid">
+        <article class="review-list-item"
+                 th:each="item : ${view.attributes()['wrongAnswers']}">
           <h2 th:text="${item['question']}">문제 내용</h2>
 
           <p>
@@ -50,7 +55,10 @@
 
           <p>
             상태:
-            <span th:text="${item['reviewStatus']}">PENDING</span>
+            <!-- 수정: 상태 스타일링용 class 추가 -->
+            <span class="review-status"
+                  th:classappend="${item['reviewStatus'] == 'SOLVED'} ? ' is-solved' : ' is-pending'"
+                  th:text="${item['reviewStatus']}">PENDING</span>
           </p>
 
           <a th:href="@{|/learning/review/${item['wrongAnswerId']}|}">상세 보기</a>
