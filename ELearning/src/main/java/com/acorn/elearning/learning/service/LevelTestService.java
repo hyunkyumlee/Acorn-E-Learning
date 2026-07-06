@@ -191,6 +191,14 @@ public class LevelTestService {
                 attempt.getTotalCount());
     }
 
+    /** 특정 과목에서 사용자가 해금한 레벨 코드 목록(REST 응답 unlockedLevels용). */
+    @Transactional(readOnly = true)
+    public List<String> getUnlockedLevelCodes(Long userId, Long subjectId) {
+        return unlockMapper.findByUserAndSubject(userId, subjectId).stream()
+                .map(UserLevelUnlock::getLevelCode)
+                .toList();
+    }
+
     /** 정답 개수 → 등급. 0-2 Bronze / 3-5 Silver / 6-8 Gold. */
     private static String grade(int correctCount) {
         if (correctCount <= 2) {

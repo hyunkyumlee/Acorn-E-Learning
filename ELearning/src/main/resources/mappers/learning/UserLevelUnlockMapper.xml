@@ -39,6 +39,15 @@
           AND level_code = #{levelCode}
     </select>
 
+    <!-- 특정 과목에서 사용자가 해금한 레벨 전체 -->
+    <select id="findByUserAndSubject" resultMap="UserLevelUnlockResultMap">
+        SELECT <include refid="columns" />
+        FROM user_level_unlocks
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+        ORDER BY level_code ASC
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.UserLevelUnlock"
             useGeneratedKeys="true" keyProperty="unlockId">
         INSERT INTO user_level_unlocks
