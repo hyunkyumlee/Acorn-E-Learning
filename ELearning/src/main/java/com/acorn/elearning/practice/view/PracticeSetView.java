@@ -1,6 +1,7 @@
 package com.acorn.elearning.practice.view;
 
 import com.acorn.elearning.practice.model.PracticeProblem;
+import com.acorn.elearning.practice.model.ProblemChoice;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,9 @@ public record PracticeSetView(String title, String status, Map<String, Object> a
     */
 
     // 서비스에서 호출하는 from 메서드
-    public static PracticeSetView from(Long setAttemptId, List<PracticeProblem> problems) {
+    public static PracticeSetView from(Long setAttemptId,
+                                       List<PracticeProblem> problems,
+                                       Map<Long, List<ProblemChoice>> choiceMap) {
         // 1. 정답(answerText)을 제외한 문제 데이터만 추출
         List<Map<String, Object>> safeProblems = problems.stream()
                 .map(p -> {
@@ -24,6 +27,22 @@ public record PracticeSetView(String title, String status, Map<String, Object> a
                     map.put("question", p.getQuestion());
                     map.put("problemType", p.getProblemType());
                     map.put("difficultyCode", p.getDifficultyCode());
+
+                    // 객관식 보기
+                    List<Map<String, Object>> choices =
+                            choiceMap.getOrDefault(p.getProblemId(), List.of())
+                                    .stream()
+                                    .map(c -> {
+                                        Map<String, Object> choice = new HashMap<>();
+                                        choice.put("choiceId", c.getChoiceId());
+                                        choice.put("choiceLabel", c.getChoiceLabel());
+                                        choice.put("choiceText", c.getChoiceText());
+                                        return choice;
+                                    })
+                                    .toList();
+
+                    map.put("choices", choices);
+
                     return map;
                 })
                 .collect(Collectors.toList());
