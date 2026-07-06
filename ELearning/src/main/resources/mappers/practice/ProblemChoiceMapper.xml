@@ -1,37 +1,75 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.practice.mapper.ProblemChoiceMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="ProblemChoiceResultMap" type="com.acorn.elearning.practice.model.ProblemChoice">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="ProblemChoiceResultMap">
-          SELECT /* DDL column list */
-          FROM problem_choices
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="ProblemChoiceResultMap">
-          SELECT /* DDL column list */
-          FROM problem_choices
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.practice.model.ProblemChoice" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO problem_choices (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.practice.model.ProblemChoice">
-          UPDATE problem_choices
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <resultMap id="ProblemChoiceResultMap" type="com.acorn.elearning.practice.model.ProblemChoice">
+        <id property="choiceId" column="choice_id" />
+        <result property="problemId" column="problem_id" />
+        <result property="choiceLabel" column="choice_label" />
+        <result property="choiceText" column="choice_text" />
+        <result property="isCorrect" column="is_correct" />
+        <result property="sortOrder" column="sort_order" />
+    </resultMap>
+    <select id="findById" parameterType="long" resultMap="ProblemChoiceResultMap">
+        SELECT
+        choice_id,
+        problem_id,
+        choice_label,
+        choice_text,
+        is_correct,
+        sort_order
+        FROM problem_choices
+        WHERE choice_id = #{id}
+    </select>
+    <select id="findAll" resultMap="ProblemChoiceResultMap">
+        SELECT
+        choice_id,
+        problem_id,
+        choice_label,
+        choice_text,
+        is_correct,
+        sort_order
+        FROM problem_choices
+        ORDER BY choice_id DESC
+    </select>
+
+    <select id="findByProblemId" parameterType="long" resultMap="ProblemChoiceResultMap">
+        SELECT
+        choice_id,
+        problem_id,
+        choice_label,
+        choice_text,
+        is_correct,
+        sort_order
+        FROM problem_choices
+        WHERE problem_id = #{problemId}
+        ORDER BY sort_order ASC
+    </select>
+    <insert id="insert"
+            parameterType="com.acorn.elearning.practice.model.ProblemChoice"
+            useGeneratedKeys="true"
+            keyProperty="choiceId">
+        INSERT INTO problem_choices (
+        problem_id,
+        choice_label,
+        choice_text,
+        is_correct,
+        sort_order
+        ) VALUES (
+        #{problemId},
+        #{choiceLabel},
+        #{choiceText},
+        #{isCorrect},
+        #{sortOrder}
+        )
+    </insert>
+    <update id="update" parameterType="com.acorn.elearning.practice.model.ProblemChoice">
+        UPDATE problem_choices
+        SET
+        problem_id = #{problemId},
+        choice_label = #{choiceLabel},
+        choice_text = #{choiceText},
+        is_correct = #{isCorrect},
+        sort_order = #{sortOrder}
+        WHERE choice_id = #{choiceId}
+    </update>
 </mapper>

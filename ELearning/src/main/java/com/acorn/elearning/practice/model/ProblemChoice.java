@@ -8,9 +8,9 @@
     @Setter
     public class ProblemChoice {
         private Long choiceId;
-private Long problemId;
-private String choiceLabel;
-private String choiceText;
-private Boolean isCorrect;
-private Integer sortOrder;
+        private Long problemId;
+        private String choiceLabel;
+        private String choiceText;
+        private Boolean isCorrect;
+        private Integer sortOrder;
     }

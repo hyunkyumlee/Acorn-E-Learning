@@ -48,11 +48,22 @@
         )
     </insert>
 
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.practice.model.PracticeSubmission">
-          UPDATE practice_submissions
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+    <select id="findBySetAttemptIdAndProblemIdAndContext"
+            resultMap="PracticeSubmissionResultMap">
+        SELECT *
+        FROM practice_submissions
+        WHERE set_attempt_id = #{setAttemptId}
+        AND problem_id = #{problemId}
+        AND submission_context = #{submissionContext}
+    </select>
+
+    <update id="updateSubmission"
+            parameterType="com.acorn.elearning.practice.model.PracticeSubmission">
+        UPDATE practice_submissions
+        SET submitted_answer = #{submittedAnswer},
+        is_correct = #{isCorrect},
+        is_skipped = #{isSkipped},
+        solved_at = NOW()
+        WHERE submission_id = #{submissionId}
+    </update>
 </mapper>

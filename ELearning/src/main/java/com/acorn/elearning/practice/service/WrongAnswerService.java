@@ -3,6 +3,8 @@ package com.acorn.elearning.practice.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import com.acorn.elearning.practice.form.WrongAnswerRetryForm;
 import com.acorn.elearning.practice.mapper.PracticeProblemMapper;
 import com.acorn.elearning.practice.mapper.PracticeSubmissionMapper;
@@ -44,21 +46,28 @@ public class WrongAnswerService {
     // 오답을 데이터베이스에 기록합니다.
     @Transactional
     public void recordWrongAnswer(Long setAttemptId, Long userId, Long problemId, Long submissionId) {
+        Optional<WrongAnswer> existing = wrongAnswerMapper.findByUserIdAndProblemId(userId, problemId);
+
+        if (existing.isPresent()) {
+            WrongAnswer wrongAnswer = existing.get();
+            wrongAnswer.setLastSubmissionId(submissionId);
+            wrongAnswer.setWrongCount(wrongAnswer.getWrongCount() + 1);
+            wrongAnswer.setReviewStatus("PENDING");
+            wrongAnswer.setRetryBonusAwarded(false);
+
+            int updatedRows = wrongAnswerMapper.updateWrongAnswerOnNewMistake(wrongAnswer);
+            if (updatedRows == 0) {
+                throw new RuntimeException("오답노트 갱신 실패: userId=" + userId + ", problemId=" + problemId);
+            }
+            return;
+        }
         WrongAnswer wrongAnswer = new WrongAnswer();
         wrongAnswer.setSetAttemptId(setAttemptId);
         wrongAnswer.setUserId(userId);
         wrongAnswer.setProblemId(problemId);
-
-        // 1. 오답 횟수 초기화 (처음 틀렸을 때는 1)
-        wrongAnswer.setWrongCount(1);
-
-        // 2. 제출 ID 기록 (나중에 상세 오답 노트 볼 때 참조) --// 모델에 있는 필드 활용 [cite: 649]
         wrongAnswer.setLastSubmissionId(submissionId);
-
-        // 3. 상태 초기화
+        wrongAnswer.setWrongCount(1);
         wrongAnswer.setReviewStatus("PENDING");
-
-        // 4. 재정답 보너스 여부 초기화
         wrongAnswer.setRetryBonusAwarded(false);
 
         wrongAnswerMapper.insertWrongAnswer(wrongAnswer);
@@ -67,7 +76,6 @@ public class WrongAnswerService {
 
     // 사용자 ID로 오답 목록 가져오기
     public List<WrongAnswer> getWrongAnswersByUserId(Long userId) {
-
         return wrongAnswerMapper.findAllWrongAnswersByUserId(userId);
     }
 
@@ -146,26 +154,45 @@ public class WrongAnswerService {
 
         boolean isCorrect = problem.getAnswerText().equals(form.getSubmittedAnswer());
 
-        PracticeSubmission submission = new PracticeSubmission();
-        submission.setSetAttemptId(wrongAnswer.getSetAttemptId());
-        submission.setUserId(sessionUser.userId());
-        submission.setProblemId(problem.getProblemId());
-        submission.setSubmissionContext("WRONG_ANSWER_RETRY");
-        submission.setSubmittedAnswer(form.getSubmittedAnswer());
-        submission.setIsCorrect(isCorrect);
-        submission.setIsSkipped(false);
+        Optional<PracticeSubmission> existingSubmission =
+                practiceSubmissionMapper.findBySetAttemptIdAndProblemIdAndContext(
+                        wrongAnswer.getSetAttemptId(),
+                        problem.getProblemId(),
+                        "WRONG_ANSWER_RETRY"
+                );
 
-        practiceSubmissionMapper.insertSubmission(submission);
+        if (existingSubmission.isPresent()) {
+            PracticeSubmission submission = existingSubmission.get();
+            submission.setSubmittedAnswer(form.getSubmittedAnswer());
+            submission.setIsCorrect(isCorrect);
+            submission.setIsSkipped(false);
+
+            int updatedRows = practiceSubmissionMapper.updateSubmission(submission);
+            if (updatedRows == 0) {
+                throw new RuntimeException("재시도 제출 수정에 실패했습니다.");
+            }
+        } else {
+            PracticeSubmission submission = new PracticeSubmission();
+            submission.setSetAttemptId(wrongAnswer.getSetAttemptId());
+            submission.setUserId(sessionUser.userId());
+            submission.setProblemId(problem.getProblemId());
+            submission.setSubmissionContext("WRONG_ANSWER_RETRY");
+            submission.setSubmittedAnswer(form.getSubmittedAnswer());
+            submission.setIsCorrect(isCorrect);
+            submission.setIsSkipped(false);
+
+            practiceSubmissionMapper.insertSubmission(submission);
+        }
 
         if (isCorrect) {
-            wrongAnswerMapper.updateWrongAnswer(wrongAnswerId);
+            wrongAnswerMapper.markWrongAnswerSolved(wrongAnswerId);
         }
     }
 
     @Transactional
     public void markReviewed(SessionUser sessionUser, Long wrongAnswerId) {
         getOwnedWrongAnswer(sessionUser, wrongAnswerId);
-        wrongAnswerMapper.updateWrongAnswer(wrongAnswerId);
+        wrongAnswerMapper.markWrongAnswerSolved(wrongAnswerId);
     }
 
     private WrongAnswer getOwnedWrongAnswer(SessionUser sessionUser, Long wrongAnswerId) {
