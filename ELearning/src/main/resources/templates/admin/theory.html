@@ -95,7 +95,11 @@
                       th:data-is-active="${lesson.isActive}">
                 수정
               </button>
-              <button type="button" class="theory-table-button">삭제</button>
+              <form method="post"
+                    th:action="@{/admin/theory/{lessonId}/delete(lessonId=${lesson.lessonId})}"
+                    onsubmit="return confirm('이 이론 자료를 삭제하시겠습니까?');">
+                <button type="submit" class="theory-table-button">삭제</button>
+              </form>
             </div>
           </td>
         </tr>
@@ -110,7 +114,8 @@
   <section class="theory-form-panel">
     <h2>이론 자료 등록 / 수정 폼</h2>
 
-    <form method="post" action="/admin/theory" th:object="${lessonForm}">
+    <form method="post" action="/admin/theory" th:object="${lessonForm}"
+          onsubmit="return confirm('이론 자료를 저장하시겠습니까?');">
       <div class="theory-form-layout">
         <div class="theory-form-fields">
           <input type="hidden" name="lessonId" id="lessonId">
@@ -142,7 +147,6 @@
           <div class="theory-form-actions">
             <button type="submit" class="theory-primary-button">저장</button>
             <button type="reset" class="theory-secondary-button">취소</button>
-            <button type="button" class="theory-secondary-button">삭제</button>
           </div>
         </div>
 

@@ -1,14 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.admin.mapper.AdminContentMapper">
-
-<!--    <delete id="deleteSubjectById" parameterType="long">-->
-<!--        DELETE FROM subjects-->
-<!--        WHERE subject_id = #{subjectId}-->
-<!--    </delete>-->
-
-<!--    <delete id="deleteCurriculumNodeById" parameterType="long">-->
-<!--        DELETE FROM curriculum_nodes-->
-<!--        WHERE node_id = #{nodeId}-->
-<!--    </delete>-->
 </mapper>

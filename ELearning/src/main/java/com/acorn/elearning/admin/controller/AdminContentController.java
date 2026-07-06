@@ -51,40 +51,28 @@ public class AdminContentController {
     }
 
     @PostMapping("/admin/courses/subjects")
-    public String regCourses(SubjectForm form){
+    public String regCourses(SubjectForm form, RedirectAttributes redirectAttributes){
 
         if (form.getSubjectId() == null) {
             service.createSubject(form);
+            redirectAttributes.addFlashAttribute("message", "과목이 등록되었습니다.");
         } else{
             service.updateSubject(form);
+            redirectAttributes.addFlashAttribute("message", "과목이 수정되었습니다.");
         }
 
         return "redirect:/admin/courses";
     }
 
-
-//    @PostMapping("/admin/courses/subjects/{subjectId}/delete")
-//    public String deleteSubjects(@PathVariable Long subjectId,
-//                                 RedirectAttributes redirectAttributes){
-//
-//        int deleteCount = service.deleteSubject(subjectId);
-//       if(deleteCount == 1){
-//            redirectAttributes.addFlashAttribute("message", "과목이 삭제되었습니다.");
-//       }else{
-//            redirectAttributes.addFlashAttribute("errorMessage", "삭제할 과목을 찾을 수 없습니다.");
-//       }
-//
-//       return "redirect:/admin/courses";
-//
-//    }
-
     @PostMapping("/admin/courses/curriculum-nodes")
-    public String regCurriculumNode(CurriculumNodeForm form){
+    public String regCurriculumNode(CurriculumNodeForm form, RedirectAttributes redirectAttributes){
 
         if (form.getNodeId() == null) {
             service.createCurriculumNode(form);
+            redirectAttributes.addFlashAttribute("message", "커리큘럼이 등록되었습니다.");
         } else{
             service.updateCurriculumNode(form);
+            redirectAttributes.addFlashAttribute("message", "커리큘럼이 수정되었습니다.");
         }
 
         return "redirect:/admin/courses?tab=curriculum";
@@ -108,12 +96,29 @@ public class AdminContentController {
     }
 
     @PostMapping("/admin/theory")
-    public String regTheory(LessonForm form){
+    public String regTheory(LessonForm form, RedirectAttributes redirectAttributes){
 
         if (form.getLessonId() == null) {
             service.createLesson(form);
+            redirectAttributes.addFlashAttribute("message", "이론 자료가 등록되었습니다.");
         } else {
             service.updateLesson(form);
+            redirectAttributes.addFlashAttribute("message", "이론 자료가 수정되었습니다.");
+        }
+
+        return "redirect:/admin/theory";
+    }
+
+    @PostMapping("/admin/theory/{lessonId}/delete")
+    public String deleteTheory(@PathVariable Long lessonId,
+                               RedirectAttributes redirectAttributes) {
+
+        int deleteCount = service.deleteLesson(lessonId);
+
+        if (deleteCount == 1) {
+            redirectAttributes.addFlashAttribute("message", "이론 자료가 삭제되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "삭제할 이론 자료를 찾을 수 없습니다.");
         }
 
         return "redirect:/admin/theory";
@@ -138,12 +143,14 @@ public class AdminContentController {
     }
 
     @PostMapping("/admin/problems")
-    public String regProblem(ProblemForm form){
+    public String regProblem(ProblemForm form, RedirectAttributes redirectAttributes){
 
         if (form.getProblemId() == null) {
             service.createProblem(form);
+            redirectAttributes.addFlashAttribute("message", "문제가 등록되었습니다.");
         } else {
             service.updateProblem(form);
+            redirectAttributes.addFlashAttribute("message", "문제가 수정되었습니다.");
         }
 
         return "redirect:/admin/problems";
