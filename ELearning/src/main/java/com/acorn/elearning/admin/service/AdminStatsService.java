@@ -5,6 +5,7 @@ import java.util.List;
 
 
 import com.acorn.elearning.admin.dto.response.AdminChartPointResponse;
+import com.acorn.elearning.admin.dto.response.AdminStatsResponse;
 import com.acorn.elearning.admin.mapper.AdminDashboardMapper;
 import com.acorn.elearning.admin.model.Notice;
 import com.acorn.elearning.community.model.Report;
@@ -16,6 +17,30 @@ import org.springframework.stereotype.Service;
 public class AdminStatsService {
 
     private final AdminDashboardMapper dm;
+
+    private boolean isTodayScope(String summaryScope) {
+        return "today".equalsIgnoreCase(summaryScope);
+    }
+
+    public long countUsers(String summaryScope) {
+        return isTodayScope(summaryScope) ? dm.countTodayUsers() : dm.countTotalUsers();
+    }
+
+    public long countActiveUsers(String summaryScope) {
+        return isTodayScope(summaryScope) ? dm.countTodayActiveUsers() : dm.countAllActiveUsers();
+    }
+
+    public long countLearning(String summaryScope) {
+        return isTodayScope(summaryScope) ? dm.countTodayLearning() : dm.countAllLearning();
+    }
+
+    public long countSubmissions(String summaryScope) {
+        return isTodayScope(summaryScope) ? dm.countTodaySubmissions() : dm.countAllSubmissions();
+    }
+
+    public long countExamAttempts(String summaryScope) {
+        return isTodayScope(summaryScope) ? dm.countTodayExamAttempts() : dm.countAllExamAttempts();
+    }
 
 
     //전체 사용자 수
@@ -39,6 +64,12 @@ public class AdminStatsService {
     public long countPendingReports(){
         return dm.countPendingReports();
     }
+
+    //활성 사용자 수
+    public long countTodayActiveUsers(){return dm.countTodayActiveUsers();}
+
+    //시험 응시 수
+    public long countTodayExamAttempts(){return dm.countTodayExamAttempts();}
 
     //최근 신고 목록
 
@@ -71,13 +102,29 @@ public class AdminStatsService {
         return points;
     }
 
-    //
+
     public List<AdminChartPointResponse> dailyLearningChart(){
-      return applyPercent(dm.findDailyLearningActivity());
+        return dailyLearningChart(null, null);
+    }
+
+    public List<AdminChartPointResponse> dailyLearningChart(String periodUnit, String range){
+      return applyPercent(dm.findDailyLearningActivity(periodUnit));
     }
 
     public List<AdminChartPointResponse> subjectCompleteChart(){
-        return applyPercent(dm.findSubjectCompletionCounts());
+        return subjectCompleteChart(null, null, null);
+    }
+
+    public List<AdminChartPointResponse> subjectCompleteChart(String periodUnit, String subject, String range){
+        return applyPercent(dm.findSubjectCompletionCounts(periodUnit, subject, range));
+    }
+
+    public List<AdminChartPointResponse> subjectExamScoreChart(String subject, String range) {
+        return dm.findSubjectAverageExamScores(subject, range);
+    }
+
+    public List<AdminStatsResponse.TableRow> findStatsTableRows(String subject, String range){
+        return dm.findStatsTableRows(subject, range);
     }
 
 }
