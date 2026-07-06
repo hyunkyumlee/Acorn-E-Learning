@@ -27,8 +27,9 @@
 }
 
 .exam-gate {
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  grid-template-columns: minmax(0, 760px);
   align-items: stretch;
+  justify-content: start;
 }
 
 .exam-gate-card,
@@ -157,6 +158,14 @@
   background: color-mix(in srgb, var(--warning) 8%, var(--surface));
 }
 
+.exam-gate-card.is-ready {
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--line));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 11%, transparent), transparent 48%),
+    color-mix(in srgb, var(--surface) 96%, transparent);
+}
+
 .exam-alert {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -204,8 +213,39 @@
 }
 
 .exam-create-form {
-  grid-template-columns: minmax(120px, 0.3fr) minmax(160px, 0.4fr) auto;
-  align-items: end;
+  grid-template-columns: max-content;
+  align-items: center;
+}
+
+.exam-create-form .button {
+  min-width: 180px;
+}
+
+.exam-scope-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.exam-scope-card {
+  display: grid;
+  gap: var(--space-1);
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--line));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface-soft) 52%, var(--surface));
+  padding: var(--space-4);
+}
+
+.exam-scope-card span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.exam-scope-card strong {
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 900;
 }
 
 .exam-create-form label,
@@ -601,7 +641,8 @@
     grid-template-columns: 1fr;
   }
 
-  .exam-create-form {
+  .exam-create-form,
+  .exam-scope-summary {
     grid-template-columns: 1fr;
   }
 
