@@ -2,8 +2,10 @@ package com.acorn.elearning.learning.service;
 
 import com.acorn.elearning.learning.mapper.AttendanceRecordMapper;
 import com.acorn.elearning.learning.model.AttendanceRecord;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,5 +51,20 @@ public class AttendanceService {
         record.setQualifiedSetAttemptId(qualifiedSetAttemptId);
         attendanceRecordMapper.insert(record);
         return record;
+    }
+
+    /** 이번 주(월~일, KST) 요일별 출석 여부. index 0=월요일 ... 6=일요일. */
+    public boolean[] getWeeklyAttendance(Long userId) {
+        LocalDate today = LocalDate.now(KST);
+        LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate sunday = monday.plusDays(6);
+        boolean[] week = new boolean[7];
+        for (AttendanceRecord r : attendanceRecordMapper.findByUserIdAndDateRange(userId, monday, sunday)) {
+            LocalDate d = r.getAttendanceDate();
+            if (d != null) {
+                week[d.getDayOfWeek().getValue() - 1] = true;
+            }
+        }
+        return week;
     }
 }

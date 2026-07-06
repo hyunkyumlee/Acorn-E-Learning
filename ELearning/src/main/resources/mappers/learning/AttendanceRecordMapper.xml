@@ -38,6 +38,15 @@
         LIMIT 1
     </select>
 
+    <!-- 이번 주 출석 표시용: 날짜 구간 조회(요일 판정은 서비스) -->
+    <select id="findByUserIdAndDateRange" resultMap="AttendanceRecordResultMap">
+        SELECT <include refid="columns" />
+        FROM attendance_records
+        WHERE user_id = #{userId}
+          AND attendance_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY attendance_date ASC
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.AttendanceRecord"
             useGeneratedKeys="true" keyProperty="attendanceId">
         INSERT INTO attendance_records
