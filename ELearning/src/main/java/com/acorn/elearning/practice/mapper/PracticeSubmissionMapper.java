@@ -11,6 +11,13 @@ public interface PracticeSubmissionMapper {
     List<PracticeSubmission> findAllSubmission();
     // 3. 답안 제출 시 기록 저장
     int insertSubmission(PracticeSubmission submission);
-    // 답안수정 가능할 경우를 위해
-    //int update(PracticeSubmission model);
+    // 4. 같은 set/problem/context 제출 조회
+    Optional<PracticeSubmission> findBySetAttemptIdAndProblemIdAndContext(
+            Long setAttemptId,
+            Long problemId,
+            String submissionContext
+    );
+
+    // 5. 기존 제출 수정
+    int updateSubmission(PracticeSubmission submission);
 }

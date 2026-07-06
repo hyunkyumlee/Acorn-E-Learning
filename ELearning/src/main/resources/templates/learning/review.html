@@ -1,17 +1,116 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>오답 복습 | Knowva</title>
+
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
-  <script defer th:src="@{/js/common/theme.js}"></script>
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/learning.css}">
 </head>
+
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>오답 복습</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>learning/review</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+
+<main class="page-shell learning-screen">
+  <section class="practice-header">
+    <h1 th:text="${view.title()}">오답 복습</h1>
+  </section>
+
+  <section class="practice-body">
+
+    <div class="practice-footer">
+      <a th:href="@{/learning}">학습 메인으로</a>
+      <a th:href="@{/learning/review/list}">오답 목록으로</a>
+    </div>
+
+    <!-- 요약 화면 -->
+    <div th:if="${view.attributes()['totalWrongCount'] != null}">
+      <h2>오답 복습 요약</h2>
+
+      <p>
+        전체 오답 수:
+        <span th:text="${view.attributes()['totalWrongCount']}">0</span>
+      </p>
+
+      <p>
+        복습 대기:
+        <span th:text="${view.attributes()['pendingCount']}">0</span>
+      </p>
+
+      <p>
+        해결 완료:
+        <span th:text="${view.attributes()['solvedCount']}">0</span>
+      </p>
+
+      <div class="practice-footer">
+        <a th:href="@{/learning/review/list}">오답 목록 확인</a>
+      </div>
+    </div>
+
+    <!-- 상세 화면 -->
+    <div th:if="${view.attributes()['wrongAnswerId'] != null}">
+      <article>
+        <h2 th:text="${view.attributes()['question']}">문제 내용</h2>
+
+        <p>
+          문제 ID:
+          <span th:text="${view.attributes()['problemId']}">1</span>
+        </p>
+
+        <p>
+          오답 횟수:
+          <span th:text="${view.attributes()['wrongCount']}">1</span>
+        </p>
+
+        <p>
+          상태:
+          <span th:text="${view.attributes()['reviewStatus']}">PENDING</span>
+        </p>
+
+        <p>
+          정답:
+          <strong th:text="${view.attributes()['answerText']}">정답</strong>
+        </p>
+
+        <p>
+          재시도 보상 지급 여부:
+          <span th:text="${view.attributes()['retryBonusAwarded']}">false</span>
+        </p>
+      </article>
+
+      <hr>
+
+      <section>
+        <h3>다시 풀기</h3>
+
+        <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/retry|}" method="post">
+          <div>
+            <label for="submittedAnswer">답안 입력</label>
+            <input id="submittedAnswer" name="submittedAnswer" type="text" required>
+          </div>
+
+          <button type="submit">다시 풀기 제출</button>
+        </form>
+      </section>
+
+      <hr>
+
+      <section>
+        <h3>검토 완료</h3>
+
+        <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/reviewed|}" method="post">
+          <button type="submit">검토 완료 처리</button>
+        </form>
+      </section>
+    </div>
+
+  </section>
+</main>
 </body>
 </html>

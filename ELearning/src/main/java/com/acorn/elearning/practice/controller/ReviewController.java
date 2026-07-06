@@ -25,7 +25,7 @@ public class ReviewController {
     // 1. 오답 요약 페이지
     @GetMapping("/learning/review")
     public String summary(
-            @SessionAttribute("user") SessionUser sessionUser,
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             Model model) {
 
         WrongAnswerSummaryView view = wrongAnswerService.summary(sessionUser);
@@ -35,9 +35,10 @@ public class ReviewController {
         return "learning/review";
     }
 
+
     @GetMapping("/learning/review/list")
     public String list(
-            @SessionAttribute("user") SessionUser sessionUser,
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             Model model) {
 
         WrongAnswerPageView view = wrongAnswerService.list(sessionUser);
@@ -49,7 +50,7 @@ public class ReviewController {
 
     @GetMapping("/learning/review/{wrongAnswerId}")
     public String detail(@PathVariable Long wrongAnswerId,
-                         @SessionAttribute("user") SessionUser sessionUser,
+                         @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                          Model model) {
         WrongAnswerDetailView view = wrongAnswerService.detail(sessionUser, wrongAnswerId);
         model.addAttribute("view", view);
@@ -59,7 +60,7 @@ public class ReviewController {
 
     @PostMapping("/learning/review/{wrongAnswerId}/retry")
     public String retry(@PathVariable Long wrongAnswerId,
-                        @SessionAttribute("user") SessionUser sessionUser,
+                        @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                         @Validated @ModelAttribute("form") WrongAnswerRetryForm form,
                         BindingResult bindingResult,
                         RedirectAttributes redirectAttributes) {
@@ -76,7 +77,7 @@ public class ReviewController {
 
     @PostMapping("/learning/review/{wrongAnswerId}/reviewed")
     public String markReviewed(@PathVariable Long wrongAnswerId,
-                               @SessionAttribute("user") SessionUser sessionUser,
+                               @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                                RedirectAttributes redirectAttributes) {
         // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
         // if (bindingResult.hasErrors()) { return "/learning/review"; }

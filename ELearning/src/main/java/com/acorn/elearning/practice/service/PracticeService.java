@@ -2,18 +2,20 @@ package com.acorn.elearning.practice.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.acorn.elearning.practice.dto.response.PracticeAnswerResultResponse;
 import com.acorn.elearning.practice.dto.response.PracticeSetResponse;
 import com.acorn.elearning.practice.form.CreatePracticeSetForm;
 import com.acorn.elearning.practice.form.PracticeAnswerForm;
 import com.acorn.elearning.practice.form.PracticeSetCompleteForm;
-import com.acorn.elearning.practice.mapper.PracticeProblemMapper;
 import com.acorn.elearning.practice.mapper.PracticeSetAttemptMapper;
 import com.acorn.elearning.practice.mapper.PracticeSubmissionMapper;
+import com.acorn.elearning.practice.mapper.ProblemChoiceMapper;
 import com.acorn.elearning.practice.model.PracticeProblem;
 import com.acorn.elearning.practice.model.PracticeSetAttempt;
 import com.acorn.elearning.practice.model.PracticeSubmission;
+import com.acorn.elearning.practice.model.ProblemChoice;
 import com.acorn.elearning.practice.view.PracticeSetView;
 import com.acorn.elearning.learning.service.AttendanceService;
 import com.acorn.elearning.learning.service.ProgressService;
@@ -39,10 +41,11 @@ public class PracticeService {
     private final ScoreService scoreService;
     private final ProgressService progressService;
     private final AttendanceService attendanceService;
+    private final ProblemChoiceMapper problemChoiceMapper;
 
 
     //생성자 주입
-    public PracticeService(PracticeSetAttemptMapper practiceSetAttemptMapper, ProblemService problemService, WrongAnswerService wrongAnswerService, PracticeSubmissionMapper practiceSubmissionMapper, ScoreService scoreService, ProgressService progressService, AttendanceService attendanceService) {
+    public PracticeService(PracticeSetAttemptMapper practiceSetAttemptMapper, ProblemService problemService, WrongAnswerService wrongAnswerService, PracticeSubmissionMapper practiceSubmissionMapper, ScoreService scoreService, ProgressService progressService, AttendanceService attendanceService, ProblemChoiceMapper problemChoiceMapper) {
         this.practiceSetAttemptMapper = practiceSetAttemptMapper;
         this.problemService = problemService;
         this.wrongAnswerService = wrongAnswerService;
@@ -50,6 +53,7 @@ public class PracticeService {
         this.scoreService = scoreService;
         this.progressService = progressService;
         this.attendanceService = attendanceService;
+        this.problemChoiceMapper = problemChoiceMapper;
     }
 
     //문제조회
@@ -76,9 +80,19 @@ public class PracticeService {
         // Mapper를 통해 DB에 Insert (insert 직후 attempt 객체 안에 자동 생성된 PK값이 담김)
         practiceSetAttemptMapper.insertAttempt(attempt);
 
-        // 3. 문제와 선택지를 화면용 ViewModel로 반환
-        // (화면에 넘길 때 정답(answerText)은 숨기고 넘기기)
-        return PracticeSetView.from(attempt.getSetAttemptId(), problems);
+        // 3. 문제별 선택지 조회
+        // 객관식 문제는 choices를 화면에 넘기고, 정답(answerText/isCorrect)은 넘기지 않음
+        Map<Long, List<ProblemChoice>> choiceMap = problems.stream()
+                .collect(Collectors.toMap(
+                        PracticeProblem::getProblemId,
+                        problem -> problemChoiceMapper.findByProblemId(problem.getProblemId())
+                ));
+
+        return PracticeSetView.from(
+                attempt.getSetAttemptId(),
+                problems,
+                choiceMap
+        );
     }
 
         //submission 관련 business logic
@@ -102,8 +116,10 @@ public class PracticeService {
             submission.setSetAttemptId(setAttemptId);
             submission.setUserId(user.userId());
             submission.setProblemId(answerForm.getProblemId());
+            submission.setSubmissionContext("PRACTICE_SET");
             submission.setSubmittedAnswer(answerForm.getSubmittedAnswer());
             submission.setIsCorrect(isCorrect);
+            submission.setIsSkipped(false);
 
             practiceSubmissionMapper.insertSubmission(submission);
             Long submissionId = submission.getSubmissionId();
@@ -156,15 +172,21 @@ public class PracticeService {
             }
 
             // 2. 이동 경로 로직
-            boolean isTestStep = (attempt.getSubjectId() == 5);
-            String nextPath = isTestStep ? "/learning/test/start" : "/learning/practice/next/" + (attempt.getSubjectId() + 1);
+            boolean isTestStep = false;
+            String nextPath = "/learning";
 
-            // 3. 데이터를 Map에 담기
             Map<String, Object> data = Map.of(
                     "passed", attempt.getPassed(),
                     "nextPath", nextPath,
                     "isTestStep", isTestStep
             );
+            /* 다음 단원과 테스트 분기용 예시
+            boolean isTestStep = (attempt.getSubjectId() == 5);
+            String nextPath = isTestStep ? "/learning/test/start" : "/learning";
+
+            boolean isTestStep = (attempt.getSubjectId() == 5);
+            String nextPath = isTestStep ? "/learning/test/start" : "/learning/subject/" + (attempt.getSubjectId() + 1);
+            */
 
             // 4. 기존 응답 객체 반환
             return PracticeSetResponse.success(data);
