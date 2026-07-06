@@ -1,18 +1,169 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>관리자 통계 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/adminStats.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>관리자 통계</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/stats</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+<div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
+
+<main class="page-shell admin-screen admin-stats-screen">
+  <section class="admin-stats-header">
+    <h1>통계</h1>
+  </section>
+
+  <section class="admin-stats-summary-section" aria-label="통계 요약">
+    <div class="admin-stats-section-head">
+      <h2>요약</h2>
+      <form method="get" th:action="@{/admin/stats}" class="admin-stats-scope-filter">
+        <input type="hidden" name="periodUnit" th:value="${selectedPeriodUnit}">
+        <input type="hidden" name="subject" th:value="${selectedSubject}">
+        <button type="submit" name="summaryScope" value="all"
+                th:classappend="${selectedSummaryScope == null or selectedSummaryScope == 'all'} ? ' is-active' : ''">
+          전체
+        </button>
+        <button type="submit" name="summaryScope" value="today"
+                th:classappend="${selectedSummaryScope == 'today'} ? ' is-active' : ''">
+          당일
+        </button>
+      </form>
+    </div>
+
+    <div class="admin-stats-summary">
+      <article class="admin-stats-card">
+        <span>가입자 수</span>
+        <strong th:text="${totalUsers}">0</strong>
+      </article>
+      <article class="admin-stats-card">
+        <span>활성 사용자 수</span>
+        <strong th:text="${activeUsers}">0</strong>
+      </article>
+      <article class="admin-stats-card">
+        <span>학습 활동 수</span>
+        <strong th:text="${learningCount}">0</strong>
+      </article>
+      <article class="admin-stats-card">
+        <span>문제풀이 수</span>
+        <strong th:text="${submissionCount}">0</strong>
+      </article>
+      <article class="admin-stats-card">
+        <span>시험 응시 수</span>
+        <strong th:text="${examAttemptCount}">0</strong>
+      </article>
+    </div>
+  </section>
+
+  <section class="admin-stats-chart-section" aria-label="통계 그래프">
+    <div class="admin-stats-section-head">
+      <h2>통계 그래프</h2>
+      <form method="get" th:action="@{/admin/stats}" class="admin-stats-filter-row">
+        <input type="hidden" name="summaryScope" th:value="${selectedSummaryScope}">
+        <select name="periodUnit" aria-label="일별 월별 선택" onchange="this.form.submit()">
+          <option value="day" th:selected="${selectedPeriodUnit == null or selectedPeriodUnit == '' or selectedPeriodUnit == 'day'}">일별</option>
+          <option value="month" th:selected="${selectedPeriodUnit == 'month'}">월별</option>
+        </select>
+        <select name="subject" aria-label="과목 선택" onchange="this.form.submit()">
+          <option value="">과목별 선택</option>
+          <option value="Java" th:selected="${selectedSubject == 'Java'}">Java</option>
+          <option value="Python" th:selected="${selectedSubject == 'Python'}">Python</option>
+          <option value="SQL" th:selected="${selectedSubject == 'SQL'}">SQL</option>
+          <option value="Web" th:selected="${selectedSubject == 'Web'}">Web</option>
+        </select>
+      </form>
+    </div>
+
+    <div class="admin-stats-chart-grid">
+      <article class="admin-stats-chart-card">
+        <h3 th:text="${selectedPeriodUnit == 'month' ? '월별 학습 활동 그래프' : '최근 5일 학습 활동 그래프'}">최근 5일 학습 활동 그래프</h3>
+        <div class="admin-stats-chart" aria-label="학습 활동 그래프">
+          <div th:each="point : ${dailyLearningChart}"
+               class="admin-stats-bar"
+               th:style="'--bar-height: ' + ${point.percent} + '%'">
+            <strong th:text="${point.value}">0</strong>
+            <i th:if="${point.value > 0}"></i>
+            <span th:text="${point.label}">07/01</span>
+          </div>
+          <div th:if="${#lists.isEmpty(dailyLearningChart)}" class="admin-stats-chart-placeholder">
+            학습 활동 데이터가 없습니다.
+          </div>
+        </div>
+      </article>
+
+      <article class="admin-stats-chart-card">
+        <h3>과목별 학습량 그래프</h3>
+        <div class="admin-stats-chart" aria-label="과목별 학습량 그래프">
+          <div th:each="point : ${subjectCompleteChart}"
+               class="admin-stats-bar"
+               th:style="'--bar-height: ' + ${point.percent} + '%'">
+            <strong th:text="${point.value}">0</strong>
+            <i th:if="${point.value > 0}"></i>
+            <span th:text="${point.label}">Java</span>
+          </div>
+          <div th:if="${#lists.isEmpty(subjectCompleteChart)}" class="admin-stats-chart-placeholder">
+            과목별 학습 데이터가 없습니다.
+          </div>
+        </div>
+      </article>
+
+      <article class="admin-stats-chart-card">
+        <h3>과목별 시험 평균 점수</h3>
+        <div class="admin-stats-chart" aria-label="과목별 시험 평균 점수">
+          <div th:each="point : ${subjectExamScoreChart}"
+               class="admin-stats-bar"
+               th:style="'--bar-height: ' + ${point.percent} + '%'">
+            <strong th:text="${point.value}">0</strong>
+            <i th:if="${point.value > 0}"></i>
+            <span th:text="${point.label}">Java</span>
+          </div>
+          <div th:if="${#lists.isEmpty(subjectExamScoreChart)}" class="admin-stats-chart-placeholder">
+            시험 점수 데이터가 없습니다.
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="admin-stats-table-section" aria-label="통계 테이블">
+    <h2>통계 테이블</h2>
+    <div class="admin-stats-table-wrap">
+      <table class="admin-stats-table">
+        <thead>
+        <tr>
+          <th>날짜</th>
+          <th>과목</th>
+          <th>학습 수</th>
+          <th>문제풀이 수</th>
+          <th>시험 응시 수</th>
+          <th>평균 점수</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${statsRows}">
+          <td th:text="${row.statDate}">2026-06-12</td>
+          <td th:text="${row.subjectName}">Java</td>
+          <td th:text="${row.learningCount}">150</td>
+          <td th:text="${row.submissionCount}">320</td>
+          <td th:text="${row.examAttemptCount}">45</td>
+          <td th:text="${row.averageScore}">78.5</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(statsRows)}">
+          <td colspan="6">표시할 통계 데이터가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
 </body>
 </html>

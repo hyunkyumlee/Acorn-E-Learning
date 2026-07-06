@@ -8,6 +8,17 @@
         FROM users
     </select>
 
+    <select id="countTodayUsers" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE DATE(created_at) = CURDATE()
+    </select>
+
+    <select id="countAllLearning" resultType="long">
+        SELECT COUNT(*)
+        FROM learning_progress
+    </select>
+
     <select id="countTodayLearning" resultType="long">
         SELECT COUNT(*)
         FROM learning_progress
@@ -15,6 +26,10 @@
         OR DATE(completed_at) = CURDATE()
     </select>
 
+    <select id="countAllSubmissions" resultType="long">
+        SELECT COUNT(*)
+        FROM practice_submissions
+    </select>
 
     <select id="countTodaySubmissions" resultType="long">
         SELECT COUNT(*)
@@ -28,6 +43,29 @@
         WHERE status = 'PENDING'
     </select>
 
+    <select id="countAllActiveUsers" resultType="long">
+        SELECT COUNT(DISTINCT user_id)
+        FROM learning_progress
+    </select>
+
+    <select id="countTodayActiveUsers" resultType="long">
+        SELECT COUNT(DISTINCT user_id)
+        FROM learning_progress
+        WHERE DATE(COALESCE(updated_at, created_at)) = CURDATE()
+    </select>
+
+    <select id="countAllExamAttempts" resultType="long">
+        SELECT COUNT(*)
+        FROM exam_sessions
+        WHERE submitted_at IS NOT NULL
+    </select>
+
+    <select id="countTodayExamAttempts" resultType="long">
+        SELECT COUNT(*)
+        FROM exam_sessions
+        WHERE submitted_at IS NOT NULL
+        AND DATE(submitted_at) = CURDATE()
+    </select>
 
     <select id="findRecentReports" resultType="com.acorn.elearning.community.model.Report">
         SELECT report_id, target_type, target_id,
@@ -46,19 +84,47 @@
 
     <select id="findDailyLearningActivity" resultType="com.acorn.elearning.admin.dto.response.AdminChartPointResponse">
         SELECT
-            label,
-            value,
+            <choose>
+                <when test="periodUnit == 'month'">
+                    DATE_FORMAT(days.activity_date, '%Y-%m') AS label,
+                </when>
+                <otherwise>
+                    DATE_FORMAT(days.activity_date, '%m/%d') AS label,
+                </otherwise>
+            </choose>
+            COUNT(lp.progress_id) AS value,
             0 AS percent
         FROM (
-            SELECT
-                DATE_FORMAT(DATE(COALESCE(updated_at, created_at)), '%m/%d') AS label,
-                DATE(COALESCE(updated_at, created_at)) AS activity_date,
-                COUNT(*) AS value
-            FROM learning_progress
-            WHERE DATE(COALESCE(updated_at, created_at)) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-            GROUP BY DATE(COALESCE(updated_at, created_at))
-        ) daily
-        ORDER BY activity_date
+            <choose>
+                <when test="periodUnit == 'month'">
+                    SELECT STR_TO_DATE(DATE_FORMAT(CURDATE(), '%Y-%m-01'), '%Y-%m-%d') AS activity_date
+                    UNION ALL SELECT DATE_SUB(STR_TO_DATE(DATE_FORMAT(CURDATE(), '%Y-%m-01'), '%Y-%m-%d'), INTERVAL 1 MONTH)
+                    UNION ALL SELECT DATE_SUB(STR_TO_DATE(DATE_FORMAT(CURDATE(), '%Y-%m-01'), '%Y-%m-%d'), INTERVAL 2 MONTH)
+                    UNION ALL SELECT DATE_SUB(STR_TO_DATE(DATE_FORMAT(CURDATE(), '%Y-%m-01'), '%Y-%m-%d'), INTERVAL 3 MONTH)
+                    UNION ALL SELECT DATE_SUB(STR_TO_DATE(DATE_FORMAT(CURDATE(), '%Y-%m-01'), '%Y-%m-%d'), INTERVAL 4 MONTH)
+                </when>
+                <otherwise>
+                    SELECT CURDATE() AS activity_date
+                    UNION ALL SELECT DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+                    UNION ALL SELECT DATE_SUB(CURDATE(), INTERVAL 2 DAY)
+                    UNION ALL SELECT DATE_SUB(CURDATE(), INTERVAL 3 DAY)
+                    UNION ALL SELECT DATE_SUB(CURDATE(), INTERVAL 4 DAY)
+                </otherwise>
+            </choose>
+        ) days
+        LEFT JOIN learning_progress lp
+            ON (
+                <choose>
+                    <when test="periodUnit == 'month'">
+                        DATE_FORMAT(DATE(COALESCE(lp.updated_at, lp.created_at)), '%Y-%m') = DATE_FORMAT(days.activity_date, '%Y-%m')
+                    </when>
+                    <otherwise>
+                        DATE(COALESCE(lp.updated_at, lp.created_at)) = days.activity_date
+                    </otherwise>
+                </choose>
+            )
+        GROUP BY days.activity_date
+        ORDER BY days.activity_date
     </select>
 
     <select id="findSubjectCompletionCounts" resultType="com.acorn.elearning.admin.dto.response.AdminChartPointResponse">
@@ -74,10 +140,118 @@
                 OR lp.practice_passed = 1
                 OR lp.completed_at IS NOT NULL
             )
+            AND DATE(COALESCE(lp.updated_at, lp.created_at)) >=
+            <choose>
+                <when test="range == '30'">DATE_SUB(CURDATE(), INTERVAL 29 DAY)</when>
+                <when test="range == '90'">DATE_SUB(CURDATE(), INTERVAL 89 DAY)</when>
+                <otherwise>DATE_SUB(CURDATE(), INTERVAL 6 DAY)</otherwise>
+            </choose>
         WHERE s.is_active = 1
+        <if test="subject != null and subject != ''">
+            AND s.subject_name = #{subject}
+        </if>
         GROUP BY s.subject_id, s.subject_name, s.sort_order
         ORDER BY value DESC, s.sort_order ASC
         LIMIT 7
     </select>
 
+    <select id="findSubjectAverageExamScores" resultType="com.acorn.elearning.admin.dto.response.AdminChartPointResponse">
+        SELECT
+            s.subject_name AS label,
+            COALESCE(ROUND(AVG(es.correct_count / es.total_problem_count * 100), 1), 0) AS value,
+            COALESCE(ROUND(AVG(es.correct_count / es.total_problem_count * 100), 1), 0) AS percent
+        FROM subjects s
+        LEFT JOIN exam_sessions es
+            ON s.subject_id = es.subject_id
+            AND es.submitted_at IS NOT NULL
+            AND DATE(es.submitted_at) >=
+            <choose>
+                <when test="range == '30'">DATE_SUB(CURDATE(), INTERVAL 29 DAY)</when>
+                <when test="range == '90'">DATE_SUB(CURDATE(), INTERVAL 89 DAY)</when>
+                <otherwise>DATE_SUB(CURDATE(), INTERVAL 6 DAY)</otherwise>
+            </choose>
+        WHERE s.is_active = 1
+        <if test="subject != null and subject != ''">
+            AND s.subject_name = #{subject}
+        </if>
+        GROUP BY s.subject_id, s.subject_name, s.sort_order
+        ORDER BY value DESC, s.sort_order ASC
+        LIMIT 7
+    </select>
+
+
+    <select id="findStatsTableRows"
+            resultType="com.acorn.elearning.admin.dto.response.AdminStatsResponse$TableRow">
+        SELECT
+            DATE_FORMAT(stats.stat_date, '%Y-%m-%d') AS statDate,
+            s.subject_name AS subjectName,
+            SUM(stats.learning_count) AS learningCount,
+            SUM(stats.submission_count) AS submissionCount,
+            SUM(stats.exam_attempt_count) AS examAttemptCount,
+            COALESCE(ROUND(AVG(stats.average_score), 1), 0) AS averageScore
+        FROM (
+            SELECT
+                DATE(COALESCE(updated_at, created_at)) AS stat_date,
+                subject_id,
+                COUNT(*) AS learning_count,
+                0 AS submission_count,
+                0 AS exam_attempt_count,
+                NULL AS average_score
+            FROM learning_progress
+            WHERE DATE(COALESCE(updated_at, created_at)) >=
+            <choose>
+                <when test="range == '30'">DATE_SUB(CURDATE(), INTERVAL 29 DAY)</when>
+                <when test="range == '90'">DATE_SUB(CURDATE(), INTERVAL 89 DAY)</when>
+                <otherwise>DATE_SUB(CURDATE(), INTERVAL 6 DAY)</otherwise>
+            </choose>
+            GROUP BY DATE(COALESCE(updated_at, created_at)), subject_id
+
+            UNION ALL
+
+            SELECT
+                DATE(ps.created_at) AS stat_date,
+                psa.subject_id,
+                0 AS learning_count,
+                COUNT(*) AS submission_count,
+                0 AS exam_attempt_count,
+                NULL AS average_score
+            FROM practice_submissions ps
+            JOIN practice_set_attempts psa
+                ON ps.set_attempt_id = psa.set_attempt_id
+            WHERE DATE(ps.created_at) >=
+            <choose>
+                <when test="range == '30'">DATE_SUB(CURDATE(), INTERVAL 29 DAY)</when>
+                <when test="range == '90'">DATE_SUB(CURDATE(), INTERVAL 89 DAY)</when>
+                <otherwise>DATE_SUB(CURDATE(), INTERVAL 6 DAY)</otherwise>
+            </choose>
+            GROUP BY DATE(ps.created_at), psa.subject_id
+
+            UNION ALL
+
+            SELECT
+                DATE(submitted_at) AS stat_date,
+                subject_id,
+                0 AS learning_count,
+                0 AS submission_count,
+                COUNT(*) AS exam_attempt_count,
+                AVG(correct_count / total_problem_count * 100) AS average_score
+            FROM exam_sessions
+            WHERE submitted_at IS NOT NULL
+            AND DATE(submitted_at) >=
+            <choose>
+                <when test="range == '30'">DATE_SUB(CURDATE(), INTERVAL 29 DAY)</when>
+                <when test="range == '90'">DATE_SUB(CURDATE(), INTERVAL 89 DAY)</when>
+                <otherwise>DATE_SUB(CURDATE(), INTERVAL 6 DAY)</otherwise>
+            </choose>
+            GROUP BY DATE(submitted_at), subject_id
+        ) stats
+        JOIN subjects s
+            ON stats.subject_id = s.subject_id
+        <if test="subject != null and subject != ''">
+            WHERE s.subject_name = #{subject}
+        </if>
+        GROUP BY stats.stat_date, s.subject_id, s.subject_name, s.sort_order
+        ORDER BY stats.stat_date DESC, s.sort_order ASC
+        LIMIT 10
+    </select>
 </mapper>
