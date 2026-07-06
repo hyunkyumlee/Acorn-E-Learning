@@ -14,15 +14,32 @@ public class ContentController {
         this.contentRecommendationService = contentRecommendationService;
     }
 
-    @GetMapping("/community/recommendations")
+    @GetMapping({"/content/recommendations", "/community/recommendations"})
     public String recommendations(
             @RequestParam(required = false) Long subjectId,
-            @RequestParam(required = false) String contentType,
             @RequestParam(required = false, name = "slot") String slot,
             Model model
     ) {
-        model.addAttribute("screen", "community/recommendations");
-        model.addAttribute("view", contentRecommendationService.recommendations(subjectId, contentType, slot));
-        return "community/recommendations";
+        Long activeSubjectId = subjectId == null ? 1L : subjectId;
+        model.addAttribute("screen", "content/recommendations");
+        model.addAttribute("activeSubjectId", activeSubjectId);
+        model.addAttribute("subjectLabel", subjectLabel(activeSubjectId));
+        model.addAttribute("videoView", contentRecommendationService.recommendations(activeSubjectId, "VIDEO", slot));
+        model.addAttribute("articleView", contentRecommendationService.recommendations(activeSubjectId, "ARTICLE", slot));
+        model.addAttribute("docsView", contentRecommendationService.recommendations(activeSubjectId, "DOCS", slot));
+        model.addAttribute("courseView", contentRecommendationService.recommendations(activeSubjectId, "COURSE", slot));
+        return "content/recommendations";
+    }
+
+    private String subjectLabel(Long subjectId) {
+        if (subjectId == null) {
+            return "JAVA";
+        }
+        return switch (subjectId.intValue()) {
+            case 2 -> "Python";
+            case 3 -> "HTML/CSS/JS";
+            case 4 -> "SQL";
+            default -> "JAVA";
+        };
     }
 }

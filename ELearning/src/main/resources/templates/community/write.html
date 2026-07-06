@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>글 작성 | Knowva</title>
+  <title>게시글 작성 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
   <link rel="stylesheet" th:href="@{/css/common/reset.css}">
@@ -18,47 +18,56 @@
   <main class="page-shell community-screen">
     <section class="page-heading">
       <span class="eyebrow">Community</span>
-      <h1>글 작성</h1>
-      <p>게시글을 작성하고 첨부 파일 metadata를 함께 등록할 수 있어.</p>
+      <h1>게시글 작성</h1>
+      <p>언어 게시판과 글 유형을 선택해서 커뮤니티 글을 등록할 수 있어.</p>
     </section>
 
-    <section class="panel community-panel community-form-panel">
-      <div class="community-panel-header">
-        <div>
-          <h2>게시글 작성</h2>
-          <p>제목, 과목, 게시판, 내용을 입력해서 등록해.</p>
-        </div>
-        <a class="button" th:href="@{/community/board}">목록</a>
-      </div>
+    <div class="community-content-layout">
+      <aside th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></aside>
 
-      <form method="post" th:action="@{/community/posts}" th:object="${form}" enctype="multipart/form-data" class="community-form">
-        <div class="community-form-grid">
-          <label class="wide">제목
-            <input th:field="*{title}" maxlength="200" required>
-          </label>
-          <label>과목 ID
-            <input th:field="*{subjectId}" type="number" required>
-          </label>
-          <label>게시판
-            <select th:field="*{boardType}" required>
-              <option value="FREE">자유</option>
-              <option value="QUESTION">질문</option>
-              <option value="STUDY_LOG">공부 일지</option>
-            </select>
-          </label>
-          <label class="wide">내용
-            <textarea th:field="*{content}" rows="12" required></textarea>
-          </label>
-          <label class="wide">첨부 파일
-            <input th:field="*{files}" type="file" multiple>
-          </label>
+      <section class="panel community-panel community-form-panel">
+        <div class="community-panel-header">
+          <div>
+            <h2>새 글</h2>
+            <p>제목, 게시판, 내용, 첨부 파일을 입력해.</p>
+          </div>
+          <a class="button" th:href="@{/community/board}">목록</a>
         </div>
-        <div class="community-actions right">
-          <a class="button" th:href="@{/community/board}">취소</a>
-          <button class="button primary" type="submit">등록</button>
-        </div>
-      </form>
-    </section>
+
+        <form method="post" th:action="@{/community/posts}" th:object="${form}" enctype="multipart/form-data" class="community-form">
+          <div class="community-form-grid">
+            <label class="wide">제목
+              <input th:field="*{title}" maxlength="200" required>
+            </label>
+            <label>언어
+              <select th:field="*{subjectId}" required>
+                <option value="1">Java</option>
+                <option value="4">SQL</option>
+                <option value="3">HTML/CSS/JS</option>
+                <option value="2">Python</option>
+              </select>
+            </label>
+            <label>게시판
+              <select th:field="*{boardType}" required>
+                <option value="FREE">자유</option>
+                <option value="QUESTION">질문</option>
+                <option value="STUDY_LOG">공부 일지</option>
+              </select>
+            </label>
+            <label class="wide">내용
+              <textarea th:field="*{content}" rows="12" required></textarea>
+            </label>
+            <label class="wide">첨부 파일
+              <input th:field="*{files}" type="file" multiple>
+            </label>
+          </div>
+          <div class="community-actions right">
+            <a class="button" th:href="@{/community/board}">취소</a>
+            <button class="button primary" type="submit">등록</button>
+          </div>
+        </form>
+      </section>
+    </div>
   </main>
 </body>
 </html>
