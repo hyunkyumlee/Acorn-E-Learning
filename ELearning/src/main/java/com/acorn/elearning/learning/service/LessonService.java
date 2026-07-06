@@ -4,6 +4,7 @@ import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.learning.dto.response.LessonBookmarkPageResponse;
 import com.acorn.elearning.learning.dto.response.LessonBookmarkResponse;
+import com.acorn.elearning.learning.dto.response.LessonDetailResponse;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
 import com.acorn.elearning.learning.mapper.LearningProgressMapper;
 import com.acorn.elearning.learning.mapper.LessonBookmarkMapper;
@@ -127,6 +128,40 @@ public class LessonService {
         }
 
         return new LessonProgressView(node.getNodeId(), true, rate.intValue(), nextAction, nextNodeId);
+    }
+
+    /**
+     * 레슨 상세 조회(REST): 이론 본문 + 북마크 여부 + 단원 진행.
+     * 레슨/단원 없으면 404, 잠긴 레벨이면 403(완료 처리와 동일 기준).
+     */
+    @Transactional(readOnly = true)
+    public LessonDetailResponse getLessonDetailResponse(SessionUser user, Long lessonId) {
+        Long userId = user.userId();
+
+        Lesson lesson = lessonMapper.findById(lessonId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "레슨을 찾을 수 없습니다."));
+        CurriculumNode node = curriculumNodeMapper.findById(lesson.getNodeId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "단원 정보를 찾을 수 없습니다."));
+        Long subjectId = node.getSubjectId();
+
+        if (userLevelUnlockMapper.findByUserSubjectLevel(userId, subjectId, node.getLevelCode()).isEmpty()) {
+            throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "아직 잠긴 레벨의 학습입니다.");
+        }
+
+        boolean bookmarked = lessonBookmarkMapper.findByUserAndLesson(userId, lessonId).isPresent();
+        LearningProgress progress = learningProgressMapper
+                .findByUserSubjectNode(userId, subjectId, node.getNodeId())
+                .orElse(null);
+
+        LessonDetailResponse.Progress progressView = new LessonDetailResponse.Progress(
+                progress != null && Boolean.TRUE.equals(progress.getLessonCompleted()),
+                progress != null && Boolean.TRUE.equals(progress.getPracticePassed()),
+                (progress != null && progress.getProgressRate() != null)
+                        ? progress.getProgressRate().intValue() : 0);
+
+        return new LessonDetailResponse(
+                lesson.getLessonId(), lesson.getNodeId(), lesson.getTitle(),
+                lesson.getContent(), lesson.getExampleCode(), bookmarked, progressView);
     }
 
     /** LEARN-006: 레슨 북마크 추가. 레슨 없으면 404, 이미 북마크면 409. */

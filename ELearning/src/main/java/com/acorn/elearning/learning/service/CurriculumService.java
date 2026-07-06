@@ -1,25 +1,44 @@
 package com.acorn.elearning.learning.service;
 
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
+import com.acorn.elearning.learning.dto.response.CurriculumResponse;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
+import com.acorn.elearning.learning.mapper.LearningProgressMapper;
 import com.acorn.elearning.learning.mapper.LessonMapper;
+import com.acorn.elearning.learning.mapper.SubjectMapper;
+import com.acorn.elearning.learning.mapper.UserLevelUnlockMapper;
 import com.acorn.elearning.learning.model.CurriculumNode;
+import com.acorn.elearning.learning.model.LearningProgress;
 import com.acorn.elearning.learning.model.Lesson;
+import com.acorn.elearning.learning.model.Subject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CurriculumService {
 
     private final CurriculumNodeMapper curriculumNodeMapper;
     private final LessonMapper lessonMapper;
+    private final SubjectMapper subjectMapper;
+    private final LearningProgressMapper learningProgressMapper;
+    private final UserLevelUnlockMapper userLevelUnlockMapper;
 
-    public CurriculumService(CurriculumNodeMapper curriculumNodeMapper, LessonMapper lessonMapper) {
+    public CurriculumService(CurriculumNodeMapper curriculumNodeMapper,
+                             LessonMapper lessonMapper,
+                             SubjectMapper subjectMapper,
+                             LearningProgressMapper learningProgressMapper,
+                             UserLevelUnlockMapper userLevelUnlockMapper) {
         this.curriculumNodeMapper = curriculumNodeMapper;
         this.lessonMapper = lessonMapper;
+        this.subjectMapper = subjectMapper;
+        this.learningProgressMapper = learningProgressMapper;
+        this.userLevelUnlockMapper = userLevelUnlockMapper;
     }
 
     /**
@@ -39,6 +58,53 @@ public class CurriculumService {
         return lessonMapper.findById(lessonId).orElse(null);
     }
 
+    /**
+     * 커리큘럼 조회(REST): 과목 요약 + 레벨 목록 + 노드(+노드별 진행) + 해금 이력.
+     * levelCode가 있으면 해당 레벨 노드만 필터한다. 과목 없으면 404.
+     */
+    @Transactional(readOnly = true)
+    public CurriculumResponse getCurriculumResponse(Long userId, Long subjectId, String levelCode) {
+        Subject subject = subjectMapper.findById(subjectId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "과목을 찾을 수 없습니다."));
+
+        List<CurriculumNode> roadmap = getRoadmap(subjectId).stream()
+                .filter(node -> levelCode == null || levelCode.equals(node.getLevelCode()))
+                .toList();
+
+        Map<Long, LearningProgress> progressByNode = new HashMap<>();
+        for (LearningProgress row : learningProgressMapper.findByUserIdAndSubjectId(userId, subjectId)) {
+            progressByNode.put(row.getNodeId(), row);
+        }
+
+        List<CurriculumResponse.Node> nodes = roadmap.stream()
+                .map(node -> {
+                    LearningProgress row = progressByNode.get(node.getNodeId());
+                    CurriculumResponse.NodeProgress nodeProgress = new CurriculumResponse.NodeProgress(
+                            row != null && Boolean.TRUE.equals(row.getLessonCompleted()),
+                            row != null && Boolean.TRUE.equals(row.getPracticePassed()),
+                            (row != null && row.getProgressRate() != null) ? row.getProgressRate().intValue() : 0);
+                    return new CurriculumResponse.Node(
+                            node.getNodeId(), node.getParentNodeId(), node.getLevelCode(), node.getNodeType(),
+                            node.getPlanetNo(), node.getTitle(), node.getDescription(), node.getSortOrder(),
+                            node.getGateCondition(), nodeProgress);
+                })
+                .toList();
+
+        List<String> levels = roadmap.stream()
+                .map(CurriculumNode::getLevelCode)
+                .distinct()
+                .toList();
+
+        List<CurriculumResponse.Unlock> unlocks = userLevelUnlockMapper.findByUserAndSubject(userId, subjectId).stream()
+                .map(u -> new CurriculumResponse.Unlock(u.getLevelCode(), u.getUnlockSource(), u.getUnlockedAt()))
+                .toList();
+
+        return new CurriculumResponse(
+                new CurriculumResponse.SubjectInfo(
+                        subject.getSubjectId(), subject.getSubjectCode(), subject.getSubjectName()),
+                levels, nodes, unlocks);
+    }
+
     /** 로드맵 각 노드의 활성 레슨 수(nodeId → count). hover 카드 "N개 레슨" 메타용. */
     public Map<Long, Integer> getLessonCountsByNodes(List<CurriculumNode> roadmap) {
         Set<Long> nodeIds = roadmap.stream()
@@ -52,14 +118,5 @@ public class CurriculumService {
             }
         }
         return counts;
-    }
-
-    public Map<String, Object> stub(String action) {
-        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // Object entity = domainMapper.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
-        // domainMapper.update(applyForm(entity, form));
-        // return Map.of("result", entity);
-        return Map.of("action", action, "status", "SKELETON");
     }
 }
