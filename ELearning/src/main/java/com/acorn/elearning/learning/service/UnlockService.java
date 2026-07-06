@@ -39,4 +39,28 @@ public class UnlockService {
         unlockMapper.insert(unlock);
         return unlock;
     }
+
+    /**
+     * AI 코딩테스트 통과 시: 현재 레벨의 "다음 레벨"을 unlock한다.
+     * 진행 순서 BRONZE → SILVER → GOLD. 현재가 GOLD(최고)면 다음이 없어 아무 것도 하지 않고 null을 반환한다.
+     */
+    @Transactional
+    public UserLevelUnlock unlockNextLevel(Long userId, Long subjectId, String currentLevelCode, Long examId) {
+        String nextLevel = nextLevelOf(currentLevelCode);
+        if (nextLevel == null) {
+            return null;
+        }
+        return unlock(userId, subjectId, nextLevel, SOURCE_AI_EXAM_PASS, examId);
+    }
+
+    /** 레벨 진행 순서에서 다음 레벨. 다음이 없으면(GOLD 또는 미지정) null. */
+    private static String nextLevelOf(String levelCode) {
+        if ("BRONZE".equals(levelCode)) {
+            return "SILVER";
+        }
+        if ("SILVER".equals(levelCode)) {
+            return "GOLD";
+        }
+        return null;
+    }
 }

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.admin.mapper.AdminCommunityMapper">
+
+    <resultMap id="PostItemResultMap"
+               type="com.acorn.elearning.admin.dto.response.AdminCommunityPageResponse$PostItem">
+        <constructor>
+            <idArg name="postId" column="post_id" javaType="java.lang.Long"/>
+            <arg name="writerNickname" column="writer_nickname" javaType="java.lang.String"/>
+            <arg name="title" column="title" javaType="java.lang.String"/>
+            <arg name="boardType" column="board_type" javaType="java.lang.String"/>
+            <arg name="likeCount" column="like_count" javaType="java.lang.Integer"/>
+            <arg name="commentCount" column="comment_count" javaType="java.lang.Integer"/>
+            <arg name="reportCount" column="report_count" javaType="java.lang.Integer"/>
+            <arg name="createdAt" column="created_at" javaType="java.time.LocalDateTime"/>
+            <arg name="status" column="status" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="CommentItemResultMap"
+               type="com.acorn.elearning.admin.dto.response.AdminCommunityPageResponse$CommentItem">
+        <constructor>
+            <idArg name="commentId" column="comment_id" javaType="java.lang.Long"/>
+            <arg name="postId" column="post_id" javaType="java.lang.Long"/>
+            <arg name="writerNickname" column="writer_nickname" javaType="java.lang.String"/>
+            <arg name="content" column="content" javaType="java.lang.String"/>
+            <arg name="reportCount" column="report_count" javaType="java.lang.Integer"/>
+            <arg name="createdAt" column="created_at" javaType="java.time.LocalDateTime"/>
+            <arg name="status" column="status" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findPosts" resultMap="PostItemResultMap">
+        SELECT
+            P.post_id,
+            U.nickname AS writer_nickname,
+            P.title,
+            P.board_type,
+            P.like_count,
+            P.comment_count,
+            COUNT(R.report_id) AS report_count,
+            P.created_at,
+            P.status
+        FROM community_posts P
+        JOIN users U
+            ON P.writer_id = U.user_id
+        LEFT JOIN reports R
+            ON R.target_type = 'POST'
+           AND R.target_id = P.post_id
+        GROUP BY
+            P.post_id,
+            U.nickname,
+            P.title,
+            P.board_type,
+            P.like_count,
+            P.comment_count,
+            P.created_at,
+            P.status
+        ORDER BY P.created_at DESC
+    </select>
+
+    <select id="findComments" resultMap="CommentItemResultMap">
+        SELECT
+            C.comment_id,
+            C.post_id,
+            U.nickname AS writer_nickname,
+            C.content,
+            COUNT(R.report_id) AS report_count,
+            C.created_at,
+            C.status
+        FROM comments C
+        JOIN users U
+            ON C.writer_id = U.user_id
+        LEFT JOIN reports R
+            ON R.target_type = 'COMMENT'
+           AND R.target_id = C.comment_id
+        GROUP BY
+            C.comment_id,
+            C.post_id,
+            U.nickname,
+            C.content,
+            C.created_at,
+            C.status
+        ORDER BY C.created_at DESC
+    </select>
+
+    <update id="updatePostStatus">
+        UPDATE community_posts
+        SET status = #{status},
+            deleted_at = CASE
+                WHEN #{status} = 'DELETED' THEN NOW()
+                WHEN #{status} = 'ACTIVE' THEN NULL
+                ELSE deleted_at
+            END,
+            updated_at = NOW()
+        WHERE post_id = #{postId}
+    </update>
+
+    <update id="updateCommentStatus">
+        UPDATE comments
+        SET status = #{status},
+            deleted_at = CASE
+                WHEN #{status} = 'DELETED' THEN NOW()
+                WHEN #{status} = 'ACTIVE' THEN NULL
+                ELSE deleted_at
+            END,
+            updated_at = NOW()
+        WHERE comment_id = #{commentId}
+    </update>
+
+</mapper>

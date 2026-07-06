@@ -17,6 +17,8 @@ import com.acorn.elearning.practice.model.PracticeSetAttempt;
 import com.acorn.elearning.practice.model.PracticeSubmission;
 import com.acorn.elearning.practice.model.ProblemChoice;
 import com.acorn.elearning.practice.view.PracticeSetView;
+import com.acorn.elearning.learning.service.AttendanceService;
+import com.acorn.elearning.learning.service.ProgressService;
 import com.acorn.elearning.security.SessionUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,16 +39,20 @@ public class PracticeService {
     private final ProblemService problemService;
     private final WrongAnswerService wrongAnswerService;
     private final ScoreService scoreService;
+    private final ProgressService progressService;
+    private final AttendanceService attendanceService;
     private final ProblemChoiceMapper problemChoiceMapper;
 
 
     //생성자 주입
-    public PracticeService(PracticeSetAttemptMapper practiceSetAttemptMapper, ProblemService problemService, WrongAnswerService wrongAnswerService, PracticeSubmissionMapper practiceSubmissionMapper, ScoreService scoreService, ProblemChoiceMapper problemChoiceMapper) {
+    public PracticeService(PracticeSetAttemptMapper practiceSetAttemptMapper, ProblemService problemService, WrongAnswerService wrongAnswerService, PracticeSubmissionMapper practiceSubmissionMapper, ScoreService scoreService, ProgressService progressService, AttendanceService attendanceService, ProblemChoiceMapper problemChoiceMapper) {
         this.practiceSetAttemptMapper = practiceSetAttemptMapper;
         this.problemService = problemService;
         this.wrongAnswerService = wrongAnswerService;
         this.practiceSubmissionMapper = practiceSubmissionMapper;
         this.scoreService = scoreService;
+        this.progressService = progressService;
+        this.attendanceService = attendanceService;
         this.problemChoiceMapper = problemChoiceMapper;
     }
 
@@ -157,6 +163,12 @@ public class PracticeService {
             if (!"COMPLETED".equals(attempt.getStatus())) {
                 attempt.setStatus("COMPLETED");
                 practiceSetAttemptMapper.updateAttempt(attempt);
+            }
+
+            // 세트 통과 시 학습 로드맵 진행률과 출석을 기록한다.
+            if (Boolean.TRUE.equals(attempt.getPassed())) {
+                progressService.markPracticePassed(attempt.getUserId(), attempt.getSubjectId(), attempt.getNodeId());
+                attendanceService.recordAttendanceOnPracticePass(attempt.getUserId(), attempt.getSetAttemptId());
             }
 
             // 2. 이동 경로 로직

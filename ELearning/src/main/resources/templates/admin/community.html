@@ -1,18 +1,233 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>커뮤니티 관리 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/adminCommunity.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>커뮤니티 관리</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>admin/community</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
-  </main>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
+<div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
+
+<main class="page-shell admin-screen admin-community-screen">
+  <section class="admin-community-header">
+    <h1>커뮤니티 관리</h1>
+  </section>
+
+  <section class="admin-community-tabs" aria-label="커뮤니티 관리 탭">
+    <button type="button" class="admin-community-tab is-active" data-tab="posts">게시글 관리</button>
+    <button type="button" class="admin-community-tab" data-tab="comments">댓글 관리</button>
+  </section>
+
+  <section class="admin-community-toolbar" aria-label="게시글 검색 조건">
+    <select id="communityBoardFilter" aria-label="게시판 유형">
+      <option value="">게시판 유형</option>
+      <option value="자유">자유</option>
+      <option value="질문">질문</option>
+      <option value="공부 일지">공부 일지</option>
+    </select>
+    <select id="communityStatusFilter" aria-label="공개 상태">
+      <option value="">공개 상태</option>
+      <option value="공개">공개</option>
+      <option value="숨김">숨김</option>
+      <option value="삭제">삭제</option>
+    </select>
+    <input type="search" id="communityKeywordFilter" placeholder="키워드 검색" aria-label="키워드 검색">
+  </section>
+
+  <section class="admin-community-panel" data-panel="posts" aria-label="게시글 목록">
+    <h2>게시글 목록</h2>
+    <div class="admin-community-table-wrap">
+      <table class="admin-community-table">
+        <thead>
+        <tr>
+          <th>게시글 ID</th>
+          <th>작성자</th>
+          <th>제목</th>
+          <th>게시판</th>
+          <th>좋아요</th>
+          <th>댓글</th>
+          <th>신고</th>
+          <th>작성일</th>
+          <th>상태</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="post : ${communityPage.posts}"
+            class="admin-community-post-row"
+            th:data-board="${post.boardTypeLabel()}"
+            th:data-status="${post.statusLabel()}"
+            th:data-keyword="${post.title + ' ' + post.writerNickname}">
+          <td th:text="${'#' + post.postId}">#001</td>
+          <td th:text="${post.writerNickname}">닉네임1</td>
+          <td th:text="${post.title}">Java 변수 공부 방법 공유합니다</td>
+          <td th:text="${post.boardTypeLabel()}">정보</td>
+          <td th:text="${post.likeCount}">24</td>
+          <td th:text="${post.commentCount}">5</td>
+          <td th:text="${post.reportCount}">0</td>
+          <td th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd') : '-'}">2026-06-01</td>
+          <td>
+            <span class="admin-community-status"
+                  th:classappend="${post.statusClass()}"
+                  th:text="${post.statusLabel()}">공개</span>
+          </td>
+          <td>
+            <div class="admin-community-actions">
+              <form method="post"
+                    th:action="@{/admin/community/posts/{postId}/status(postId=${post.postId})}"
+                    onsubmit="return confirm('이 게시글을 공개 상태로 변경할까요?');">
+                <input type="hidden" name="status" value="ACTIVE">
+                <button type="submit">공개</button>
+              </form>
+              <form method="post"
+                    th:action="@{/admin/community/posts/{postId}/status(postId=${post.postId})}"
+                    onsubmit="return confirm('이 게시글을 숨김 상태로 변경할까요?');">
+                <input type="hidden" name="status" value="HIDDEN">
+                <button type="submit">숨김</button>
+              </form>
+              <form method="post"
+                    th:action="@{/admin/community/posts/{postId}/status(postId=${post.postId})}"
+                    onsubmit="return confirm('이 게시글을 삭제 상태로 변경할까요?');">
+                <input type="hidden" name="status" value="DELETED">
+                <button type="submit">삭제</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(communityPage.posts)}">
+          <td colspan="10" class="admin-community-empty">게시글이 없습니다.</td>
+        </tr>
+        <tr class="admin-community-post-empty is-hidden">
+          <td colspan="10" class="admin-community-empty">조건에 맞는 게시글이 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="admin-community-panel" data-panel="comments" aria-label="댓글 목록">
+    <h2>댓글 목록</h2>
+    <div class="admin-community-table-wrap">
+      <table class="admin-community-table">
+        <thead>
+        <tr>
+          <th>댓글 ID</th>
+          <th>게시글 ID</th>
+          <th>작성자</th>
+          <th>댓글 내용 요약</th>
+          <th>신고 수</th>
+          <th>작성일</th>
+          <th>상태</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="comment : ${communityPage.comments}"
+            class="admin-community-comment-row"
+            th:data-status="${comment.statusLabel()}"
+            th:data-keyword="${comment.content + ' ' + comment.writerNickname}">
+          <td th:text="${'#C' + comment.commentId}">#C001</td>
+          <td th:text="${'#' + comment.postId}">#001</td>
+          <td th:text="${comment.writerNickname}">닉네임2</td>
+          <td th:text="${comment.contentSummary()}">저도 같은 방식으로 공부했어요.</td>
+          <td th:text="${comment.reportCount}">0</td>
+          <td th:text="${comment.createdAt != null ? #temporals.format(comment.createdAt, 'yyyy-MM-dd') : '-'}">2026-06-01</td>
+          <td>
+            <span class="admin-community-status"
+                  th:classappend="${comment.statusClass()}"
+                  th:text="${comment.statusLabel()}">공개</span>
+          </td>
+          <td>
+            <div class="admin-community-actions">
+              <form method="post"
+                    th:action="@{/admin/community/comments/{commentId}/status(commentId=${comment.commentId})}"
+                    onsubmit="return confirm('이 댓글을 공개 상태로 변경할까요?');">
+                <input type="hidden" name="status" value="ACTIVE">
+                <button type="submit">공개</button>
+              </form>
+              <form method="post"
+                    th:action="@{/admin/community/comments/{commentId}/status(commentId=${comment.commentId})}"
+                    onsubmit="return confirm('이 댓글을 숨김 상태로 변경할까요?');">
+                <input type="hidden" name="status" value="HIDDEN">
+                <button type="submit">숨김</button>
+              </form>
+              <form method="post"
+                    th:action="@{/admin/community/comments/{commentId}/status(commentId=${comment.commentId})}"
+                    onsubmit="return confirm('이 댓글을 삭제 상태로 변경할까요?');">
+                <input type="hidden" name="status" value="DELETED">
+                <button type="submit">삭제</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(communityPage.comments)}">
+          <td colspan="8" class="admin-community-empty">댓글이 없습니다.</td>
+        </tr>
+        <tr class="admin-community-comment-empty is-hidden">
+          <td colspan="8" class="admin-community-empty">조건에 맞는 댓글이 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  const tabs = document.querySelectorAll(".admin-community-tab");
+  const panels = document.querySelectorAll(".admin-community-panel");
+  const boardFilter = document.querySelector("#communityBoardFilter");
+  const statusFilter = document.querySelector("#communityStatusFilter");
+  const keywordFilter = document.querySelector("#communityKeywordFilter");
+  let activeTab = "posts";
+
+  const applyCommunityFilter = () => {
+    const selectedBoard = boardFilter.value;
+    const selectedStatus = statusFilter.value;
+    const keyword = keywordFilter.value.trim().toLowerCase();
+    const rowSelector = activeTab === "posts" ? ".admin-community-post-row" : ".admin-community-comment-row";
+    const emptyRow = document.querySelector(activeTab === "posts" ? ".admin-community-post-empty" : ".admin-community-comment-empty");
+    let visibleCount = 0;
+
+    document.querySelectorAll(rowSelector).forEach((row) => {
+      const matchesBoard = activeTab !== "posts" || selectedBoard === "" || row.dataset.board === selectedBoard;
+      const matchesStatus = selectedStatus === "" || row.dataset.status === selectedStatus;
+      const matchesKeyword = keyword === "" || (row.dataset.keyword || "").toLowerCase().includes(keyword);
+      const visible = matchesBoard && matchesStatus && matchesKeyword;
+
+      row.hidden = !visible;
+      if (visible) {
+        visibleCount += 1;
+      }
+    });
+
+    emptyRow?.classList.toggle("is-hidden", visibleCount > 0);
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      activeTab = tab.dataset.tab;
+      tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
+      panels.forEach((panel) => panel.classList.toggle("is-hidden", panel.dataset.panel !== activeTab));
+      boardFilter.disabled = activeTab !== "posts";
+      applyCommunityFilter();
+    });
+  });
+
+  boardFilter?.addEventListener("change", applyCommunityFilter);
+  statusFilter?.addEventListener("change", applyCommunityFilter);
+  keywordFilter?.addEventListener("input", applyCommunityFilter);
+
+  panels.forEach((panel) => panel.classList.toggle("is-hidden", panel.dataset.panel !== activeTab));
+</script>
 </body>
 </html>
