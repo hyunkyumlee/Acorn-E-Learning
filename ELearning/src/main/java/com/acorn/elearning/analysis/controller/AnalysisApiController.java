@@ -2,6 +2,7 @@ package com.acorn.elearning.analysis.controller;
 
 import com.acorn.elearning.analysis.dto.request.AnalysisRetryRequest;
 import com.acorn.elearning.analysis.dto.request.GenerateAnalysisRequest;
+import com.acorn.elearning.analysis.dto.response.AnalysisAutoRefreshResponse;
 import com.acorn.elearning.analysis.dto.response.AnalysisReportResponse;
 import com.acorn.elearning.analysis.dto.response.AnalysisStatusResponse;
 import com.acorn.elearning.analysis.service.AiAnalysisService;
@@ -29,6 +30,13 @@ public class AnalysisApiController {
             @Valid @RequestBody GenerateAnalysisRequest request
     ) {
         return ApiResponse.success(aiAnalysisService.generate(sessionUser, request));
+    }
+
+    @PostMapping("/api/analyses/latest/refresh")
+    public ApiResponse<AnalysisAutoRefreshResponse> refreshLatest(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+    ) {
+        return ApiResponse.success(aiAnalysisService.refreshLatestIfRequired(sessionUser));
     }
 
     @GetMapping("/api/analyses/{reportId}")

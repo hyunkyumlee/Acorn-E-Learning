@@ -8,6 +8,7 @@ import com.acorn.elearning.auth.dto.response.UserSessionResponse;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.security.SessionUser;
+import jakarta.mail.Session;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +47,11 @@ public class SessionService {
         return GuestSessionResponse.guest();
     }
 
+    //signup 응답 변환
+    //AUTH-001 REST : email 포함 응답
+    public UserSessionResponse toSignupResponse(SessionUser sessionUser) {
+        return UserSessionResponse.fromSignup(sessionUser);
+    }
 
 
 

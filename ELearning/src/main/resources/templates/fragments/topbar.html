@@ -13,18 +13,55 @@
   </nav>
   <div class="topbar-actions">
     <button class="header-icon theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
-      <span class="theme-icon" aria-hidden="true"></span>
+      <span class="theme-symbol" aria-hidden="true">
+        <svg class="theme-symbol-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <title>다크모드</title>
+          <path d="M20.4 14.7A7.7 7.7 0 0 1 9.3 3.6 8.7 8.7 0 1 0 20.4 14.7Z"></path>
+          <path d="M16.7 3.8h.01M19.4 6.7h.01"></path>
+        </svg>
+        <svg class="theme-symbol-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <title>라이트모드</title>
+          <circle cx="12" cy="12" r="4.2"></circle>
+          <path d="M12 2.5v2.1M12 19.4v2.1M4.6 4.6l1.5 1.5M17.9 17.9l1.5 1.5M2.5 12h2.1M19.4 12h2.1M4.6 19.4l1.5-1.5M17.9 6.1l1.5-1.5"></path>
+        </svg>
+      </span>
     </button>
-    <a class="header-icon settings-icon" th:href="@{/settings}" data-nav-prefix="/settings" aria-label="설정">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
-        <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2.1 2.1 0 0 1-2.97 2.97l-.05-.05a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65V21a2.1 2.1 0 0 1-4.2 0v-.08a1.8 1.8 0 0 0-1.1-1.65 1.8 1.8 0 0 0-1.97.36l-.05.05a2.1 2.1 0 0 1-2.97-2.97l.05-.05A1.8 1.8 0 0 0 3.84 15a1.8 1.8 0 0 0-1.65-1.09H2.1a2.1 2.1 0 0 1 0-4.2h.08a1.8 1.8 0 0 0 1.65-1.1 1.8 1.8 0 0 0-.36-1.97l-.05-.05a2.1 2.1 0 0 1 2.97-2.97l.05.05a1.8 1.8 0 0 0 1.98.36 1.8 1.8 0 0 0 1.09-1.65V2.1a2.1 2.1 0 0 1 4.2 0v.08a1.8 1.8 0 0 0 1.1 1.65 1.8 1.8 0 0 0 1.97-.36l.05-.05a2.1 2.1 0 0 1 2.97 2.97l-.05.05a1.8 1.8 0 0 0-.36 1.98 1.8 1.8 0 0 0 1.65 1.09h.08a2.1 2.1 0 0 1 0 4.2h-.08A1.8 1.8 0 0 0 19.4 15Z"></path>
-      </svg>
-    </a>
-    <a class="profile-pill" th:if="${loginUser != null}" th:href="@{/mypage}" data-nav-prefix="/mypage" aria-label="마이페이지">
-      <span class="profile-dot" aria-hidden="true" th:text="${loginUser.nickname != null and !#strings.isEmpty(loginUser.nickname) ? #strings.substring(loginUser.nickname, 0, 1) : 'K'}">K</span>
-      <span class="profile-label" th:text="${loginUser.nickname != null and !#strings.isEmpty(loginUser.nickname) ? loginUser.nickname : '프로필'}">프로필</span>
-    </a>
+    <div class="profile-menu" th:if="${loginUser != null}">
+      <button class="profile-pill profile-menu-trigger" type="button" data-profile-menu aria-haspopup="true" aria-expanded="false">
+        <span class="profile-dot" aria-hidden="true" th:text="${loginUser.nickname != null and !#strings.isEmpty(loginUser.nickname) ? #strings.substring(loginUser.nickname, 0, 1) : 'K'}">K</span>
+        <span class="profile-label" th:text="${loginUser.nickname != null and !#strings.isEmpty(loginUser.nickname) ? loginUser.nickname : '프로필'}">프로필</span>
+        <svg class="profile-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 9 6 6 6-6"></path>
+        </svg>
+      </button>
+      <div class="profile-dropdown" role="menu" aria-label="사용자 메뉴">
+        <a class="profile-dropdown-item" th:href="@{/mypage}" data-nav-prefix="/mypage" role="menuitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 20a6 6 0 0 0-12 0"></path>
+            <circle cx="12" cy="8" r="4"></circle>
+          </svg>
+          <span>마이페이지</span>
+        </a>
+        <a class="profile-dropdown-item" th:href="@{/settings}" data-nav-prefix="/settings" role="menuitem">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+            <path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2.1 2.1 0 0 1-2.97 2.97l-.05-.05a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65V21a2.1 2.1 0 0 1-4.2 0v-.08a1.8 1.8 0 0 0-1.1-1.65 1.8 1.8 0 0 0-1.97.36l-.05.05a2.1 2.1 0 0 1-2.97-2.97l.05-.05A1.8 1.8 0 0 0 3.84 15a1.8 1.8 0 0 0-1.65-1.09H2.1a2.1 2.1 0 0 1 0-4.2h.08a1.8 1.8 0 0 0 1.65-1.1 1.8 1.8 0 0 0-.36-1.97l-.05-.05a2.1 2.1 0 0 1 2.97-2.97l.05.05a1.8 1.8 0 0 0 1.98.36 1.8 1.8 0 0 0 1.09-1.65V2.1a2.1 2.1 0 0 1 4.2 0v.08a1.8 1.8 0 0 0 1.1 1.65 1.8 1.8 0 0 0 1.97-.36l.05-.05a2.1 2.1 0 0 1 2.97 2.97l-.05.05a1.8 1.8 0 0 0-.36 1.98 1.8 1.8 0 0 0 1.65 1.09h.08a2.1 2.1 0 0 1 0 4.2h-.08A1.8 1.8 0 0 0 19.4 15Z"></path>
+          </svg>
+          <span>설정</span>
+        </a>
+        <form class="profile-dropdown-form" th:action="@{/logout}" method="post">
+          <button class="profile-dropdown-item profile-dropdown-button" type="submit" role="menuitem">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 17 15 12 10 7"></path>
+              <path d="M15 12H3"></path>
+              <path d="M21 19V5a2 2 0 0 0-2-2h-5"></path>
+              <path d="M14 21h5a2 2 0 0 0 2-2"></path>
+            </svg>
+            <span>로그아웃</span>
+          </button>
+        </form>
+      </div>
+    </div>
     <a class="profile-pill" th:if="${loginUser == null}" th:href="@{/login}" data-nav-exact="/login" aria-label="로그인">
       <span class="profile-dot" aria-hidden="true">K</span>
       <span class="profile-label">로그인</span>

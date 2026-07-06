@@ -1,19 +1,31 @@
-import {basicSetup, EditorView} from "https://esm.sh/codemirror";
-import {indentLess, indentMore} from "https://esm.sh/@codemirror/commands";
-import {java} from "https://esm.sh/@codemirror/lang-java";
-import {oneDark} from "https://esm.sh/@codemirror/theme-one-dark";
+import {basicSetup, EditorView, indentLess, indentMore, java, oneDark} from "../vendor/codemirror.bundle.js";
 
 const form = document.querySelector("[data-code-run-form]");
 const runButton = document.querySelector("[data-code-run-button]");
 const resultPanel = document.querySelector("[data-code-run-result]");
+const finalSubmitModal = document.querySelector("[data-final-submit-modal]");
 
 if (form && runButton && resultPanel) {
   const textarea = form.querySelector("textarea[name='answerText']");
   const editorHost = form.querySelector("[data-code-editor]");
+  const submitButton = document.querySelector("[data-code-submit-button]");
   const statusText = resultPanel.querySelector("[data-code-run-status]");
   const timeText = resultPanel.querySelector("[data-code-run-time]");
   const detailText = resultPanel.querySelector("[data-code-run-detail]");
   let editorView = null;
+  const initialAnswerText = textarea?.value || "";
+  const alreadySubmitted = form.dataset.answerSubmitted === "true";
+  const notifyEditorReady = () => document.dispatchEvent(new CustomEvent("knowva:code-editor-ready"));
+  const notifyEditorFailed = () => document.dispatchEvent(new CustomEvent("knowva:code-editor-failed"));
+
+  const updateSubmitState = (code) => {
+    if (!submitButton) {
+      return;
+    }
+    const changed = code !== initialAnswerText;
+    submitButton.disabled = alreadySubmitted && !changed;
+    submitButton.textContent = alreadySubmitted && !changed ? "제출됨" : (alreadySubmitted ? "다시 제출" : "제출");
+  };
   const insertSoftTab = (view) => {
     const hasSelection = view.state.selection.ranges.some((range) => !range.empty);
     if (hasSelection) {
@@ -57,27 +69,38 @@ if (form && runButton && resultPanel) {
   });
 
   if (textarea && editorHost) {
-    editorView = new EditorView({
-      doc: textarea.value,
-      extensions: [
-        basicSetup,
-        java(),
-        oneDark,
-        knowvaEditorTheme,
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
-            textarea.value = update.state.doc.toString();
-          }
-        }),
-      ],
-      parent: editorHost,
-    });
-    editorHost.addEventListener("keydown", handleEditorTab, true);
-    editorHost.addEventListener("mousedown", () => {
-      requestAnimationFrame(() => editorView?.focus());
-    });
-    form.classList.add("is-enhanced");
+    try {
+      editorView = new EditorView({
+        doc: textarea.value,
+        extensions: [
+          basicSetup,
+          java(),
+          oneDark,
+          knowvaEditorTheme,
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged) {
+              textarea.value = update.state.doc.toString();
+              updateSubmitState(textarea.value);
+            }
+          }),
+        ],
+        parent: editorHost,
+      });
+      editorHost.addEventListener("keydown", handleEditorTab, true);
+      editorHost.addEventListener("mousedown", () => {
+        requestAnimationFrame(() => editorView?.focus());
+      });
+      form.classList.add("is-enhanced");
+      requestAnimationFrame(() => requestAnimationFrame(notifyEditorReady));
+    } catch (error) {
+      notifyEditorFailed();
+      throw error;
+    }
+  } else {
+    notifyEditorReady();
   }
+  textarea?.addEventListener("input", () => updateSubmitState(textarea.value));
+  updateSubmitState(initialAnswerText);
 
   const syncTextarea = () => {
     if (editorView && textarea) {
@@ -112,7 +135,7 @@ if (form && runButton && resultPanel) {
     const code = syncTextarea();
     if (!code.trim()) {
       event.preventDefault();
-      renderResult("danger", "저장 불가", "-", "답안 코드가 필요합니다.");
+      renderResult("danger", "제출 불가", "-", "답안 코드가 필요합니다.");
       editorView?.focus();
     }
   });
@@ -153,5 +176,12 @@ if (form && runButton && resultPanel) {
     } finally {
       runButton.disabled = false;
     }
+  });
+}
+
+if (finalSubmitModal) {
+  const closeButton = finalSubmitModal.querySelector("[data-final-submit-close]");
+  closeButton?.addEventListener("click", () => {
+    finalSubmitModal.hidden = true;
   });
 }

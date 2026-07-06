@@ -156,9 +156,8 @@ public class ExamController {
         idempotencyTokenService.requireAndConsume(form.getIdempotencyToken(), "", httpSession);
         ExamSessionResponse exam = aiExamService.saveAnswer(sessionUser, examId, aiProblemId, new SaveExamAnswerRequest(form.getAnswerText()));
         ExamProblemStepResponse step = ExamProblemStepResponse.from(exam, problemNo);
-        if ("submit".equals(form.getMove()) && step.allAnswered()) {
-            aiExamService.submit(sessionUser, examId);
-            return "redirect:/exams/{examId}/result";
+        if ("next".equals(form.getMove()) && step.allAnswered()) {
+            redirectAttributes.addFlashAttribute("finalSubmitReady", true);
         }
         redirectAttributes.addAttribute("problemNo", targetProblemNo(step, form.getMove()));
         return "redirect:/exams/{examId}/problems/{problemNo}";

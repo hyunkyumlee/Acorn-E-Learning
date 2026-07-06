@@ -1,7 +1,6 @@
 package com.acorn.elearning.community.dto.response;
 
-import java.util.Map;
+import com.acorn.elearning.community.model.Comment;
 
-public record CommentResponse(String status, Map<String, Object> data) {
-    public static CommentResponse stub() { return new CommentResponse("SKELETON", Map.of()); }
+public record CommentResponse(Comment comment) {
 }

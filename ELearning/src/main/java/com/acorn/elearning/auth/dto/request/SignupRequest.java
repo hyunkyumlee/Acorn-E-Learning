@@ -9,6 +9,6 @@ import java.util.Map;
 public record SignupRequest(@NotBlank @Email String email,
                             @NotBlank @Size(min = 8, max = 72) String password,
                             @NotBlank @Size(min = 2, max = 50) String nickname,
-                            Long primarySubjectId, String LearningGoal) { }
+                            Long primarySubjectId, String learningGoal) { }
 
 //public record SignupRequest(@NotBlank String requestId, Map<String, Object> payload) {}

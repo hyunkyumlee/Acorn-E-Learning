@@ -42,7 +42,7 @@ class AiExamServiceGateTest {
 
         BusinessException exception = assertThrows(
                 BusinessException.class,
-                () -> service.create(user(), new CreateExamRequest(1L, "BEGINNER")));
+                () -> service.create(user(), new CreateExamRequest(1L, "BRONZE")));
 
         assertEquals(ErrorCode.COMMON_VALIDATION_FAILED, exception.errorCode());
         assertEquals(0, examSessionMapper.insertCount);

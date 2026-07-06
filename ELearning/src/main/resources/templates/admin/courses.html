@@ -44,9 +44,9 @@
         </select>
         <select>
           <option value="">난이도/레벨</option>
-          <option value="BEGINNER">BEGINNER</option>
-          <option value="INTERMEDIATE">INTERMEDIATE</option>
-          <option value="ADVANCED">ADVANCED</option>
+          <option value="BRONZE">BRONZE</option>
+          <option value="SILVER">SILVER</option>
+          <option value="GOLD">GOLD</option>
         </select>
       </div>
       <button type="button" class="course-primary-button subject-create-button">+ 과목 등록</button>
@@ -138,9 +138,9 @@
         </select>
         <select id="curriculumLevelFilter">
           <option value="">레벨</option>
-          <option value="BEGINNER">BEGINNER</option>
-          <option value="INTERMEDIATE">INTERMEDIATE</option>
-          <option value="ADVANCED">ADVANCED</option>
+          <option value="BRONZE">BRONZE</option>
+          <option value="SILVER">SILVER</option>
+          <option value="GOLD">GOLD</option>
         </select>
       </div>
       <button type="button" class="course-primary-button">+ 커리큘럼 등록</button>
@@ -172,7 +172,7 @@
               th:data-level-code="${node.levelCode}">
             <td th:text="${'#' + node.nodeId}">#001</td>
             <td th:text="${subjectNameMap[node.subjectId] ?: '-'}">Java</td>
-            <td th:text="${node.levelCode}">BEGINNER</td>
+            <td th:text="${node.levelCode}">BRONZE</td>
             <td th:text="${node.nodeType}">LESSON</td>
             <td th:text="${node.title}">Java 기초</td>
             <td th:text="${node.isActive} ? '활성' : '비활성'">활성</td>
@@ -217,9 +217,9 @@
           </select>
           <select name="levelCode" id="curriculumLevelCode">
             <option value="">레벨 선택</option>
-            <option value="BEGINNER">BEGINNER</option>
-            <option value="INTERMEDIATE">INTERMEDIATE</option>
-            <option value="ADVANCED">ADVANCED</option>
+            <option value="BRONZE">BRONZE</option>
+            <option value="SILVER">SILVER</option>
+            <option value="GOLD">GOLD</option>
           </select>
           <select name="nodeType" id="curriculumNodeType">
             <option value="">노드 타입 선택</option>

@@ -60,6 +60,7 @@ public class PracticeService {
         // 2. practice_set_attempts 생성
         PracticeSetAttempt attempt = new PracticeSetAttempt();
         attempt.setUserId(user.userId());
+        attempt.setSubjectId(form.getSubjectId()); //🔆과목
         attempt.setNodeId(form.getNodeId());
         attempt.setTotalCount(problems.size()); // 10개
         attempt.setCorrectCount(0); // 시작할때 정답은 0개

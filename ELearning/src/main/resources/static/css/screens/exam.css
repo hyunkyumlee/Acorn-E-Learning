@@ -50,6 +50,108 @@
   padding: var(--space-6);
 }
 
+.exam-final-submit-modal,
+.exam-loading-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, black 34%, transparent);
+  padding: var(--space-5);
+}
+
+.exam-loading-modal {
+  z-index: 70;
+}
+
+.exam-final-submit-modal[hidden],
+.exam-loading-modal[hidden] {
+  display: none;
+}
+
+.exam-final-submit-card,
+.exam-loading-card {
+  display: grid;
+  width: min(460px, 100%);
+  gap: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--primary) 36%, var(--line));
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, white), var(--surface));
+  box-shadow: 0 24px 60px color-mix(in srgb, black 24%, transparent);
+  padding: var(--space-6);
+}
+
+.exam-final-submit-card h2,
+.exam-loading-card h2 {
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.exam-final-submit-card p,
+.exam-loading-card p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.exam-loading-card {
+  justify-items: start;
+}
+
+.exam-loading-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid color-mix(in srgb, var(--primary) 18%, var(--line));
+  border-top-color: var(--primary);
+  border-radius: 999px;
+  animation: exam-loading-spin 760ms linear infinite;
+}
+
+.exam-loading-progress {
+  overflow: hidden;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-soft) 82%, var(--line));
+}
+
+.exam-loading-progress span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--primary-strong));
+  animation: exam-loading-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes exam-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes exam-loading-slide {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  50% {
+    transform: translateX(70%);
+  }
+
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.exam-final-submit-form {
+  display: flex;
+  max-width: none;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
 .exam-gate-card.is-locked {
   border-color: color-mix(in srgb, var(--warning) 34%, var(--line));
   background: color-mix(in srgb, var(--warning) 8%, var(--surface));
@@ -107,8 +209,7 @@
 }
 
 .exam-create-form label,
-.exam-code-field,
-.analysis-generate-form label {
+.exam-code-field {
   display: grid;
   gap: var(--space-2);
   color: var(--muted);
@@ -445,18 +546,58 @@
 }
 
 .exam-review-list {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .exam-review-card {
   align-content: start;
 }
 
+.exam-review-card header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.exam-review-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.exam-review-section {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface-soft) 44%, var(--surface));
+  padding: var(--space-4);
+}
+
+.exam-review-section h3 {
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.exam-review-section p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 1100px) {
   .exam-gate,
   .exam-studio,
-  .exam-workbench-head,
-  .exam-review-list {
+  .exam-workbench-head {
+    grid-template-columns: 1fr;
+  }
+
+  .exam-review-body {
     grid-template-columns: 1fr;
   }
 

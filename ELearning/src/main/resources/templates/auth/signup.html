@@ -1,17 +1,92 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>회원가입 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/welcome.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/auth.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/guest-header :: guestHeader}"></div>
-  <main class="page-shell welcome-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>회원가입</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>auth/signup</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p><form method="post"><input type="hidden" name="_csrf" value="TODO-CSRF"><input type="hidden" name="idempotencyToken" value="TODO-IDEMPOTENCY"><button class="button primary" type="submit">Submit</button></form></section>
+  <main class="page-shell auth-screen">
+    <section class="page-heading">
+      <span class="eyebrow">SR-002 · Auth</span>
+      <h1>회원가입</h1>
+      <p>학습 기록을 저장할 계정을 만듭니다. 가입 후 로그인 화면으로 이동해 직접 로그인합니다.</p>
+    </section>
+
+    <section class="auth-two-col">
+      <div class="form-panel">
+        <h3>이메일 가입</h3>
+
+        <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
+
+        <form th:action="@{/signup}" th:object="${signupForm}" method="post">
+          <input type="hidden" name="redirect" value="/login">
+
+          <label class="field">
+            <span>이메일</span>
+            <input type="email" th:field="*{email}" placeholder="newuser@example.com" autocomplete="email">
+          </label>
+          <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+
+          <label class="field">
+            <span>비밀번호 (8자 이상)</span>
+            <input type="password" th:field="*{password}" placeholder="Knowva1234!" autocomplete="new-password">
+          </label>
+          <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+
+          <label class="field">
+            <span>닉네임</span>
+            <input type="text" th:field="*{nickname}" placeholder="신규유저" autocomplete="nickname">
+          </label>
+          <p class="field-error" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></p>
+
+          <label class="field">
+            <span>관심 과목 ID (선택)</span>
+            <input type="number" th:field="*{primarySubjectId}" min="1" placeholder="비우거나 sample data ID">
+          </label>
+
+          <label class="field">
+            <span>학습 목표 (선택)</span>
+            <textarea th:field="*{learningGoal}" rows="3" placeholder="Java 백엔드 학습"></textarea>
+          </label>
+
+          <button class="button primary" type="submit">가입하기</button>
+        </form>
+
+        <p class="form-foot">이미 계정이 있으신가요? <a th:href="@{/login}">로그인</a></p>
+      </div>
+
+      <div class="panel">
+        <h2>가입 시점 안내</h2>
+        <ul class="info-list">
+          <li>
+            <strong>학습 목표</strong>
+            <span>선택 입력입니다. onboarding에서 다시 수정할 수 있습니다.</span>
+          </li>
+          <li>
+            <strong>관심 과목</strong>
+            <span>과목 ID는 sample data 기준입니다. 비워두면 이후 onboarding에서 선택합니다.</span>
+          </li>
+          <li>
+            <strong>가입 후 로그인</strong>
+            <span>가입만으로는 자동 로그인되지 않습니다. 방금 입력한 email과 password로 로그인하세요.</span>
+          </li>
+          <li>
+            <strong>소셜 로그인</strong>
+            <span>Google/Kakao 가입은 MVP skeleton 단계입니다. 로그인 화면에서 route를 확인할 수 있습니다.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
   </main>
 </body>
 </html>

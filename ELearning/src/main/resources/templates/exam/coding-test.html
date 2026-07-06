@@ -6,6 +6,7 @@
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/exam.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
+  <script defer th:src="@{/js/exam/exam-loading.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
@@ -26,7 +27,13 @@
         <h2 th:text="${eligibility.message()}">AI 코딩테스트를 시작할 수 있습니다.</h2>
         <p>문제 생성 후 1번 문제부터 순서대로 이동합니다. 제출 후에는 테스트케이스 실행 결과로 채점됩니다.</p>
         <div class="exam-gate-actions">
-          <form th:action="@{/exams}" th:object="${form}" method="post" class="exam-create-form">
+          <form th:action="@{/exams}"
+                th:object="${form}"
+                method="post"
+                class="exam-create-form"
+                data-loading-form
+                data-loading-title="문제 생성 중입니다"
+                data-loading-message="학습 범위를 확인하고 AI 코딩테스트 문제와 테스트케이스를 생성하고 있습니다.">
             <input type="hidden" th:field="*{idempotencyToken}">
             <label>
               <span>과목 ID</span>
@@ -36,9 +43,9 @@
               <span>레벨</span>
               <select th:field="*{levelCode}" required>
                 <option value="">선택</option>
-                <option value="BEGINNER">BEGINNER</option>
-                <option value="INTERMEDIATE">INTERMEDIATE</option>
-                <option value="ADVANCED">ADVANCED</option>
+                <option value="BRONZE">BRONZE</option>
+                <option value="SILVER">SILVER</option>
+                <option value="GOLD">GOLD</option>
               </select>
             </label>
             <button type="submit" class="button primary">시험 시작</button>
@@ -56,6 +63,20 @@
         <p>완료한 이론 학습 또는 통과한 문제풀이 범위가 있어야 AI 코딩테스트 문제를 생성할 수 있습니다.</p>
         <a class="button" th:href="@{/learning}">학습 이어가기</a>
       </aside>
+    </section>
+
+    <section class="exam-loading-modal"
+             data-exam-loading-modal
+             hidden
+             aria-hidden="true"
+             aria-labelledby="exam-loading-title">
+      <div class="exam-loading-card" role="dialog" aria-modal="true">
+        <div class="exam-loading-spinner" aria-hidden="true"></div>
+        <span class="exam-state-badge">처리 중</span>
+        <h2 id="exam-loading-title" data-exam-loading-title>처리 중입니다</h2>
+        <p data-exam-loading-message>잠시만 기다려 주세요.</p>
+        <div class="exam-loading-progress" aria-hidden="true"><span></span></div>
+      </div>
     </section>
   </main>
 </body>

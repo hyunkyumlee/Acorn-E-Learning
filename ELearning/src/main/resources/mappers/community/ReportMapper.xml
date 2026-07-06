@@ -1,37 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.community.mapper.ReportMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="ReportResultMap" type="com.acorn.elearning.community.model.Report">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="ReportResultMap">
-          SELECT /* DDL column list */
-          FROM reports
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="ReportResultMap">
-          SELECT /* DDL column list */
-          FROM reports
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.community.model.Report" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO reports (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.community.model.Report">
-          UPDATE reports
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+
+
+
+    <resultMap id="ReportResultMap" type="com.acorn.elearning.community.model.Report">
+        <id property="reportId" column="report_id" />
+        <result property="targetType" column="target_type" />
+        <result property="targetId" column="target_id" />
+        <result property="reporterId" column="reporter_id" />
+        <result property="reasonCode" column="reason_code" />
+        <result property="status" column="status" />
+        <result property="handledBy" column="handled_by" />
+        <result property="handledAt" column="handled_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        report_id, target_type, target_id, reporter_id, reason_code, status, handled_by, handled_at, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="ReportResultMap">
+        SELECT <include refid="columns" />
+        FROM reports
+        WHERE report_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="ReportResultMap">
+        SELECT <include refid="columns" />
+        FROM reports
+        ORDER BY report_id DESC
+    </select>
+
+    <select id="countByTargetAndReporter" resultType="long">
+        SELECT COUNT(*)
+        FROM reports
+        WHERE target_type = #{targetType}
+          AND target_id = #{targetId}
+          AND reporter_id = #{reporterId}
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.community.model.Report"
+            useGeneratedKeys="true" keyProperty="reportId">
+        INSERT INTO reports (
+            target_type, target_id, reporter_id, reason_code, status
+        )
+        VALUES (
+            #{targetType}, #{targetId}, #{reporterId}, #{reasonCode}, #{status}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.community.model.Report">
+        UPDATE reports
+        SET reason_code = #{reasonCode},
+            status = #{status},
+            handled_by = #{handledBy},
+            handled_at = #{handledAt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE report_id = #{reportId}
+    </update>
 </mapper>

@@ -1,12 +1,12 @@
 package com.acorn.elearning.learning.view;
 
 /**
- * 학습 메인(SR-003) 대시보드 표시용 View.
+ * 학습 메인 대시보드 표시용 View (사용자 프로필/출석).
  * 데이터 출처:
  *   - nickname        : SessionUser (로그인 세션)
  *   - primarySubjectId, currentLevelCode, gradeCode, totalScore : user_learning_profiles
- *   - progressRate    : learning_progress (주 과목 노드 progress_rate 평균, 0~100 정수)
  *   - streakCount, attendedToday : attendance_records (최근 1건)
+ * 로드맵 진행률(행성 완료수·%)은 선택 과목 기준으로 ProgressService.RoadmapProgress가 별도 제공한다.
  */
 public record LearningDashboardView(
         String nickname,
@@ -14,7 +14,6 @@ public record LearningDashboardView(
         String currentLevelCode,
         String gradeCode,
         int totalScore,
-        int progressRate,
         int streakCount,
         boolean attendedToday
 ) {}

@@ -1,17 +1,57 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>로그인 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/welcome.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/auth.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/guest-header :: guestHeader}"></div>
-  <main class="page-shell welcome-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>로그인</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>auth/login</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p><form method="post"><input type="hidden" name="_csrf" value="TODO-CSRF"><input type="hidden" name="idempotencyToken" value="TODO-IDEMPOTENCY"><button class="button primary" type="submit">Submit</button></form></section>
+  <main class="page-shell auth-screen">
+    <section class="auth-grid">
+      <div class="form-panel">
+        <h3>로그인</h3>
+
+        <p class="form-success" th:if="${successMessage}" th:text="${successMessage}">가입 완료 메시지</p>
+        <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
+
+        <form th:action="@{/login}" th:object="${loginForm}" method="post">
+          <input type="hidden" name="redirect" th:value="${redirect}" th:if="${redirect}">
+          <label class="field">
+            <span>이메일</span>
+            <input type="email" th:field="*{email}" placeholder="learner@knowva.local" autocomplete="email">
+          </label>
+          <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+
+          <label class="field">
+            <span>비밀번호</span>
+            <input type="password" th:field="*{password}" placeholder="비밀번호" autocomplete="current-password">
+          </label>
+          <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+
+          <label class="checkbox">
+            <input type="checkbox" th:field="*{rememberMe}"> 로그인 상태 유지
+          </label>
+
+          <button class="button primary" type="submit">로그인</button>
+        </form>
+
+        <div class="social-login-row" aria-label="소셜 로그인">
+          <a class="button social-login google" th:href="@{/oauth/google}">Google로 계속</a>
+          <a class="button social-login kakao" th:href="@{/oauth/kakao}">Kakao로 계속</a>
+        </div>
+
+        <p class="form-foot">계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
+      </div>
+    </section>
   </main>
 </body>
 </html>

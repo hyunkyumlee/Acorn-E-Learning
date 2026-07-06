@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.analysis.mapper.AnalysisDashboardMapper">
+    <resultMap id="AnalysisExamSummaryResultMap" type="com.acorn.elearning.analysis.model.AnalysisExamSummary">
+        <id property="examId" column="exam_id" />
+        <result property="userId" column="user_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="subjectCode" column="subject_code" />
+        <result property="subjectName" column="subject_name" />
+        <result property="levelCode" column="level_code" />
+        <result property="status" column="status" />
+        <result property="resultStatus" column="result_status" />
+        <result property="totalProblemCount" column="total_problem_count" />
+        <result property="correctCount" column="correct_count" />
+        <result property="retryCount" column="retry_count" />
+        <result property="startedAt" column="started_at" />
+        <result property="submittedAt" column="submitted_at" />
+        <result property="gradedAt" column="graded_at" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <resultMap id="AnalysisCodingMistakeStatResultMap" type="com.acorn.elearning.analysis.model.AnalysisCodingMistakeStat">
+        <id property="mistakeType" column="mistake_type" />
+        <result property="occurrenceCount" column="occurrence_count" />
+        <result property="affectedExamCount" column="affected_exam_count" />
+        <result property="samplePrompt" column="sample_prompt" />
+        <result property="latestOccurredAt" column="latest_occurred_at" />
+    </resultMap>
+
+    <resultMap id="AnalysisCodingExamAggregateResultMap" type="com.acorn.elearning.analysis.model.AnalysisCodingExamAggregate">
+        <result property="totalExamCount" column="total_exam_count" />
+        <result property="passedExamCount" column="passed_exam_count" />
+        <result property="totalProblemCount" column="total_problem_count" />
+        <result property="correctCount" column="correct_count" />
+        <result property="retryCount" column="retry_count" />
+    </resultMap>
+
+    <resultMap id="AnalysisLearningProgressStatResultMap" type="com.acorn.elearning.analysis.model.AnalysisLearningProgressStat">
+        <id property="nodeId" column="node_id" />
+        <result property="nodeTitle" column="node_title" />
+        <result property="nodeType" column="node_type" />
+        <result property="planetNo" column="planet_no" />
+        <result property="lessonCompleted" column="lesson_completed" />
+        <result property="practicePassed" column="practice_passed" />
+        <result property="progressRate" column="progress_rate" />
+        <result property="completedAt" column="completed_at" />
+    </resultMap>
+
+    <resultMap id="AnalysisPracticeSummaryResultMap" type="com.acorn.elearning.analysis.model.AnalysisPracticeSummary">
+        <result property="totalAttempts" column="total_attempts" />
+        <result property="passedAttempts" column="passed_attempts" />
+        <result property="totalProblems" column="total_problems" />
+        <result property="correctProblems" column="correct_problems" />
+        <result property="averageCorrectRate" column="average_correct_rate" />
+    </resultMap>
+
+    <resultMap id="AnalysisWrongAnswerSummaryResultMap" type="com.acorn.elearning.analysis.model.AnalysisWrongAnswerSummary">
+        <result property="totalWrongAnswers" column="total_wrong_answers" />
+        <result property="openWrongAnswers" column="open_wrong_answers" />
+        <result property="solvedWrongAnswers" column="solved_wrong_answers" />
+        <result property="totalWrongCount" column="total_wrong_count" />
+    </resultMap>
+
+    <resultMap id="AnalysisWrongAnswerNodeStatResultMap" type="com.acorn.elearning.analysis.model.AnalysisWrongAnswerNodeStat">
+        <id property="nodeId" column="node_id" />
+        <result property="nodeTitle" column="node_title" />
+        <result property="wrongAnswerCount" column="wrong_answer_count" />
+        <result property="totalWrongCount" column="total_wrong_count" />
+        <result property="openCount" column="open_count" />
+    </resultMap>
+
+    <resultMap id="AnalysisSubjectSummaryResultMap" type="com.acorn.elearning.analysis.model.AnalysisSubjectSummary">
+        <id property="subjectId" column="subject_id" />
+        <result property="subjectCode" column="subject_code" />
+        <result property="subjectName" column="subject_name" />
+        <result property="codingExamCount" column="coding_exam_count" />
+        <result property="passedExamCount" column="passed_exam_count" />
+        <result property="codingCorrectProblems" column="coding_correct_problems" />
+        <result property="codingTotalProblems" column="coding_total_problems" />
+        <result property="failedProblemCount" column="failed_problem_count" />
+        <result property="retryCount" column="retry_count" />
+    </resultMap>
+
+    <resultMap id="AnalysisLevelSummaryResultMap" type="com.acorn.elearning.analysis.model.AnalysisLevelSummary">
+        <id property="levelCode" column="level_code" />
+        <result property="codingExamCount" column="coding_exam_count" />
+        <result property="passedExamCount" column="passed_exam_count" />
+        <result property="codingCorrectProblems" column="coding_correct_problems" />
+        <result property="codingTotalProblems" column="coding_total_problems" />
+        <result property="failedProblemCount" column="failed_problem_count" />
+        <result property="retryCount" column="retry_count" />
+    </resultMap>
+
+    <resultMap id="AnalysisCodingAnswerSummaryResultMap" type="com.acorn.elearning.analysis.model.AnalysisCodingAnswerSummary">
+        <id property="examId" column="exam_id" />
+        <result property="subjectName" column="subject_name" />
+        <result property="levelCode" column="level_code" />
+        <result property="problemNo" column="problem_no" />
+        <result property="prompt" column="prompt" />
+        <result property="starterCode" column="starter_code" />
+        <result property="submittedCode" column="submitted_code" />
+        <result property="passedCaseCount" column="passed_case_count" />
+        <result property="correct" column="is_correct" />
+        <result property="aiReview" column="ai_review" />
+        <result property="gradedAt" column="graded_at" />
+    </resultMap>
+
+    <sql id="ExamSummaryColumns">
+        es.exam_id,
+        es.user_id,
+        es.subject_id,
+        s.subject_code,
+        s.subject_name,
+        es.level_code,
+        es.status,
+        es.result_status,
+        es.total_problem_count,
+        es.correct_count,
+        es.retry_count,
+        es.started_at,
+        es.submitted_at,
+        es.graded_at,
+        es.created_at
+    </sql>
+
+    <select id="findSubjectSummaries" parameterType="long" resultMap="AnalysisSubjectSummaryResultMap">
+        SELECT
+            s.subject_id,
+            s.subject_code,
+            s.subject_name,
+            COUNT(es.exam_id) AS coding_exam_count,
+            COALESCE(SUM(CASE WHEN es.result_status = 'PASSED' THEN 1 ELSE 0 END), 0) AS passed_exam_count,
+            COALESCE(SUM(es.correct_count), 0) AS coding_correct_problems,
+            COALESCE(SUM(es.total_problem_count), 0) AS coding_total_problems,
+            COALESCE(SUM(es.total_problem_count - es.correct_count), 0) AS failed_problem_count,
+            COALESCE(SUM(es.retry_count), 0) AS retry_count
+        FROM subjects s
+        JOIN exam_sessions es ON es.subject_id = s.subject_id
+                             AND es.user_id = #{userId}
+                             AND es.status = 'GRADED'
+        WHERE s.is_active = 1
+        GROUP BY s.subject_id, s.subject_code, s.subject_name, s.sort_order
+        ORDER BY s.sort_order ASC, s.subject_id ASC
+    </select>
+
+    <select id="findLevelSummaries" parameterType="long" resultMap="AnalysisLevelSummaryResultMap">
+        SELECT
+            es.level_code,
+            COUNT(es.exam_id) AS coding_exam_count,
+            COALESCE(SUM(CASE WHEN es.result_status = 'PASSED' THEN 1 ELSE 0 END), 0) AS passed_exam_count,
+            COALESCE(SUM(es.correct_count), 0) AS coding_correct_problems,
+            COALESCE(SUM(es.total_problem_count), 0) AS coding_total_problems,
+            COALESCE(SUM(es.total_problem_count - es.correct_count), 0) AS failed_problem_count,
+            COALESCE(SUM(es.retry_count), 0) AS retry_count
+        FROM exam_sessions es
+        WHERE es.user_id = #{userId}
+          AND es.status = 'GRADED'
+        GROUP BY es.level_code
+        ORDER BY FIELD(UPPER(es.level_code), 'BRONZE', 'SILVER', 'GOLD'), es.level_code
+    </select>
+
+    <select id="findCodingAnswerSummaries" parameterType="long" resultMap="AnalysisCodingAnswerSummaryResultMap">
+        SELECT
+            es.exam_id,
+            s.subject_name,
+            es.level_code,
+            p.problem_no,
+            p.prompt,
+            JSON_UNQUOTE(JSON_EXTRACT(p.ai_raw_response, CONCAT('$.problems[', p.problem_no - 1, '].starterCode'))) AS starter_code,
+            ea.answer_text AS submitted_code,
+            COALESCE(ea.passed_case_count, 0) AS passed_case_count,
+            COALESCE(ea.is_correct, 0) AS is_correct,
+            ea.ai_review,
+            ea.graded_at
+        FROM exam_sessions es
+        JOIN subjects s ON s.subject_id = es.subject_id
+        JOIN ai_exam_problems p ON p.exam_id = es.exam_id
+        JOIN exam_answers ea ON ea.exam_id = es.exam_id
+                            AND ea.ai_problem_id = p.ai_problem_id
+        WHERE es.user_id = #{userId}
+          AND es.status = 'GRADED'
+        ORDER BY es.graded_at DESC, es.exam_id DESC, p.problem_no ASC
+    </select>
+
+    <select id="findLatestGradedExamSummary" parameterType="long" resultMap="AnalysisExamSummaryResultMap">
+        SELECT
+        <include refid="ExamSummaryColumns" />
+        FROM exam_sessions es
+        JOIN subjects s ON s.subject_id = es.subject_id
+        WHERE es.user_id = #{userId}
+          AND es.status = 'GRADED'
+        ORDER BY es.graded_at DESC, es.exam_id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findExamSummary" resultMap="AnalysisExamSummaryResultMap">
+        SELECT
+        <include refid="ExamSummaryColumns" />
+        FROM exam_sessions es
+        JOIN subjects s ON s.subject_id = es.subject_id
+        WHERE es.user_id = #{userId}
+          AND es.exam_id = #{examId}
+    </select>
+
+    <select id="findRecentGradedExamSummaries" resultMap="AnalysisExamSummaryResultMap">
+        SELECT
+        <include refid="ExamSummaryColumns" />
+        FROM exam_sessions es
+        JOIN subjects s ON s.subject_id = es.subject_id
+        WHERE es.user_id = #{userId}
+          AND es.subject_id = #{subjectId}
+          AND es.status = 'GRADED'
+        ORDER BY es.graded_at DESC, es.exam_id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="findRecentGradedExamSummariesByUser" resultMap="AnalysisExamSummaryResultMap">
+        SELECT
+        <include refid="ExamSummaryColumns" />
+        FROM exam_sessions es
+        JOIN subjects s ON s.subject_id = es.subject_id
+        WHERE es.user_id = #{userId}
+          AND es.status = 'GRADED'
+        ORDER BY es.graded_at DESC, es.exam_id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="findAllGradedExamSummariesByUser" parameterType="long" resultMap="AnalysisExamSummaryResultMap">
+        SELECT
+        <include refid="ExamSummaryColumns" />
+        FROM exam_sessions es
+        JOIN subjects s ON s.subject_id = es.subject_id
+        WHERE es.user_id = #{userId}
+          AND es.status = 'GRADED'
+        ORDER BY es.graded_at DESC, es.exam_id DESC
+    </select>
+
+    <select id="findCodingMistakeStats" resultMap="AnalysisCodingMistakeStatResultMap">
+        SELECT
+            mistake_type,
+            COUNT(*) AS occurrence_count,
+            COUNT(DISTINCT exam_id) AS affected_exam_count,
+            SUBSTRING_INDEX(
+                GROUP_CONCAT(sample_prompt ORDER BY occurred_at DESC SEPARATOR ' || '),
+                ' || ',
+                1
+            ) AS sample_prompt,
+            MAX(occurred_at) AS latest_occurred_at
+        FROM (
+            SELECT
+                es.exam_id,
+                CASE
+                    WHEN COALESCE(ea.ai_review, '') LIKE '%출력%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%형식%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%공백%'
+                        THEN 'OUTPUT_FORMAT'
+                    WHEN p.prompt LIKE '%배열%'
+                      OR p.prompt LIKE '%문자열%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%배열%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%문자열%'
+                        THEN 'ARRAY_STRING'
+                    WHEN p.prompt LIKE '%조건%'
+                      OR p.prompt LIKE '%반복%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%조건%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%반복%'
+                      OR LOWER(COALESCE(ea.ai_review, '')) LIKE '%if%'
+                      OR LOWER(COALESCE(ea.ai_review, '')) LIKE '%for%'
+                        THEN 'CONTROL_FLOW'
+                    WHEN COALESCE(ea.passed_case_count, 0) = 0
+                        THEN 'MISSING_CORE_LOGIC'
+                    ELSE 'EDGE_CASE'
+                END AS mistake_type,
+                p.prompt AS sample_prompt,
+                COALESCE(ea.graded_at, ea.submitted_at, ea.created_at) AS occurred_at
+            FROM exam_sessions es
+            JOIN ai_exam_problems p ON p.exam_id = es.exam_id
+            JOIN exam_answers ea ON ea.exam_id = es.exam_id
+                                AND ea.ai_problem_id = p.ai_problem_id
+            WHERE es.user_id = #{userId}
+              AND es.subject_id = #{subjectId}
+              AND es.status = 'GRADED'
+              AND COALESCE(ea.is_correct, 0) = 0
+        ) classified
+        GROUP BY mistake_type
+        ORDER BY occurrence_count DESC, latest_occurred_at DESC
+        LIMIT 5
+    </select>
+
+    <select id="findCodingMistakeStatsByUser" parameterType="long" resultMap="AnalysisCodingMistakeStatResultMap">
+        SELECT
+            mistake_type,
+            COUNT(*) AS occurrence_count,
+            COUNT(DISTINCT exam_id) AS affected_exam_count,
+            SUBSTRING_INDEX(
+                GROUP_CONCAT(sample_prompt ORDER BY occurred_at DESC SEPARATOR ' || '),
+                ' || ',
+                1
+            ) AS sample_prompt,
+            MAX(occurred_at) AS latest_occurred_at
+        FROM (
+            SELECT
+                es.exam_id,
+                CASE
+                    WHEN COALESCE(ea.ai_review, '') LIKE '%출력%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%형식%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%공백%'
+                        THEN 'OUTPUT_FORMAT'
+                    WHEN p.prompt LIKE '%배열%'
+                      OR p.prompt LIKE '%문자열%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%배열%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%문자열%'
+                        THEN 'ARRAY_STRING'
+                    WHEN p.prompt LIKE '%조건%'
+                      OR p.prompt LIKE '%반복%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%조건%'
+                      OR COALESCE(ea.ai_review, '') LIKE '%반복%'
+                      OR LOWER(COALESCE(ea.ai_review, '')) LIKE '%if%'
+                      OR LOWER(COALESCE(ea.ai_review, '')) LIKE '%for%'
+                        THEN 'CONTROL_FLOW'
+                    WHEN COALESCE(ea.passed_case_count, 0) = 0
+                        THEN 'MISSING_CORE_LOGIC'
+                    ELSE 'EDGE_CASE'
+                END AS mistake_type,
+                p.prompt AS sample_prompt,
+                COALESCE(ea.graded_at, ea.submitted_at, ea.created_at) AS occurred_at
+            FROM exam_sessions es
+            JOIN ai_exam_problems p ON p.exam_id = es.exam_id
+            JOIN exam_answers ea ON ea.exam_id = es.exam_id
+                                AND ea.ai_problem_id = p.ai_problem_id
+            WHERE es.user_id = #{userId}
+              AND es.status = 'GRADED'
+              AND COALESCE(ea.is_correct, 0) = 0
+        ) classified
+        GROUP BY mistake_type
+        ORDER BY occurrence_count DESC, latest_occurred_at DESC
+        LIMIT 5
+    </select>
+
+    <select id="findCodingExamAggregate" resultMap="AnalysisCodingExamAggregateResultMap">
+        SELECT
+            COUNT(*) AS total_exam_count,
+            COALESCE(SUM(CASE WHEN es.result_status = 'PASSED' THEN 1 ELSE 0 END), 0) AS passed_exam_count,
+            COALESCE(SUM(es.total_problem_count), 0) AS total_problem_count,
+            COALESCE(SUM(es.correct_count), 0) AS correct_count,
+            COALESCE(SUM(es.retry_count), 0) AS retry_count
+        FROM exam_sessions es
+        WHERE es.user_id = #{userId}
+          AND es.subject_id = #{subjectId}
+          AND es.status = 'GRADED'
+    </select>
+
+    <select id="findCodingExamAggregateByUser" parameterType="long" resultMap="AnalysisCodingExamAggregateResultMap">
+        SELECT
+            COUNT(*) AS total_exam_count,
+            COALESCE(SUM(CASE WHEN es.result_status = 'PASSED' THEN 1 ELSE 0 END), 0) AS passed_exam_count,
+            COALESCE(SUM(es.total_problem_count), 0) AS total_problem_count,
+            COALESCE(SUM(es.correct_count), 0) AS correct_count,
+            COALESCE(SUM(es.retry_count), 0) AS retry_count
+        FROM exam_sessions es
+        WHERE es.user_id = #{userId}
+          AND es.status = 'GRADED'
+    </select>
+
+    <select id="findLearningProgressStats" resultMap="AnalysisLearningProgressStatResultMap">
+        SELECT
+            cn.node_id,
+            cn.title AS node_title,
+            cn.node_type,
+            cn.planet_no,
+            COALESCE(lp.lesson_completed, 0) AS lesson_completed,
+            COALESCE(lp.practice_passed, 0) AS practice_passed,
+            COALESCE(lp.progress_rate, 0.00) AS progress_rate,
+            lp.completed_at
+        FROM curriculum_nodes cn
+        LEFT JOIN learning_progress lp
+               ON lp.node_id = cn.node_id
+              AND lp.user_id = #{userId}
+              AND lp.subject_id = #{subjectId}
+        WHERE cn.subject_id = #{subjectId}
+          AND cn.is_active = 1
+        ORDER BY cn.level_code ASC, cn.sort_order ASC, cn.node_id ASC
+    </select>
+
+    <select id="findPracticeSummary" resultMap="AnalysisPracticeSummaryResultMap">
+        SELECT
+            COUNT(*) AS total_attempts,
+            COALESCE(SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END), 0) AS passed_attempts,
+            COALESCE(SUM(total_count), 0) AS total_problems,
+            COALESCE(SUM(correct_count), 0) AS correct_problems,
+            COALESCE(ROUND(SUM(correct_count) / NULLIF(SUM(total_count), 0) * 100, 2), 0.00) AS average_correct_rate
+        FROM practice_set_attempts
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+          AND status = 'COMPLETED'
+    </select>
+
+    <select id="findWrongAnswerSummary" resultMap="AnalysisWrongAnswerSummaryResultMap">
+        SELECT
+            COUNT(wa.wrong_answer_id) AS total_wrong_answers,
+            COALESCE(SUM(CASE WHEN wa.review_status = 'OPEN' THEN 1 ELSE 0 END), 0) AS open_wrong_answers,
+            COALESCE(SUM(CASE WHEN wa.review_status = 'SOLVED' THEN 1 ELSE 0 END), 0) AS solved_wrong_answers,
+            COALESCE(SUM(wa.wrong_count), 0) AS total_wrong_count
+        FROM wrong_answers wa
+        JOIN practice_set_attempts psa ON psa.set_attempt_id = wa.set_attempt_id
+        WHERE wa.user_id = #{userId}
+          AND psa.subject_id = #{subjectId}
+    </select>
+
+    <select id="findWrongAnswerNodeStats" resultMap="AnalysisWrongAnswerNodeStatResultMap">
+        SELECT
+            cn.node_id,
+            cn.title AS node_title,
+            COUNT(wa.wrong_answer_id) AS wrong_answer_count,
+            COALESCE(SUM(wa.wrong_count), 0) AS total_wrong_count,
+            COALESCE(SUM(CASE WHEN wa.review_status = 'OPEN' THEN 1 ELSE 0 END), 0) AS open_count
+        FROM wrong_answers wa
+        JOIN practice_problems pp ON pp.problem_id = wa.problem_id
+        JOIN curriculum_nodes cn ON cn.node_id = pp.node_id
+        JOIN practice_set_attempts psa ON psa.set_attempt_id = wa.set_attempt_id
+        WHERE wa.user_id = #{userId}
+          AND psa.subject_id = #{subjectId}
+        GROUP BY cn.node_id, cn.title
+        ORDER BY total_wrong_count DESC, wrong_answer_count DESC, cn.node_id ASC
+    </select>
+</mapper>

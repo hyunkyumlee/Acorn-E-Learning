@@ -1,8 +1,12 @@
 package com.acorn.elearning.exam.dto.response;
 
+import com.acorn.elearning.common.ai.AiGeneratedTextSanitizer;
 import com.acorn.elearning.exam.model.ExamAnswer;
 import com.acorn.elearning.exam.model.ExamSession;
 import java.util.List;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 public record ExamResultResponse(
         Long examId,
@@ -12,6 +16,8 @@ public record ExamResultResponse(
         Integer totalProblemCount,
         List<Answer> answers
 ) {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     public static ExamResultResponse from(ExamSession session, List<ExamAnswer> answers) {
         return new ExamResultResponse(
                 session.getExamId(),
@@ -27,15 +33,39 @@ public record ExamResultResponse(
             Long aiProblemId,
             Integer passedCaseCount,
             Boolean correct,
-            String aiReview
+            String aiReview,
+            String explanation,
+            String codeReview
     ) {
         static Answer from(ExamAnswer answer) {
+            ReviewText reviewText = ReviewText.from(answer.getAiReview());
             return new Answer(
                     answer.getAnswerId(),
                     answer.getAiProblemId(),
                     answer.getPassedCaseCount(),
                     answer.getIsCorrect(),
-                    answer.getAiReview());
+                    answer.getAiReview(),
+                    reviewText.explanation(),
+                    reviewText.codeReview());
+        }
+    }
+
+    private record ReviewText(String explanation, String codeReview) {
+        private static ReviewText from(String rawReview) {
+            if (rawReview == null || rawReview.isBlank()) {
+                return new ReviewText("", "");
+            }
+            try {
+                JsonNode node = OBJECT_MAPPER.readTree(rawReview);
+                String explanation = AiGeneratedTextSanitizer.removeStarterCodePraise(node.path("explanation").asText(""));
+                String codeReview = AiGeneratedTextSanitizer.removeStarterCodePraise(node.path("codeReview").asText(""));
+                if (!explanation.isBlank() || !codeReview.isBlank()) {
+                    return new ReviewText(explanation, codeReview);
+                }
+                return new ReviewText(rawReview, "");
+            } catch (JacksonException exception) {
+                return new ReviewText(rawReview, "");
+            }
         }
     }
 }
