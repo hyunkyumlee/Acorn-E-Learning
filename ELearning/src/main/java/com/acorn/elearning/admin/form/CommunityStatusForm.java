@@ -8,7 +8,5 @@ import lombok.Setter;
 @Setter
 public class CommunityStatusForm {
     @NotBlank
-    private String skeletonValue = "TODO";
-    private String idempotencyToken;
-    private Long id;
+    private String status;
 }

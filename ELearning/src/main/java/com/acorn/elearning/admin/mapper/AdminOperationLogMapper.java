@@ -9,4 +9,6 @@ public interface AdminOperationLogMapper {
     List<AdminOperationLog> findAll();
     int insert(AdminOperationLog model);
     int update(AdminOperationLog model);
+
+
 }

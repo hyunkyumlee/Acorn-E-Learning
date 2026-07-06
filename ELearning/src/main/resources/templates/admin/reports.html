@@ -37,7 +37,6 @@
       <option value="반려">반려</option>
     </select>
     <input type="date" id="reportDateFilter" aria-label="검색 날짜">
-    <button type="button" id="reportSearchButton">검색</button>
   </section>
 
   <section class="admin-report-section" aria-label="신고 목록">
@@ -166,7 +165,6 @@
   const typeFilter = document.querySelector("#reportTypeFilter");
   const statusFilter = document.querySelector("#reportStatusFilter");
   const dateFilter = document.querySelector("#reportDateFilter");
-  const searchButton = document.querySelector("#reportSearchButton");
   const filterEmptyRow = document.querySelector(".admin-report-filter-empty");
 
   const resetDetail = () => {
@@ -207,7 +205,7 @@
     resetDetail();
   });
 
-  searchButton?.addEventListener("click", () => {
+  const applyReportFilter = () => {
     const selectedType = typeFilter.value;
     const selectedStatus = statusFilter.value;
     const selectedDate = dateFilter.value;
@@ -229,7 +227,11 @@
 
     filterEmptyRow?.classList.toggle("is-hidden", visibleCount > 0);
     resetDetail();
-  });
+  };
+
+  typeFilter?.addEventListener("change", applyReportFilter);
+  statusFilter?.addEventListener("change", applyReportFilter);
+  dateFilter?.addEventListener("change", applyReportFilter);
 </script>
 </body>
 </html>
