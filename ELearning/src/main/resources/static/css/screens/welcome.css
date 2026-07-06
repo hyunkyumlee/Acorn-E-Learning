@@ -1,1 +1,213 @@
-.welcome-screen .panel { border-left: 4px solid var(--accent); }
+/*
+ * SR-001 웰컴/튜토리얼 화면별 CSS
+ * - guest-header + page-shell.welcome-screen (login/signup과 동일 shell)
+ * - welcome만 우주 hero orbit visual 허용
+ */
+
+.welcome-screen {
+  --welcome-copy-ink: var(--text);
+  --welcome-copy-muted: var(--muted);
+  --welcome-panel: color-mix(in srgb, var(--surface) 88%, transparent);
+  --welcome-panel-strong: color-mix(in srgb, var(--surface) 96%, transparent);
+  --welcome-star: color-mix(in srgb, var(--text) 18%, transparent);
+  --welcome-guide-bg: color-mix(in srgb, var(--surface) 92%, transparent);
+  --welcome-guide-line: color-mix(in srgb, var(--primary) 28%, var(--line));
+  background:
+    radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 27%),
+    radial-gradient(circle at 15% 82%, color-mix(in srgb, var(--success) 14%, transparent), transparent 24%),
+    linear-gradient(135deg, var(--bg) 0%, var(--surface-soft) 52%, var(--bg) 100%);
+  color: var(--welcome-copy-ink);
+}
+
+:root[data-theme="knowva-ion-dark"] .welcome-screen {
+  --welcome-star: color-mix(in srgb, var(--text) 42%, transparent);
+  background:
+    radial-gradient(circle at 76% 17%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 29%),
+    radial-gradient(circle at 16% 80%, color-mix(in srgb, var(--success) 12%, transparent), transparent 25%),
+    linear-gradient(135deg, #070a18 0%, #111833 54%, #0d1720 100%);
+}
+
+/* --- hero layout --- */
+.welcome-launch {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 48px);
+  min-height: calc(100vh - var(--header-height) - var(--space-10));
+  padding: var(--space-6) 0 var(--space-10);
+}
+
+.welcome-copy {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 760px;
+}
+
+.welcome-copy h1 {
+  margin: 0;
+  font-size: clamp(38px, 5.5vw, 72px);
+  line-height: 1.02;
+  word-break: keep-all;
+}
+
+.welcome-copy p {
+  margin: 0;
+  max-width: 650px;
+  color: var(--welcome-copy-muted);
+  font-size: clamp(16px, 2vw, 20px);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.welcome-screen .button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.welcome-screen .button.primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* --- orbit visual: 행성 + 궤도 선 함께 float --- */
+@keyframes welcomeOrbitCenterFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.welcome-visual {
+  position: relative;
+  min-height: clamp(420px, 42vw, 560px);
+}
+
+.welcome-orbit {
+  position: absolute;
+  inset: 28px;
+  overflow: hidden;
+  border: 1px solid var(--welcome-guide-line);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 52% 44%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 34%),
+    linear-gradient(140deg, var(--welcome-panel-strong), var(--welcome-panel));
+  box-shadow: var(--shadow-elevated);
+}
+
+.welcome-orbit-center {
+  position: absolute;
+  inset: 0;
+  animation: welcomeOrbitCenterFloat 8s ease-in-out infinite;
+}
+
+.welcome-orbit-center .big-planet {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: clamp(160px, 18vw, 210px);
+  height: clamp(160px, 18vw, 210px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle at 35% 30%, #ffffff 0 9%, transparent 10%),
+    linear-gradient(135deg, var(--success), var(--primary));
+  box-shadow: 0 0 46px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+.welcome-orbit-center .orbit {
+  position: absolute;
+  inset: 28% 9%;
+  border: 2px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  border-left-color: color-mix(in srgb, var(--success) 62%, transparent);
+  border-radius: 50%;
+  transform: rotate(-18deg);
+}
+
+.welcome-orbit-center .orbit-alt {
+  inset: 34% 16%;
+  border-top-color: color-mix(in srgb, var(--primary) 46%, transparent);
+  transform: rotate(20deg);
+}
+
+.welcome-comet {
+  position: absolute;
+  right: 16%;
+  top: 18%;
+  width: 112px;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, transparent, var(--primary), #ffffff);
+  transform: rotate(-20deg);
+}
+
+.welcome-moon {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.welcome-moon.one {
+  left: 8%;
+  top: 15%;
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #efffbd, var(--success));
+}
+
+.welcome-moon.two {
+  right: 9%;
+  bottom: 16%;
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, #d8f4ff, var(--primary));
+}
+
+.welcome-guide {
+  position: absolute;
+  right: 28px;
+  top: 72px;
+  z-index: 2;
+  width: min(268px, 48%);
+  border: 1px solid var(--welcome-guide-line);
+  border-radius: var(--radius);
+  background: var(--welcome-guide-bg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-soft);
+}
+
+.welcome-guide strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--accent);
+  font-size: 15px;
+}
+
+.welcome-guide span {
+  color: var(--welcome-copy-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+@media (max-width: 980px) {
+  .welcome-launch {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .welcome-visual {
+    min-height: 380px;
+  }
+}
+
+@media (max-width: 640px) {
+  .welcome-guide {
+    position: static;
+    width: 100%;
+    margin-top: var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-orbit-center {
+    animation: none;
+  }
+}

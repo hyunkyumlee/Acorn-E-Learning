@@ -2,6 +2,7 @@ package com.acorn.elearning.learning.controller;
 
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.Subject;
+import com.acorn.elearning.learning.service.AttendanceService;
 import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.ProgressService;
@@ -31,13 +32,16 @@ public class LearningController {
     private final LearningService learningService;
     private final CurriculumService curriculumService;
     private final ProgressService progressService;
+    private final AttendanceService attendanceService;
 
     public LearningController(LearningService learningService,
                               CurriculumService curriculumService,
-                              ProgressService progressService) {
+                              ProgressService progressService,
+                              AttendanceService attendanceService) {
         this.learningService = learningService;
         this.curriculumService = curriculumService;
         this.progressService = progressService;
+        this.attendanceService = attendanceService;
     }
 
     @GetMapping("/learning")
@@ -51,6 +55,9 @@ public class LearningController {
         LearningDashboardView dashboard = learningService.getLearningHome(user);
         model.addAttribute("dashboard", dashboard);
 
+        // 이번 주 요일별 출석(월~일 boolean 7) — 사이드바 주간 출석 도트
+        model.addAttribute("weeklyAttendance", attendanceService.getWeeklyAttendance(user.userId()));
+
         List<Subject> subjects = learningService.getActiveSubjects();
         model.addAttribute("subjects", subjects);
 
@@ -62,6 +69,9 @@ public class LearningController {
 
         List<CurriculumNode> roadmap = curriculumService.getRoadmap(roadmapSubjectId);
         model.addAttribute("roadmap", roadmap);
+
+        // hover 카드 "N개 레슨" 메타: 노드별 활성 레슨 수(nodeId → count)
+        model.addAttribute("nodeLessonCounts", curriculumService.getLessonCountsByNodes(roadmap));
 
         // 로드맵 완료/현재/잠금 판정 = 선택 과목의 노드별 learning_progress 기준(평균 근사치 아님).
         var progress = progressService.computeRoadmapProgress(user.userId(), roadmapSubjectId, roadmap);

@@ -34,6 +34,36 @@
   font-weight: 700;
 }
 
+/* ----- 상단 헤딩 행 (eyebrow + 동기부여 h1 + 우측 streak pill) ----- */
+.learning-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.learning-eyebrow {
+  margin: 0 0 6px;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.learning-heading-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* 헤딩 안에서 streak pill은 우측으로 밀되, 공간 부족하면 자연 줄바꿈 */
+.learning-heading .streak-banner {
+  margin-left: auto;
+}
+
 .learning-console {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr) 300px;
@@ -97,6 +127,34 @@
   gap: var(--space-2);
 }
 
+/* 진입 버튼(오답복습/랭킹): 공통 .button에 왼쪽 정렬 + 아이콘 배지 레이아웃만 덧댐(재정의 아님) */
+.entry-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  text-align: left;
+}
+
+.entry-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 9px;
+}
+
+.entry-icon-warm {
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
+  color: var(--warning);
+}
+
+.entry-icon-cyan {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--primary);
+}
+
 /* ----- SubjectSwitcher ----- */
 .subject-switcher {
   list-style: none;
@@ -134,6 +192,23 @@
   width: 100%;
   color: inherit;
   text-decoration: none;
+}
+
+/* 활성 과목 표시 도트(오른쪽 끝) + 코드 배지 primary 강조 */
+.subject-chip-dot {
+  margin-left: auto;
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+
+.subject-chip.is-current code {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+  color: var(--primary);
 }
 
 /* ----- ProgressSummary ----- */
@@ -187,6 +262,87 @@
   background: var(--success);
 }
 
+/* 진행률 링(conic) + 레벨/등급/누적점수. --pct(0~100)는 인라인으로 주입. */
+.progress-summary-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.progress-ring {
+  --pct: 0;
+  position: relative;
+  width: 76px;
+  height: 76px;
+  flex: none;
+  border-radius: 50%;
+  background: conic-gradient(var(--success) calc(var(--pct) * 1%), var(--surface-soft) 0);
+}
+
+.progress-ring-core {
+  position: absolute;
+  inset: 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface);
+  line-height: 1;
+}
+
+.progress-ring-core strong {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.progress-ring-core span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.progress-summary-info {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.level-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* 레벨 코드 pill (BRONZE/SILVER/GOLD) — 중립 톤 배지 */
+.level-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  font-size: 11.5px;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+}
+
+.summary-grade {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.score-line {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.score-line strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
 /* ----- TodayMissionCard (중앙 상단 강조) ----- */
 .mission-card {
   display: grid;
@@ -199,6 +355,9 @@
 }
 
 .mission-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--primary);
   font-size: 12px;
   font-weight: 850;
@@ -221,6 +380,29 @@
 .mission-card .button {
   justify-self: start;
   margin-top: var(--space-2);
+}
+
+/* 미션 CTA: 라벨 + 화살표. 호버 시 화살표만 살짝 이동 */
+.mission-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mission-cta .cta-arrow {
+  transition: transform 160ms ease;
+}
+
+.mission-cta:hover .cta-arrow {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mission-cta .cta-arrow,
+  .mission-cta:hover .cta-arrow {
+    transition: none;
+    transform: none;
+  }
 }
 
 .mission-card-gate {
@@ -258,6 +440,90 @@
   border-top: 1px dashed var(--line);
 }
 
+/* 코딩테스트 Gate 단계바: 행성 수만큼 칸, 완료분 채움(색 + 안내 텍스트 병기) */
+.gate-steps {
+  display: flex;
+  gap: 5px;
+}
+
+.gate-step {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+}
+
+.gate-step.is-filled {
+  background: var(--success);
+}
+
+/* 코딩테스트 Gate 카드(우패널 상단): 아이콘 헤더 + 단계바 + unlock 박스. warning 톤 강조. */
+.gate-card {
+  border-color: color-mix(in srgb, var(--warning) 30%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--warning) 8%, var(--surface)), var(--surface));
+}
+
+.gate-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.gate-card-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--warning) 18%, transparent);
+  color: var(--warning);
+}
+
+.gate-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.gate-card-title {
+  font-size: 14.5px;
+  font-weight: 850;
+}
+
+.gate-card-sub {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* unlock 안내 박스 (미해금=warning / 응시가능=success) */
+.gate-unlock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--warning) 26%, var(--line));
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.gate-unlock svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.gate-unlock.is-ready {
+  border-color: color-mix(in srgb, var(--success) 30%, var(--line));
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
+}
+
 /* ----- 연속 출석 메시지(상단 배너) ----- */
 .streak-banner {
   display: inline-flex;
@@ -277,26 +543,92 @@
   color: var(--warning);
 }
 
+/* ----- 이번 주 출석 요일 도트 ----- */
+.streak-week-dots {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.streak-day {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  flex: 1;
+}
+
+.streak-day-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 100%;
+  max-width: 30px;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  color: var(--surface);
+}
+
+.streak-day.is-done .streak-day-dot {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.streak-day-dot svg {
+  width: 14px;
+  height: 14px;
+}
+
+.streak-day small {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
 /* 콘솔 반응형: 좁아지면 단(column) 줄이기 */
+/* 태블릿: 사이드바(세로 유지) + 로드맵 2단, 우패널은 아래 full-width 가로 카드로 */
+/* 태블릿: 세로 스택(사이드바 정돈 그리드 → 로드맵 → 우패널). 겹침 없음.
+   로드맵은 폭을 제한해 aspect-ratio 세로 폭발을 막고 중앙 정렬. */
 @media (max-width: 1024px) {
   .learning-console {
-    grid-template-columns: minmax(0, 1fr) 280px;
+    display: block;
   }
 
-  /* 좌 사이드바를 맨 위 full-width로 */
   .learning-sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  /* 미션 카드는 강조 위해 상단 full-width, 나머지 카드는 2열 */
+  .learning-sidebar > .mission-card {
     grid-column: 1 / -1;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .roadmap-canvas {
+    margin-bottom: var(--space-4);
+  }
+
+  .status-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: var(--space-3);
   }
 }
 
+/* 모바일: 전부 1단, 로드맵 폭 제한 해제(화면이 좁아 자연히 작음) */
 @media (max-width: 760px) {
-  .learning-console {
+  .learning-sidebar {
     grid-template-columns: 1fr;
   }
 
-  .learning-sidebar {
+  .status-panel {
     grid-template-columns: 1fr;
+  }
+
+  .learning-heading-title {
+    font-size: 24px;
   }
 }
 
@@ -326,6 +658,45 @@
   font-size: 12px;
   font-weight: 700;
 }
+
+/* 로드맵 패널 제목 행: 제목(좌) + 상태 범례(우) */
+.roadmap-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.roadmap-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.roadmap-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.roadmap-legend li::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.roadmap-legend .legend-done { color: var(--success); }
+.roadmap-legend .legend-current { color: var(--primary); }
+.roadmap-legend .legend-locked { color: var(--muted); }
 
 /* 맵 뷰포트: 세로 맵을 내부 스크롤로 보는 창(유일한 테두리 영역)
    - 스크롤바 숨김(scrollbar-width:none + ::-webkit-scrollbar). 스크롤 자체는 휠/터치로 동작.
@@ -523,11 +894,9 @@
 }
 
 /* 잠김: 포털이 잠든 듯 채도/명도 더 낮추고 살짝 축소(행성 잠금보다 눈에 덜 띄게) */
+/* 잠긴 게이트 = 잠긴 행성과 동일한 어둡기(grayscale/brightness 통일). opacity/축소 없음. */
 .roadmap-node.is-gate.is-locked .roadmap-gate-img {
-  filter: grayscale(0.5) brightness(0.66) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
-  opacity: 0.9;
-  transform: scale(0.9);
-  transform-origin: center;
+  filter: grayscale(0.7) brightness(0.6) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
 }
 
 /* ----- 상태 배지(색 + 텍스트 병기) : 행성 위 pill ----- */
@@ -546,14 +915,21 @@
   color: var(--muted);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
-/* 상태 점(색만으로 구분 금지: 점 + 텍스트 병기). 점 색 = 상태색(currentColor) */
-.roadmap-badge::before {
-  content: "";
-  width: 6px;
-  height: 6px;
+/* 상태 아이콘 원(색만으로 구분 금지: 원 + 텍스트 병기). 원 색 = 상태색(currentColor) */
+.roadmap-badge-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: currentColor;
   flex: none;
+}
+
+.roadmap-badge-icon svg {
+  width: 10px;
+  height: 10px;
+  color: var(--surface);
 }
 
 .roadmap-node.is-done .roadmap-badge {
@@ -596,16 +972,14 @@
 .roadmap-card {
   position: absolute;
   top: 50%;
-  width: 236px;
+  width: 244px;
   max-width: 62vw;
-  display: grid;
-  gap: 9px;
-  padding: 16px;
   border-radius: var(--radius);
   background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: 0 20px 46px rgba(0, 0, 0, 0.55);
   text-align: left;
+  overflow: hidden;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -634,6 +1008,72 @@
   visibility: visible;
   pointer-events: auto;
   transform: translateY(-50%) scale(1);
+}
+
+/* 카드 상단 cover: 미니 행성 + 번호(좌) + 상태 태그(우). 상태색 그라데이션 배경. */
+.roadmap-card-cover {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--muted) 10%, transparent), transparent 72%);
+}
+
+.roadmap-node.is-done .roadmap-card-cover {
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--success) 15%, transparent), transparent 70%),
+    radial-gradient(circle at 84% 15%, color-mix(in srgb, var(--success) 26%, transparent), transparent 60%);
+}
+
+.roadmap-node.is-current .roadmap-card-cover {
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%),
+    radial-gradient(circle at 84% 15%, color-mix(in srgb, var(--primary) 30%, transparent), transparent 60%);
+}
+
+.roadmap-node.is-ready .roadmap-card-cover {
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--warning) 16%, transparent), transparent 70%),
+    radial-gradient(circle at 84% 15%, color-mix(in srgb, var(--warning) 30%, transparent), transparent 60%);
+}
+
+/* 미니 행성/게이트 아트 */
+.roadmap-card-mini {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: block;
+}
+
+.roadmap-card-mini img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+.roadmap-node.is-locked .roadmap-card-mini img {
+  filter: grayscale(0.7) brightness(0.6);
+}
+
+/* 카드 본문 */
+.roadmap-card-body {
+  display: grid;
+  gap: 9px;
+  padding: 14px;
+}
+
+.roadmap-card-num {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.roadmap-card-cover .roadmap-card-tag {
+  margin-left: auto;
 }
 
 /* 카드 상단 상태 태그 pill (참고: 카드 내 레벨/상태 pill). 색은 노드 상태 기준. */
@@ -681,6 +1121,22 @@
   line-height: 1.3;
   color: var(--text);
   word-break: keep-all;
+}
+
+/* hover 카드 메타: "N개 레슨" (레슨 아이콘 + 텍스트) */
+.roadmap-card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.roadmap-card-meta svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
 }
 .roadmap-card-desc {
   font-size: 12.5px;

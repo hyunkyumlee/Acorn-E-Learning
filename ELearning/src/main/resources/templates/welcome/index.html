@@ -1,17 +1,48 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>웰컴 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/welcome.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/welcome.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/guest-header :: guestHeader}"></div>
   <main class="page-shell welcome-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>웰컴</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>welcome/index</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="welcome-launch" aria-label="Knowva 소개">
+      <div class="welcome-copy">
+        <h1>코딩 여정을<br>푸른 이온 궤도로.</h1>
+        <p>지식을 얻으며 빛나는 학습자. 짧은 이론과 문제풀이로 실력을 쌓고, 나만의 학습 기록을 이어가 보세요.</p>
+        <div class="button-row">
+          <button class="button primary" type="button" disabled aria-disabled="true" title="튜토리얼 준비 중">튜토리얼 시작</button>
+          <a class="button" th:href="@{/login}">바로 로그인하기</a>
+        </div>
+      </div>
+
+      <div class="welcome-visual" aria-label="Knowva ion launch visual">
+        <div class="welcome-orbit">
+          <div class="welcome-comet" aria-hidden="true"></div>
+          <div class="welcome-orbit-center" aria-hidden="true">
+            <div class="big-planet"></div>
+            <div class="orbit"></div>
+            <div class="orbit orbit-alt"></div>
+          </div>
+        </div>
+        <div class="welcome-moon one" aria-hidden="true"></div>
+        <div class="welcome-moon two" aria-hidden="true"></div>
+        <aside class="welcome-guide">
+          <strong>Nova Guide</strong>
+          <span>Knowva에 오신 것을 환영해요. 과목별 로드맵을 따라 학습하고, 오답 복습과 시험으로 실력을 확인할 수 있어요. 학습 기록을 저장하려면 로그인해 주세요.</span>
+        </aside>
+      </div>
+    </section>
   </main>
 </body>
 </html>

@@ -208,3 +208,119 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --- 로그인 전용: 페이지 중앙 정렬 + 세로 비율 강화 --- */
+.auth-screen.login-screen {
+  min-height: calc(100vh - 96px);
+  align-content: center;   /* 그리드 행을 세로 중앙으로 */
+  justify-items: center;   /* 가로 중앙 */
+}
+
+.auth-screen.login-screen .auth-grid {
+  grid-template-columns: minmax(0, 1fr);
+  width: min(420px, 100%);
+  gap: var(--space-4);
+}
+
+.auth-screen.login-screen .form-panel {
+  padding-block: var(--space-6);
+  gap: var(--space-4);
+}
+
+/* --- 로컬 테스트 계정 복붙 영역 --- */
+.login-test-accounts {
+  display: grid;
+  gap: var(--space-3);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  padding: var(--space-4);
+}
+
+.login-test-accounts .test-accounts-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.login-test-accounts .test-accounts-head strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.login-test-accounts .test-accounts-head span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.login-test-accounts .test-accounts-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.login-test-accounts .test-accounts-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.login-test-accounts .acc-tag {
+  flex: 0 0 auto;
+  min-width: 52px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--muted) 18%, transparent);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.login-test-accounts .acc-tag.acc-admin {
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: var(--danger);
+}
+
+.login-test-accounts .acc-tag.acc-premium {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--accent);
+}
+
+.login-test-accounts .copy-chip {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.login-test-accounts .copy-chip:hover {
+  border-color: var(--primary);
+}
+
+.login-test-accounts .copy-chip.is-copied {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+@media (max-width: 880px) {
+  .auth-screen.login-screen {
+    min-height: 0;
+  }
+}
