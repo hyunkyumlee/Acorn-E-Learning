@@ -180,7 +180,8 @@ public class PracticeController {
         }
 
         PracticeProblem problem = problemService.getProblem(problemId);
-        boolean correct = problem.getAnswerText().equals(submittedAnswer);
+        boolean correct = normalizeAnswer(problem.getAnswerText())
+                .equals(normalizeAnswer(submittedAnswer));
 
         PracticeAnswerForm.SingleAnswer answer = new PracticeAnswerForm.SingleAnswer();
         answer.setProblemId(problemId);
@@ -279,5 +280,9 @@ public class PracticeController {
             return numberValue.longValue();
         }
         return Long.valueOf(String.valueOf(value));
+    }
+
+    private String normalizeAnswer(String value) {
+        return value == null ? "" : value.replaceAll("\\s+", "");
     }
 }

@@ -1,0 +1,225 @@
+/* =========================================================================
+   Review Screen
+   - review.html / review-list.html 공용
+   - 오답 목록, 오답 상세, 요약 화면을 같은 톤으로 정리
+   ========================================================================= */
+
+.practice-header,
+.practice-body {
+    display: grid;
+    gap: var(--space-4);
+}
+
+/* 제목 */
+.practice-header h1 {
+    font-size: 30px;
+    font-weight: 850;
+    line-height: 1.2;
+}
+
+.practice-header p {
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+/* 내부 블록 */
+.practice-body > div,
+.practice-body > section {
+    display: grid;
+    gap: var(--space-4);
+}
+
+/* 카드형 article */
+.practice-body article {
+    display: grid;
+    gap: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    box-shadow: var(--shadow-soft);
+    padding: var(--space-5);
+}
+
+/* 목록 카드용 class */
+.review-grid-shell {
+    display: grid;
+    gap: var(--space-4);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    box-shadow: var(--shadow-soft);
+    padding: var(--space-5);
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    align-items: stretch;
+}
+
+.review-list-item {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    min-height: 180px;
+    height: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    padding: var(--space-4);
+    box-shadow: none;
+}
+
+.review-list-item h2 {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.45;
+    word-break: keep-all;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.review-list-item p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.review-list-item a {
+    margin-top: auto;
+    width: fit-content;
+}
+
+/* 제목 */
+.practice-body h2 {
+    font-size: 24px;
+    font-weight: 850;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+.practice-body h3 {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+/* 본문 */
+.practice-body p {
+    line-height: 1.6;
+}
+
+/* 구분선 */
+.practice-body hr {
+    width: 100%;
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 0;
+}
+
+/* review form */
+.practice-body form {
+    max-width: none;
+    display: grid;
+    gap: var(--space-3);
+}
+
+/* 비어있는 상태 */
+.review-empty {
+    color: var(--muted);
+}
+
+/* 상단/하단 버튼 영역 */
+.practice-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+/* 링크/버튼 톤 통일 */
+.practice-footer a,
+.practice-body a,
+.practice-body button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    padding: 10px 14px;
+    color: var(--text);
+    font-weight: 750;
+    transition: background 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
+}
+
+.practice-footer a:hover,
+.practice-body a:hover,
+.practice-body button:hover {
+    border-color: color-mix(in srgb, var(--primary) 36%, var(--line));
+    background: var(--surface-soft);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 15%, transparent);
+    transform: translateY(-1px);
+}
+
+/* 상태 배지 */
+.review-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--surface-soft);
+    padding: 4px 10px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.review-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* 상태별 구분 */
+.review-status.is-pending {
+    color: var(--warning);
+    border-color: color-mix(in srgb, var(--warning) 36%, var(--line));
+    background: color-mix(in srgb, var(--warning) 14%, var(--surface));
+}
+
+.review-status.is-solved {
+    color: var(--success);
+    border-color: color-mix(in srgb, var(--success) 36%, var(--line));
+    background: color-mix(in srgb, var(--success) 14%, var(--surface));
+}
+
+/* 모바일 대응 */
+@media (max-width: 640px) {
+    .practice-header h1 {
+        font-size: 26px;
+    }
+
+    .practice-body h2 {
+        font-size: 20px;
+    }
+
+    .practice-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .practice-footer a,
+    .practice-body a,
+    .practice-body button {
+        width: 100%;
+    }
+}
