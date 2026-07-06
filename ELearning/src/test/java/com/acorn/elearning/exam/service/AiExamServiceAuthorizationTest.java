@@ -9,6 +9,8 @@ import com.acorn.elearning.common.ai.ChatGptResponse;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.exam.mapper.AiExamProblemMapper;
+import com.acorn.elearning.learning.mapper.UserLevelUnlockMapper;
+import com.acorn.elearning.learning.service.UnlockService;
 import com.acorn.elearning.exam.mapper.AiRequestLogMapper;
 import com.acorn.elearning.exam.mapper.ExamAnswerMapper;
 import com.acorn.elearning.exam.mapper.ExamLearningScopeMapper;
@@ -42,7 +44,8 @@ class AiExamServiceAuthorizationTest {
                 new TestCaseExecutionService(objectMapper),
                 new AiReviewService(unusedChatGptApiClient(objectMapper), logService),
                 new ExamLearningScopeService(unusedMapper(ExamLearningScopeMapper.class)),
-                objectMapper);
+                objectMapper,
+                new UnlockService(unusedMapper(UserLevelUnlockMapper.class)));
     }
 
     private static SessionUser admin() {

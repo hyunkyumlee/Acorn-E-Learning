@@ -10,6 +10,8 @@ import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.exam.dto.request.CreateExamRequest;
 import com.acorn.elearning.exam.mapper.AiExamProblemMapper;
+import com.acorn.elearning.learning.mapper.UserLevelUnlockMapper;
+import com.acorn.elearning.learning.service.UnlockService;
 import com.acorn.elearning.exam.mapper.AiRequestLogMapper;
 import com.acorn.elearning.exam.mapper.ExamAnswerMapper;
 import com.acorn.elearning.exam.mapper.ExamLearningScopeMapper;
@@ -38,7 +40,8 @@ class AiExamServiceGateTest {
                 new TestCaseExecutionService(objectMapper),
                 new AiReviewService(unusedChatGptApiClient(objectMapper), new AiRequestLogService(unusedMapper(AiRequestLogMapper.class), objectMapper)),
                 new ExamLearningScopeService(new EmptyExamLearningScopeMapper()),
-                objectMapper);
+                objectMapper,
+                new UnlockService(unusedMapper(UserLevelUnlockMapper.class)));
 
         BusinessException exception = assertThrows(
                 BusinessException.class,

@@ -13,6 +13,8 @@ import com.acorn.elearning.exam.dto.request.SaveExamAnswerRequest;
 import com.acorn.elearning.exam.dto.response.ExamSessionResponse;
 import com.acorn.elearning.exam.dto.response.ExamSubmitResponse;
 import com.acorn.elearning.exam.mapper.AiExamProblemMapper;
+import com.acorn.elearning.learning.mapper.UserLevelUnlockMapper;
+import com.acorn.elearning.learning.service.UnlockService;
 import com.acorn.elearning.exam.mapper.AiRequestLogMapper;
 import com.acorn.elearning.exam.mapper.ExamAnswerMapper;
 import com.acorn.elearning.exam.mapper.ExamLearningScopeMapper;
@@ -84,7 +86,8 @@ class AiExamServiceStatusTest {
                 new TestCaseExecutionService(objectMapper),
                 new AiReviewService(unusedChatGptApiClient(objectMapper), logService),
                 new ExamLearningScopeService(new LearnedExamLearningScopeMapper()),
-                objectMapper);
+                objectMapper,
+                new UnlockService(unusedMapper(UserLevelUnlockMapper.class)));
     }
 
     private static ExamSession readySession() {
