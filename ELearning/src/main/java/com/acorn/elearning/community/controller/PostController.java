@@ -28,10 +28,20 @@ public class PostController {
     }
 
     @GetMapping("/community/board")
-    public String list(@ModelAttribute PostSearchCondition condition, Model model) {
+    public String list(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @ModelAttribute PostSearchCondition condition,
+            Model model
+    ) {
+        PostSearchCondition hotCondition = new PostSearchCondition();
+        hotCondition.setSort("hot");
+        hotCondition.setSize(5);
+
         model.addAttribute("screen", "community/board");
         model.addAttribute("condition", condition);
         model.addAttribute("view", postService.page(condition));
+        model.addAttribute("hotView", postService.page(hotCondition));
+        addCommunityShell(model, sessionUser, condition);
         return "community/board";
     }
 
@@ -41,11 +51,17 @@ public class PostController {
             @PathVariable Long postId,
             Model model
     ) {
+        PostDetailResponse view = postService.detail(sessionUser, postId);
+        PostSearchCondition condition = new PostSearchCondition();
+        condition.setSubjectId(view.post().getSubjectId());
+        condition.setBoardType(view.post().getBoardType());
+
         model.addAttribute("screen", "community/detail");
-        model.addAttribute("view", postService.detail(sessionUser, postId));
+        model.addAttribute("view", view);
         model.addAttribute("currentUserId", sessionUser == null ? null : sessionUser.userId());
         model.addAttribute("commentForm", new CommentForm());
         model.addAttribute("reportForm", new ReportForm());
+        addCommunityShell(model, sessionUser, condition);
         return "community/detail";
     }
 
@@ -59,6 +75,7 @@ public class PostController {
         }
         model.addAttribute("screen", "community/write");
         model.addAttribute("form", new PostForm());
+        addCommunityShell(model, sessionUser, new PostSearchCondition());
         return "community/write";
     }
 
@@ -75,6 +92,7 @@ public class PostController {
         }
         if (bindingResult.hasErrors()) {
             model.addAttribute("screen", "community/write");
+            addCommunityShell(model, sessionUser, conditionFromForm(form));
             return "community/write";
         }
         CommunityPost post = postService.create(sessionUser, form);
@@ -100,6 +118,7 @@ public class PostController {
         form.setContent(view.post().getContent());
         model.addAttribute("view", view);
         model.addAttribute("form", form);
+        addCommunityShell(model, sessionUser, conditionFromForm(form));
         return "community/edit";
     }
 
@@ -118,6 +137,7 @@ public class PostController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("screen", "community/edit");
             model.addAttribute("view", postService.detail(sessionUser, postId));
+            addCommunityShell(model, sessionUser, conditionFromForm(form));
             return "community/edit";
         }
         postService.update(sessionUser, postId, form);
@@ -137,5 +157,23 @@ public class PostController {
         postService.delete(sessionUser, postId);
         redirectAttributes.addFlashAttribute("message", "게시글이 삭제되었습니다.");
         return "redirect:/community/board";
+    }
+
+    private void addCommunityShell(Model model, SessionUser sessionUser, PostSearchCondition condition) {
+        model.addAttribute("activeSubjectId", condition.getSubjectId() == null ? "" : condition.getSubjectId().toString());
+        model.addAttribute("activeBoardType", condition.getBoardType() == null ? "" : condition.getBoardType());
+        model.addAttribute("loggedIn", sessionUser != null);
+        model.addAttribute("profileName", sessionUser == null ? "guest" : sessionUser.nickname());
+        model.addAttribute("profileEmail", sessionUser == null ? "로그인하면 커뮤니티 활동을 확인할 수 있어." : sessionUser.email());
+        if (sessionUser != null) {
+            model.addAttribute("profileSummary", postService.profile(sessionUser));
+        }
+    }
+
+    private PostSearchCondition conditionFromForm(PostForm form) {
+        PostSearchCondition condition = new PostSearchCondition();
+        condition.setSubjectId(form.getSubjectId());
+        condition.setBoardType(form.getBoardType());
+        return condition;
     }
 }

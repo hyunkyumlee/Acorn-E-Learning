@@ -1,0 +1,48 @@
+<aside class="panel community-panel community-sidebar"
+       th:fragment="sidebar(activeSubjectId, activeBoardType, profileName, profileEmail, profileSummary)"
+       xmlns:th="http://www.thymeleaf.org"
+       aria-label="커뮤니티 사이드바">
+  <nav class="community-board-nav" aria-label="언어별 게시판">
+    <h2>게시판</h2>
+
+    <a class="community-board-card"
+       th:classappend="${activeSubjectId == '1'} ? ' is-active'"
+       th:href="@{/community/board(subjectId=1)}">
+      <strong>Java</strong>
+      <span>자유 · 질문 · 공부 일지</span>
+    </a>
+    <a class="community-board-card"
+       th:classappend="${activeSubjectId == '4'} ? ' is-active'"
+       th:href="@{/community/board(subjectId=4)}">
+      <strong>SQL</strong>
+      <span>자유 · 질문 · 공부 일지</span>
+    </a>
+    <a class="community-board-card"
+       th:classappend="${activeSubjectId == '3'} ? ' is-active'"
+       th:href="@{/community/board(subjectId=3)}">
+      <strong>HTML/CSS/JS</strong>
+      <span>자유 · 질문 · 공부 일지</span>
+    </a>
+    <a class="community-board-card"
+       th:classappend="${activeSubjectId == '2'} ? ' is-active'"
+       th:href="@{/community/board(subjectId=2)}">
+      <strong>Python</strong>
+      <span>자유 · 질문 · 공부 일지</span>
+    </a>
+  </nav>
+
+  <section class="community-profile-mini" aria-label="커뮤니티 프로필 요약">
+    <div class="community-profile-line">
+      <span class="community-avatar" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
+      <div>
+        <strong th:text="${profileName}">nova_learner</strong>
+        <small>
+          작성 글 <b th:text="${profileSummary != null ? profileSummary.postCount() : 0}">0</b>
+          · 스크랩 <b th:text="${profileSummary != null ? profileSummary.scrapCount() : 0}">0</b>
+          · 좋아요 <b th:text="${profileSummary != null ? profileSummary.receivedLikeCount() : 0}">0</b>
+        </small>
+      </div>
+    </div>
+    <a class="button" th:href="@{/community/profile}">내 커뮤니티 프로필</a>
+  </section>
+</aside>

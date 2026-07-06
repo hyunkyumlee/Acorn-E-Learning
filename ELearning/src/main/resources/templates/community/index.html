@@ -18,25 +18,50 @@
   <main class="page-shell community-screen">
     <section class="page-heading">
       <span class="eyebrow">Community</span>
-      <h1>커뮤니티 홈</h1>
-      <p>최근 커뮤니티 활동을 빠르게 확인할 수 있어.</p>
+      <h1>커뮤니티</h1>
+      <p>언어별 게시판과 공감이 많은 HOT 게시물을 빠르게 확인할 수 있어.</p>
     </section>
 
-    <section class="panel community-panel">
-      <div class="community-panel-header">
-        <div>
-          <h2>최근 커뮤니티 글</h2>
-          <p>최신 게시글을 확인하고 목록으로 이동할 수 있어.</p>
+    <section class="community-home-layout" aria-label="커뮤니티 홈">
+      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></div>
+
+      <section class="panel community-panel community-feed-panel">
+        <div class="community-panel-header">
+          <div>
+            <h2>최근 커뮤니티 글</h2>
+            <p>최신 게시글을 확인하고 게시판 목록으로 이동할 수 있어.</p>
+          </div>
+          <a class="button primary" th:href="@{/community/board}">전체 보기</a>
         </div>
-        <a class="button primary" th:href="@{/community/board}">전체 보기</a>
-      </div>
-      <ul class="community-list">
-        <li th:each="post : ${view.posts}">
-          <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글</a>
-          <span class="community-badge" th:text="${post.boardType == 'FREE' ? '자유' : (post.boardType == 'QUESTION' ? '질문' : (post.boardType == 'STUDY_LOG' ? '공부 일지' : post.boardType))}">자유</span>
-        </li>
-        <li th:if="${#lists.isEmpty(view.posts)}" class="community-empty">게시글이 없습니다.</li>
-      </ul>
+        <ul class="community-list">
+          <li th:each="post : ${view.posts}">
+            <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글</a>
+            <span class="community-badge" th:text="${post.boardType == 'FREE' ? '자유' : (post.boardType == 'QUESTION' ? '질문' : (post.boardType == 'STUDY_LOG' ? '공부 일지' : post.boardType))}">자유</span>
+          </li>
+          <li th:if="${#lists.isEmpty(view.posts)}" class="community-empty">게시글이 없어.</li>
+        </ul>
+      </section>
+
+      <aside class="panel community-panel community-hot-panel" aria-label="HOT 게시물">
+        <div class="community-panel-header">
+          <div>
+            <span class="community-hot-tag">HOT</span>
+            <h2>공감 많은 게시물</h2>
+            <p>좋아요, 댓글, 스크랩 반응이 높은 글부터 보여줘.</p>
+          </div>
+        </div>
+        <ol class="community-hot-list">
+          <li th:each="post, stat : ${hotView.posts}">
+            <span class="community-rank" th:text="${stat.count}">1</span>
+            <a class="community-hot-title" th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+            <span class="community-hot-meta">
+              공감 <strong th:text="${post.likeCount}">0</strong>
+              댓글 <strong th:text="${post.commentCount}">0</strong>
+            </span>
+          </li>
+          <li th:if="${#lists.isEmpty(hotView.posts)}" class="community-empty">HOT 게시물이 없어.</li>
+        </ol>
+      </aside>
     </section>
   </main>
 </body>
