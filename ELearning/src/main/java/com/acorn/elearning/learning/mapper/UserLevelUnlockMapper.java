@@ -12,6 +12,9 @@ public interface UserLevelUnlockMapper {
     Optional<UserLevelUnlock> findByUserSubjectLevel(@Param("userId") Long userId,
                                                      @Param("subjectId") Long subjectId,
                                                      @Param("levelCode") String levelCode);
+    /** 특정 과목에서 사용자가 해금한 레벨 전체(레벨 코드 오름차순). */
+    List<UserLevelUnlock> findByUserAndSubject(@Param("userId") Long userId,
+                                               @Param("subjectId") Long subjectId);
     int insert(UserLevelUnlock model);
     int update(UserLevelUnlock model);
 }
