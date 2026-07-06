@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>과목 콘텐츠 추천 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/content.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+</head>
+<body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+
+  <main class="content-recommend-screen">
+    <aside class="content-subject-sidebar" aria-label="과목 선택">
+      <a th:classappend="${activeSubjectId == 1} ? ' is-active'" th:href="@{/content/recommendations(subjectId=1)}">JAVA</a>
+      <a th:classappend="${activeSubjectId == 4} ? ' is-active'" th:href="@{/content/recommendations(subjectId=4)}">SQL</a>
+      <a th:classappend="${activeSubjectId == 2} ? ' is-active'" th:href="@{/content/recommendations(subjectId=2)}">Python</a>
+      <a th:classappend="${activeSubjectId == 3} ? ' is-active'" th:href="@{/content/recommendations(subjectId=3)}">HTML CSS</a>
+    </aside>
+
+    <section class="content-main">
+      <header class="content-hero">
+        <span>Knowva</span>
+        <h1>과목 콘텐츠 추천</h1>
+      </header>
+
+      <section class="content-card-grid" aria-label="추천 콘텐츠 목록">
+        <article class="content-recommend-card">
+          <h2 th:text="|${subjectLabel} 영상 추천|">JAVA 영상 추천</h2>
+          <ul>
+            <li th:each="item : ${videoView.recommendations}">
+              <a th:href="${item.url}" target="_blank" rel="noopener">
+                <i></i>
+                <strong th:text="${item.title}">자바지향 기초</strong>
+                <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 영상'}">추천 영상</small>
+              </a>
+            </li>
+            <li class="content-empty" th:if="${#lists.isEmpty(videoView.recommendations)}">추천 영상이 없어.</li>
+          </ul>
+        </article>
+
+        <article class="content-recommend-card">
+          <h2>기사 추천</h2>
+          <ul>
+            <li th:each="item : ${articleView.recommendations}">
+              <a th:href="${item.url}" target="_blank" rel="noopener">
+                <i></i>
+                <strong th:text="${item.title}">개발자 학습 루틴</strong>
+                <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 기사'}">추천 기사</small>
+              </a>
+            </li>
+            <li class="content-empty" th:if="${#lists.isEmpty(articleView.recommendations)}">추천 기사가 없어.</li>
+          </ul>
+        </article>
+
+        <article class="content-recommend-card">
+          <h2>개발 콘텐츠 추천</h2>
+          <ul>
+            <li th:each="item : ${docsView.recommendations}">
+              <a th:href="${item.url}" target="_blank" rel="noopener">
+                <i></i>
+                <strong th:text="${item.title}">공식 문서 읽기</strong>
+                <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 콘텐츠'}">추천 콘텐츠</small>
+              </a>
+            </li>
+            <li th:each="item : ${courseView.recommendations}">
+              <a th:href="${item.url}" target="_blank" rel="noopener">
+                <i></i>
+                <strong th:text="${item.title}">미니 프로젝트</strong>
+                <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 콘텐츠'}">추천 콘텐츠</small>
+              </a>
+            </li>
+            <li class="content-empty" th:if="${#lists.isEmpty(docsView.recommendations) and #lists.isEmpty(courseView.recommendations)}">추천 콘텐츠가 없어.</li>
+          </ul>
+        </article>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

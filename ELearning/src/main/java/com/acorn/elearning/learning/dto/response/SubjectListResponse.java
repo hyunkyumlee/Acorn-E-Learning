@@ -1,7 +1,9 @@
 package com.acorn.elearning.learning.dto.response;
 
-import java.util.Map;
+import java.util.List;
 
-public record SubjectListResponse(String status, Map<String, Object> data) {
-    public static SubjectListResponse stub() { return new SubjectListResponse("SKELETON", Map.of()); }
+/** GET /api/subjects 응답: 활성 과목 목록. */
+public record SubjectListResponse(List<Item> subjects) {
+
+    public record Item(Long subjectId, String subjectCode, String subjectName, String description) {}
 }

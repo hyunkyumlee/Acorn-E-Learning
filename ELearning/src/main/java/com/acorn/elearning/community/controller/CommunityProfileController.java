@@ -1,5 +1,6 @@
 package com.acorn.elearning.community.controller;
 
+import com.acorn.elearning.community.dto.response.CommunityProfileResponse;
 import com.acorn.elearning.community.service.PostService;
 import com.acorn.elearning.security.SessionUser;
 import org.springframework.stereotype.Controller;
@@ -23,8 +24,15 @@ public class CommunityProfileController {
         if (sessionUser == null) {
             return "redirect:/login";
         }
+        CommunityProfileResponse profile = postService.profile(sessionUser);
         model.addAttribute("screen", "community/profile");
-        model.addAttribute("view", postService.profile(sessionUser));
+        model.addAttribute("view", profile);
+        model.addAttribute("activeSubjectId", "");
+        model.addAttribute("activeBoardType", "");
+        model.addAttribute("loggedIn", true);
+        model.addAttribute("profileName", sessionUser.nickname());
+        model.addAttribute("profileEmail", sessionUser.email());
+        model.addAttribute("profileSummary", profile);
         return "community/profile";
     }
 }
