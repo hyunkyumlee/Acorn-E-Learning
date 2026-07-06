@@ -89,6 +89,7 @@
         SET status = #{status},
             deleted_at = CASE
                 WHEN #{status} = 'DELETED' THEN NOW()
+                WHEN #{status} = 'ACTIVE' THEN NULL
                 ELSE deleted_at
             END,
             updated_at = NOW()
@@ -100,6 +101,7 @@
         SET status = #{status},
             deleted_at = CASE
                 WHEN #{status} = 'DELETED' THEN NOW()
+                WHEN #{status} = 'ACTIVE' THEN NULL
                 ELSE deleted_at
             END,
             updated_at = NOW()
