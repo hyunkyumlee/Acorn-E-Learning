@@ -15,7 +15,7 @@
 </head>
 <body>
   <div th:replace="~{fragments/guest-header :: guestHeader}"></div>
-  <main class="page-shell auth-screen">
+  <main class="page-shell auth-screen login-screen">
     <section class="auth-grid">
       <div class="form-panel">
         <h3>로그인</h3>
@@ -51,7 +51,49 @@
 
         <p class="form-foot">계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
       </div>
+
+      <!-- 로컬/데모용 테스트 계정: 칩을 클릭하면 클립보드로 복사됨 (sample data 기준) -->
+      <aside class="login-test-accounts" aria-label="로컬 테스트 계정">
+        <div class="test-accounts-head">
+          <strong>테스트 계정</strong>
+          <span>로컬/데모용 · 클릭하면 복사돼요</span>
+        </div>
+        <ul class="test-accounts-list">
+          <li>
+            <span class="acc-tag acc-admin">관리자</span>
+            <button type="button" class="copy-chip" data-copy="admin@knowva.local">admin@knowva.local</button>
+            <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
+          </li>
+          <li>
+            <span class="acc-tag">일반</span>
+            <button type="button" class="copy-chip" data-copy="learner@knowva.local">learner@knowva.local</button>
+            <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
+          </li>
+          <li>
+            <span class="acc-tag acc-premium">프리미엄</span>
+            <button type="button" class="copy-chip" data-copy="premium@knowva.local">premium@knowva.local</button>
+            <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
+          </li>
+        </ul>
+      </aside>
     </section>
   </main>
+
+  <!-- 테스트 계정 칩 클립보드 복사 (로컬 개발 편의) -->
+  <script th:inline="none">
+    document.querySelectorAll('.login-test-accounts .copy-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var text = chip.dataset.copy;
+        navigator.clipboard.writeText(text).then(function () {
+          chip.classList.add('is-copied');
+          chip.textContent = '복사됨!';
+          setTimeout(function () {
+            chip.textContent = text;
+            chip.classList.remove('is-copied');
+          }, 900);
+        });
+      });
+    });
+  </script>
 </body>
 </html>
