@@ -1,15 +1,21 @@
 package com.acorn.elearning.auth.service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
 
+import com.acorn.elearning.auth.dto.response.SocialAccountListResponse;
+import com.acorn.elearning.auth.dto.response.SocialAccountResponse;
 import com.acorn.elearning.auth.mapper.SocialAccountMapper;
+import com.acorn.elearning.auth.model.SocialAccount;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OAuthService {
@@ -49,6 +55,31 @@ public class OAuthService {
         return "/settings/social";
     }
 
+    public SocialAccountListResponse socialAccounts(SessionUser sessionUser) {
+        requireLogin(sessionUser);
+        List<SocialAccount> rows = socialAccountMapper.findByUserId(sessionUser.userId());
+        return SocialAccountListResponse.from(rows);
+    }
+
+    @Transactional
+    public SocialAccountResponse deleteSocialAccount(SessionUser sessionUser, String provider) {
+        requireLogin(sessionUser);
+        SocialAccount account = socialAccountMapper.findByUserId(sessionUser.userId()).stream()
+                .filter(a -> provider.equals(a.getProvider()) && Boolean.TRUE.equals(a.getIsActive()))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "연결된 소셜 계정이 없습니다."));
+        account.setIsActive(false);
+        account.setDisconnectedAt(LocalDateTime.now());
+        socialAccountMapper.update(account);
+        return SocialAccountResponse.from(account);
+    }
+
+    private void requireLogin(SessionUser sessionUser) {
+        if(sessionUser == null || sessionUser.userId() == null) {
+            throw new BusinessException(ErrorCode.AUTH_REQUIRED);
+        }
+    }
+
     private void issueState(HttpSession session, String provider) {
         byte[] bytes = new byte[16];
         secureRandom.nextBytes(bytes);
@@ -63,12 +94,5 @@ public class OAuthService {
         }
     }
 
-//    public Map<String, Object> stub(String action) {
-//        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-//        // String state = oAuthStateStore.issue(provider, sessionUser.userId());
-//        // SocialAccount account = socialAccountMapper.findByProviderAndProviderUserId(provider, providerUserId).orElse(null);
-//        // socialAccountMapper.insertOrUpdate(account);
-//        // return Map.of("provider", provider, "connected", true);
-//        return Map.of("action", action, "status", "SKELETON");
-//    }
+
 }
