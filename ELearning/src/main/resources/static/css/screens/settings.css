@@ -183,7 +183,8 @@
 
 .figma-setting-row,
 .figma-payment-plan,
-.figma-payment-history {
+.figma-payment-history,
+.figma-withdraw-summary {
   display: grid;
   gap: 12px;
   align-items: center;
@@ -199,14 +200,16 @@
 
 .figma-setting-row strong,
 .figma-payment-plan strong,
-.figma-payment-history strong {
+.figma-payment-history strong,
+.figma-withdraw-summary strong {
   color: var(--text);
   font-weight: 950;
 }
 
 .figma-setting-row span,
 .figma-payment-plan span,
-.figma-payment-history span {
+.figma-payment-history span,
+.figma-withdraw-summary span {
   min-width: 0;
   overflow-wrap: anywhere;
   color: var(--muted);
@@ -326,6 +329,16 @@ textarea.figma-field {
 
 .figma-profile-save {
   justify-self: center;
+  min-width: 112px;
+}
+
+.figma-withdraw-summary {
+  grid-template-columns: 150px minmax(0, 1fr);
+  margin-top: 12px;
+}
+
+.figma-withdraw-button {
+  justify-self: end;
   min-width: 112px;
 }
 
@@ -719,7 +732,8 @@ textarea.figma-field {
 
   .figma-setting-row,
   .figma-payment-plan,
-  .figma-payment-history {
+  .figma-payment-history,
+  .figma-withdraw-summary {
     grid-template-columns: 1fr;
   }
 
