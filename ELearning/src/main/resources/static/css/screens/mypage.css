@@ -1057,12 +1057,14 @@ textarea.mypage-field {
   display: grid;
   width: min(640px, calc(100vw - 48px));
   max-width: none;
+  max-height: calc(100vh - 56px);
   gap: 22px;
   border: 1px solid var(--mypage-line);
   border-radius: 26px;
   background: var(--mypage-card-strong);
   box-shadow: 0 24px 80px color-mix(in srgb, black 26%, transparent);
   padding: clamp(28px, 3.6vw, 40px);
+  overflow: hidden;
 }
 
 .exam-result-modal header {
@@ -1116,6 +1118,24 @@ textarea.mypage-field {
 .exam-modal-list {
   display: grid;
   gap: 12px;
+  max-height: 344px;
+  overflow-y: auto;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+}
+
+.exam-modal-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.exam-modal-list::-webkit-scrollbar-track {
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.exam-modal-list::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--primary) 72%, var(--accent));
 }
 
 .exam-modal-row {
@@ -1123,6 +1143,7 @@ textarea.mypage-field {
   grid-template-columns: 72px minmax(0, 1fr) auto;
   gap: 18px;
   align-items: center;
+  min-height: 77px;
   border: 1px solid var(--mypage-line-strong);
   border-radius: 16px;
   background: var(--mypage-card);
@@ -1743,8 +1764,13 @@ textarea.mypage-field {
     padding: 28px 22px;
   }
 
+  .exam-modal-list {
+    max-height: min(62vh, 432px);
+  }
+
   .exam-modal-row {
     grid-template-columns: 1fr;
+    min-height: 0;
     padding: 22px;
   }
 
