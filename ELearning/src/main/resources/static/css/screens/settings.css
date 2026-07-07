@@ -531,17 +531,133 @@ textarea.figma-field {
 }
 
 .figma-payment-plan {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
 }
 
 .figma-payment-history {
-  grid-template-columns: 130px minmax(0, 1fr) auto;
+  grid-template-columns: 130px minmax(0, 1fr) auto auto;
 }
 
 .figma-payment-history b {
   justify-self: end;
   color: var(--text);
   font-weight: 950;
+}
+
+.figma-payment-detail-button {
+  min-width: 92px;
+  min-height: 38px;
+  justify-self: end;
+  padding: 0 14px;
+}
+
+.figma-payment-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, #000 42%, transparent);
+  padding: 24px;
+}
+
+.figma-payment-modal-backdrop[hidden] {
+  display: none;
+}
+
+.figma-payment-modal {
+  width: min(100%, 560px);
+  border: 1px solid var(--settings-line);
+  border-radius: var(--radius-lg);
+  background: var(--settings-panel-strong);
+  box-shadow: var(--shadow-soft);
+  padding: 24px;
+}
+
+.figma-payment-modal header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.figma-payment-modal h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 950;
+}
+
+.figma-payment-modal-close {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--settings-line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.figma-payment-modal-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  border-radius: var(--radius);
+  background: var(--settings-soft);
+  padding: 14px 16px;
+}
+
+.figma-payment-modal-summary strong,
+.figma-payment-modal-summary span {
+  color: var(--text);
+  font-weight: 950;
+}
+
+.figma-payment-modal-summary span {
+  color: var(--accent);
+}
+
+.figma-payment-detail-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.figma-payment-detail-list div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  padding: 10px 0;
+}
+
+.figma-payment-detail-list div:last-child {
+  border-bottom: 0;
+}
+
+.figma-payment-detail-list dt,
+.figma-payment-detail-list dd {
+  margin: 0;
+  font-weight: 900;
+}
+
+.figma-payment-detail-list dt {
+  color: var(--muted);
+}
+
+.figma-payment-detail-list dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
 }
 
 @media (max-width: 1180px) {
@@ -609,6 +725,23 @@ textarea.figma-field {
 
   .figma-payment-history b {
     justify-self: start;
+  }
+
+  .figma-payment-detail-button {
+    justify-self: start;
+  }
+
+  .figma-payment-modal {
+    padding: 20px;
+  }
+
+  .figma-payment-modal-summary,
+  .figma-payment-detail-list div {
+    grid-template-columns: 1fr;
+  }
+
+  .figma-payment-modal-summary {
+    display: grid;
   }
 
   .figma-system-row {

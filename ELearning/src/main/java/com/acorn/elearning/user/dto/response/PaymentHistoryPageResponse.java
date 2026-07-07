@@ -107,6 +107,16 @@ public record PaymentHistoryPageResponse(
             return hasText(paymentMethod) ? paymentMethod : "-";
         }
 
+        public String paymentMethodDetailLabel() {
+            if ("CARD".equals(paymentMethod)) {
+                return "신용카드 더미 승인";
+            }
+            if ("BANK_TRANSFER".equals(paymentMethod)) {
+                return "무통장 입금 더미 승인";
+            }
+            return paymentMethodLabel();
+        }
+
         public String paymentStatusLabel() {
             if ("PAID".equals(paymentStatus)) {
                 return "결제 완료";
@@ -130,6 +140,13 @@ public record PaymentHistoryPageResponse(
             return "-";
         }
 
+        public String grantTypeLabel() {
+            if ("LIFETIME".equals(grantType)) {
+                return "Lifetime";
+            }
+            return hasText(grantType) ? grantType : "-";
+        }
+
         public String amountLabel() {
             if (amount == null) {
                 return "0원";
@@ -139,6 +156,14 @@ public record PaymentHistoryPageResponse(
 
         public String paidAtLabel() {
             return formatDateTime(paidAt);
+        }
+
+        public String paymentCreatedAtLabel() {
+            return formatDateTime(paymentCreatedAt);
+        }
+
+        public String grantedAtLabel() {
+            return formatDateTime(grantedAt);
         }
 
         public String expiresAtLabel() {
