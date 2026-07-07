@@ -128,7 +128,7 @@ public class MyPageController {
         UserProfileResponse updated = userService.updateProfile(sessionUser, form);
         httpSession.setAttribute(
                 SessionUser.SESSION_KEY,
-                new SessionUser(updated.userId(), updated.email(), updated.nickname(), updated.role(), sessionUser.premiumActive()));
+                new SessionUser(updated.userId(), updated.email(), updated.nickname(), updated.role(), sessionUser.premiumActive(), updated.profileImageUrl()));
         redirectAttributes.addFlashAttribute("message", "프로필이 저장되었습니다.");
         return "redirect:/mypage";
     }
