@@ -3,6 +3,7 @@ package com.acorn.elearning.auth.controller;
 import com.acorn.elearning.auth.form.LoginForm;
 import com.acorn.elearning.auth.form.SignupForm;
 import com.acorn.elearning.auth.service.AuthService;
+import com.acorn.elearning.auth.service.OAuthService;
 import com.acorn.elearning.auth.service.SessionService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpSession;
@@ -18,10 +19,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final SessionService sessionService;
+    private final OAuthService oAuthService;
 
-    public AuthController(AuthService authService, SessionService sessionService) {
+    public AuthController(AuthService authService, SessionService sessionService, OAuthService oAuthService) {
         this.authService = authService;
         this.sessionService = sessionService;
+        this.oAuthService = oAuthService;
     }
 
     //testhtml 용
@@ -43,13 +46,22 @@ public class AuthController {
     public String loginForm(
             HttpSession session,
             @RequestParam(required = false) String redirect,
+            @RequestParam(required = false) String linkPending,
+            @RequestParam(required = false) String email,
             Model model) {
         SessionUser sessionUser = currentUser(session);
         if (sessionUser != null) {
             return "redirect:" + safeRedirect(redirect, sessionUser.defaultRedirectPath());
         }
+
+        LoginForm form = new LoginForm();
+        if(email != null && !email.isBlank()) {
+            form.setEmail(email); // 소셜 이메일 미리 채움
+        }
+
         model.addAttribute("loginForm", new LoginForm());
         model.addAttribute("redirect", redirect);
+        model.addAttribute("linkPendingProvider", linkPending);
         model.addAttribute("screen", "auth/login");
         return "auth/login";
     }
@@ -68,6 +80,7 @@ public class AuthController {
         }
         try {
             authService.login(session, loginForm);
+            sessionService.getUser(session).ifPresent(u -> oAuthService.consumePendingLink(session, u));
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             if (redirect != null && !redirect.isBlank()) {

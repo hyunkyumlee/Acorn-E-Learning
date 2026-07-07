@@ -14,86 +14,94 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/guest-header :: guestHeader}"></div>
-  <main class="page-shell auth-screen login-screen">
-    <section class="auth-grid">
-      <div class="form-panel">
-        <h3>로그인</h3>
+<div th:replace="~{fragments/guest-header :: guestHeader}"></div>
+<main class="page-shell auth-screen login-screen">
+  <section class="auth-grid">
+    <div class="form-panel">
+      <h3>로그인</h3>
 
-        <p class="form-success" th:if="${successMessage}" th:text="${successMessage}">가입 완료 메시지</p>
-        <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
+      <!-- 소셜 로그인 중 기존 계정 발견 시 연동 안내 배너 -->
+      <p class="form-info" th:if="${linkPendingProvider}"
+         th:text="|이미 가입된 이메일이에요. 비밀번호로 로그인하면 ${linkPendingProvider} 계정이 자동으로 연동됩니다.|">연동 안내</p>
 
-        <form th:action="@{/login}" th:object="${loginForm}" method="post">
-          <input type="hidden" name="redirect" th:value="${redirect}" th:if="${redirect}">
-          <label class="field">
-            <span>이메일</span>
-            <input type="email" th:field="*{email}" placeholder="learner@knowva.local" autocomplete="email">
-          </label>
-          <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+      <p class="form-success" th:if="${successMessage}" th:text="${successMessage}">가입 완료 메시지</p>
+      <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
 
-          <label class="field">
-            <span>비밀번호</span>
-            <input type="password" th:field="*{password}" placeholder="비밀번호" autocomplete="current-password">
-          </label>
-          <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+      <form th:action="@{/login}" th:object="${loginForm}" method="post">
+        <input type="hidden" name="redirect" th:value="${redirect}" th:if="${redirect}">
+        <label class="field">
+          <span>이메일</span>
+          <input type="email" th:field="*{email}" placeholder="learner@knowva.local" autocomplete="email">
+        </label>
+        <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
 
-          <label class="checkbox">
-            <input type="checkbox" th:field="*{rememberMe}"> 로그인 상태 유지
-          </label>
+        <label class="field">
+          <span>비밀번호</span>
+          <input type="password" th:field="*{password}" placeholder="비밀번호" autocomplete="current-password">
+        </label>
+        <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
 
-          <button class="button primary" type="submit">로그인</button>
-        </form>
+        <label class="checkbox">
+          <input type="checkbox" th:field="*{rememberMe}"> 로그인 상태 유지
+        </label>
 
-        <div class="social-login-row" aria-label="소셜 로그인">
-          <a class="button social-login google" th:href="@{/oauth/google}">Google로 계속</a>
-          <a class="button social-login kakao" th:href="@{/oauth/kakao}">Kakao로 계속</a>
-        </div>
+        <button class="button primary" type="submit">로그인</button>
+      </form>
 
-        <p class="form-foot">계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
+      <div class="social-login-row" aria-label="소셜 로그인">
+        <a class="button social-login google" th:href="@{/oauth/google}">Google로 계속</a>
+        <!-- [삭제] Kakao 버튼 제거. 원본 주석 보존: -->
+        <!-- <a class="button social-login kakao" th:href="@{/oauth/kakao}">Kakao로 계속</a> -->
+        <!-- [삭제] 위 Kakao 버튼 삭제 -->
+        <!-- [추가] GitHub 버튼 -->
+        <a class="button social-login github" th:href="@{/oauth/github}">GitHub로 계속</a>
       </div>
 
-      <!-- 로컬/데모용 테스트 계정: 칩을 클릭하면 클립보드로 복사됨 (sample data 기준) -->
-      <aside class="login-test-accounts" aria-label="로컬 테스트 계정">
-        <div class="test-accounts-head">
-          <strong>테스트 계정</strong>
-          <span>로컬/데모용 · 클릭하면 복사돼요</span>
-        </div>
-        <ul class="test-accounts-list">
-          <li>
-            <span class="acc-tag acc-admin">관리자</span>
-            <button type="button" class="copy-chip" data-copy="admin@knowva.local">admin@knowva.local</button>
-            <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
-          </li>
-          <li>
-            <span class="acc-tag">일반</span>
-            <button type="button" class="copy-chip" data-copy="learner@knowva.local">learner@knowva.local</button>
-            <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
-          </li>
-          <li>
-            <span class="acc-tag acc-premium">프리미엄</span>
-            <button type="button" class="copy-chip" data-copy="premium@knowva.local">premium@knowva.local</button>
-            <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
-          </li>
-        </ul>
-      </aside>
-    </section>
-  </main>
+      <p class="form-foot">계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
+    </div>
 
-  <!-- 테스트 계정 칩 클립보드 복사 (로컬 개발 편의) -->
-  <script th:inline="none">
-    document.querySelectorAll('.login-test-accounts .copy-chip').forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        var text = chip.dataset.copy;
-        navigator.clipboard.writeText(text).then(function () {
-          chip.classList.add('is-copied');
-          chip.textContent = '복사됨!';
-          setTimeout(function () {
-            chip.textContent = text;
-            chip.classList.remove('is-copied');
-          }, 900);
-        });
+    <!-- 로컬/데모용 테스트 계정: 칩을 클릭하면 클립보드로 복사됨 (sample data 기준) -->
+    <aside class="login-test-accounts" aria-label="로컬 테스트 계정">
+      <div class="test-accounts-head">
+        <strong>테스트 계정</strong>
+        <span>로컬/데모용 · 클릭하면 복사돼요</span>
+      </div>
+      <ul class="test-accounts-list">
+        <li>
+          <span class="acc-tag acc-admin">관리자</span>
+          <button type="button" class="copy-chip" data-copy="admin@knowva.local">admin@knowva.local</button>
+          <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
+        </li>
+        <li>
+          <span class="acc-tag">일반</span>
+          <button type="button" class="copy-chip" data-copy="learner@knowva.local">learner@knowva.local</button>
+          <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
+        </li>
+        <li>
+          <span class="acc-tag acc-premium">프리미엄</span>
+          <button type="button" class="copy-chip" data-copy="premium@knowva.local">premium@knowva.local</button>
+          <button type="button" class="copy-chip" data-copy="Knowva1234!">Knowva1234!</button>
+        </li>
+      </ul>
+    </aside>
+  </section>
+</main>
+
+<!-- 테스트 계정 칩 클립보드 복사 (로컬 개발 편의) -->
+<script th:inline="none">
+  document.querySelectorAll('.login-test-accounts .copy-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var text = chip.dataset.copy;
+      navigator.clipboard.writeText(text).then(function () {
+        chip.classList.add('is-copied');
+        chip.textContent = '복사됨!';
+        setTimeout(function () {
+          chip.textContent = text;
+          chip.classList.remove('is-copied');
+        }, 900);
       });
     });
-  </script>
+  });
+</script>
 </body>
 </html>
