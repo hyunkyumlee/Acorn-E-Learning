@@ -6,12 +6,14 @@ import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.service.AdminContentService;
 import com.acorn.elearning.learning.model.Subject;
+import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -28,11 +30,6 @@ public class AdminContentController {
 
     @GetMapping("/admin/courses")
     public String courses(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // AdminManagePageView view = adminContentService.courses(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
 
         List<Subject> subjectList = service.findAllSubject();
         Map<Long, String> subjectNameMap = subjectList.stream()
@@ -51,13 +48,15 @@ public class AdminContentController {
     }
 
     @PostMapping("/admin/courses/subjects")
-    public String regCourses(SubjectForm form, RedirectAttributes redirectAttributes){
+    public String regCourses(SubjectForm form,
+                             @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+                             RedirectAttributes redirectAttributes){
 
         if (form.getSubjectId() == null) {
-            service.createSubject(form);
+            service.createSubject(form, sessionUser.userId());
             redirectAttributes.addFlashAttribute("message", "과목이 등록되었습니다.");
         } else{
-            service.updateSubject(form);
+            service.updateSubject(form, sessionUser.userId());
             redirectAttributes.addFlashAttribute("message", "과목이 수정되었습니다.");
         }
 
@@ -65,13 +64,15 @@ public class AdminContentController {
     }
 
     @PostMapping("/admin/courses/curriculum-nodes")
-    public String regCurriculumNode(CurriculumNodeForm form, RedirectAttributes redirectAttributes){
+    public String regCurriculumNode(CurriculumNodeForm form,
+                                    @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+                                    RedirectAttributes redirectAttributes){
 
         if (form.getNodeId() == null) {
-            service.createCurriculumNode(form);
+            service.createCurriculumNode(form, sessionUser.userId());
             redirectAttributes.addFlashAttribute("message", "커리큘럼이 등록되었습니다.");
         } else{
-            service.updateCurriculumNode(form);
+            service.updateCurriculumNode(form, sessionUser.userId());
             redirectAttributes.addFlashAttribute("message", "커리큘럼이 수정되었습니다.");
         }
 
@@ -81,12 +82,6 @@ public class AdminContentController {
 
     @GetMapping("/admin/theory")
     public String theory(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // AdminManagePageView view = adminContentService.theory(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
-
         model.addAttribute("theoryList", service.findAllAdminLesson());
         model.addAttribute("subjectList", service.findAllSubject());
         model.addAttribute("curriculumList", service.findAllCurriculumNode());
@@ -96,13 +91,15 @@ public class AdminContentController {
     }
 
     @PostMapping("/admin/theory")
-    public String regTheory(LessonForm form, RedirectAttributes redirectAttributes){
+    public String regTheory(LessonForm form,
+                            @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+                            RedirectAttributes redirectAttributes){
 
         if (form.getLessonId() == null) {
-            service.createLesson(form);
+            service.createLesson(form, sessionUser.userId());
             redirectAttributes.addFlashAttribute("message", "이론 자료가 등록되었습니다.");
         } else {
-            service.updateLesson(form);
+            service.updateLesson(form, sessionUser.userId());
             redirectAttributes.addFlashAttribute("message", "이론 자료가 수정되었습니다.");
         }
 
@@ -111,9 +108,10 @@ public class AdminContentController {
 
     @PostMapping("/admin/theory/{lessonId}/delete")
     public String deleteTheory(@PathVariable Long lessonId,
+                               @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                                RedirectAttributes redirectAttributes) {
 
-        int deleteCount = service.deleteLesson(lessonId);
+        int deleteCount = service.deleteLesson(lessonId, sessionUser.userId());
 
         if (deleteCount == 1) {
             redirectAttributes.addFlashAttribute("message", "이론 자료가 삭제되었습니다.");
@@ -128,11 +126,6 @@ public class AdminContentController {
 
     @GetMapping("/admin/problems")
     public String problems(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // AdminManagePageView view = adminContentService.problems(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
 
         model.addAttribute("problemList", service.findAllAdminProblem());
         model.addAttribute("subjectList", service.findAllSubject());
@@ -143,13 +136,15 @@ public class AdminContentController {
     }
 
     @PostMapping("/admin/problems")
-    public String regProblem(ProblemForm form, RedirectAttributes redirectAttributes){
+    public String regProblem(ProblemForm form,
+                             @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+                             RedirectAttributes redirectAttributes){
 
         if (form.getProblemId() == null) {
-            service.createProblem(form);
+            service.createProblem(form, sessionUser.userId());
             redirectAttributes.addFlashAttribute("message", "문제가 등록되었습니다.");
         } else {
-            service.updateProblem(form);
+            service.updateProblem(form, sessionUser.userId());
             redirectAttributes.addFlashAttribute("message", "문제가 수정되었습니다.");
         }
 
@@ -158,9 +153,10 @@ public class AdminContentController {
 
     @PostMapping("/admin/problems/{problemId}/delete")
     public String deleteProblem(@PathVariable Long problemId,
+                                @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                                 RedirectAttributes redirectAttributes) {
 
-        int deleteCount = service.deleteProblem(problemId);
+        int deleteCount = service.deleteProblem(problemId, sessionUser.userId());
 
         if (deleteCount == 1) {
             redirectAttributes.addFlashAttribute("message", "문제가 삭제되었습니다.");

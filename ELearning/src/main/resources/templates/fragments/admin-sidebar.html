@@ -70,12 +70,14 @@
   </form>
   <script th:if="${message != null}" th:inline="javascript">
     window.addEventListener("DOMContentLoaded", () => {
-      alert([[${message}]]);
+      const message = /*[[${message}]]*/ "";
+      alert(message);
     });
   </script>
   <script th:if="${errorMessage != null}" th:inline="javascript">
     window.addEventListener("DOMContentLoaded", () => {
-      alert([[${errorMessage}]]);
+      const errorMessage = /*[[${errorMessage}]]*/ "";
+      alert(errorMessage);
     });
   </script>
 </aside>

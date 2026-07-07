@@ -8,10 +8,10 @@
     @Setter
     public class AdminOperationLog {
         private Long logId;
-private Long adminId;
-private String actionType;
-private String targetType;
-private Long targetId;
-private String resultStatus;
-private LocalDateTime createdAt;
+        private Long adminId;
+        private String actionType;
+        private String targetType;
+        private Long targetId;
+        private String resultStatus;
+        private LocalDateTime createdAt;
     }

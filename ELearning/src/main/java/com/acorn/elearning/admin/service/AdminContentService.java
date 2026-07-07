@@ -1,7 +1,7 @@
 package com.acorn.elearning.admin.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -13,6 +13,7 @@ import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.form.SubjectForm;
 import com.acorn.elearning.admin.mapper.AdminLessonMapper;
 import com.acorn.elearning.admin.mapper.AdminProblemMapper;
+import com.acorn.elearning.admin.model.AdminOperationLog;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
 import com.acorn.elearning.learning.mapper.LessonMapper;
 import com.acorn.elearning.learning.mapper.SubjectMapper;
@@ -30,18 +31,29 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminContentService {
 
     private final SubjectMapper sm;
-
     private final CurriculumNodeMapper cm;
-
     private final LessonMapper lm;
-
     private final PracticeProblemMapper ppm;
     private final AdminLessonMapper alm;
     private final AdminProblemMapper apm;
 
+    private final AdminLogService adminLogService;
+
+    private AdminOperationLog operationLog(Long adminId, String actionType, String targetType,Long targetId){
+
+        AdminOperationLog log = new AdminOperationLog();
+        log.setAdminId(adminId);
+        log.setActionType(actionType);
+        log.setTargetType(targetType);
+        log.setTargetId(targetId);
+        log.setResultStatus("SUCCESS");
+        log.setCreatedAt(LocalDateTime.now());
+
+        return log;
+    }
+
     //과목 목록 조회
     public List<Subject> findAllSubject(){
-
         return sm.findAll();
     }
 
@@ -60,8 +72,7 @@ public class AdminContentService {
         return sm.update(model);
     }
 
-
-    public int createSubject(SubjectForm form){
+    public int createSubject(SubjectForm form, Long adminId){
 
         Subject s = new Subject();
         s.setSubjectName(form.getSubjectName());
@@ -71,10 +82,18 @@ public class AdminContentService {
         s.setSubjectCode(form.getSubjectName());
         s.setSortOrder(sm.findAll().size() + 1);
 
-        return sm.insert(s);
+        int inserted = sm.insert(s);
+
+        if(inserted == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "SUBJECT_CREATE", "SUBJECT", s.getSubjectId())
+            );
+        }
+
+        return inserted;
     }
 
-    public int updateSubject(SubjectForm form){
+    public int updateSubject(SubjectForm form, Long adminId){
         Subject s = sm.findById(form.getSubjectId())
                         .orElseThrow();
 
@@ -82,7 +101,14 @@ public class AdminContentService {
         s.setIsActive(form.getIsActive());
         s.setDescription(form.getDescription());
 
-        return sm.update(s);
+        int updated = sm.update(s);
+
+        if(updated == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "SUBJECT_UPDATE", "SUBJECT", s.getSubjectId())
+            );
+        }
+        return updated;
     }
 
     //커리큘럼 조회
@@ -95,19 +121,11 @@ public class AdminContentService {
         return cm.findById(id);
     }
 
-    //커리큘럼 등록
-    public int insert(CurriculumNode model) {
-        return cm.insert(model);
-    }
-
-    //커리큘럼 수정
-    public int update(CurriculumNode model) {
-        return cm.update(model);
-    }
-
-    public int createCurriculumNode(CurriculumNodeForm form){
+    public int createCurriculumNode(CurriculumNodeForm form, Long adminId){
 
         CurriculumNode c = new CurriculumNode();
+
+
 
         c.setSubjectId(form.getSubjectId());
         c.setLevelCode(form.getLevelCode());
@@ -118,10 +136,17 @@ public class AdminContentService {
         c.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
         c.setDescription(form.getDescription());
 
-        return cm.insert(c);
+        int created = cm.insert(c);
+
+        if(created == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "CURRICULUM_NODE_CREATE", "CURRICULUM_NODE", c.getNodeId())
+            );
+        }
+        return created;
     }
 
-    public int updateCurriculumNode(CurriculumNodeForm form){
+    public int updateCurriculumNode(CurriculumNodeForm form, Long adminId){
         CurriculumNode c = cm.findById(form.getNodeId())
                 .orElseThrow();
 
@@ -135,7 +160,14 @@ public class AdminContentService {
         c.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
         c.setDescription(form.getDescription());
 
-        return cm.update(c);
+        int updated = cm.update(c);
+
+        if(updated == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "CURRICULUM_NODE_UPDATE", "CURRICULUM_NODE", c.getNodeId())
+            );
+        }
+        return updated;
     }
 
 
@@ -148,6 +180,7 @@ public class AdminContentService {
     public List<AdminLessonManageRowResponse> findAllAdminLesson(){
         return alm.findAll();
     }
+
     //이론 자료 단건 조회
     public Optional<Lesson> findByLessonId(Long id){
         return lm.findById(id);
@@ -163,7 +196,7 @@ public class AdminContentService {
         return lm.update(model);
     }
 
-    public int createLesson(LessonForm form){
+    public int createLesson(LessonForm form, Long adminId){
         Lesson lesson = new Lesson();
         lesson.setNodeId(form.getNodeId());
         lesson.setTitle(form.getTitle());
@@ -171,10 +204,19 @@ public class AdminContentService {
         lesson.setSortOrder(form.getSortOrder() == null ? 0 : form.getSortOrder());
         lesson.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
-        return lm.insert(lesson);
+        int inserted = lm.insert(lesson);
+
+        if(inserted == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "LESSON_CREATE", "LESSON", lesson.getLessonId())
+            );
+        }
+
+
+        return inserted;
     }
 
-    public int updateLesson(LessonForm form){
+    public int updateLesson(LessonForm form, Long adminId){
         Lesson lesson = lm.findById(form.getLessonId())
                 .orElseThrow();
 
@@ -184,13 +226,28 @@ public class AdminContentService {
         lesson.setSortOrder(form.getSortOrder() == null ? lesson.getSortOrder() : form.getSortOrder());
         lesson.setIsActive(form.getIsActive() == null ? lesson.getIsActive() : form.getIsActive());
 
-        return lm.update(lesson);
+        int updated = lm.update(lesson);
+
+        if(updated == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "LESSON_UPDATE", "LESSON", lesson.getLessonId())
+            );
+        }
+        return updated;
     }
 
     @Transactional
-    public int deleteLesson(Long lessonId) {
+    public int deleteLesson(Long lessonId, Long adminId) {
         alm.deleteBookmarksByLessonId(lessonId);
-        return alm.deleteById(lessonId);
+
+        int deleted = alm.deleteById(lessonId);
+
+        if(deleted == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "LESSON_DELETE", "LESSON", lessonId)
+            );
+        }
+        return deleted;
     }
 
 
@@ -199,8 +256,17 @@ public class AdminContentService {
         return apm.findAll();
     }
 
-    public int deleteProblem(Long problemId) {
-        return apm.deleteById(problemId);
+    public int deleteProblem(Long problemId, Long adminId) {
+
+        int deleted = apm.deleteById(problemId);
+
+        if(deleted == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "PROBLEM_DELETE", "PROBLEM", problemId)
+            );
+        }
+        
+        return deleted;
     }
 
     //문제 목록 조회
@@ -223,7 +289,7 @@ public class AdminContentService {
         return ppm.update(model);
     }
 
-    public int createProblem(ProblemForm form){
+    public int createProblem(ProblemForm form, Long adminId){
         PracticeProblem problem = new PracticeProblem();
         problem.setSubjectId(form.getSubjectId());
         problem.setNodeId(form.getNodeId());
@@ -238,10 +304,18 @@ public class AdminContentService {
         problem.setDifficultyCode(form.getDifficultyCode());
         problem.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
-        return ppm.insert(problem);
+        int inserted = ppm.insert(problem);
+
+        if(inserted == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "PROBLEM_CREATE", "PROBLEM", problem.getProblemId())
+            );
+        }
+
+        return inserted;
     }
 
-    public int updateProblem(ProblemForm form){
+    public int updateProblem(ProblemForm form, Long adminId){
         PracticeProblem problem = ppm.findById(form.getProblemId())
                 .orElseThrow();
 
@@ -253,7 +327,14 @@ public class AdminContentService {
         problem.setDifficultyCode(form.getDifficultyCode());
         problem.setIsActive(form.getIsActive() == null ? problem.getIsActive() : form.getIsActive());
 
-        return ppm.update(problem);
+        int updated = ppm.update(problem);
+
+        if(updated == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "PROBLEM_UPDATE", "PROBLEM", problem.getProblemId())
+            );
+        }
+        return updated;
     }
 
     private String toProblemTypeCode(String value) {
@@ -269,13 +350,5 @@ public class AdminContentService {
         };
     }
 
-    public Map<String, Object> stub(String action) {
-        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-        // SessionUser admin = currentAdminSessionUser();
-        // Object target = targetMapper.findById(targetId).orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
-        // targetMapper.update(applyStatusOrForm(target, form));
-        // adminOperationLogMapper.insert(AdminOperationLog.changed(admin.userId(), target));
-        // return Map.of("result", "updated");
-        return Map.of("action", action, "status", "SKELETON");
-    }
 }
+
