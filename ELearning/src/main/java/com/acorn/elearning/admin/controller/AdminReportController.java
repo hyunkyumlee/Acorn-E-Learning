@@ -35,11 +35,7 @@ public class AdminReportController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             RedirectAttributes redirectAttributes
     ) {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "admin/reports"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // adminCommunityService.handle(sessionUser, form);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+
         service.handle(reportId, form, sessionUser);
         redirectAttributes.addFlashAttribute("message", "신고 처리 상태가 변경되었습니다.");
         return "redirect:/admin/reports";

@@ -140,6 +140,18 @@
     margin-top: auto;
 }
 
+.admin-sidebar-logout-form {
+    margin: auto 0 0;
+}
+
+.admin-sidebar-logout-form .admin-sidebar-logout {
+    width: 100%;
+    margin-top: 0;
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+}
+
 @media (min-width: 769px) {
     .admin-sidebar + .admin-screen,
     .admin-sidebar ~ .admin-screen {
@@ -172,7 +184,8 @@
         flex: none;
     }
 
-    .admin-sidebar-logout {
+    .admin-sidebar-logout,
+    .admin-sidebar-logout-form {
         margin-top: 14px;
     }
 }

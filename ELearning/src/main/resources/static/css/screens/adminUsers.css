@@ -152,6 +152,25 @@
     gap: 8px;
 }
 
+.admin-user-detail-actions form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.admin-user-detail-actions select {
+    width: 132px;
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .admin-user-table-button {
     min-width: 64px;
     height: 28px;

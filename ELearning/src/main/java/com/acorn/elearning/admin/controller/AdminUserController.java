@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -21,11 +25,6 @@ public class AdminUserController {
 
     @GetMapping("/admin/users")
     public String users(Model model) {
-        // TODO 구현 예시입니다. 실제 signature에 HttpSession 또는 SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // AdminManagePageView view = adminUserService.users(sessionUser);
-        // model.addAttribute("view", view);
-        // 필요한 경우 model.addAttribute("form", new XxxForm()); 값도 같이 넣으세요.
 
         List<AdminUserManageRowResponse> userList = service.findAll();
         model.addAttribute("userList", userList);
@@ -36,4 +35,39 @@ public class AdminUserController {
         model.addAttribute("screen", "admin/users");
         return "admin/adminUsers";
     }
+
+    @PostMapping("/admin/users/{userId}/status")
+    public String updateUserStatus(@PathVariable Long userId,
+                                   @RequestParam String status,
+                                   RedirectAttributes redirectAttributes)
+    {
+
+        int statusResult = service.updateStatus(userId, status);
+
+        if(statusResult == 1) {
+            redirectAttributes.addFlashAttribute("message", "상태가 변경되었습니다.");
+        }else{
+            redirectAttributes.addFlashAttribute("errorMessage", "상태가 변경되지 않았습니다. 다시 시도하세요.");
+        }
+
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/admin/users/{userId}/role")
+    public String updateUserRole(@PathVariable Long userId,
+                                 @RequestParam String role,
+                                 RedirectAttributes redirectAttributes){
+
+        int roleResult = service.updateRole(userId, role);
+
+        if(roleResult == 1){
+            redirectAttributes.addFlashAttribute("message", "권한이 변경되었습니다.");
+        }else{
+            redirectAttributes.addFlashAttribute("errorMessage", "권한 변경에 실패하였습니다.");
+        }
+
+        return "redirect:/admin/users";
+    }
+
+
 }
