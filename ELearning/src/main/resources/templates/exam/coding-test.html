@@ -12,9 +12,11 @@
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell exam-screen">
     <section class="page-heading">
-      <span class="eyebrow">Coding Test Gate</span>
-      <h1>AI 코딩테스트</h1>
-      <p>학습 화면에서 열린 Gate 기준으로 3문항을 시작합니다.</p>
+      <span class="eyebrow" th:text="${manualSelectionMode} ? 'Development Gate' : 'Coding Test Gate'">Coding Test Gate</span>
+      <h1 th:text="${manualSelectionMode} ? 'AI 코딩테스트 개발용 시작' : 'AI 코딩테스트'">AI 코딩테스트</h1>
+      <p th:text="${manualSelectionMode} ? '학습 화면 Gate 값이 맞지 않을 때 과목과 난이도를 직접 선택합니다.' : '학습 화면에서 열린 Gate 기준으로 3문항을 시작합니다.'">
+        학습 화면에서 열린 Gate 기준으로 3문항을 시작합니다.
+      </p>
     </section>
 
     <div class="exam-alert is-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">
@@ -23,7 +25,48 @@
 
     <section class="exam-gate">
       <article class="exam-gate-card is-ready"
-               th:if="${eligibility != null && eligibility.eligible() && hasGateContext}">
+               th:if="${manualSelectionMode}">
+        <span class="exam-state-badge">개발용 수동 선택</span>
+        <div>
+          <h2>과목과 난이도를 직접 선택합니다.</h2>
+          <p>학습 화면에서 전달되는 Gate 값과 별개로 코딩테스트 생성 요청값을 확인할 수 있습니다.</p>
+        </div>
+        <form th:action="@{/exams/coding-test/dev}"
+              th:object="${form}"
+              method="post"
+              class="exam-create-form is-manual"
+              data-loading-form
+              data-loading-title="문제 생성 중입니다"
+              data-loading-message="선택한 과목과 난이도 기준으로 AI 코딩테스트 문제와 테스트케이스를 생성하고 있습니다.">
+          <input type="hidden" th:field="*{idempotencyToken}">
+          <div class="exam-manual-fields">
+            <label>
+              <span>과목</span>
+              <select th:field="*{subjectId}" required>
+                <option value="">과목 선택</option>
+                <option th:each="subject : ${subjectOptions}"
+                        th:value="${subject.subjectId}"
+                        th:text="${#strings.isEmpty(subject.subjectName) ? subject.subjectCode : subject.subjectName}">
+                  Java
+                </option>
+              </select>
+              <small class="exam-field-error" th:if="${#fields.hasErrors('subjectId')}" th:errors="*{subjectId}">과목을 선택해 주세요.</small>
+            </label>
+            <label>
+              <span>난이도</span>
+              <select th:field="*{levelCode}" required>
+                <option th:each="level : ${levelOptions}" th:value="${level}" th:text="${level}">BRONZE</option>
+              </select>
+              <small class="exam-field-error" th:if="${#fields.hasErrors('levelCode')}" th:errors="*{levelCode}">난이도를 선택해 주세요.</small>
+            </label>
+          </div>
+          <p class="exam-field-hint">선택한 값은 그대로 문제 생성 요청에 사용됩니다.</p>
+          <button type="submit" class="button primary">선택한 조건으로 시작</button>
+        </form>
+      </article>
+
+      <article class="exam-gate-card is-ready"
+               th:if="${eligibility != null && eligibility.eligible() && hasGateContext && !manualSelectionMode}">
         <span class="exam-state-badge">Gate 활성화</span>
         <div>
           <h2>코딩테스트 준비 완료</h2>
@@ -58,14 +101,17 @@
       </article>
 
       <aside class="exam-gate-card is-locked"
-             th:if="${eligibility != null && eligibility.eligible() && !hasGateContext}">
+             th:if="${eligibility != null && eligibility.eligible() && !hasGateContext && !manualSelectionMode}">
         <span class="exam-state-badge is-warning">Gate 선택 필요</span>
         <h2>학습 화면에서 열린 Gate를 선택해 주세요.</h2>
         <p>코딩테스트는 완료한 과목과 난이도 기준으로 생성됩니다.</p>
-        <a class="button primary" th:href="@{/learning}">학습 화면으로</a>
+        <div class="exam-gate-actions">
+          <a class="button primary" th:href="@{/learning}">학습 화면으로</a>
+          <a class="button" th:href="@{/exams/coding-test/dev}">개발용 수동 선택</a>
+        </div>
       </aside>
 
-      <aside class="exam-gate-card is-locked" th:if="${eligibility == null || !eligibility.eligible()}">
+      <aside class="exam-gate-card is-locked" th:if="${(eligibility == null || !eligibility.eligible()) && !manualSelectionMode}">
         <span class="exam-state-badge is-warning">응시 조건 미달</span>
         <h2 th:text="${eligibility == null ? '로그인이 필요합니다.' : eligibility.message()}">필수 이론 학습 완료 후 응시</h2>
         <p>완료한 이론 학습 또는 통과한 문제풀이 범위가 있어야 AI 코딩테스트 문제를 생성할 수 있습니다.</p>
