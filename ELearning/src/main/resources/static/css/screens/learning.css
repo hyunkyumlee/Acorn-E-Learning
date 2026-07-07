@@ -698,6 +698,53 @@
 .roadmap-legend .legend-current { color: var(--primary); }
 .roadmap-legend .legend-locked { color: var(--muted); }
 
+/* 난이도 레벨 탭: 로드맵 판 전환(Bronze/Silver/Gold). 선택 탭만 강조, 잠긴 레벨은 자물쇠 흐림. */
+.roadmap-levels {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  flex-wrap: wrap;
+}
+
+.roadmap-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+a.roadmap-level:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
+}
+
+.roadmap-level.is-active {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--line));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-soft));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.roadmap-level.is-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.roadmap-level.is-locked svg {
+  width: 12px;
+  height: 12px;
+}
+
 /* 맵 뷰포트: 세로 맵을 내부 스크롤로 보는 창(유일한 테두리 영역)
    - 스크롤바 숨김(scrollbar-width:none + ::-webkit-scrollbar). 스크롤 자체는 휠/터치로 동작.
    - 관성 스무스 스크롤(부드럽게 미끄러지는 슬라이드)은 learning-roadmap.js가 이 stage의 휠에만 적용.
@@ -897,6 +944,31 @@
 /* 잠긴 게이트 = 잠긴 행성과 동일한 어둡기(grayscale/brightness 통일). opacity/축소 없음. */
 .roadmap-node.is-gate.is-locked .roadmap-gate-img {
   filter: grayscale(0.7) brightness(0.6) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+/* 게이트 통과 상태(이미 통과 = 재응시 가능): 응시가능(is-ready)과 동일한 디자인, 문구만 다름 */
+.roadmap-node.is-gate.is-passed .roadmap-gate-img {
+  filter:
+    drop-shadow(0 10px 24px rgba(0, 0, 0, 0.42))
+    drop-shadow(0 0 22px color-mix(in srgb, var(--primary) 55%, transparent));
+}
+
+.roadmap-node.is-passed .roadmap-badge {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 18%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 38%, var(--line));
+}
+
+.roadmap-node.is-passed .roadmap-card-tag {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 16%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 34%, var(--line));
+}
+
+.roadmap-node.is-passed .roadmap-card-cover {
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--warning) 16%, transparent), transparent 70%),
+    radial-gradient(circle at 84% 15%, color-mix(in srgb, var(--warning) 30%, transparent), transparent 60%);
 }
 
 /* ----- 상태 배지(색 + 텍스트 병기) : 행성 위 pill ----- */
@@ -1335,10 +1407,53 @@
 .lesson-content { white-space: pre-wrap; line-height: 1.7; }
 .lesson-meta { margin-top: var(--space-3); font-size: 13px; color: var(--muted); }
 
+/* 이론학습 제목 줄: 제목 좌 + 완료 상태 칩 우 */
+.lesson-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.lesson-title { margin: 0; }
+
+/* 이론 완료됨 상태 칩(제목 옆) */
+.lesson-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--success) 34%, var(--line));
+}
+
+.lesson-back { margin-top: var(--space-4); font-size: 14px; }
+
+/* 이론 완료됨 상태 배지(완료된 레슨: 액션 버튼 대신 표시) */
+.lesson-done-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: var(--radius);
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--success) 34%, var(--line));
+}
+
 /* 이론 완료 버튼 영역 */
 .lesson-actions {
   margin-top: var(--space-5);
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 

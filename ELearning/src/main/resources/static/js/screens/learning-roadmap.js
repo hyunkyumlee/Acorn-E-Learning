@@ -60,11 +60,13 @@
     stage.addEventListener("scroll", updateProgress, { passive: true });
     updateProgress();
 
-    /* ---- 2a-2) 로드맵을 맨 아래까지 내리면 페이지도 맨 아래로 "착" 붙이기 ----
-       내부 stage는 화면보다 커서 하단이 뷰포트 밖으로 나간다. 맵 끝(게이트)까지
-       왔을 때 페이지를 문서 하단으로 스냅하면 stage 전체가 화면에 들어와 게이트가 다 보인다.
-       내부 스크롤은 그대로 두고(따로 동작), "끝에 도달"한 순간에만 1회 페이지를 정렬한다. */
+    /* ---- 2a-2) 로드맵 양 끝에서 페이지 전체를 "착" 정렬 ----
+       내부 stage는 화면보다 커서 위/아래가 뷰포트 밖으로 나간다.
+       - 맵 끝(게이트)까지 내리면 페이지를 문서 하단으로 스냅 → 게이트가 다 보인다.
+       - 맵 처음까지 올리면 페이지를 문서 상단으로 스냅(하단의 대칭) → 상단 UI가 다 보인다.
+       내부 스크롤은 그대로 두고, 끝 구간에 "도달"한 순간에만 1회 페이지를 정렬한다. */
     var snappedBottom = false;
+    var snappedTop = true; // 로드는 상단에서 시작 → 상단을 떠났다 되돌아올 때만 스냅
     function snapPageToRoadmapEnd() {
       var m = stage.scrollHeight - stage.clientHeight;
       if (m <= 0) {
@@ -83,6 +85,18 @@
         }
       } else {
         snappedBottom = false; // 끝 구간에서 벗어나면 다시 스냅 가능하도록 해제
+      }
+      // 맵 처음 근처 → 페이지 상단으로 정렬 (하단 스냅의 대칭)
+      if (stage.scrollTop <= lead) {
+        if (!snappedTop) {
+          snappedTop = true;
+          window.scrollTo({
+            top: 0,
+            behavior: prefersReduced ? "auto" : "smooth",
+          });
+        }
+      } else {
+        snappedTop = false; // 상단 구간에서 벗어나면 다시 스냅 가능하도록 해제
       }
     }
     stage.addEventListener("scroll", snapPageToRoadmapEnd, { passive: true });

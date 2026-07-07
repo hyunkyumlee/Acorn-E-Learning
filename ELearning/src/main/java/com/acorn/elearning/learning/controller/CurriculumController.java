@@ -38,8 +38,12 @@ public class CurriculumController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long lessonId, Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
-        model.addAttribute("lesson", curriculumService.getLessonDetail(lessonId));
+        var lesson = curriculumService.getLessonDetail(lessonId);
+        model.addAttribute("lesson", lesson);
         model.addAttribute("bookmarked", lessonService.isBookmarked(user, lessonId));
+        // 이론 완료 상태: 완료된 레슨은 액션 버튼 대신 완료 표시(재클릭 시 409도 예방)
+        model.addAttribute("lessonCompleted",
+                lesson != null && curriculumService.isLessonTheoryCompleted(user.userId(), lesson.getNodeId()));
         model.addAttribute("screen", "learning/curriculum");
         return "learning/curriculum";
     }
