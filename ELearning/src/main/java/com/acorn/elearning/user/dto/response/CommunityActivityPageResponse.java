@@ -25,7 +25,7 @@ public record CommunityActivityPageResponse(
         List<PostItem> items,
         boolean empty
 ) {
-    private static final int PAGE_SIZE = 2;
+    private static final int PAGE_SIZE = 10;
 
     public static CommunityActivityPageResponse of(String type, String category, String query, int page, List<PostItem> items) {
         String safeType = normalizeType(type);
