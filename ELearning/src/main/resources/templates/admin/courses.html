@@ -15,7 +15,6 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-<div th:replace="~{fragments/topbar :: topbar}"></div>
 <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
 
 <main class="page-shell admin-screen course-manage-screen">
@@ -41,12 +40,6 @@
           <option value="">사용 여부</option>
           <option value="true">활성</option>
           <option value="false">비활성</option>
-        </select>
-        <select>
-          <option value="">난이도/레벨</option>
-          <option value="BRONZE">BRONZE</option>
-          <option value="SILVER">SILVER</option>
-          <option value="GOLD">GOLD</option>
         </select>
       </div>
       <button type="button" class="course-primary-button subject-create-button">+ 과목 등록</button>
@@ -141,7 +134,7 @@
           <option value="GOLD">GOLD</option>
         </select>
       </div>
-      <button type="button" class="course-primary-button">+ 커리큘럼 등록</button>
+      <button type="button" class="course-primary-button curriculum-create-button">+ 커리큘럼 등록</button>
     </div>
 
     <section class="course-section">
@@ -220,6 +213,8 @@
           </select>
           <select name="nodeType" id="curriculumNodeType">
             <option value="">노드 타입 선택</option>
+            <option value="PLANET">PLANET</option>
+            <option value="GATE">GATE</option>
             <option value="LESSON">LESSON</option>
             <option value="PRACTICE">PRACTICE</option>
             <option value="TEST">TEST</option>
@@ -311,6 +306,21 @@
       document.querySelector("#isActive").value = button.dataset.isActive;
     });
   });
+
+  document.querySelector(".curriculum-create-button")?.addEventListener("click", () => {
+    document.querySelector("#curriculumNodeId").value = "";
+    document.querySelector("#curriculumSubjectId").value = "";
+    document.querySelector("#curriculumLevelCode").value = "";
+    document.querySelector("#curriculumNodeType").value = "";
+    document.querySelector("#curriculumTitle").value = "";
+    document.querySelector("#curriculumSortOrder").value = "";
+    document.querySelector("#curriculumDescription").value = "";
+    document.querySelector("#curriculumIsActive").value = "";
+
+    document.querySelector("#curriculumSubjectId").scrollIntoView({ behavior: "smooth", block: "center"});
+    document.querySelector("#curriculumSubjectId").focus({preventScroll: true});
+  })
+
 
   document.querySelectorAll(".curriculum-edit-button").forEach((button) => {
     button.addEventListener("click", () => {

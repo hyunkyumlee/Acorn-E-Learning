@@ -21,7 +21,8 @@
 }
 
 .problem-note {
-    margin: 0 0 14px;
+    width: min(calc(100% - (var(--admin-content-x) * 2)), var(--max-content));
+    margin: 0 auto 18px;
     color: #6b7280;
     font-size: 13px;
     font-weight: 700;

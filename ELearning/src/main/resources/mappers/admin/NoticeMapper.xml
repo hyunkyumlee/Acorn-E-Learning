@@ -40,13 +40,14 @@
 
     <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="noticeId">
         INSERT INTO notices (
-            writer_id, title, content, status
+            writer_id, title, content, status, published_at
         )
         VALUES (
             #{writerId},
             #{title},
             #{content},
-            #{status}
+            #{status},
+            CASE WHEN #{status} = 'PUBLISHED' THEN NOW() ELSE NULL END
         )
     </insert>
 
@@ -55,6 +56,11 @@
         SET title = #{title},
         content = #{content},
         status = #{status},
+        published_at = CASE
+            WHEN #{status} = 'PUBLISHED' AND published_at IS NULL THEN NOW()
+            WHEN #{status} = 'DRAFT' THEN NULL
+            ELSE published_at
+        END,
         updated_at = NOW()
         WHERE NOTICE_ID = #{noticeId}
     </update>

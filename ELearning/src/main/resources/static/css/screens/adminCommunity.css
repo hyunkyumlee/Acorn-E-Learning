@@ -15,6 +15,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(160px, 220px));
   gap: 8px;
+  justify-content: start;
 }
 
 .admin-community-tab {
@@ -35,9 +36,9 @@
 
 .admin-community-toolbar {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(240px, 2fr);
+  grid-template-columns: 200px 200px minmax(260px, 1fr);
   gap: 12px;
-  max-width: 900px;
+  align-items: center;
 }
 
 .admin-community-toolbar select,
@@ -53,11 +54,11 @@
 }
 
 .admin-community-panel {
-  border: 1px solid #dfe4ec;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.05);
-  padding-bottom: 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-bottom: 0;
 }
 
 .admin-community-panel.is-hidden,
@@ -67,8 +68,8 @@
 }
 
 .admin-community-panel h2 {
-  margin: 0;
-  padding: 16px 18px 10px;
+  margin: 0 0 8px;
+  padding: 0;
   color: #151922;
   font-size: 16px;
   font-weight: 700;
@@ -76,6 +77,10 @@
 
 .admin-community-table-wrap {
   overflow-x: auto;
+  border: 1px solid #dfe4ec;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.05);
 }
 
 .admin-community-table {

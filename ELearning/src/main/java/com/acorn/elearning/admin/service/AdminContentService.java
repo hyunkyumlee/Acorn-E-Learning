@@ -114,8 +114,8 @@ public class AdminContentService {
         c.setNodeType(form.getNodeType());
 
         c.setTitle(form.getTitle());
-        c.setSortOrder(form.getSortOrder());
-        c.setIsActive(form.getIsActive());
+        c.setSortOrder(form.getSortOrder() == null ? 0 : form.getSortOrder());
+        c.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
         c.setDescription(form.getDescription());
 
         return cm.insert(c);
@@ -127,11 +127,12 @@ public class AdminContentService {
 
         c.setSubjectId(form.getSubjectId());
         c.setLevelCode(form.getLevelCode());
-        c.setNodeType(form.getNodeType());
+        c.setNodeType(form.getNodeType() == null || form.getNodeType().isBlank()
+                        ? c.getNodeType() : form.getNodeType()  );
 
         c.setTitle(form.getTitle());
-        c.setSortOrder(form.getSortOrder());
-        c.setIsActive(form.getIsActive());
+        c.setSortOrder(form.getSortOrder() == null ? 0 : form.getSortOrder());
+        c.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
         c.setDescription(form.getDescription());
 
         return cm.update(c);
@@ -234,7 +235,7 @@ public class AdminContentService {
             practice PracticeProblem에 explanation 필드 추가 후 연결
             problem.setExplanation(form.getExplanation());
         */
-        problem.setDifficultyCode(toDifficultyCode(form.getDifficultyCode()));
+        problem.setDifficultyCode(form.getDifficultyCode());
         problem.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
         return ppm.insert(problem);
@@ -249,7 +250,7 @@ public class AdminContentService {
         problem.setProblemType(toProblemTypeCode(form.getProblemType()));
         problem.setQuestion(form.getQuestion());
         problem.setAnswerText(form.getAnswerText());
-        problem.setDifficultyCode(toDifficultyCode(form.getDifficultyCode()));
+        problem.setDifficultyCode(form.getDifficultyCode());
         problem.setIsActive(form.getIsActive() == null ? problem.getIsActive() : form.getIsActive());
 
         return ppm.update(problem);
@@ -263,25 +264,10 @@ public class AdminContentService {
             case "객관식" -> "MULTIPLE_CHOICE";
             case "빈칸" -> "FILL_BLANK";
             case "코드 결과 예측" -> "CODE_OUTPUT";
-            case "간단 코드 입력" -> "SHORT_CODE";
+            case "간단 코드 입력", "SHORT_CODE" -> "CODE_SHORT";
             default -> value;
         };
     }
-
-    private String toDifficultyCode(String value) {
-        if (value == null) {
-            return null;
-        }
-        return switch (value) {
-            case "하" -> "LOW";
-            case "중" -> "MEDIUM";
-            case "상" -> "HIGH";
-            default -> value;
-        };
-    }
-
-
-
 
     public Map<String, Object> stub(String action) {
         // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.

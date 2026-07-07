@@ -15,7 +15,6 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-<div th:replace="~{fragments/topbar :: topbar}"></div>
 <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
 
 <main class="page-shell admin-screen admin-report-screen">
@@ -68,7 +67,7 @@
             th:data-target="${report.targetSummary}"
             th:data-reason="${report.reasonLabel()}"
             th:data-content="${report.targetSummary}">
-          <td th:text="${'#R' + report.reportId}">#R001</td>
+          <td th:text="${'#' + report.reportId}">#001</td>
           <td th:text="${report.reporterNickname}">닉네임1</td>
           <td th:text="${report.targetTypeLabel()}">게시글</td>
           <td th:text="${report.targetSummary}">신고 대상</td>

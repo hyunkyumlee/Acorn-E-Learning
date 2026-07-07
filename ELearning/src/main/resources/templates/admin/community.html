@@ -15,7 +15,6 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-<div th:replace="~{fragments/topbar :: topbar}"></div>
 <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
 
 <main class="page-shell admin-screen admin-community-screen">
@@ -29,7 +28,7 @@
   </section>
 
   <section class="admin-community-toolbar" aria-label="게시글 검색 조건">
-    <select id="communityBoardFilter" aria-label="게시판 유형">
+    <select id="communityBoardFilter" class="community-board-filter" aria-label="게시판 유형">
       <option value="">게시판 유형</option>
       <option value="자유">자유</option>
       <option value="질문">질문</option>
@@ -136,7 +135,7 @@
             class="admin-community-comment-row"
             th:data-status="${comment.statusLabel()}"
             th:data-keyword="${comment.content + ' ' + comment.writerNickname}">
-          <td th:text="${'#C' + comment.commentId}">#C001</td>
+          <td th:text="${'#' + comment.commentId}">#C001</td>
           <td th:text="${'#' + comment.postId}">#001</td>
           <td th:text="${comment.writerNickname}">닉네임2</td>
           <td th:text="${comment.contentSummary()}">저도 같은 방식으로 공부했어요.</td>
@@ -190,6 +189,15 @@
   const keywordFilter = document.querySelector("#communityKeywordFilter");
   let activeTab = "posts";
 
+  const syncCommunityFilterVisibility = () => {
+    const postTab = activeTab === "posts";
+    boardFilter.hidden = !postTab;
+
+    if (!postTab) {
+      boardFilter.value = "";
+    }
+  };
+
   const applyCommunityFilter = () => {
     const selectedBoard = boardFilter.value;
     const selectedStatus = statusFilter.value;
@@ -218,7 +226,7 @@
       activeTab = tab.dataset.tab;
       tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
       panels.forEach((panel) => panel.classList.toggle("is-hidden", panel.dataset.panel !== activeTab));
-      boardFilter.disabled = activeTab !== "posts";
+      syncCommunityFilterVisibility();
       applyCommunityFilter();
     });
   });
@@ -228,6 +236,8 @@
   keywordFilter?.addEventListener("input", applyCommunityFilter);
 
   panels.forEach((panel) => panel.classList.toggle("is-hidden", panel.dataset.panel !== activeTab));
+  syncCommunityFilterVisibility();
+  applyCommunityFilter();
 </script>
 </body>
 </html>

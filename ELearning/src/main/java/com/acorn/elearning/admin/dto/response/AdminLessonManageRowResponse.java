@@ -1,5 +1,6 @@
 package com.acorn.elearning.admin.dto.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,7 @@ public class AdminLessonManageRowResponse {
     private String content;
     private String levelCode;
     private Integer sortOrder;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean isActive;
 }

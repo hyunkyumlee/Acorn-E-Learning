@@ -2,6 +2,7 @@ package com.acorn.elearning.admin.controller;
 
 import com.acorn.elearning.admin.dto.response.AdminUserManageRowResponse;
 import com.acorn.elearning.admin.form.SubjectForm;
+import com.acorn.elearning.admin.service.AdminContentService;
 import com.acorn.elearning.admin.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import java.util.List;
 public class AdminUserController {
 
     private final AdminUserService service;
+    private final AdminContentService contentService;
 
 
     @GetMapping("/admin/users")
@@ -27,6 +29,7 @@ public class AdminUserController {
 
         List<AdminUserManageRowResponse> userList = service.findAll();
         model.addAttribute("userList", userList);
+        model.addAttribute("subjectList", contentService.findAllSubject());
 
         model.addAttribute("userStatusForm", new SubjectForm());
 

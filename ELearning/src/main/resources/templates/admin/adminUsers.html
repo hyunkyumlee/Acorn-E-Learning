@@ -15,7 +15,6 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-<div th:replace="~{fragments/topbar :: topbar}"></div>
 <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
 
 <main class="page-shell admin-screen admin-user-screen">
@@ -28,16 +27,15 @@
       <input type="search" id="searchUser" placeholder="이메일 / 닉네임 검색">
       <select id="userSubjectFilter">
         <option value="">관심 과목</option>
-        <option th:each="user : ${userList}"
-                th:if="${user.subjectName != null}"
-                th:value="${user.subjectName}"
-                th:text="${user.subjectName}">Java</option>
+        <option th:each="subject : ${subjectList}"
+                th:value="${subject.subjectName}"
+                th:text="${subject.subjectName}">Java</option>
       </select>
       <select id="userGradeFilter">
         <option value="">등급</option>
-        <option value="Bronze">Bronze</option>
-        <option value="Silver">Silver</option>
-        <option value="Gold">Gold</option>
+        <option value="BEGINNER">BEGINNER</option>
+        <option value="INTERMEDIATE">INTERMEDIATE</option>
+        <option value="ADVANCED">ADVANCED</option>
       </select>
       <select id="userRoleFilter">
         <option value="">권한</option>

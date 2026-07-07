@@ -15,7 +15,6 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-<div th:replace="~{fragments/topbar :: topbar}"></div>
 <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
 
 <main class="page-shell admin-screen theory-manage-screen">
@@ -63,7 +62,7 @@
           <th>커리큘럼</th>
           <th>제목</th>
           <th>레벨</th>
-          <th>수정일</th>
+          <th>등록일</th>
           <th>활성화</th>
           <th>관리</th>
         </tr>
@@ -81,7 +80,7 @@
           <td th:text="${lesson.curriculumTitle}">변수와 자료형</td>
           <td th:text="${lesson.lessonTitle}">Java 변수 이해하기</td>
           <td th:text="${lesson.levelCode}">Lv.1</td>
-          <td th:text="${#temporals.format(lesson.updatedAt, 'yyyy-MM-dd')}">2026-06-01</td>
+          <td th:text="${#temporals.format(lesson.createdAt, 'yyyy-MM-dd')}">2026-06-01</td>
           <td th:text="${lesson.isActive} ? '활성' : '비활성'">활성</td>
           <td>
             <div class="theory-table-actions">
