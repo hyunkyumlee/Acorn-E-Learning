@@ -12,6 +12,7 @@ import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
 import com.acorn.elearning.learning.model.Lesson;
 import com.acorn.elearning.learning.model.Subject;
+import com.acorn.elearning.learning.model.UserLevelUnlock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +54,35 @@ public class CurriculumService {
                 .toList();
     }
 
+    /**
+     * 특정 과목·레벨의 활성 커리큘럼 노드(로드맵 한 판)를 조회한다.
+     * 레벨별로 판을 나눠 표시하기 위해 subject_id + level_code로 DB에서 직접 필터한다.
+     */
+    public List<CurriculumNode> getRoadmap(Long subjectId, String levelCode) {
+        return curriculumNodeMapper.findBySubjectAndLevel(subjectId, levelCode);
+    }
+
+    /** 특정 과목에서 사용자가 해금한 레벨 코드 집합. 로드맵 레벨 탭의 활성/잠금 판정용. */
+    public Set<String> getUnlockedLevelCodes(Long userId, Long subjectId) {
+        return userLevelUnlockMapper.findByUserAndSubject(userId, subjectId).stream()
+                .map(UserLevelUnlock::getLevelCode)
+                .collect(Collectors.toSet());
+    }
+
     /** 단일 lesson 상세 조회. 없으면 null을 반환한다. */
     public Lesson getLessonDetail(Long lessonId) {
         return lessonMapper.findById(lessonId).orElse(null);
+    }
+
+    /** 특정 사용자의 해당 노드 이론(lesson) 완료 여부. 이론학습 화면의 완료 상태 표시용. */
+    public boolean isLessonTheoryCompleted(Long userId, Long nodeId) {
+        CurriculumNode node = curriculumNodeMapper.findById(nodeId).orElse(null);
+        if (node == null) {
+            return false;
+        }
+        return learningProgressMapper.findByUserSubjectNode(userId, node.getSubjectId(), nodeId)
+                .map(p -> Boolean.TRUE.equals(p.getLessonCompleted()))
+                .orElse(false);
     }
 
     /**

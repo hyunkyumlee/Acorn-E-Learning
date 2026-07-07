@@ -17,31 +17,43 @@
     <p class="flash-message" th:if="${message != null}" th:text="${message}">처리되었습니다.</p>
 
     <section class="panel" th:if="${lesson != null}">
-      <h2 th:text="${lesson.title}">lesson 제목</h2>
+      <div class="lesson-head">
+        <h2 class="lesson-title" th:text="${lesson.title}">lesson 제목</h2>
+        <span th:if="${lessonCompleted}" class="lesson-status-chip">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"></path></svg>
+          이론 완료됨
+        </span>
+      </div>
       <p class="lesson-summary" th:if="${lesson.summary != null}" th:text="${lesson.summary}">요약</p>
       <hr/>
       <div class="lesson-content" th:text="${lesson.content}">본문</div>
       <pre th:if="${lesson.exampleCode != null}"><code th:text="${lesson.exampleCode}">예시 코드</code></pre>
-      <p class="lesson-meta">lesson_id=<span th:text="${lesson.lessonId}">0</span> · node_id=<span th:text="${lesson.nodeId}">0</span></p>
 
-      <!-- 이론 완료 처리(POST). 완료 시 learning_progress upsert 후 같은 화면으로 redirect. -->
-      <form class="lesson-actions" th:action="@{/learning/lessons/{id}/complete(id=${lesson.lessonId})}" method="post">
-        <button type="submit" class="button primary">이론 완료</button>
-      </form>
-
-      <!-- 북마크 토글(POST). 현재 상태에 따라 추가/해제 후 같은 화면으로 redirect. -->
-      <form class="lesson-actions" th:action="@{/learning/lessons/{id}/bookmark(id=${lesson.lessonId})}" method="post">
-        <!-- 별표 대신 북마크 리본 아이콘: 채움(fill)=북마크됨 / 외곽선(none)=미북마크 -->
-        <button type="submit" class="button bookmark-toggle" th:classappend="${bookmarked} ? ' is-bookmarked' : ''"
-                th:attr="aria-label=${bookmarked} ? '북마크 해제' : '북마크 추가'">
-          <svg class="bookmark-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"
-               th:attr="fill=${bookmarked} ? 'currentColor' : 'none'"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path>
-          </svg>
-          <span th:text="${bookmarked} ? '북마크됨' : '북마크'">북마크</span>
-        </button>
-      </form>
+      <!--
+        액션 한 줄(버튼 높이 통일): (미완) 이론 완료 → 문제 풀이 → 북마크 / (완료) 문제 풀이(primary) → 북마크.
+        문제 풀이 = /learning/practice(practice 도메인). 이론만 하면 단원 미완(50%)이라 여기서 이어짐.
+      -->
+      <div class="lesson-actions">
+        <form th:unless="${lessonCompleted}" th:action="@{/learning/lessons/{id}/complete(id=${lesson.lessonId})}" method="post">
+          <button type="submit" class="button primary">이론 완료</button>
+        </form>
+        <a class="button" th:classappend="${lessonCompleted} ? ' primary' : ''" th:href="@{/learning/practice}">
+          문제 풀이 하러 가기
+          <svg class="cta-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+        <form th:action="@{/learning/lessons/{id}/bookmark(id=${lesson.lessonId})}" method="post">
+          <!-- 별표 대신 북마크 리본 아이콘: 채움(fill)=북마크됨 / 외곽선(none)=미북마크 -->
+          <button type="submit" class="button bookmark-toggle" th:classappend="${bookmarked} ? ' is-bookmarked' : ''"
+                  th:attr="aria-label=${bookmarked} ? '북마크 해제' : '북마크 추가'">
+            <svg class="bookmark-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"
+                 th:attr="fill=${bookmarked} ? 'currentColor' : 'none'"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path>
+            </svg>
+            <span th:text="${bookmarked} ? '북마크됨' : '북마크'">북마크</span>
+          </button>
+        </form>
+      </div>
     </section>
 
     <section class="panel" th:if="${lesson == null}">
@@ -49,7 +61,7 @@
       <p>해당 lessonId의 데이터가 없습니다. (lessons seed 확인)</p>
     </section>
 
-    <section class="panel"><p><a th:href="@{/learning}">← 학습 메인으로</a> · View: <code>learning/curriculum</code> · 데이터: <code>LessonMapper.findById()</code></p></section>
+    <p class="lesson-back"><a th:href="@{/learning}">← 학습 메인으로</a></p>
   </main>
 </body>
 </html>

@@ -35,6 +35,16 @@
         ORDER BY subject_id ASC, level_code ASC, sort_order ASC, node_id ASC
     </select>
 
+    <!-- 특정 과목·레벨의 활성 노드(로드맵 한 판). idx_nodes_subject_level(subject_id, level_code) 사용 -->
+    <select id="findBySubjectAndLevel" resultMap="CurriculumNodeResultMap">
+        SELECT <include refid="columns" />
+        FROM curriculum_nodes
+        WHERE subject_id = #{subjectId}
+          AND level_code = #{levelCode}
+          AND is_active = 1
+        ORDER BY sort_order ASC, node_id ASC
+    </select>
+
     <!-- 로드맵 순서 기준 "다음" 활성 노드 1건 (completeLesson nextAction 판단용) -->
     <select id="findNextNode" resultMap="CurriculumNodeResultMap">
         SELECT <include refid="columns" />

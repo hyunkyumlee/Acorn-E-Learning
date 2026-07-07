@@ -8,6 +8,9 @@ import org.apache.ibatis.annotations.Param;
 public interface CurriculumNodeMapper {
     Optional<CurriculumNode> findById(Long id);
     List<CurriculumNode> findAll();
+    /** 특정 과목·레벨의 활성 노드(로드맵 한 판)를 sort_order 순으로 조회. */
+    List<CurriculumNode> findBySubjectAndLevel(@Param("subjectId") Long subjectId,
+                                               @Param("levelCode") String levelCode);
     /**
      * 로드맵 순서(level_code, sort_order, node_id) 기준으로 주어진 노드 "다음" 활성 노드 1건.
      * completeLesson의 nextAction(NEXT_NODE/GATE) 판단용. 다음 노드가 없으면 empty.

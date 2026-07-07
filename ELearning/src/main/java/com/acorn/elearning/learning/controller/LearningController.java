@@ -7,8 +7,10 @@ import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.ProgressService;
 import com.acorn.elearning.learning.view.LearningDashboardView;
+import com.acorn.elearning.learning.view.RoadmapLevelTab;
 import com.acorn.elearning.security.SessionUser;
 import java.util.List;
+import java.util.Set;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,9 @@ public class LearningController {
 
     /** roadmap fallback용 기본 과목: JAVA(subject_id=1). 선택 과목·프로필 주 과목이 모두 없을 때만 사용. */
     private static final Long DEFAULT_SUBJECT_ID = 1L;
+
+    /** 로드맵 레벨 탭 표시 순서(낮은 난이도 → 높은 난이도). 표시 레벨 기본값도 첫 원소. */
+    private static final List<String> LEVEL_ORDER = List.of("BRONZE", "SILVER", "GOLD");
 
     /**
      * 개발용 fallback 사용자: 로그인/세션은 1번(auth) 담당이라 구현 전까지 세션이 비어 있다.
@@ -47,6 +52,7 @@ public class LearningController {
     @GetMapping("/learning")
     public String dashboard(
             @RequestParam(name = "subjectId", required = false) Long subjectId,
+            @RequestParam(name = "levelCode", required = false) String levelCode,
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
@@ -67,7 +73,23 @@ public class LearningController {
         model.addAttribute("roadmapSubjectId", roadmapSubjectId);
         model.addAttribute("roadmapSubjectCode", subjectCodeOf(subjects, roadmapSubjectId));
 
-        List<CurriculumNode> roadmap = curriculumService.getRoadmap(roadmapSubjectId);
+        // 표시 레벨: 요청 levelCode 우선 → 없으면 사용자 현재 레벨 → 그래도 없으면 최저 레벨.
+        String selectedLevel = (levelCode != null && !levelCode.isBlank()) ? levelCode
+                : (dashboard.currentLevelCode() != null ? dashboard.currentLevelCode() : LEVEL_ORDER.get(0));
+        model.addAttribute("selectedLevel", selectedLevel);
+
+        // 레벨 탭: 해금된 레벨만 선택 가능, 현재 표시 레벨은 항상 활성으로 둔다.
+        Set<String> unlockedLevels = curriculumService.getUnlockedLevelCodes(user.userId(), roadmapSubjectId);
+        List<RoadmapLevelTab> levelTabs = LEVEL_ORDER.stream()
+                .map(code -> new RoadmapLevelTab(
+                        code,
+                        unlockedLevels.contains(code) || code.equals(selectedLevel),
+                        code.equals(selectedLevel)))
+                .toList();
+        model.addAttribute("levelTabs", levelTabs);
+
+        // 로드맵은 선택 레벨의 노드(한 판)만 표시 — 레벨이 섞여 planet_no가 충돌하지 않게 레벨로 스코핑.
+        List<CurriculumNode> roadmap = curriculumService.getRoadmap(roadmapSubjectId, selectedLevel);
         model.addAttribute("roadmap", roadmap);
 
         // hover 카드 "N개 레슨" 메타: 노드별 활성 레슨 수(nodeId → count)
@@ -79,6 +101,14 @@ public class LearningController {
         model.addAttribute("completedPlanets", completedPlanets);
         model.addAttribute("planetCount", progress.planetCount());
         model.addAttribute("progressPercent", progress.progressPercent());
+
+        // 게이트 상태: 다음 레벨이 이미 해금됐으면 이 레벨 게이트는 통과함(재응시 가능),
+        // 아니면 전 행성 완료 시 응시 가능(ready), 그 외 잠김(locked).
+        String nextLevel = nextLevel(selectedLevel);
+        boolean gatePassed = nextLevel != null && unlockedLevels.contains(nextLevel);
+        String gateState = gatePassed ? "passed"
+                : ((progress.planetCount() > 0 && completedPlanets >= progress.planetCount()) ? "ready" : "locked");
+        model.addAttribute("gateState", gateState);
 
         // TodayMissionCard용 현재 학습 행성 = 완료수 다음 행성. (모두 완료면 null → 게이트 단계)
         CurriculumNode currentNode = roadmap.stream()
@@ -100,5 +130,11 @@ public class LearningController {
                 .map(Subject::getSubjectCode)
                 .findFirst()
                 .orElse("-");
+    }
+
+    /** 레벨 순서상 다음 레벨(없으면 null). 게이트 통과 판정(다음 레벨 해금 여부)용. */
+    private String nextLevel(String level) {
+        int i = LEVEL_ORDER.indexOf(level);
+        return (i >= 0 && i + 1 < LEVEL_ORDER.size()) ? LEVEL_ORDER.get(i + 1) : null;
     }
 }
