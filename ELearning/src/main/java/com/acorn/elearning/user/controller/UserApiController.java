@@ -56,7 +56,7 @@ public class UserApiController {
         UserProfileResponse response = userService.updateProfile(sessionUser, request.toForm());
         httpSession.setAttribute(
                 SessionUser.SESSION_KEY,
-                new SessionUser(response.userId(), response.email(), response.nickname(), response.role(), sessionUser.premiumActive()));
+                new SessionUser(response.userId(), response.email(), response.nickname(), response.role(), sessionUser.premiumActive(), response.profileImageUrl()));
         return ApiResponse.success(response);
     }
 
@@ -69,7 +69,7 @@ public class UserApiController {
         UserProfileResponse response = settingsService.updateSecurity(sessionUser, request.toForm());
         httpSession.setAttribute(
                 SessionUser.SESSION_KEY,
-                new SessionUser(response.userId(), response.email(), response.nickname(), response.role(), sessionUser.premiumActive()));
+                new SessionUser(response.userId(), response.email(), response.nickname(), response.role(), sessionUser.premiumActive(), response.profileImageUrl()));
         return ApiResponse.success(response);
     }
 

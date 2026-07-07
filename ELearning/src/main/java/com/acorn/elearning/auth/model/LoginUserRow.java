@@ -14,11 +14,12 @@ public class LoginUserRow {
     private String nickname;
     private String role;
     private String status;
+    private String profileImageUrl;
     private String passwordHash; //BCrypt matches() 에 필요 - Controller/Response에는 절대 노출 X
 
     /*
 
-    SELECT u.user_id, u.email, u.nickname, u.role, u.status, c.password_hash
+    SELECT u.user_id, u.email, u.nickname, u.role, u.status, u.profile_image_url, c.password_hash
     FROM users u
     INNER JOIN user_credentials c ON c.user_id = u.user_id
     WHERE u.email = #{email}

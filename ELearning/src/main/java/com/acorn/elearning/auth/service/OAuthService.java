@@ -322,7 +322,7 @@ public class OAuthService {
     }
 
     private SessionUser toSessionUser(User user) {
-        return new SessionUser(user.getUserId(), user.getEmail(), user.getNickname(), user.getRole(), false);
+        return new SessionUser(user.getUserId(), user.getEmail(), user.getNickname(), user.getRole(), false, user.getProfileImageUrl());
     }
 
     private void requireLogin(SessionUser sessionUser) {

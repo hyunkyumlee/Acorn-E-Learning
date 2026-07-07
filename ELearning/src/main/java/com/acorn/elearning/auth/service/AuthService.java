@@ -73,7 +73,7 @@ public class AuthService {
 
     private SessionUser toSessionUser(LoginUserRow row) {
         boolean premiumActive = paymentAccessService.hasPremiumAccess(row.getUserId());
-        return new SessionUser( row.getUserId(), row.getEmail(), row.getNickname(), row.getRole(), premiumActive);
+        return new SessionUser(row.getUserId(), row.getEmail(), row.getNickname(), row.getRole(), premiumActive, row.getProfileImageUrl());
     }
 
     // ---- signup ----
@@ -129,7 +129,7 @@ public class AuthService {
 
     private SessionUser toSessionUser(User user){
         boolean premiumActive = false;
-        return new SessionUser(user.getUserId(), user.getEmail(), user.getNickname(), user.getRole(), premiumActive);
+        return new SessionUser(user.getUserId(), user.getEmail(), user.getNickname(), user.getRole(), premiumActive, user.getProfileImageUrl());
     }
 
 

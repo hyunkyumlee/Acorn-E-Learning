@@ -309,6 +309,14 @@
   font-size: 12px;
 }
 
+.profile-avatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .profile-label {
   overflow: hidden;
   max-width: 108px;
