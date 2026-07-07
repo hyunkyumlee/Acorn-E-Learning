@@ -17,7 +17,20 @@
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell community-screen community-board-screen">
     <section class="community-board-layout" aria-label="커뮤니티 게시판">
-      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></div>
+      <div class="community-left-rail">
+        <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></div>
+        <a class="community-content-recommend-link" th:href="@{/content/recommendations}">
+          <span class="community-content-recommend-copy">
+            <strong class="community-content-recommend-title">Knowva의 과목 콘텐츠 추천</strong>
+            <span class="community-video-icon" aria-hidden="true">
+              <span class="community-video-body">
+                <span class="community-video-play"></span>
+              </span>
+            </span>
+            <span class="community-video-caption"><i aria-hidden="true"></i> 동영상 재생</span>
+          </span>
+        </a>
+      </div>
 
       <section class="panel community-panel community-board-main">
         <div class="community-board-toolbar">
@@ -45,14 +58,22 @@
         <section class="community-feed-card">
           <div class="community-feed-heading">
             <h2>게시글 목록</h2>
-            <p>학습 중 떠오른 이야기와 공부 기록을 자유롭게 나눠.</p>
           </div>
 
           <ul class="community-post-list">
             <li th:each="post : ${view.posts}">
-              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+              <div class="community-post-title-row">
+                <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+                <span class="community-post-hot-ribbon"
+                      th:if="${hotPostIds != null and hotPostIds.contains(post.postId)}"
+                      aria-label="HOT 게시글">
+                  <span>H</span>
+                  <span>O</span>
+                  <span>T</span>
+                </span>
+              </div>
               <span>
-                작성자 <b th:text="${post.writerId}">1</b>
+                작성자: <b th:text="${writerNicknames.get(post.writerId)}">nova_learner</b>
                 · 댓글 <b th:text="${post.commentCount}">0</b>
                 · 좋아요 <b th:text="${post.likeCount}">0</b>
               </span>
@@ -63,9 +84,32 @@
       </section>
 
       <div class="community-side-rail">
+        <section class="community-profile-mini community-profile-rail-card" aria-label="커뮤니티 프로필 요약">
+          <div class="community-profile-line">
+            <span class="community-avatar" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
+            <div>
+              <strong th:text="${profileName}">nova_learner</strong>
+              <small class="community-profile-rail-stats">
+                <span>작성 글 <b th:text="${profileSummary != null ? profileSummary.postCount() : 0}">0</b></span>
+                <span>스크랩 <b th:text="${profileSummary != null ? profileSummary.scrapCount() : 0}">0</b></span>
+                <span>좋아요 <b th:text="${profileSummary != null ? profileSummary.receivedLikeCount() : 0}">0</b></span>
+              </small>
+            </div>
+          </div>
+          <a class="button" th:href="@{/community/profile}">내 커뮤니티 프로필</a>
+        </section>
+
         <aside class="panel community-panel community-hot-panel" aria-label="HOT 게시물">
           <div class="community-hot-heading">
-            <span class="community-hot-tag">HOT</span>
+            <span class="community-hot-tag">
+              <span class="community-hot-flame" aria-hidden="true">🔥</span>
+              <span class="community-hot-word" aria-label="HOT">
+                <span>H</span>
+                <span>O</span>
+                <span>T</span>
+              </span>
+              <span class="community-hot-flame" aria-hidden="true">🔥</span>
+            </span>
           </div>
           <ol class="community-hot-list">
             <li th:each="post : ${hotView.posts}">
@@ -75,12 +119,73 @@
           </ol>
         </aside>
 
-        <a class="community-content-recommend-link" th:href="@{/content/recommendations}">
-          <strong>Knowva의 과목 콘텐츠 추천 영상</strong>
-          <span><i aria-hidden="true"></i> 동영상 재생</span>
+        <a class="community-content-recommend-link" th:href="@{/content/recommendations}" th:remove="all">
+          <span class="community-content-recommend-copy">
+            <strong>Knowva의 과목 콘텐츠 추천</strong>
+            <span class="community-video-icon" aria-hidden="true">
+              <span class="community-video-body">
+                <span class="community-video-play"></span>
+              </span>
+            </span>
+            <span class="community-video-caption"><i aria-hidden="true"></i> 동영상 재생</span>
+          </span>
         </a>
       </div>
     </section>
   </main>
+  <script>
+    (() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const screen = document.querySelector('.community-board-screen');
+      const boards = () => Array.from(document.querySelectorAll('.community-board-screen .community-left-rail, .community-board-screen .community-side-rail'));
+      let current = 0;
+      let target = 0;
+      let frame = 0;
+      let revealTimer = 0;
+
+      const apply = (value) => {
+        boards().forEach((board) => board.style.setProperty('--community-follow-y', `${value.toFixed(2)}px`));
+      };
+
+      const tick = () => {
+        current += (target - current) * 0.055;
+        if (Math.abs(target - current) < 0.05) {
+          current = target;
+          frame = 0;
+          apply(current);
+          return;
+        }
+        apply(current);
+        frame = window.requestAnimationFrame(tick);
+      };
+
+      const update = () => {
+        const disabled = reduceMotion.matches || window.innerWidth <= 1020;
+        if (screen) {
+          window.clearTimeout(revealTimer);
+          if (disabled) {
+            screen.classList.remove('is-community-follow-away');
+          } else {
+            screen.classList.add('is-community-follow-away');
+            revealTimer = window.setTimeout(() => {
+              screen.classList.remove('is-community-follow-away');
+            }, 420);
+          }
+        }
+
+        target = disabled
+          ? 0
+          : Math.min(36, window.scrollY * 0.055);
+        if (!frame) {
+          frame = window.requestAnimationFrame(tick);
+        }
+      };
+
+      window.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      reduceMotion.addEventListener?.('change', update);
+      update();
+    })();
+  </script>
 </body>
 </html>

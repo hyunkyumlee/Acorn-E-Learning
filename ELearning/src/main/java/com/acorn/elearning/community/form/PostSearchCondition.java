@@ -11,7 +11,7 @@ public class PostSearchCondition {
     private String keyword;
     private String sort = "latest";
     private int page = 1;
-    private int size = 10;
+    private int size = 20;
 
     public int offset() {
         return (normalizedPage() - 1) * normalizedSize();
@@ -31,7 +31,7 @@ public class PostSearchCondition {
 
     public int normalizedSize() {
         if (size < 1) {
-            return 10;
+            return 20;
         }
         return Math.min(size, 50);
     }

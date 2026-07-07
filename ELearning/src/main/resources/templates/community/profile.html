@@ -26,64 +26,209 @@
       <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></div>
 
       <section class="panel community-panel community-profile-panel" th:if="${view != null}">
-        <div class="community-panel-header">
-          <div>
-            <h2 th:text="${profileName}">nova_learner</h2>
-            <p>게시판 활동을 자동 집계하는 커뮤니티 전용 프로필이야.</p>
+        <div class="community-profile-hero">
+          <div class="community-profile-hero-main">
+            <span class="community-profile-hero-avatar" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
+            <div>
+              <h2 th:text="${profileName}">nova_learner</h2>
+              <p>Java 기초 문법을 꾸준히 학습합니다.</p>
+              <a class="button ghost" th:href="@{/community/board}">게시판으로</a>
+            </div>
           </div>
-          <a class="button" th:href="@{/community/board}">게시판으로</a>
+          <div class="community-profile-hero-meta">
+            <span>현재 레벨 <b>BRONZE</b></span>
+            <span>대표 과목 <b>Java</b></span>
+          </div>
         </div>
 
         <div class="community-profile-stats">
           <article><span>작성 글</span><strong th:text="${view.postCount()}">0</strong></article>
-          <article><span>작성 댓글</span><strong th:text="${view.commentCount()}">0</strong></article>
-          <article><span>받은 공감</span><strong th:text="${view.receivedLikeCount()}">0</strong></article>
-          <article><span>받은 댓글</span><strong th:text="${view.receivedCommentCount()}">0</strong></article>
-          <article><span>좋아요한 글</span><strong th:text="${view.likedCount()}">0</strong></article>
-          <article><span>스크랩</span><strong th:text="${view.scrapCount()}">0</strong></article>
+          <article class="community-profile-comment-stat">
+            <span>작성 댓글</span>
+            <strong th:text="${view.commentCount()}">0</strong>
+            <button class="community-profile-more-button" type="button" data-community-note-toggle="my-comments" aria-expanded="false">더보기</button>
+          </article>
+          <article class="community-profile-comment-stat">
+            <span>받은 공감</span>
+            <strong th:text="${view.receivedLikeCount()}">0</strong>
+            <button class="community-profile-more-button" type="button" data-community-note-toggle="received-likes" aria-expanded="false">더보기</button>
+          </article>
+          <article class="community-profile-comment-stat">
+            <span>받은 댓글</span>
+            <strong th:text="${view.receivedCommentCount()}">0</strong>
+            <button class="community-profile-more-button" type="button" data-community-note-toggle="received-comments" aria-expanded="false">더보기</button>
+          </article>
+          <article class="community-profile-comment-stat">
+            <span>좋아요한 글</span>
+            <strong th:text="${view.likedCount()}">0</strong>
+            <button class="community-profile-more-button" type="button" data-community-note-toggle="liked-posts" aria-expanded="false">더보기</button>
+          </article>
+          <article class="community-profile-comment-stat">
+            <span>스크랩</span>
+            <strong th:text="${view.scrapCount()}">0</strong>
+            <button class="community-profile-more-button" type="button" data-community-note-toggle="scraped-posts" aria-expanded="false">더보기</button>
+          </article>
         </div>
 
         <div class="community-profile-grid">
-          <section class="community-subsection">
+          <section class="community-subsection community-profile-post-section">
             <h3>내가 쓴 글</h3>
-            <ul class="community-list compact community-profile-list">
+            <ul class="community-profile-post-list">
               <li th:each="post : ${view.myPosts}">
-                <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">글</a>
-                <span class="community-badge" th:text="|공감 ${post.likeCount}|"></span>
+                <a th:href="@{/community/posts/{id}(id=${post.postId})}">
+                  <strong th:text="${post.title}">글 제목</strong>
+                  <span>
+                    공감 <b th:text="${post.likeCount}">0</b>
+                    · 댓글 <b th:text="${post.commentCount}">0</b>
+                    · 스크랩 <b th:text="${post.scrapCount}">0</b>
+                  </span>
+                </a>
               </li>
               <li th:if="${#lists.isEmpty(view.myPosts)}" class="community-empty">작성한 글이 없어.</li>
             </ul>
           </section>
-          <section class="community-subsection">
-            <h3>내 댓글</h3>
-            <ul class="community-list compact community-profile-list">
+        </div>
+        <div class="community-comment-note-backdrop" data-community-note-panel="my-comments" hidden>
+          <aside class="community-comment-note" role="dialog" aria-modal="false" aria-label="내가 쓴 댓글">
+            <div class="community-comment-note-header">
+              <div>
+                <span>작성 댓글</span>
+                <h3>내가 쓴 댓글</h3>
+              </div>
+              <button class="community-comment-note-close" type="button" data-community-note-close aria-label="닫기">닫기</button>
+            </div>
+            <ul class="community-comment-note-list">
               <li th:each="comment : ${view.myComments}">
                 <a th:href="@{/community/posts/{id}(id=${comment.postId})}" th:text="${comment.content}">댓글</a>
               </li>
               <li th:if="${#lists.isEmpty(view.myComments)}" class="community-empty">작성한 댓글이 없어.</li>
             </ul>
-          </section>
-          <section class="community-subsection">
-            <h3>좋아요한 글</h3>
-            <ul class="community-list compact community-profile-list">
+          </aside>
+        </div>
+        <div class="community-comment-note-backdrop" data-community-note-panel="received-likes" hidden>
+          <aside class="community-comment-note" role="dialog" aria-modal="false" aria-label="받은 공감">
+            <div class="community-comment-note-header">
+              <div>
+                <span>받은 공감</span>
+                <h3>공감 받은 글</h3>
+              </div>
+              <button class="community-comment-note-close" type="button" data-community-note-close aria-label="닫기">닫기</button>
+            </div>
+            <ul class="community-comment-note-list">
+              <li th:each="post : ${view.myPosts}" th:if="${post.likeCount != null and post.likeCount > 0}">
+                <a th:href="@{/community/posts/{id}(id=${post.postId})}">
+                  <strong th:text="${post.title}">글 제목</strong>
+                  <span th:text="|공감 ${post.likeCount}|">공감 0</span>
+                </a>
+              </li>
+              <li th:if="${view.receivedLikeCount() == 0}" class="community-empty">아직 공감 받은 글이 없어.</li>
+            </ul>
+          </aside>
+        </div>
+        <div class="community-comment-note-backdrop" data-community-note-panel="received-comments" hidden>
+          <aside class="community-comment-note" role="dialog" aria-modal="false" aria-label="받은 댓글">
+            <div class="community-comment-note-header">
+              <div>
+                <span>받은 댓글</span>
+                <h3>댓글 받은 글</h3>
+              </div>
+              <button class="community-comment-note-close" type="button" data-community-note-close aria-label="닫기">닫기</button>
+            </div>
+            <ul class="community-comment-note-list">
+              <li th:each="post : ${view.myPosts}" th:if="${post.commentCount != null and post.commentCount > 0}">
+                <a th:href="@{/community/posts/{id}(id=${post.postId})}">
+                  <strong th:text="${post.title}">글 제목</strong>
+                  <span th:text="|댓글 ${post.commentCount}|">댓글 0</span>
+                </a>
+              </li>
+              <li th:if="${view.receivedCommentCount() == 0}" class="community-empty">아직 댓글 받은 글이 없어.</li>
+            </ul>
+          </aside>
+        </div>
+        <div class="community-comment-note-backdrop" data-community-note-panel="liked-posts" hidden>
+          <aside class="community-comment-note" role="dialog" aria-modal="false" aria-label="좋아요한 글">
+            <div class="community-comment-note-header">
+              <div>
+                <span>좋아요한 글</span>
+                <h3>내가 공감한 글</h3>
+              </div>
+              <button class="community-comment-note-close" type="button" data-community-note-close aria-label="닫기">닫기</button>
+            </div>
+            <ul class="community-comment-note-list">
               <li th:each="post : ${view.likedPosts}">
-                <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">글</a>
+                <a th:href="@{/community/posts/{id}(id=${post.postId})}">
+                  <strong th:text="${post.title}">글 제목</strong>
+                  <span th:text="|공감 ${post.likeCount} · 댓글 ${post.commentCount}|">공감 0 · 댓글 0</span>
+                </a>
               </li>
               <li th:if="${#lists.isEmpty(view.likedPosts)}" class="community-empty">좋아요한 글이 없어.</li>
             </ul>
-          </section>
-          <section class="community-subsection">
-            <h3>스크랩한 글</h3>
-            <ul class="community-list compact community-profile-list">
+          </aside>
+        </div>
+        <div class="community-comment-note-backdrop" data-community-note-panel="scraped-posts" hidden>
+          <aside class="community-comment-note" role="dialog" aria-modal="false" aria-label="스크랩한 글">
+            <div class="community-comment-note-header">
+              <div>
+                <span>스크랩</span>
+                <h3>스크랩한 글</h3>
+              </div>
+              <button class="community-comment-note-close" type="button" data-community-note-close aria-label="닫기">닫기</button>
+            </div>
+            <ul class="community-comment-note-list">
               <li th:each="post : ${view.scrapedPosts}">
-                <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">글</a>
+                <a th:href="@{/community/posts/{id}(id=${post.postId})}">
+                  <strong th:text="${post.title}">글 제목</strong>
+                  <span th:text="|공감 ${post.likeCount} · 댓글 ${post.commentCount}|">공감 0 · 댓글 0</span>
+                </a>
               </li>
               <li th:if="${#lists.isEmpty(view.scrapedPosts)}" class="community-empty">스크랩한 글이 없어.</li>
             </ul>
-          </section>
+          </aside>
         </div>
       </section>
     </section>
   </main>
+  <script>
+    (() => {
+      const toggles = document.querySelectorAll("[data-community-note-toggle]");
+      const panels = document.querySelectorAll("[data-community-note-panel]");
+      const closeAll = () => {
+        panels.forEach((panel) => panel.setAttribute("hidden", ""));
+        toggles.forEach((toggle) => {
+          toggle.textContent = "더보기";
+          toggle.setAttribute("aria-expanded", "false");
+        });
+      };
+
+      toggles.forEach((toggle) => {
+        toggle.addEventListener("click", () => {
+          const key = toggle.dataset.communityNoteToggle;
+          const panel = document.querySelector(`[data-community-note-panel="${key}"]`);
+          if (!panel) {
+            return;
+          }
+          const willOpen = panel.hasAttribute("hidden");
+          closeAll();
+          if (willOpen) {
+            panel.removeAttribute("hidden");
+            toggle.textContent = "접기";
+            toggle.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
+      panels.forEach((panel) => {
+        panel.addEventListener("click", (event) => {
+          if (event.target === panel || event.target.closest("[data-community-note-close]")) {
+            closeAll();
+          }
+        });
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeAll();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
