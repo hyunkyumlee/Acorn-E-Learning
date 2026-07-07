@@ -113,7 +113,7 @@ INSERT INTO user_learning_profiles (
 VALUES
   (1, 1, @java_subject_id, '관리자 검수용 계정입니다.', 'GOLD', 0, 'ADVANCED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (2, 2, @java_subject_id, 'Java 기초 문법을 꾸준히 학습합니다.', 'BRONZE', 230, 'BEGINNER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, 3, @java_subject_id, 'AI 코딩테스트와 Premium 분석을 확인합니다.', 'SILVER', 870, 'INTERMEDIATE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (3, 3, @java_subject_id, 'AI 코딩테스트와 Premium 분석을 확인합니다.', 'GOLD', 1870, 'ADVANCED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   primary_subject_id = VALUES(primary_subject_id),
@@ -146,6 +146,88 @@ ON DUPLICATE KEY UPDATE
   is_active = VALUES(is_active),
   updated_at = CURRENT_TIMESTAMP;
 
+/*
+  Learning seed coverage
+  - Existing Java Bronze rows above are kept as the hand-written base example.
+  - The generated rows below fill every active subject and every roadmap level
+    so subject/level switching never lands on an empty curriculum.
+  - Node id ranges: JAVA 1-26, PYTHON 101-126, WEB 201-226, SQL 301-326.
+*/
+INSERT INTO curriculum_nodes (
+  node_id, subject_id, parent_node_id, level_code, node_type, planet_no, title, description, sort_order, gate_condition, is_active, created_at, updated_at
+)
+SELECT
+  seed_subject.node_base + seed_level.node_offset + seed_step.sort_order AS node_id,
+  seed_subject.subject_id,
+  NULL AS parent_node_id,
+  seed_level.level_code,
+  IF(seed_step.sort_order = 6, 'GATE', 'PLANET') AS node_type,
+  IF(seed_step.sort_order = 6, NULL, seed_step.sort_order) AS planet_no,
+  IF(
+    seed_step.sort_order = 6,
+    CONCAT(seed_subject.subject_name, ' ', seed_level.level_label, ' AI 코딩테스트 Gate'),
+    CONCAT(seed_subject.subject_name, ' ', seed_level.level_label, ' ', seed_step.topic, ' 행성')
+  ) AS title,
+  IF(
+    seed_step.sort_order = 6,
+    '5개 planet 완료 후 응시하는 AI 코딩테스트입니다.',
+    CONCAT(seed_step.description, ' 학습합니다.')
+  ) AS description,
+  seed_step.sort_order,
+  CASE
+    WHEN seed_step.sort_order = 1 THEN NULL
+    WHEN seed_step.sort_order = 6 THEN '5 planets complete'
+    ELSE CONCAT('planet ', seed_step.sort_order - 1, ' complete')
+  END AS gate_condition,
+  1 AS is_active,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+FROM (
+  SELECT @java_subject_id AS subject_id, 'JAVA' AS subject_code, 'Java' AS subject_name, 0 AS node_base
+  UNION ALL SELECT @python_subject_id, 'PYTHON', 'Python', 100
+  UNION ALL SELECT @web_subject_id, 'WEB', 'Web', 200
+  UNION ALL SELECT @sql_subject_id, 'SQL', 'SQL', 300
+) seed_subject
+CROSS JOIN (
+  SELECT 'BRONZE' AS level_code, 'Bronze' AS level_label, 0 AS node_offset
+  UNION ALL SELECT 'SILVER', 'Silver', 10
+  UNION ALL SELECT 'GOLD', 'Gold', 20
+) seed_level
+JOIN (
+  SELECT 'BRONZE' AS level_code, 1 AS sort_order, '기초 문법' AS topic, '기초 문법과 실행 흐름을' AS description
+  UNION ALL SELECT 'BRONZE', 2, '조건 분기', '조건에 따라 다른 처리를 하는 방법을'
+  UNION ALL SELECT 'BRONZE', 3, '반복 처리', '반복문과 반복 조건을'
+  UNION ALL SELECT 'BRONZE', 4, '자료 구조', '기초 자료 구조와 값 접근을'
+  UNION ALL SELECT 'BRONZE', 5, '함수와 모듈', '기능을 함수와 모듈로 나누는 방법을'
+  UNION ALL SELECT 'BRONZE', 6, 'Gate', 'Bronze Gate를'
+  UNION ALL SELECT 'SILVER', 1, '자료구조 활용', '자료구조를 목적에 맞게 활용하는 방법을'
+  UNION ALL SELECT 'SILVER', 2, '예외와 검증', '예외 상황과 입력 검증 흐름을'
+  UNION ALL SELECT 'SILVER', 3, '입출력 처리', '입력과 출력 데이터를 다루는 방법을'
+  UNION ALL SELECT 'SILVER', 4, '모듈화 설계', '역할별로 코드를 나누는 설계를'
+  UNION ALL SELECT 'SILVER', 5, '테스트와 디버깅', '작은 단위로 검증하고 오류를 찾는 방법을'
+  UNION ALL SELECT 'SILVER', 6, 'Gate', 'Silver Gate를'
+  UNION ALL SELECT 'GOLD', 1, '성능 최적화', '시간과 메모리를 고려한 구현을'
+  UNION ALL SELECT 'GOLD', 2, '설계 패턴', '반복되는 설계 문제를 해결하는 패턴을'
+  UNION ALL SELECT 'GOLD', 3, '동시성과 비동기', '동시 실행과 비동기 처리 흐름을'
+  UNION ALL SELECT 'GOLD', 4, '보안과 안정성', '입력 신뢰성과 안전한 처리 기준을'
+  UNION ALL SELECT 'GOLD', 5, '실전 프로젝트', '실전 기능을 작은 단위로 완성하는 방법을'
+  UNION ALL SELECT 'GOLD', 6, 'Gate', 'Gold Gate를'
+) seed_step
+  ON seed_step.level_code = seed_level.level_code
+WHERE NOT (seed_subject.subject_code = 'JAVA' AND seed_level.level_code = 'BRONZE')
+ON DUPLICATE KEY UPDATE
+  subject_id = VALUES(subject_id),
+  parent_node_id = VALUES(parent_node_id),
+  level_code = VALUES(level_code),
+  node_type = VALUES(node_type),
+  planet_no = VALUES(planet_no),
+  title = VALUES(title),
+  description = VALUES(description),
+  sort_order = VALUES(sort_order),
+  gate_condition = VALUES(gate_condition),
+  is_active = VALUES(is_active),
+  updated_at = CURRENT_TIMESTAMP;
+
 INSERT INTO lessons (
   lesson_id, node_id, title, summary, content, example_code, sort_order, is_active, created_by, created_at, updated_at
 )
@@ -155,6 +237,42 @@ VALUES
   (3, 3, '반복문으로 여러 번 실행하기', '같은 코드를 반복 실행합니다.', 'for 문은 시작값, 조건식, 증감식을 한 줄에 작성합니다.', 'for (int i = 0; i < 3; i++) {\n    System.out.println(i);\n}', 1, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (4, 4, '배열에 여러 값 담기', '같은 자료형 값을 묶어서 저장합니다.', '배열은 index를 사용해 값에 접근합니다.', 'int[] scores = {80, 90, 100};\nSystem.out.println(scores[0]);', 1, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (5, 5, '메서드로 코드 나누기', '반복되는 코드를 이름 붙여 분리합니다.', '메서드는 입력값을 받아 결과를 반환할 수 있습니다.', 'int add(int a, int b) {\n    return a + b;\n}', 1, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  node_id = VALUES(node_id),
+  title = VALUES(title),
+  summary = VALUES(summary),
+  content = VALUES(content),
+  example_code = VALUES(example_code),
+  sort_order = VALUES(sort_order),
+  is_active = VALUES(is_active),
+  created_by = VALUES(created_by),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO lessons (
+  lesson_id, node_id, title, summary, content, example_code, sort_order, is_active, created_by, created_at, updated_at
+)
+SELECT
+  node.node_id AS lesson_id,
+  node.node_id,
+  REPLACE(node.title, ' 행성', ' 핵심 이론') AS title,
+  node.description AS summary,
+  CONCAT(node.title, '에서는 ', node.description, ' 예제와 문제풀이를 통해 개념을 확인합니다.') AS content,
+  CASE subject.subject_code
+    WHEN 'JAVA' THEN 'int value = 10;\nSystem.out.println(value);'
+    WHEN 'PYTHON' THEN 'value = 10\nprint(value)'
+    WHEN 'WEB' THEN '<button class="primary">Start</button>'
+    WHEN 'SQL' THEN 'SELECT title\nFROM lessons\nWHERE is_active = 1;'
+    ELSE 'System.out.println("Knowva");'
+  END AS example_code,
+  1 AS sort_order,
+  1 AS is_active,
+  1 AS created_by,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+FROM curriculum_nodes node
+JOIN subjects subject ON subject.subject_id = node.subject_id
+WHERE node.node_type = 'PLANET'
+  AND NOT (subject.subject_code = 'JAVA' AND node.level_code = 'BRONZE')
 ON DUPLICATE KEY UPDATE
   node_id = VALUES(node_id),
   title = VALUES(title),
@@ -259,6 +377,38 @@ ON DUPLICATE KEY UPDATE
   unlocked_by_exam_id = VALUES(unlocked_by_exam_id),
   unlocked_at = VALUES(unlocked_at);
 
+INSERT INTO user_level_unlocks (
+  unlock_id, user_id, subject_id, level_code, unlock_source, unlocked_by_exam_id, unlocked_at, created_at
+)
+SELECT
+  1000 + seed_subject.node_base + seed_level.unlock_order AS unlock_id,
+  3 AS user_id,
+  seed_subject.subject_id,
+  seed_level.level_code,
+  IF(seed_level.level_code = 'BRONZE', 'ONBOARDING', 'ADMIN_ADJUST') AS unlock_source,
+  NULL AS unlocked_by_exam_id,
+  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL (4 - seed_level.unlock_order) DAY) AS unlocked_at,
+  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL (4 - seed_level.unlock_order) DAY) AS created_at
+FROM (
+  SELECT @java_subject_id AS subject_id, 0 AS node_base
+  UNION ALL SELECT @python_subject_id, 100
+  UNION ALL SELECT @web_subject_id, 200
+  UNION ALL SELECT @sql_subject_id, 300
+) seed_subject
+CROSS JOIN (
+  SELECT 'BRONZE' AS level_code, 1 AS unlock_order
+  UNION ALL SELECT 'SILVER', 2
+  UNION ALL SELECT 'GOLD', 3
+) seed_level
+WHERE 1 = 1
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  subject_id = VALUES(subject_id),
+  level_code = VALUES(level_code),
+  unlock_source = VALUES(unlock_source),
+  unlocked_by_exam_id = VALUES(unlocked_by_exam_id),
+  unlocked_at = VALUES(unlocked_at);
+
 INSERT INTO learning_progress (
   progress_id, user_id, subject_id, node_id, lesson_completed, practice_passed, progress_rate, completed_at, created_at, updated_at
 )
@@ -280,12 +430,68 @@ ON DUPLICATE KEY UPDATE
   completed_at = VALUES(completed_at),
   updated_at = CURRENT_TIMESTAMP;
 
+INSERT INTO learning_progress (
+  progress_id, user_id, subject_id, node_id, lesson_completed, practice_passed, progress_rate, completed_at, created_at, updated_at
+)
+SELECT
+  10000 + node.node_id AS progress_id,
+  3 AS user_id,
+  node.subject_id,
+  node.node_id,
+  1 AS lesson_completed,
+  1 AS practice_passed,
+  100.00 AS progress_rate,
+  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY) AS completed_at,
+  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY) AS created_at,
+  CURRENT_TIMESTAMP AS updated_at
+FROM curriculum_nodes node
+WHERE node.node_type = 'PLANET'
+  AND node.is_active = 1
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  subject_id = VALUES(subject_id),
+  node_id = VALUES(node_id),
+  lesson_completed = VALUES(lesson_completed),
+  practice_passed = VALUES(practice_passed),
+  progress_rate = VALUES(progress_rate),
+  completed_at = VALUES(completed_at),
+  updated_at = CURRENT_TIMESTAMP;
+
 INSERT INTO practice_set_attempts (
   set_attempt_id, user_id, subject_id, node_id, total_count, correct_count, status, passed, completed_at, created_at, updated_at
 )
 VALUES
   (1, 2, @java_subject_id, 1, 10, 7, 'COMPLETED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
   (2, 3, @java_subject_id, 5, 10, 9, 'COMPLETED', 1, CURRENT_TIMESTAMP, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  subject_id = VALUES(subject_id),
+  node_id = VALUES(node_id),
+  total_count = VALUES(total_count),
+  correct_count = VALUES(correct_count),
+  status = VALUES(status),
+  passed = VALUES(passed),
+  completed_at = VALUES(completed_at),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO practice_set_attempts (
+  set_attempt_id, user_id, subject_id, node_id, total_count, correct_count, status, passed, completed_at, created_at, updated_at
+)
+SELECT
+  10000 + node.node_id AS set_attempt_id,
+  3 AS user_id,
+  node.subject_id,
+  node.node_id,
+  10 AS total_count,
+  10 AS correct_count,
+  'COMPLETED' AS status,
+  1 AS passed,
+  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY) AS completed_at,
+  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY) AS created_at,
+  CURRENT_TIMESTAMP AS updated_at
+FROM curriculum_nodes node
+WHERE node.node_type = 'PLANET'
+  AND node.is_active = 1
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   subject_id = VALUES(subject_id),
@@ -337,6 +543,57 @@ ON DUPLICATE KEY UPDATE
   is_active = VALUES(is_active),
   updated_at = CURRENT_TIMESTAMP;
 
+INSERT INTO practice_problems (
+  problem_id, subject_id, node_id, problem_type, question, answer_text, difficulty_code, created_by, is_active, created_at, updated_at
+)
+SELECT
+  seed_subject.problem_base + seed_level.problem_offset + ((node.planet_no - 1) * 2) + seed_variant.variant_no AS problem_id,
+  node.subject_id,
+  node.node_id,
+  seed_variant.problem_type,
+  IF(
+    seed_variant.problem_type = 'MULTIPLE_CHOICE',
+    CONCAT(node.title, '의 핵심 개념으로 가장 알맞은 것은?'),
+    CONCAT(node.title, '의 핵심 표현을 입력하세요.')
+  ) AS question,
+  REPLACE(REPLACE(node.title, CONCAT(seed_subject.subject_name, ' '), ''), ' 행성', '') AS answer_text,
+  node.level_code AS difficulty_code,
+  1 AS created_by,
+  1 AS is_active,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+FROM curriculum_nodes node
+JOIN (
+  SELECT @java_subject_id AS subject_id, 'Java' AS subject_name, 0 AS problem_base
+  UNION ALL SELECT @python_subject_id, 'Python', 1000
+  UNION ALL SELECT @web_subject_id, 'Web', 2000
+  UNION ALL SELECT @sql_subject_id, 'SQL', 3000
+) seed_subject
+  ON seed_subject.subject_id = node.subject_id
+JOIN (
+  SELECT 'BRONZE' AS level_code, 0 AS problem_offset
+  UNION ALL SELECT 'SILVER', 100
+  UNION ALL SELECT 'GOLD', 200
+) seed_level
+  ON seed_level.level_code = node.level_code
+CROSS JOIN (
+  SELECT 1 AS variant_no, 'MULTIPLE_CHOICE' AS problem_type
+  UNION ALL SELECT 2, 'FILL_BLANK'
+) seed_variant
+WHERE node.node_type = 'PLANET'
+  AND node.is_active = 1
+  AND NOT (seed_subject.subject_name = 'Java' AND node.level_code = 'BRONZE')
+ON DUPLICATE KEY UPDATE
+  subject_id = VALUES(subject_id),
+  node_id = VALUES(node_id),
+  problem_type = VALUES(problem_type),
+  question = VALUES(question),
+  answer_text = VALUES(answer_text),
+  difficulty_code = VALUES(difficulty_code),
+  created_by = VALUES(created_by),
+  is_active = VALUES(is_active),
+  updated_at = CURRENT_TIMESTAMP;
+
 INSERT INTO problem_choices (choice_id, problem_id, choice_label, choice_text, is_correct, sort_order)
 VALUES
   (1, 1, 'A', 'int score = 10;', 1, 1), (2, 1, 'B', 'score int = 10;', 0, 2), (3, 1, 'C', 'number score = 10;', 0, 3), (4, 1, 'D', 'var score int;', 0, 4),
@@ -344,6 +601,35 @@ VALUES
   (9, 5, 'A', 'i <= 5', 0, 1), (10, 5, 'B', 'i < 5', 1, 2), (11, 5, 'C', 'i == 5', 0, 3), (12, 5, 'D', 'i != 0', 0, 4),
   (13, 7, 'A', 'arr.size', 0, 1), (14, 7, 'B', 'arr.count', 0, 2), (15, 7, 'C', 'arr.length', 1, 3), (16, 7, 'D', 'length(arr)', 0, 4),
   (17, 9, 'A', 'break', 0, 1), (18, 9, 'B', 'continue', 0, 2), (19, 9, 'C', 'return', 1, 3), (20, 9, 'D', 'print', 0, 4)
+ON DUPLICATE KEY UPDATE
+  problem_id = VALUES(problem_id),
+  choice_label = VALUES(choice_label),
+  choice_text = VALUES(choice_text),
+  is_correct = VALUES(is_correct),
+  sort_order = VALUES(sort_order);
+
+INSERT INTO problem_choices (choice_id, problem_id, choice_label, choice_text, is_correct, sort_order)
+SELECT
+  (problem.problem_id * 10) + seed_choice.choice_no AS choice_id,
+  problem.problem_id,
+  seed_choice.choice_label,
+  CASE seed_choice.choice_label
+    WHEN 'A' THEN problem.answer_text
+    WHEN 'B' THEN CONCAT(problem.difficulty_code, ' 오답 보기')
+    WHEN 'C' THEN '문제와 무관한 선택지'
+    ELSE '정답 없음'
+  END AS choice_text,
+  IF(seed_choice.choice_label = 'A', 1, 0) AS is_correct,
+  seed_choice.choice_no AS sort_order
+FROM practice_problems problem
+CROSS JOIN (
+  SELECT 1 AS choice_no, 'A' AS choice_label
+  UNION ALL SELECT 2, 'B'
+  UNION ALL SELECT 3, 'C'
+  UNION ALL SELECT 4, 'D'
+) seed_choice
+WHERE problem.problem_type = 'MULTIPLE_CHOICE'
+  AND problem.problem_id > 10
 ON DUPLICATE KEY UPDATE
   problem_id = VALUES(problem_id),
   choice_label = VALUES(choice_label),
@@ -411,7 +697,7 @@ INSERT INTO ranking_scores (
   ranking_id, user_id, subject_id, scope_type, scope_key, period_type, period_key, score, rank_no, calculated_at, created_at, updated_at
 )
 VALUES
-  (1, 3, @java_subject_id, 'SUBJECT', 'JAVA', 'WEEKLY', DATE_FORMAT(CURRENT_DATE, '%x-W%v'), 870, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (1, 3, @java_subject_id, 'SUBJECT', 'JAVA', 'WEEKLY', DATE_FORMAT(CURRENT_DATE, '%x-W%v'), 1870, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (2, 2, @java_subject_id, 'SUBJECT', 'JAVA', 'WEEKLY', DATE_FORMAT(CURRENT_DATE, '%x-W%v'), 230, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (3, 1, NULL, 'GLOBAL', 'ALL', 'WEEKLY', DATE_FORMAT(CURRENT_DATE, '%x-W%v'), 0, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
