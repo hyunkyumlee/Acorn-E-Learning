@@ -41,13 +41,13 @@
         <option value="MULTIPLE_CHOICE">객관식</option>
         <option value="FILL_BLANK">빈칸</option>
         <option value="CODE_OUTPUT">코드 결과 예측</option>
-        <option value="SHORT_CODE">간단 코드 입력</option>
+        <option value="CODE_SHORT">간단 코드 입력</option>
       </select>
       <select id="problemDifficultyFilter">
         <option value="">난이도</option>
-        <option value="LOW">하</option>
-        <option value="MEDIUM">중</option>
-        <option value="HIGH">상</option>
+        <option value="BRONZE">BRONZE</option>
+        <option value="SILVER">SILVER</option>
+        <option value="GOLD">GOLD</option>
       </select>
       <select id="problemActiveFilter">
         <option value="">활성화 상태</option>
@@ -93,14 +93,15 @@
             <span th:case="'MULTIPLE_CHOICE'">객관식</span>
             <span th:case="'FILL_BLANK'">빈칸</span>
             <span th:case="'CODE_OUTPUT'">코드 결과 예측</span>
+            <span th:case="'CODE_SHORT'">간단 코드 입력</span>
             <span th:case="'SHORT_CODE'">간단 코드 입력</span>
             <span th:case="*" th:text="${problem.problemType}">객관식</span>
           </td>
           <td class="problem-question" th:text="${problem.question}">Java에서 정수형 변수를 선언하는 키워드는?</td>
           <td th:switch="${problem.difficultyCode}">
-            <span th:case="'LOW'">하</span>
-            <span th:case="'MEDIUM'">중</span>
-            <span th:case="'HIGH'">상</span>
+            <span th:case="'BRONZE'">BRONZE</span>
+            <span th:case="'SILVER'">SILVER</span>
+            <span th:case="'GOLD'">GOLD</span>
             <span th:case="*" th:text="${problem.difficultyCode}">하</span>
           </td>
           <td th:text="${problem.isActive} ? '활성' : '비활성'">활성</td>
@@ -148,7 +149,7 @@
             <option value="MULTIPLE_CHOICE">객관식</option>
             <option value="FILL_BLANK">빈칸</option>
             <option value="CODE_OUTPUT">코드 결과 예측</option>
-            <option value="SHORT_CODE">간단 코드 입력</option>
+            <option value="CODE_SHORT">간단 코드 입력</option>
           </select>
 
           <textarea name="question" id="problemQuestion" class="problem-question-input" placeholder="문제 내용 입력"></textarea>
@@ -159,9 +160,9 @@
             <input type="text" name="answerText" id="problemAnswerText" placeholder="정답 입력">
             <select name="difficultyCode" id="problemDifficultyCode">
               <option value="">난이도 선택</option>
-              <option value="LOW">하</option>
-              <option value="MEDIUM">중</option>
-              <option value="HIGH">상</option>
+              <option value="BRONZE">BRONZE</option>
+              <option value="SILVER">SILVER</option>
+              <option value="GOLD">GOLD</option>
             </select>
           </div>
 
@@ -203,13 +204,9 @@
     "객관식": "MULTIPLE_CHOICE",
     "빈칸": "FILL_BLANK",
     "코드 결과 예측": "CODE_OUTPUT",
-    "간단 코드 입력": "SHORT_CODE"
-  };
-
-  const difficultyCodeMap = {
-    "하": "LOW",
-    "중": "MEDIUM",
-    "상": "HIGH"
+    "간단 코드 입력": "CODE_SHORT",
+    "SHORT_CODE": "CODE_SHORT",
+    "CODE_SHORT": "CODE_SHORT"
   };
 
   function applyProblemFilters() {
@@ -224,7 +221,7 @@
       const rowQuestion = (row.dataset.question || "").toLowerCase();
       const rowSubjectId = row.dataset.subjectId || "";
       const rowNodeId = row.dataset.nodeId || "";
-      const rowProblemType = row.dataset.problemType || "";
+      const rowProblemType = problemTypeCodeMap[row.dataset.problemType] || row.dataset.problemType || "";
       const rowDifficultyCode = row.dataset.difficultyCode || "";
       const rowIsActive = row.dataset.isActive || "";
 
@@ -293,7 +290,7 @@
       document.querySelector("#problemQuestion").value = button.dataset.question || "";
       document.querySelector("#problemAnswerText").value = button.dataset.answerText || "";
       document.querySelector("#problemExplanation").value = button.dataset.explanation || "";
-      document.querySelector("#problemDifficultyCode").value = difficultyCodeMap[button.dataset.difficultyCode] || button.dataset.difficultyCode;
+      document.querySelector("#problemDifficultyCode").value = button.dataset.difficultyCode;
       document.querySelector("#problemIsActive").value = button.dataset.isActive;
 
       document.querySelector("#problemType").scrollIntoView({ behavior: "smooth", block: "center" });

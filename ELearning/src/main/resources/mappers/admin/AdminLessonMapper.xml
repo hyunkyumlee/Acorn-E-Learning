@@ -43,14 +43,14 @@
         l.content,
         c.level_code,
         l.sort_order,
-        l.updated_at,
+        l.created_at,
         l.is_active
         FROM lessons l
         JOIN curriculum_nodes c
         ON l.node_id = c.node_id
         JOIN subjects s
         ON c.subject_id = s.subject_id
-        ORDER BY l.updated_at DESC, l.lesson_id DESC
+        ORDER BY l.created_at DESC, l.lesson_id DESC
     </select>
 
     <delete id="deleteById">

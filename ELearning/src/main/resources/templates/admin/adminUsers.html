@@ -28,10 +28,9 @@
       <input type="search" id="searchUser" placeholder="이메일 / 닉네임 검색">
       <select id="userSubjectFilter">
         <option value="">관심 과목</option>
-        <option th:each="user : ${userList}"
-                th:if="${user.subjectName != null}"
-                th:value="${user.subjectName}"
-                th:text="${user.subjectName}">Java</option>
+        <option th:each="subject : ${subjectList}"
+                th:value="${subject.subjectName}"
+                th:text="${subject.subjectName}">Java</option>
       </select>
       <select id="userGradeFilter">
         <option value="">등급</option>

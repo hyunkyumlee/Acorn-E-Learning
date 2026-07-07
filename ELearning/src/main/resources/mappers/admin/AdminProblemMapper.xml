@@ -52,7 +52,7 @@
         ON p.subject_id = s.subject_id
         LEFT JOIN curriculum_nodes c
         ON p.node_id = c.node_id
-        ORDER BY p.updated_at DESC, p.problem_id DESC
+        ORDER BY p.problem_id DESC
     </select>
 
     <delete id="deleteById" parameterType="long">
