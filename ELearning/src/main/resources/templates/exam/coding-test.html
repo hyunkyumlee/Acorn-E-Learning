@@ -12,9 +12,9 @@
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell exam-screen">
     <section class="page-heading">
-      <span class="eyebrow">SR-008 · AI Coding Test</span>
+      <span class="eyebrow">Coding Test Gate</span>
       <h1>AI 코딩테스트</h1>
-      <p>응시 조건을 확인하고 3문항을 순차적으로 풉니다.</p>
+      <p>학습 화면에서 열린 Gate 기준으로 3문항을 시작합니다.</p>
     </section>
 
     <div class="exam-alert is-danger" th:if="${errorMessage != null}" th:text="${errorMessage}">
@@ -22,41 +22,49 @@
     </div>
 
     <section class="exam-gate">
-      <article class="exam-gate-card" th:if="${eligibility != null && eligibility.eligible()}">
-        <span class="exam-state-badge">응시 가능</span>
-        <h2 th:text="${eligibility.message()}">AI 코딩테스트를 시작할 수 있습니다.</h2>
-        <p>문제 생성 후 1번 문제부터 순서대로 이동합니다. 제출 후에는 테스트케이스 실행 결과로 채점됩니다.</p>
-        <div class="exam-gate-actions">
-          <form th:action="@{/exams}"
-                th:object="${form}"
-                method="post"
-                class="exam-create-form"
-                data-loading-form
-                data-loading-title="문제 생성 중입니다"
-                data-loading-message="학습 범위를 확인하고 AI 코딩테스트 문제와 테스트케이스를 생성하고 있습니다.">
-            <input type="hidden" th:field="*{idempotencyToken}">
-            <label>
-              <span>과목 ID</span>
-              <input type="number" th:field="*{subjectId}" min="1" required>
-            </label>
-            <label>
-              <span>레벨</span>
-              <select th:field="*{levelCode}" required>
-                <option value="">선택</option>
-                <option value="BRONZE">BRONZE</option>
-                <option value="SILVER">SILVER</option>
-                <option value="GOLD">GOLD</option>
-              </select>
-            </label>
-            <button type="submit" class="button primary">시험 시작</button>
-          </form>
-          <a class="button"
-             th:if="${eligibility.latestExamId() != null}"
-             th:href="${eligibility.latestStatus() == 'GRADED'} ? @{/exams/{examId}/result(examId=${eligibility.latestExamId()})} : @{/exams/{examId}/problems/1(examId=${eligibility.latestExamId()})}">
-            최근 시험 이어가기
-          </a>
+      <article class="exam-gate-card is-ready"
+               th:if="${eligibility != null && eligibility.eligible() && hasGateContext}">
+        <span class="exam-state-badge">Gate 활성화</span>
+        <div>
+          <h2>코딩테스트 준비 완료</h2>
+          <p>선택한 과목과 난이도 범위에서 문제를 생성합니다.</p>
         </div>
+        <div class="exam-scope-summary" aria-label="코딩테스트 응시 범위">
+          <article class="exam-scope-card">
+            <span>과목</span>
+            <strong th:text="${selectedSubjectName}">Java</strong>
+          </article>
+          <article class="exam-scope-card">
+            <span>난이도</span>
+            <strong th:text="${selectedLevelCode}">BRONZE</strong>
+          </article>
+          <article class="exam-scope-card">
+            <span>문항</span>
+            <strong>3문항</strong>
+          </article>
+        </div>
+        <form th:action="@{/exams}"
+              th:object="${form}"
+              method="post"
+              class="exam-create-form"
+              data-loading-form
+              data-loading-title="문제 생성 중입니다"
+              data-loading-message="학습 범위를 확인하고 AI 코딩테스트 문제와 테스트케이스를 생성하고 있습니다.">
+          <input type="hidden" th:field="*{idempotencyToken}">
+          <input type="hidden" th:field="*{subjectId}">
+          <input type="hidden" th:field="*{levelCode}">
+          <button type="submit" class="button primary">코딩테스트 시작</button>
+        </form>
       </article>
+
+      <aside class="exam-gate-card is-locked"
+             th:if="${eligibility != null && eligibility.eligible() && !hasGateContext}">
+        <span class="exam-state-badge is-warning">Gate 선택 필요</span>
+        <h2>학습 화면에서 열린 Gate를 선택해 주세요.</h2>
+        <p>코딩테스트는 완료한 과목과 난이도 기준으로 생성됩니다.</p>
+        <a class="button primary" th:href="@{/learning}">학습 화면으로</a>
+      </aside>
+
       <aside class="exam-gate-card is-locked" th:if="${eligibility == null || !eligibility.eligible()}">
         <span class="exam-state-badge is-warning">응시 조건 미달</span>
         <h2 th:text="${eligibility == null ? '로그인이 필요합니다.' : eligibility.message()}">필수 이론 학습 완료 후 응시</h2>
