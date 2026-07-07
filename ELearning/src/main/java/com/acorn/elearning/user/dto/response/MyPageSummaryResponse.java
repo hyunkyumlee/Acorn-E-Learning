@@ -27,6 +27,7 @@ public record MyPageSummaryResponse(
         LearningSummary learning,
         ExamSummary exam,
         CommunitySummary community,
+        RankingSummary ranking,
         PaymentSummary latestPayment
 ) {
     public static MyPageSummaryResponse of(
@@ -40,6 +41,7 @@ public record MyPageSummaryResponse(
             Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel,
             List<ExamSession> examSessions,
             List<LevelTestAttempt> levelTestAttempts,
+            List<UserLearningProfile> allLearningProfiles,
             int likedPostCount,
             int scrapedPostCount,
             int writtenPostCount,
@@ -61,6 +63,7 @@ public record MyPageSummaryResponse(
                         learningProfile == null ? null : learningProfile.getCurrentLevelCode()
                 ),
                 CommunitySummary.from(likedPostCount, scrapedPostCount, writtenPostCount),
+                RankingSummary.from(learningProfile, allLearningProfiles),
                 PaymentSummary.from(latestPayment)
         );
     }
@@ -291,6 +294,18 @@ public record MyPageSummaryResponse(
                     sortedItems.isEmpty()
             );
         }
+
+        public String summaryResultLabel() {
+            return empty ? "시험 결과 없음" : previewItems.get(0).resultLabel();
+        }
+
+        public String summaryTitle() {
+            return empty ? "응시 후 결과가 표시됩니다." : previewItems.get(0).title();
+        }
+
+        public String summaryResultClass() {
+            return empty ? "empty" : previewItems.get(0).resultClass();
+        }
     }
 
     public record ExamResultItem(
@@ -456,6 +471,55 @@ public record MyPageSummaryResponse(
 
         private static String countLabel(int count) {
             return NumberFormat.getNumberInstance(Locale.KOREA).format(Math.max(count, 0)) + "개";
+        }
+    }
+
+    public record RankingSummary(
+            Integer rankNo,
+            int totalScore,
+            String rankLabel,
+            String scoreLabel
+    ) {
+        public static RankingSummary from(
+                UserLearningProfile learningProfile,
+                List<UserLearningProfile> allLearningProfiles
+        ) {
+            int totalScore = scoreOf(learningProfile);
+            Integer rankNo = rankNo(learningProfile, allLearningProfiles);
+            return new RankingSummary(
+                    rankNo,
+                    totalScore,
+                    rankNo == null ? "-" : NumberFormat.getNumberInstance(Locale.KOREA).format(rankNo) + "위",
+                    NumberFormat.getNumberInstance(Locale.KOREA).format(totalScore) + "점"
+            );
+        }
+
+        private static Integer rankNo(
+                UserLearningProfile learningProfile,
+                List<UserLearningProfile> allLearningProfiles
+        ) {
+            if (learningProfile == null || learningProfile.getUserId() == null || allLearningProfiles == null) {
+                return null;
+            }
+            boolean profileExists = allLearningProfiles.stream()
+                    .anyMatch(profile -> profile != null
+                            && learningProfile.getUserId().equals(profile.getUserId()));
+            if (!profileExists) {
+                return null;
+            }
+            int myScore = scoreOf(learningProfile);
+            long higherScoreCount = allLearningProfiles.stream()
+                    .filter(profile -> profile != null)
+                    .filter(profile -> scoreOf(profile) > myScore)
+                    .count();
+            return Math.toIntExact(higherScoreCount + 1);
+        }
+
+        private static int scoreOf(UserLearningProfile profile) {
+            if (profile == null || profile.getTotalScore() == null) {
+                return 0;
+            }
+            return Math.max(profile.getTotalScore(), 0);
         }
     }
 

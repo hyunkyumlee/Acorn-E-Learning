@@ -28,6 +28,7 @@ import com.acorn.elearning.user.dto.response.CommunityActivityPageResponse;
 import com.acorn.elearning.user.dto.response.MyPageSummaryResponse;
 import com.acorn.elearning.user.dto.response.LearningStatusPageResponse;
 import com.acorn.elearning.user.dto.response.PaymentHistoryPageResponse;
+import com.acorn.elearning.user.mapper.UserLearningProfileMapper;
 import com.acorn.elearning.user.mapper.UserMapper;
 import com.acorn.elearning.user.model.User;
 import com.acorn.elearning.user.model.UserLearningProfile;
@@ -62,6 +63,7 @@ public class UserActivityService {
     private final LearningProgressMapper learningProgressMapper;
     private final LevelTestAttemptMapper levelTestAttemptMapper;
     private final ExamSessionMapper examSessionMapper;
+    private final UserLearningProfileMapper userLearningProfileMapper;
 
     public UserActivityService(
             DummyPaymentMapper dummyPaymentMapper,
@@ -75,7 +77,8 @@ public class UserActivityService {
             CurriculumNodeMapper curriculumNodeMapper,
             LearningProgressMapper learningProgressMapper,
             LevelTestAttemptMapper levelTestAttemptMapper,
-            ExamSessionMapper examSessionMapper
+            ExamSessionMapper examSessionMapper,
+            UserLearningProfileMapper userLearningProfileMapper
     ) {
         this.dummyPaymentMapper = dummyPaymentMapper;
         this.paymentAccessService = paymentAccessService;
@@ -89,6 +92,7 @@ public class UserActivityService {
         this.learningProgressMapper = learningProgressMapper;
         this.levelTestAttemptMapper = levelTestAttemptMapper;
         this.examSessionMapper = examSessionMapper;
+        this.userLearningProfileMapper = userLearningProfileMapper;
     }
 
     @Transactional(readOnly = true)
@@ -110,6 +114,7 @@ public class UserActivityService {
         List<LevelTestAttempt> levelTestAttempts = levelTestAttemptMapper.findAll().stream()
                 .filter(attempt -> userId.equals(attempt.getUserId()))
                 .toList();
+        List<UserLearningProfile> allLearningProfiles = userLearningProfileMapper.findAll();
         int likedPostCount = postLikeMapper.findPostsByUserId(userId).size();
         int scrapedPostCount = postScrapMapper.findPostsByUserId(userId).size();
         int writtenPostCount = communityPostMapper.findByWriterId(userId).size();
@@ -126,6 +131,7 @@ public class UserActivityService {
                 progressBySubjectLevel,
                 examSessions,
                 levelTestAttempts,
+                allLearningProfiles,
                 likedPostCount,
                 scrapedPostCount,
                 writtenPostCount,

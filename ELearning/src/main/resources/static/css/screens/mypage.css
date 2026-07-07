@@ -401,40 +401,47 @@ textarea.mypage-field {
 }
 
 .mypage-icon.flame::before {
-  width: 24px;
+  width: 18px;
   height: 30px;
-  background: currentColor;
-  clip-path: polygon(50% 0, 62% 18%, 79% 31%, 91% 52%, 86% 75%, 69% 93%, 50% 100%, 31% 93%, 14% 75%, 9% 52%, 21% 33%, 38% 20%);
-  transform: translateY(1px);
+  border-radius: 48% 48% 46% 46% / 22% 22% 66% 66%;
+  background:
+    radial-gradient(circle at 50% 34%, var(--mypage-primary-soft) 0 4px, transparent 4.5px),
+    currentColor;
+  box-shadow:
+    -9px 14px 0 -5px currentColor,
+    9px 14px 0 -5px currentColor;
+  transform: translateY(-2px);
 }
 
 .mypage-icon.flame::after {
-  width: 10px;
-  height: 16px;
-  border-radius: 50% 50% 55% 55%;
-  background: var(--mypage-primary-soft);
-  clip-path: polygon(50% 0, 76% 36%, 82% 74%, 50% 100%, 18% 74%, 24% 36%);
-  transform: translateY(7px);
+  width: 9px;
+  height: 14px;
+  border-radius: 50% 50% 60% 60%;
+  background: currentColor;
+  clip-path: polygon(50% 0, 82% 42%, 66% 100%, 50% 82%, 34% 100%, 18% 42%);
+  opacity: 0.78;
+  transform: translateY(17px);
+}
+
+.mypage-icon.fire svg {
+  width: 22px;
+  height: 25px;
+  fill: currentColor;
 }
 
 .mypage-icon.test::before {
-  width: 22px;
-  height: 28px;
-  border: 3px solid currentColor;
-  border-radius: 5px;
-  background:
-    linear-gradient(135deg, transparent 0 16%, currentColor 17% 24%, transparent 25%),
-    linear-gradient(currentColor 0 0) 6px 9px / 9px 2px no-repeat,
-    linear-gradient(currentColor 0 0) 6px 15px / 12px 2px no-repeat,
-    linear-gradient(currentColor 0 0) 6px 21px / 8px 2px no-repeat;
+  content: "100";
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: currentColor;
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: 0;
 }
 
 .mypage-icon.test::after {
-  width: 10px;
-  height: 6px;
-  border-left: 3px solid currentColor;
-  border-bottom: 3px solid currentColor;
-  transform: rotate(-45deg) translate(5px, 8px);
+  display: none;
 }
 
 .mypage-icon.ranking::before {
@@ -1289,11 +1296,19 @@ textarea.mypage-field {
 }
 
 .mypage-icon.bookmark::before {
-  width: 19px;
-  height: 25px;
-  background: currentColor;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 76%, 0 100%);
-  border-radius: 3px 3px 0 0;
+  content: none;
+}
+
+.mypage-icon.bookmark svg {
+  width: 20px;
+  height: 26px;
+  fill: currentColor;
+}
+
+.mypage-icon.write svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
 }
 
 .mypage-icon.pencil::before {
