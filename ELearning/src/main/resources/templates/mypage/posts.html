@@ -37,12 +37,12 @@
       <section class="community-activity-post-list" aria-label="커뮤니티 활동 목록">
         <article class="community-post-card" th:each="item : ${view.items()}" th:classappend="${view.type() == 'POSTS'} ? ' written' : ''">
           <span class="community-post-category" th:text="${item.categoryLabel()}">질문</span>
-          <div class="community-post-body">
+          <a class="community-post-body community-post-detail-link" th:href="${item.detailUrl()}">
             <h2 th:text="${item.title()}">Python 리스트 질문 있어요</h2>
             <p th:if="${!#strings.isEmpty(item.excerpt())}" th:text="${item.excerpt()}">게시글 요약</p>
             <span class="community-post-meta" th:if="${view.type() != 'POSTS'}" th:text="|${item.boardLabel()} - ${item.authorLabel()} - 좋아요 ${item.likeCount()} - 댓글 ${item.commentCount()}|">Java 질문 게시판 - 작성자 - 좋아요 12 - 댓글 2</span>
             <span class="community-post-meta" th:if="${view.type() == 'POSTS'}" th:text="|${item.authorLabel()} ${item.dateLabel()} - 좋아요 ${item.likeCount()} - 댓글 ${item.commentCount()}|">작성일 2026.06.10 - 좋아요 5 - 댓글 4</span>
-          </div>
+          </a>
           <time class="community-post-date" th:if="${view.type() != 'POSTS'}" th:text="${item.dateLabel()}">2026.06.14</time>
           <span class="activity-row-marker" th:if="${view.type() != 'POSTS'}" th:classappend="| ${view.markerClass()}|" aria-hidden="true"></span>
           <a class="community-row-button" th:if="${view.type() == 'POSTS'}" th:href="${item.detailUrl()}">보기</a>

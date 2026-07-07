@@ -19,12 +19,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public record MyPageSummaryResponse(
         UserSummary user,
         PremiumSummary premium,
         LearningSummary learning,
         ExamSummary exam,
+        CommunitySummary community,
         PaymentSummary latestPayment
 ) {
     public static MyPageSummaryResponse of(
@@ -35,15 +37,30 @@ public record MyPageSummaryResponse(
             AttendanceRecord latestAttendance,
             List<AttendanceRecord> attendanceRecords,
             List<LearningProgress> progressItems,
+            Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel,
             List<ExamSession> examSessions,
             List<LevelTestAttempt> levelTestAttempts,
+            int likedPostCount,
+            int scrapedPostCount,
+            int writtenPostCount,
             DummyPayment latestPayment
     ) {
         return new MyPageSummaryResponse(
                 UserSummary.from(sessionUser, user),
                 PremiumSummary.from(premiumAccess),
-                LearningSummary.from(learningProfile, latestAttendance, attendanceRecords, progressItems),
-                ExamSummary.from(examSessions, levelTestAttempts),
+                LearningSummary.from(
+                        learningProfile,
+                        latestAttendance,
+                        attendanceRecords,
+                        progressItems,
+                        progressBySubjectLevel
+                ),
+                ExamSummary.from(
+                        examSessions,
+                        levelTestAttempts,
+                        learningProfile == null ? null : learningProfile.getCurrentLevelCode()
+                ),
+                CommunitySummary.from(likedPostCount, scrapedPostCount, writtenPostCount),
                 PaymentSummary.from(latestPayment)
         );
     }
@@ -135,13 +152,15 @@ public record MyPageSummaryResponse(
             List<String> attendanceDates,
             int initialCalendarYear,
             int initialCalendarMonth,
-            String initialCalendarLabel
+            String initialCalendarLabel,
+            List<LearningStatusPageResponse.LearningStatusItem> previewItems
     ) {
         public static LearningSummary from(
                 UserLearningProfile learningProfile,
                 AttendanceRecord latestAttendance,
                 List<AttendanceRecord> attendanceRecords,
-                List<LearningProgress> progressItems
+                List<LearningProgress> progressItems,
+                Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel
         ) {
             List<LearningProgress> safeProgressItems = progressItems == null ? List.of() : progressItems;
             List<String> safeAttendanceDates = attendanceDates(attendanceRecords);
@@ -149,6 +168,12 @@ public record MyPageSummaryResponse(
                     ? LocalDate.now()
                     : latestAttendance.getAttendanceDate();
             BigDecimal averageProgressRate = averageProgressRate(safeProgressItems);
+            List<LearningStatusPageResponse.LearningStatusItem> previewItems =
+                    LearningStatusPageResponse.recentItems(
+                            safeProgressItems,
+                            progressBySubjectLevel,
+                            3
+                    );
             int streakCount = latestAttendance == null || latestAttendance.getStreakCount() == null
                     ? 0
                     : latestAttendance.getStreakCount();
@@ -173,7 +198,8 @@ public record MyPageSummaryResponse(
                     safeAttendanceDates,
                     initialCalendarDate.getYear(),
                     initialCalendarDate.getMonthValue(),
-                    yearMonthLabel(initialCalendarDate)
+                    yearMonthLabel(initialCalendarDate),
+                    previewItems
             );
         }
 
@@ -235,19 +261,25 @@ public record MyPageSummaryResponse(
             List<ExamResultItem> previewItems,
             boolean empty
     ) {
+        private static final int PREVIEW_ITEM_LIMIT = 3;
+
         public static ExamSummary from(
                 List<ExamSession> examSessions,
-                List<LevelTestAttempt> levelTestAttempts
+                List<LevelTestAttempt> levelTestAttempts,
+                String currentLevelCode
         ) {
+            int currentLevelRank = levelRank(currentLevelCode);
             List<ExamResultItem> items = new ArrayList<>();
             if (examSessions != null) {
                 examSessions.stream()
                         .map(ExamResultItem::from)
+                        .filter(item -> item.visibleForCurrentLevel(currentLevelRank))
                         .forEach(items::add);
             }
             if (levelTestAttempts != null) {
                 levelTestAttempts.stream()
                         .map(ExamResultItem::from)
+                        .filter(item -> item.visibleForCurrentLevel(currentLevelRank))
                         .forEach(items::add);
             }
             List<ExamResultItem> sortedItems = items.stream()
@@ -255,7 +287,7 @@ public record MyPageSummaryResponse(
                     .toList();
             return new ExamSummary(
                     sortedItems,
-                    sortedItems.stream().limit(2).toList(),
+                    sortedItems.stream().limit(PREVIEW_ITEM_LIMIT).toList(),
                     sortedItems.isEmpty()
             );
         }
@@ -264,6 +296,7 @@ public record MyPageSummaryResponse(
     public record ExamResultItem(
             String title,
             String subjectLabel,
+            String levelCode,
             String levelLabel,
             String resultLabel,
             String resultFilter,
@@ -281,6 +314,7 @@ public record MyPageSummaryResponse(
             return new ExamResultItem(
                     subject + " " + levelLabel,
                     subject,
+                    session.getLevelCode(),
                     levelLabel,
                     resultLabel(passed),
                     passed ? "PASS" : "RETRY",
@@ -298,6 +332,7 @@ public record MyPageSummaryResponse(
             return new ExamResultItem(
                     subject + " " + levelLabel,
                     subject,
+                    attempt.getResultLevelCode(),
                     levelLabel,
                     resultLabel(passed),
                     passed ? "PASS" : "RETRY",
@@ -306,6 +341,11 @@ public record MyPageSummaryResponse(
                     scoreLabel(attempt.getCorrectCount(), attempt.getTotalCount()),
                     attempt.getSubmittedAt() == null ? EMPTY_DATE : attempt.getSubmittedAt()
             );
+        }
+
+        private boolean visibleForCurrentLevel(int currentLevelRank) {
+            int resultLevelRank = levelRank(levelCode);
+            return currentLevelRank == 0 || resultLevelRank == 0 || resultLevelRank <= currentLevelRank;
         }
 
         private static boolean passed(Integer correctCount, Integer totalCount) {
@@ -395,6 +435,30 @@ public record MyPageSummaryResponse(
         }
     }
 
+    public record CommunitySummary(
+            int likedPostCount,
+            int scrapedPostCount,
+            int writtenPostCount,
+            String likedPostCountLabel,
+            String scrapedPostCountLabel,
+            String writtenPostCountLabel
+    ) {
+        public static CommunitySummary from(int likedPostCount, int scrapedPostCount, int writtenPostCount) {
+            return new CommunitySummary(
+                    Math.max(likedPostCount, 0),
+                    Math.max(scrapedPostCount, 0),
+                    Math.max(writtenPostCount, 0),
+                    countLabel(likedPostCount),
+                    countLabel(scrapedPostCount),
+                    countLabel(writtenPostCount)
+            );
+        }
+
+        private static String countLabel(int count) {
+            return NumberFormat.getNumberInstance(Locale.KOREA).format(Math.max(count, 0)) + "개";
+        }
+    }
+
     private static String formatDate(LocalDate value) {
         return value == null ? "-" : value.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
@@ -409,6 +473,18 @@ public record MyPageSummaryResponse(
 
     private static String yearMonthLabel(LocalDate value) {
         return value == null ? "-" : value.format(DateTimeFormatter.ofPattern("yyyy년 M월"));
+    }
+
+    private static int levelRank(String levelCode) {
+        if (!hasText(levelCode)) {
+            return 0;
+        }
+        return switch (levelCode.trim().toUpperCase(Locale.ROOT)) {
+            case "BRONZE" -> 1;
+            case "SILVER" -> 2;
+            case "GOLD" -> 3;
+            default -> 0;
+        };
     }
 
     private static boolean hasText(String value) {

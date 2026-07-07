@@ -11,6 +11,8 @@ import com.acorn.elearning.exam.form.CreateExamForm;
 import com.acorn.elearning.exam.form.ExamSubmitForm;
 import com.acorn.elearning.exam.form.SaveExamAnswerForm;
 import com.acorn.elearning.exam.service.AiExamService;
+import com.acorn.elearning.learning.mapper.SubjectMapper;
+import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -20,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -30,25 +33,29 @@ public class ExamController {
 
     private final AiExamService aiExamService;
     private final IdempotencyTokenService idempotencyTokenService;
+    private final SubjectMapper subjectMapper;
 
-    public ExamController(AiExamService aiExamService, IdempotencyTokenService idempotencyTokenService) {
+    public ExamController(AiExamService aiExamService, IdempotencyTokenService idempotencyTokenService, SubjectMapper subjectMapper) {
         this.aiExamService = aiExamService;
         this.idempotencyTokenService = idempotencyTokenService;
+        this.subjectMapper = subjectMapper;
     }
 
     @GetMapping("/exams/coding-test")
     public String codingTest(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam(name = "subjectId", required = false) Long subjectId,
+            @RequestParam(name = "levelCode", required = false) String levelCode,
             HttpSession httpSession,
             Model model
     ) {
         String redirect = learnerRedirect(sessionUser);
         if (!redirect.isBlank()) { return redirect; }
         CreateExamForm form = new CreateExamForm();
+        form.setSubjectId(subjectId);
+        form.setLevelCode(levelCode);
         form.setIdempotencyToken(idempotencyTokenService.issue(CREATE_FORM_TYPE, httpSession, sessionUser.userId()).token());
-        model.addAttribute("screen", "exam/coding-test");
-        model.addAttribute("form", form);
-        model.addAttribute("eligibility", aiExamService.eligibility(sessionUser));
+        prepareCodingTestModel(sessionUser, model, form);
         return "exam/coding-test";
     }
 
@@ -64,8 +71,7 @@ public class ExamController {
         String redirect = learnerRedirect(sessionUser);
         if (!redirect.isBlank()) { return redirect; }
         if (bindingResult.hasErrors()) {
-            model.addAttribute("screen", "exam/coding-test");
-            model.addAttribute("eligibility", aiExamService.eligibility(sessionUser));
+            prepareCodingTestModel(sessionUser, model, form);
             return "exam/coding-test";
         }
         try {
@@ -75,9 +81,7 @@ public class ExamController {
             return "redirect:/exams/{examId}/problems/1";
         } catch (BusinessException exception) {
             form.setIdempotencyToken(idempotencyTokenService.issue(CREATE_FORM_TYPE, httpSession, sessionUser.userId()).token());
-            model.addAttribute("screen", "exam/coding-test");
-            model.addAttribute("form", form);
-            model.addAttribute("eligibility", aiExamService.eligibility(sessionUser));
+            prepareCodingTestModel(sessionUser, model, form);
             model.addAttribute("errorMessage", exception.getMessage());
             return "exam/coding-test";
         }
@@ -224,6 +228,35 @@ public class ExamController {
             return step.previousProblemNo();
         }
         return step.currentProblemNo();
+    }
+
+    private void prepareCodingTestModel(SessionUser sessionUser, Model model, CreateExamForm form) {
+        boolean hasGateContext = form.getSubjectId() != null && form.getLevelCode() != null && !form.getLevelCode().isBlank();
+        model.addAttribute("screen", "exam/coding-test");
+        model.addAttribute("form", form);
+        model.addAttribute("eligibility", aiExamService.eligibility(sessionUser));
+        model.addAttribute("hasGateContext", hasGateContext);
+        model.addAttribute("selectedSubjectName", subjectDisplayName(form.getSubjectId()));
+        model.addAttribute("selectedLevelCode", form.getLevelCode());
+    }
+
+    private String subjectDisplayName(Long subjectId) {
+        if (subjectId == null) {
+            return "-";
+        }
+        return subjectMapper.findById(subjectId)
+                .map(this::subjectDisplayName)
+                .orElse("선택 과목");
+    }
+
+    private String subjectDisplayName(Subject subject) {
+        if (subject.getSubjectName() != null && !subject.getSubjectName().isBlank()) {
+            return subject.getSubjectName();
+        }
+        if (subject.getSubjectCode() != null && !subject.getSubjectCode().isBlank()) {
+            return subject.getSubjectCode();
+        }
+        return "선택 과목";
     }
 
     private String learnerRedirect(SessionUser sessionUser) {

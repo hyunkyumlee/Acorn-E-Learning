@@ -1,8 +1,7 @@
 package com.acorn.elearning.user.dto.response;
 
 import com.acorn.elearning.learning.model.LearningProgress;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -35,6 +34,16 @@ public record LearningStatusPageResponse(
             int page,
             int size
     ) {
+        return of(progressItems, Map.of(), subject, page, size);
+    }
+
+    public static LearningStatusPageResponse of(
+            List<LearningProgress> progressItems,
+            Map<Long, SubjectLevelProgress> progressBySubjectLevel,
+            String subject,
+            int page,
+            int size
+    ) {
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(size, 1);
         String selectedSubject = normalizeSubject(subject);
@@ -43,7 +52,11 @@ public record LearningStatusPageResponse(
         List<SubjectFilter> filters = filters(subjects, selectedSubject);
         List<LearningStatusItem> allItems = subjects.stream()
                 .filter(meta -> ALL_SUBJECTS.equals(selectedSubject) || meta.code().equals(selectedSubject))
-                .map(meta -> LearningStatusItem.from(meta, progressBySubject.getOrDefault(meta.subjectId(), List.of())))
+                .map(meta -> LearningStatusItem.from(
+                        meta,
+                        progressBySubject.getOrDefault(meta.subjectId(), List.of()),
+                        progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId())
+                ))
                 .toList();
 
         int totalElements = allItems.size();
@@ -64,6 +77,42 @@ public record LearningStatusPageResponse(
                 totalPages == 0 || safePage >= totalPages - 1,
                 pageItems.isEmpty()
         );
+    }
+
+    public static List<LearningStatusItem> recentItems(List<LearningProgress> progressItems, int limit) {
+        return recentItems(progressItems, Map.of(), limit);
+    }
+
+    public static List<LearningStatusItem> recentItems(
+            List<LearningProgress> progressItems,
+            Map<Long, SubjectLevelProgress> progressBySubjectLevel,
+            int limit
+    ) {
+        int safeLimit = Math.max(limit, 0);
+        if (safeLimit == 0) {
+            return List.of();
+        }
+
+        Map<Long, List<LearningProgress>> progressBySubject = progressBySubject(progressItems);
+        if (progressBySubject.isEmpty()) {
+            return List.of();
+        }
+
+        return subjects(progressBySubject).stream()
+                .filter(meta -> progressBySubject.containsKey(meta.subjectId()))
+                .sorted(Comparator
+                        .comparing(
+                                (SubjectMeta meta) -> latestActivityAt(progressBySubject.get(meta.subjectId())),
+                                Comparator.nullsLast(Comparator.reverseOrder())
+                        )
+                        .thenComparing(SubjectMeta::subjectId))
+                .limit(safeLimit)
+                .map(meta -> LearningStatusItem.from(
+                        meta,
+                        progressBySubject.getOrDefault(meta.subjectId(), List.of()),
+                        progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId())
+                ))
+                .toList();
     }
 
     private static Map<Long, List<LearningProgress>> progressBySubject(List<LearningProgress> progressItems) {
@@ -120,6 +169,30 @@ public record LearningStatusPageResponse(
         return ALL_SUBJECTS;
     }
 
+    private static LocalDateTime latestActivityAt(List<LearningProgress> progressItems) {
+        if (progressItems == null || progressItems.isEmpty()) {
+            return null;
+        }
+        return progressItems.stream()
+                .map(LearningStatusPageResponse::activityAt)
+                .filter(time -> time != null)
+                .max(Comparator.naturalOrder())
+                .orElse(null);
+    }
+
+    private static LocalDateTime activityAt(LearningProgress progress) {
+        if (progress == null) {
+            return null;
+        }
+        if (progress.getUpdatedAt() != null) {
+            return progress.getUpdatedAt();
+        }
+        if (progress.getCompletedAt() != null) {
+            return progress.getCompletedAt();
+        }
+        return progress.getCreatedAt();
+    }
+
     public int previousPage() {
         return Math.max(page - 1, 0);
     }
@@ -144,6 +217,11 @@ public record LearningStatusPageResponse(
             boolean active
     ) {}
 
+    public record SubjectLevelProgress(
+            String levelCode,
+            int progressRate
+    ) {}
+
     public record LearningStatusItem(
             Long subjectId,
             String subjectCode,
@@ -157,9 +235,15 @@ public record LearningStatusPageResponse(
             String continueUrl
     ) {
         public static LearningStatusItem from(SubjectMeta subject, List<LearningProgress> progressItems) {
-            List<LearningProgress> rows = progressItems == null ? List.of() : progressItems;
-            int progressRate = averageProgressRate(rows);
-            int level = Math.max(1, completedCount(rows) + 1);
+            return from(subject, progressItems, null);
+        }
+
+        public static LearningStatusItem from(
+                SubjectMeta subject,
+                List<LearningProgress> progressItems,
+                SubjectLevelProgress levelProgress
+        ) {
+            int progressRate = progressRate(levelProgress);
             return new LearningStatusItem(
                     subject.subjectId(),
                     subject.code(),
@@ -167,42 +251,32 @@ public record LearningStatusPageResponse(
                     subject.thumbLabel(),
                     subject.thumbClass(),
                     subject.thumbIconPath(),
-                    levelLabel(level),
+                    levelLabel(levelProgress),
                     progressRate,
                     progressRate + "%",
                     "/learning?subjectId=" + subject.subjectId()
             );
         }
 
-        private static String levelLabel(int level) {
-            if (level >= 6) {
-                return "GOLD";
-            }
-            if (level >= 3) {
-                return "SILVER";
-            }
-            return "BRONZE";
-        }
-
-        private static int completedCount(List<LearningProgress> progressItems) {
-            return (int) progressItems.stream()
-                    .filter(item -> Boolean.TRUE.equals(item.getLessonCompleted())
-                            || Boolean.TRUE.equals(item.getPracticePassed())
-                            || item.getCompletedAt() != null)
-                    .count();
-        }
-
-        private static int averageProgressRate(List<LearningProgress> progressItems) {
-            List<BigDecimal> rates = progressItems.stream()
-                    .map(LearningProgress::getProgressRate)
-                    .filter(rate -> rate != null)
-                    .toList();
-            if (rates.isEmpty()) {
+        private static int progressRate(SubjectLevelProgress levelProgress) {
+            if (levelProgress == null) {
                 return 0;
             }
-            BigDecimal total = rates.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-            return total.divide(BigDecimal.valueOf(rates.size()), 0, RoundingMode.HALF_UP).intValue();
+            return Math.max(0, Math.min(100, levelProgress.progressRate()));
         }
+
+        private static String levelLabel(SubjectLevelProgress levelProgress) {
+            String levelCode = levelProgress == null ? null : levelProgress.levelCode();
+            if (levelCode == null || levelCode.isBlank()) {
+                return "-";
+            }
+            String normalized = levelCode.trim().toUpperCase();
+            return switch (normalized) {
+                case "BRONZE", "SILVER", "GOLD" -> normalized;
+                default -> normalized;
+            };
+        }
+
     }
 
     private record SubjectMeta(
