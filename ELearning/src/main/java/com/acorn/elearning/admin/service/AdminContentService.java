@@ -23,6 +23,7 @@ import com.acorn.elearning.practice.mapper.PracticeProblemMapper;
 import com.acorn.elearning.practice.model.PracticeProblem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -185,9 +186,12 @@ public class AdminContentService {
         return lm.update(lesson);
     }
 
+    @Transactional
     public int deleteLesson(Long lessonId) {
+        alm.deleteBookmarksByLessonId(lessonId);
         return alm.deleteById(lessonId);
     }
+
 
     //관리자 문제 목록 조회
     public List<AdminProblemManageRowResponse> findAllAdminProblem(){

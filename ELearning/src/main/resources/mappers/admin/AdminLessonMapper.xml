@@ -58,4 +58,9 @@
         WHERE lesson_id = #{lessonId}
     </delete>
 
+    <delete id="deleteBookmarksByLessonId">
+        DELETE FROM lesson_bookmarks
+        WHERE lesson_id = #{lessonId}
+    </delete>
+
 </mapper>

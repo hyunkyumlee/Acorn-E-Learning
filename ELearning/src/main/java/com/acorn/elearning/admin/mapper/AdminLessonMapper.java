@@ -10,4 +10,6 @@ public interface AdminLessonMapper {
     List<AdminLessonManageRowResponse> findAll();
 
     int deleteById(@Param("lessonId") Long lessonId);
+
+    int deleteBookmarksByLessonId(@Param("lessonId") Long lessonId);
 }
