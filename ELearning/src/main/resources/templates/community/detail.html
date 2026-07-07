@@ -19,7 +19,6 @@
     <section class="page-heading">
       <span class="eyebrow">Community</span>
       <h1>게시글 상세</h1>
-      <p>게시글, 첨부 파일, 댓글, 좋아요, 스크랩, 신고를 한 화면에서 처리할 수 있어.</p>
     </section>
 
     <section class="community-content-layout" aria-label="게시글 상세">
@@ -30,7 +29,7 @@
           <div>
             <span class="community-badge" th:text="${view.post.boardType == 'FREE' ? '자유' : (view.post.boardType == 'QUESTION' ? '질문' : (view.post.boardType == 'STUDY_LOG' ? '공부 일지' : view.post.boardType))}">자유</span>
             <h2 th:text="${view.post.title}">제목</h2>
-            <p>작성자 <span th:text="${view.post.writerId}">1</span></p>
+            <p>작성자: <span th:text="${writerNicknames.get(view.post.writerId)}">nova_learner</span></p>
           </div>
           <div class="community-actions">
             <a class="button" th:href="@{/community/board}">목록</a>
@@ -67,20 +66,19 @@
           </div>
         </div>
 
-        <div class="community-subsection">
+        <div class="community-subsection" th:if="${!#lists.isEmpty(view.attachments)}">
           <h3>첨부 파일</h3>
           <ul class="community-list compact">
             <li th:each="file : ${view.attachments}">
               <span th:text="${file.originalName + ' (' + file.fileSize + ' bytes)'}">file.txt</span>
             </li>
-            <li th:if="${#lists.isEmpty(view.attachments)}" class="community-empty">첨부 파일이 없어.</li>
           </ul>
         </div>
 
         <div class="community-subsection">
           <h3>댓글</h3>
           <form method="post" th:action="@{/community/posts/{id}/comments(id=${view.post.postId})}" th:object="${commentForm}" class="community-comment-form">
-            <textarea th:field="*{content}" rows="3" placeholder="댓글을 입력해" required></textarea>
+            <textarea th:field="*{content}" rows="3" placeholder="여러 사람들이 있는 곳이므로 욕설 및 비하하는 댓글은 삼가하여 주시기 바랍니다" required></textarea>
             <button class="button primary" type="submit">댓글 등록</button>
           </form>
 
@@ -90,14 +88,14 @@
                 <div>
                   <span class="community-badge" th:if="${comment.parentCommentId != null}">답글</span>
                   <p th:text="${comment.content}">댓글</p>
-                  <small>작성자 <span th:text="${comment.writerId}">1</span></small>
+                  <small>작성자: <span th:text="${writerNicknames.get(comment.writerId)}">code_haru</span></small>
                 </div>
                 <div class="community-actions">
                   <details th:if="${comment.status == 'ACTIVE' and comment.parentCommentId == null}" class="community-inline-form">
                     <summary class="button">답글</summary>
                     <form method="post" th:action="@{/community/posts/{id}/comments(id=${view.post.postId})}">
                       <input type="hidden" name="parentCommentId" th:value="${comment.commentId}">
-                      <textarea name="content" rows="2" placeholder="답글을 입력해" required></textarea>
+                      <textarea name="content" rows="2" placeholder="여러 사람들이 있는 곳이므로 욕설 및 비하하는 댓글은 삼가하여 주시기 바랍니다" required></textarea>
                       <button class="button primary" type="submit">답글 등록</button>
                     </form>
                   </details>

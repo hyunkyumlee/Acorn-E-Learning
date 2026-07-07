@@ -1,14 +1,24 @@
 package com.acorn.elearning.community.controller;
 
 import com.acorn.elearning.community.dto.response.PostDetailResponse;
+import com.acorn.elearning.community.dto.response.PostPageResponse;
 import com.acorn.elearning.community.form.CommentForm;
 import com.acorn.elearning.community.form.PostForm;
 import com.acorn.elearning.community.form.PostSearchCondition;
 import com.acorn.elearning.community.form.ReportForm;
+import com.acorn.elearning.community.model.Comment;
 import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.community.service.PostService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -35,12 +45,21 @@ public class PostController {
     ) {
         PostSearchCondition hotCondition = new PostSearchCondition();
         hotCondition.setSort("hot");
-        hotCondition.setSize(5);
+        hotCondition.setSize(8);
+        PostPageResponse view = postService.page(condition);
+        var hotView = postService.page(hotCondition);
+        Set<Long> hotPostIds = hotView.posts().stream()
+                .map(CommunityPost::getPostId)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        hotPostIds.addAll(subjectHotPostIds(view.posts()));
+        view = blendHotPosts(view, hotPostIds, condition);
 
         model.addAttribute("screen", "community/board");
         model.addAttribute("condition", condition);
-        model.addAttribute("view", postService.page(condition));
-        model.addAttribute("hotView", postService.page(hotCondition));
+        model.addAttribute("view", view);
+        model.addAttribute("hotView", hotView);
+        model.addAttribute("hotPostIds", hotPostIds);
+        model.addAttribute("writerNicknames", writerNicknames(view, hotView));
         addCommunityShell(model, sessionUser, condition);
         return "community/board";
     }
@@ -52,6 +71,7 @@ public class PostController {
             Model model
     ) {
         PostDetailResponse view = postService.detail(sessionUser, postId);
+        view.post().setContent(removeSampleMarker(view.post().getContent()));
         PostSearchCondition condition = new PostSearchCondition();
         condition.setSubjectId(view.post().getSubjectId());
         condition.setBoardType(view.post().getBoardType());
@@ -59,6 +79,7 @@ public class PostController {
         model.addAttribute("screen", "community/detail");
         model.addAttribute("view", view);
         model.addAttribute("currentUserId", sessionUser == null ? null : sessionUser.userId());
+        model.addAttribute("writerNicknames", writerNicknames(view));
         model.addAttribute("commentForm", new CommentForm());
         model.addAttribute("reportForm", new ReportForm());
         addCommunityShell(model, sessionUser, condition);
@@ -175,5 +196,133 @@ public class PostController {
         condition.setSubjectId(form.getSubjectId());
         condition.setBoardType(form.getBoardType());
         return condition;
+    }
+
+    private Map<Long, String> writerNicknames(PostPageResponse... views) {
+        Map<Long, String> nicknames = new LinkedHashMap<>();
+        for (PostPageResponse view : views) {
+            view.posts().forEach(post -> nicknames.putIfAbsent(post.getWriterId(), nicknameFor(post.getWriterId())));
+        }
+        return nicknames;
+    }
+
+    private PostPageResponse blendHotPosts(PostPageResponse view, Set<Long> hotPostIds, PostSearchCondition condition) {
+        if (view == null || hotPostIds == null || condition == null || condition.hotSort()) {
+            return view;
+        }
+        List<CommunityPost> hotPosts = new ArrayList<>();
+        List<CommunityPost> normalPosts = new ArrayList<>();
+        for (CommunityPost post : view.posts()) {
+            if (hotPostIds.contains(post.getPostId())) {
+                hotPosts.add(post);
+            } else {
+                normalPosts.add(post);
+            }
+        }
+        if (hotPosts.size() <= 1 || normalPosts.isEmpty()) {
+            return view;
+        }
+
+        List<CommunityPost> blended = new ArrayList<>(view.posts().size());
+        int hotIndex = 0;
+        int normalIndex = 0;
+        int normalStreak = 0;
+
+        blended.add(hotPosts.get(hotIndex++));
+        blended.add(normalPosts.get(normalIndex++));
+        if (hotIndex < hotPosts.size()) {
+            blended.add(hotPosts.get(hotIndex++));
+        }
+
+        while (hotIndex < hotPosts.size() || normalIndex < normalPosts.size()) {
+            if (normalIndex < normalPosts.size() && (normalStreak < 2 || hotIndex >= hotPosts.size())) {
+                blended.add(normalPosts.get(normalIndex++));
+                normalStreak++;
+                continue;
+            }
+            if (hotIndex < hotPosts.size()) {
+                blended.add(hotPosts.get(hotIndex++));
+                normalStreak = 0;
+                continue;
+            }
+            blended.add(normalPosts.get(normalIndex++));
+        }
+
+        return new PostPageResponse(
+                blended,
+                view.total(),
+                view.page(),
+                view.size(),
+                view.totalPages(),
+                view.sort()
+        );
+    }
+
+    private Set<Long> subjectHotPostIds(List<CommunityPost> posts) {
+        Map<Long, List<CommunityPost>> postsBySubject = new LinkedHashMap<>();
+        for (CommunityPost post : posts) {
+            postsBySubject.computeIfAbsent(post.getSubjectId(), key -> new ArrayList<>()).add(post);
+        }
+
+        Set<Long> ids = new LinkedHashSet<>();
+        for (List<CommunityPost> subjectPosts : postsBySubject.values()) {
+            subjectPosts.stream()
+                    .sorted(Comparator
+                            .comparingInt(this::hotScore)
+                            .thenComparing(CommunityPost::getPostId, Comparator.nullsLast(Comparator.naturalOrder()))
+                            .reversed())
+                    .limit(2)
+                    .map(CommunityPost::getPostId)
+                    .forEach(ids::add);
+        }
+        return ids;
+    }
+
+    private int hotScore(CommunityPost post) {
+        return safeCount(post.getLikeCount()) * 3
+                + safeCount(post.getCommentCount()) * 2
+                + safeCount(post.getScrapCount());
+    }
+
+    private int safeCount(Integer count) {
+        return count == null ? 0 : count;
+    }
+
+    private Map<Long, String> writerNicknames(PostDetailResponse view) {
+        Map<Long, String> nicknames = new LinkedHashMap<>();
+        nicknames.put(view.post().getWriterId(), nicknameFor(view.post().getWriterId()));
+        view.comments().stream()
+                .map(Comment::getWriterId)
+                .forEach(writerId -> nicknames.putIfAbsent(writerId, nicknameFor(writerId)));
+        return nicknames;
+    }
+
+    private String nicknameFor(Long writerId) {
+        if (writerId == null) {
+            return "커뮤니티러";
+        }
+        String[] names = {
+                "코드하루",
+                "자바노트",
+                "쿼리연습생",
+                "파이썬친구",
+                "웹기록장",
+                "디버깅중",
+                "스터디물결",
+                "개념정리왕",
+                "스프링새싹",
+                "알고한걸음"
+        };
+        return names[(int) Math.floorMod(writerId - 1, names.length)];
+    }
+
+    private String removeSampleMarker(String content) {
+        if (content == null) {
+            return "";
+        }
+        return content
+                .replace("[sample-20260707-more-realistic-list]", "")
+                .replace("sample-20260707-more-realistic-list", "")
+                .trim();
     }
 }
