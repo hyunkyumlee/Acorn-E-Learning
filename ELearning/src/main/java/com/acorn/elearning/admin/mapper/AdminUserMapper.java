@@ -17,8 +17,8 @@ public interface AdminUserMapper {
     //Optional<AdminUserManageRowResponse>findLearningSummaryByUserId(@Param("userId") Long userId);
 
     //상태 변경
-    int updateStatus(Long userId, String status);
+    int updateStatus(@Param("userId") Long userId, @Param("status") String status);
     //권한 변경
-    int updateRole(Long userId, String role);
+    int updateRole(@Param("userId") Long userId, @Param("role") String role);
 
 }
