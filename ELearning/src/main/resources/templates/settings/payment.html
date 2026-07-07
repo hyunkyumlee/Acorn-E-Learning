@@ -36,7 +36,6 @@
               <strong>상세 분석 이용권</strong>
               <span th:if="${view != null}" th:text="|${view.premiumStatusLabel()} · ${view.premiumGrantTypeLabel()} · 만료 ${view.premiumExpiresAtLabel()}|">결제일 2026.06.05 · 9,900원 · 더미 결제</span>
               <span th:if="${view == null}">결제일 2026.06.05 · 9,900원 · 더미 결제</span>
-              <a class="figma-button" th:href="@{/payments}">결제 내역</a>
             </div>
             <div class="figma-payment-history" th:if="${view == null}">
               <span>2026.06.05</span><strong>상세 분석 이용권</strong><b>9,900원</b>
@@ -45,16 +44,125 @@
               <span>-</span><strong>결제 내역 없음</strong><b>0원</b>
             </div>
             <th:block th:if="${view != null}">
-              <div class="figma-payment-history" th:each="payment : ${view.payments()}">
-                <span th:text="${payment.paidAtLabel()}">2026.06.05</span>
-                <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
-                <b th:text="${payment.amountLabel()}">9,900원</b>
-              </div>
+              <th:block th:each="payment : ${view.payments()}">
+                <div class="figma-payment-history">
+                  <span th:text="${payment.paidAtLabel()}">2026.06.05</span>
+                  <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
+                  <b th:text="${payment.amountLabel()}">9,900원</b>
+                  <button class="figma-button figma-payment-detail-button" type="button" th:attr="data-payment-modal-open=${payment.paymentId()}">결제 상세</button>
+                </div>
+                <section class="figma-payment-modal-backdrop" hidden th:attr="data-payment-modal=${payment.paymentId()}">
+                  <article class="figma-payment-modal" role="dialog" aria-modal="true" th:attr="aria-labelledby=|payment-detail-title-${payment.paymentId()}|">
+                    <header>
+                      <h2 th:id="|payment-detail-title-${payment.paymentId()}|">결제 상세</h2>
+                      <button class="figma-payment-modal-close" type="button" data-payment-modal-close aria-label="닫기">×</button>
+                    </header>
+                    <div class="figma-payment-modal-summary">
+                      <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
+                      <span th:text="${payment.paymentStatusLabel()}">결제 완료</span>
+                    </div>
+                    <dl class="figma-payment-detail-list">
+                      <div>
+                        <dt>주문번호</dt>
+                        <dd th:text="${payment.orderNo() == null || #strings.isEmpty(payment.orderNo()) ? '-' : payment.orderNo()}">ORDER-001</dd>
+                      </div>
+                      <div>
+                        <dt>결제수단</dt>
+                        <dd th:text="${payment.paymentMethodDetailLabel()}">신용카드 더미 승인</dd>
+                      </div>
+                      <div>
+                        <dt>결제금액</dt>
+                        <dd th:text="${payment.amountLabel()}">9,900원</dd>
+                      </div>
+                      <div>
+                        <dt>결제일시</dt>
+                        <dd th:text="${payment.paidAtLabel()}">2026.06.05 12:00</dd>
+                      </div>
+                      <div>
+                        <dt>요청일시</dt>
+                        <dd th:text="${payment.paymentCreatedAtLabel()}">2026.06.05 12:00</dd>
+                      </div>
+                      <div>
+                        <dt>Premium 권한</dt>
+                        <dd th:text="|${payment.premiumStatusLabel()} · ${payment.grantTypeLabel()}|">Premium 활성 · Lifetime</dd>
+                      </div>
+                      <div>
+                        <dt>권한 시작</dt>
+                        <dd th:text="${payment.grantedAtLabel()}">2026.06.05 12:00</dd>
+                      </div>
+                      <div>
+                        <dt>권한 만료</dt>
+                        <dd th:text="${payment.expiresAtLabel()}">무제한</dd>
+                      </div>
+                    </dl>
+                  </article>
+                </section>
+              </th:block>
             </th:block>
           </section>
         </article>
       </section>
     </section>
   </main>
+  <script>
+    (function () {
+      var openButtons = document.querySelectorAll("[data-payment-modal-open]");
+      var modals = document.querySelectorAll("[data-payment-modal]");
+      var closeButtons = document.querySelectorAll("[data-payment-modal-close]");
+
+      function openModal(paymentId) {
+        var modal = document.querySelector("[data-payment-modal='" + paymentId + "']");
+        if (!modal) {
+          return;
+        }
+        modal.hidden = false;
+        document.body.classList.add("modal-open");
+      }
+
+      function closeModal(modal) {
+        if (!modal) {
+          return;
+        }
+        modal.hidden = true;
+        var hasOpenModal = Array.prototype.some.call(modals, function (item) {
+          return !item.hidden;
+        });
+        if (!hasOpenModal) {
+          document.body.classList.remove("modal-open");
+        }
+      }
+
+      openButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          openModal(button.getAttribute("data-payment-modal-open"));
+        });
+      });
+
+      closeButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          closeModal(button.closest("[data-payment-modal]"));
+        });
+      });
+
+      modals.forEach(function (modal) {
+        modal.addEventListener("click", function (event) {
+          if (event.target === modal) {
+            closeModal(modal);
+          }
+        });
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key !== "Escape") {
+          return;
+        }
+        modals.forEach(function (modal) {
+          if (!modal.hidden) {
+            closeModal(modal);
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
