@@ -80,7 +80,7 @@ public class SettingsController {
         UserProfileResponse updated = settingsService.updateProfile(sessionUser, form);
         httpSession.setAttribute(
                 SessionUser.SESSION_KEY,
-                new SessionUser(updated.userId(), updated.email(), updated.nickname(), updated.role(), sessionUser.premiumActive()));
+                new SessionUser(updated.userId(), updated.email(), updated.nickname(), updated.role(), sessionUser.premiumActive(), updated.profileImageUrl()));
         redirectAttributes.addFlashAttribute("message", "회원 정보가 저장되었습니다.");
         return "redirect:/settings/profile";
     }
@@ -119,7 +119,7 @@ public class SettingsController {
             UserProfileResponse updated = settingsService.updateSecurity(sessionUser, form);
             httpSession.setAttribute(
                     SessionUser.SESSION_KEY,
-                    new SessionUser(updated.userId(), updated.email(), updated.nickname(), updated.role(), sessionUser.premiumActive()));
+                    new SessionUser(updated.userId(), updated.email(), updated.nickname(), updated.role(), sessionUser.premiumActive(), updated.profileImageUrl()));
             redirectAttributes.addFlashAttribute("message", "이메일이 저장되었습니다.");
         } catch (BusinessException exception) {
             bindingResult.rejectValue("email", "duplicate", exception.getMessage());
