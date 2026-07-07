@@ -66,6 +66,16 @@
   <a class="admin-sidebar-logout" th:href="@{/logout}">
     로그아웃
   </a>
+  <script th:if="${message != null}" th:inline="javascript">
+    window.addEventListener("DOMContentLoaded", () => {
+      alert([[${message}]]);
+    });
+  </script>
+  <script th:if="${errorMessage != null}" th:inline="javascript">
+    window.addEventListener("DOMContentLoaded", () => {
+      alert([[${errorMessage}]]);
+    });
+  </script>
 </aside>
 </body>
 </html>
