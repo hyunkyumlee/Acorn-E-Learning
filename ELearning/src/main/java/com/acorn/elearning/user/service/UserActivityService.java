@@ -9,10 +9,12 @@ import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.exam.mapper.ExamSessionMapper;
 import com.acorn.elearning.exam.model.ExamSession;
 import com.acorn.elearning.learning.mapper.AttendanceRecordMapper;
+import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
 import com.acorn.elearning.learning.mapper.LearningProfileReadMapper;
 import com.acorn.elearning.learning.mapper.LearningProgressMapper;
 import com.acorn.elearning.learning.mapper.LevelTestAttemptMapper;
 import com.acorn.elearning.learning.model.AttendanceRecord;
+import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
 import com.acorn.elearning.learning.model.LevelTestAttempt;
 import com.acorn.elearning.payment.dto.response.PremiumAccessResponse;
@@ -29,7 +31,11 @@ import com.acorn.elearning.user.dto.response.PaymentHistoryPageResponse;
 import com.acorn.elearning.user.mapper.UserMapper;
 import com.acorn.elearning.user.model.User;
 import com.acorn.elearning.user.model.UserLearningProfile;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,6 +47,7 @@ public class UserActivityService {
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 10;
     private static final int MAX_SIZE = 100;
+    private static final String NODE_TYPE_PLANET = "PLANET";
     private static final DateTimeFormatter COMMUNITY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
     private final DummyPaymentMapper dummyPaymentMapper;
@@ -51,6 +58,7 @@ public class UserActivityService {
     private final PostScrapMapper postScrapMapper;
     private final LearningProfileReadMapper learningProfileReadMapper;
     private final AttendanceRecordMapper attendanceRecordMapper;
+    private final CurriculumNodeMapper curriculumNodeMapper;
     private final LearningProgressMapper learningProgressMapper;
     private final LevelTestAttemptMapper levelTestAttemptMapper;
     private final ExamSessionMapper examSessionMapper;
@@ -64,6 +72,7 @@ public class UserActivityService {
             PostScrapMapper postScrapMapper,
             LearningProfileReadMapper learningProfileReadMapper,
             AttendanceRecordMapper attendanceRecordMapper,
+            CurriculumNodeMapper curriculumNodeMapper,
             LearningProgressMapper learningProgressMapper,
             LevelTestAttemptMapper levelTestAttemptMapper,
             ExamSessionMapper examSessionMapper
@@ -76,6 +85,7 @@ public class UserActivityService {
         this.postScrapMapper = postScrapMapper;
         this.learningProfileReadMapper = learningProfileReadMapper;
         this.attendanceRecordMapper = attendanceRecordMapper;
+        this.curriculumNodeMapper = curriculumNodeMapper;
         this.learningProgressMapper = learningProgressMapper;
         this.levelTestAttemptMapper = levelTestAttemptMapper;
         this.examSessionMapper = examSessionMapper;
@@ -91,13 +101,18 @@ public class UserActivityService {
         List<AttendanceRecord> attendanceRecords = attendanceRecordMapper.findAll().stream()
                 .filter(record -> userId.equals(record.getUserId()))
                 .toList();
-        List<LearningProgress> progressItems = learningProfile == null || learningProfile.getPrimarySubjectId() == null
-                ? List.of()
-                : learningProgressMapper.findByUserIdAndSubjectId(userId, learningProfile.getPrimarySubjectId());
+        List<LearningProgress> progressItems = learningProgressMapper.findAll().stream()
+                .filter(progress -> userId.equals(progress.getUserId()))
+                .toList();
+        Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel =
+                progressBySubjectLevel(progressItems);
         List<ExamSession> examSessions = examSessionMapper.findByUserId(userId);
         List<LevelTestAttempt> levelTestAttempts = levelTestAttemptMapper.findAll().stream()
                 .filter(attempt -> userId.equals(attempt.getUserId()))
                 .toList();
+        int likedPostCount = postLikeMapper.findPostsByUserId(userId).size();
+        int scrapedPostCount = postScrapMapper.findPostsByUserId(userId).size();
+        int writtenPostCount = communityPostMapper.findByWriterId(userId).size();
         DummyPayment latestPayment = dummyPaymentMapper.findLatestByUserId(userId).orElse(null);
 
         return MyPageSummaryResponse.of(
@@ -108,8 +123,12 @@ public class UserActivityService {
                 latestAttendance,
                 attendanceRecords,
                 progressItems,
+                progressBySubjectLevel,
                 examSessions,
                 levelTestAttempts,
+                likedPostCount,
+                scrapedPostCount,
+                writtenPostCount,
                 latestPayment
         );
     }
@@ -126,7 +145,13 @@ public class UserActivityService {
         List<LearningProgress> progressItems = learningProgressMapper.findAll().stream()
                 .filter(progress -> userId.equals(progress.getUserId()))
                 .toList();
-        return LearningStatusPageResponse.of(progressItems, subject, safePage, DEFAULT_SIZE);
+        return LearningStatusPageResponse.of(
+                progressItems,
+                progressBySubjectLevel(progressItems),
+                subject,
+                safePage,
+                DEFAULT_SIZE
+        );
     }
 
     @Transactional(readOnly = true)
@@ -204,6 +229,70 @@ public class UserActivityService {
     private int offset(int page, int size) {
         long offset = (long) page * size;
         return offset > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) offset;
+    }
+
+    private Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel(
+            List<LearningProgress> progressItems
+    ) {
+        Map<Long, LearningProgress> progressByNodeId = new HashMap<>();
+        if (progressItems != null) {
+            progressItems.stream()
+                    .filter(progress -> progress.getNodeId() != null)
+                    .forEach(progress -> progressByNodeId.put(progress.getNodeId(), progress));
+        }
+
+        Map<Long, Map<String, List<CurriculumNode>>> planetsBySubjectLevel = new HashMap<>();
+        curriculumNodeMapper.findAll().stream()
+                .filter(node -> node.getSubjectId() != null)
+                .filter(node -> NODE_TYPE_PLANET.equals(node.getNodeType()))
+                .filter(node -> node.getPlanetNo() != null)
+                .filter(node -> Boolean.TRUE.equals(node.getIsActive()))
+                .forEach(node -> planetsBySubjectLevel
+                        .computeIfAbsent(node.getSubjectId(), ignored -> new HashMap<>())
+                        .computeIfAbsent(normalizeLevelCode(node.getLevelCode()), ignored -> new ArrayList<>())
+                        .add(node));
+
+        Map<Long, LearningStatusPageResponse.SubjectLevelProgress> result = new HashMap<>();
+        planetsBySubjectLevel.forEach((subjectId, planetsByLevel) -> {
+            LearningStatusPageResponse.SubjectLevelProgress selected = null;
+            for (String levelCode : List.of("BRONZE", "SILVER", "GOLD")) {
+                List<CurriculumNode> levelPlanets = planetsByLevel.getOrDefault(levelCode, List.of());
+                if (levelPlanets.isEmpty()) {
+                    continue;
+                }
+
+                int progressRate = levelProgressRate(levelPlanets, progressByNodeId);
+                selected = new LearningStatusPageResponse.SubjectLevelProgress(levelCode, progressRate);
+                if (progressRate < 100 || "GOLD".equals(levelCode)) {
+                    break;
+                }
+            }
+            if (selected != null) {
+                result.put(subjectId, selected);
+            }
+        });
+        return result;
+    }
+
+    private int levelProgressRate(
+            List<CurriculumNode> planets,
+            Map<Long, LearningProgress> progressByNodeId
+    ) {
+        if (planets == null || planets.isEmpty()) {
+            return 0;
+        }
+        BigDecimal total = BigDecimal.ZERO;
+        for (CurriculumNode planet : planets) {
+            LearningProgress progress = progressByNodeId.get(planet.getNodeId());
+            if (progress != null && progress.getProgressRate() != null) {
+                total = total.add(progress.getProgressRate());
+            }
+        }
+        return total.divide(BigDecimal.valueOf(planets.size()), 0, RoundingMode.HALF_UP).intValue();
+    }
+
+    private static String normalizeLevelCode(String levelCode) {
+        return levelCode == null ? "" : levelCode.trim().toUpperCase(Locale.ROOT);
     }
 
     private String normalizeCommunityActivityType(String type) {

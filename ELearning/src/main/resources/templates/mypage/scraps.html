@@ -40,12 +40,12 @@
                  th:classappend="${view.type() == 'POSTS'} ? ' written' : ''"
                  th:attr="data-post-id=${item.postId()}">
           <span class="community-post-category" th:text="${item.categoryLabel()}">질문</span>
-          <div class="community-post-body">
+          <a class="community-post-body community-post-detail-link" th:href="${item.detailUrl()}">
             <h2 th:text="${item.title()}">반복문이 헷갈려요</h2>
             <p th:if="${!#strings.isEmpty(item.excerpt())}" th:text="${item.excerpt()}">게시글 요약</p>
             <span class="community-post-meta" th:if="${view.type() != 'POSTS'}" th:text="|${item.boardLabel()} - ${item.authorLabel()} - 좋아요 ${item.likeCount()} - 댓글 ${item.commentCount()}|">Java 질문 게시판 - 작성자 - 좋아요 12 - 댓글 2</span>
             <span class="community-post-meta" th:if="${view.type() == 'POSTS'}" th:text="|${item.authorLabel()} ${item.dateLabel()} - 좋아요 ${item.likeCount()} - 댓글 ${item.commentCount()}|">작성일 2026.06.10 - 좋아요 5 - 댓글 4</span>
-          </div>
+          </a>
           <time class="community-post-date" th:if="${view.type() != 'POSTS'}" th:text="${item.dateLabel()}">2026.06.14</time>
           <button class="activity-row-marker"
                   type="button"

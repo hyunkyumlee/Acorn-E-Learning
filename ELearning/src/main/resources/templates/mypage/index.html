@@ -110,23 +110,14 @@
         <article class="mypage-section list-section">
           <div class="mypage-section-head"><h2>최근 학습 현황</h2><a class="mini-button" th:href="@{/mypage/learning}">전체보기</a></div>
           <div class="learning-status-list">
-            <div class="learning-status-row">
-              <span class="language-thumb java"><img th:src="@{/assets/images/icons/subject/java.png}" alt="Java"></span>
-              <strong>Java</strong>
-              <div class="mini-progress"><i style="width:30%"></i></div>
-              <b>30%</b>
-            </div>
-            <div class="learning-status-row">
-              <span class="language-thumb python"><img th:src="@{/assets/images/icons/subject/python.png}" alt="Python"></span>
-              <strong>Python</strong>
-              <div class="mini-progress"><i style="width:80%"></i></div>
-              <b>80%</b>
-            </div>
-            <div class="learning-status-row">
-              <span class="language-thumb sql"><img th:src="@{/assets/images/icons/subject/sql.png}" alt="SQL"></span>
-              <strong>SQL</strong>
-              <div class="mini-progress"><i style="width:50%"></i></div>
-              <b>50%</b>
+            <div class="learning-status-row" th:each="item : ${view.learning().previewItems()}">
+              <span th:class="|language-thumb ${item.thumbClass()}|">
+                <img th:if="${item.thumbIconPath() != null}" th:src="${item.thumbIconPath()}" th:alt="${item.subjectName()}">
+                <span th:if="${item.thumbIconPath() == null}" th:text="${item.thumbLabel()}">J</span>
+              </span>
+              <strong th:text="${item.subjectName()}">Java</strong>
+              <div class="mini-progress"><i th:style="|width:${item.progressRate()}%|"></i></div>
+              <b th:text="${item.progressRateLabel()}">30%</b>
             </div>
           </div>
         </article>
@@ -159,7 +150,7 @@
               <a class="mini-button" th:href="@{/mypage/community/liked}">보기</a>
             </div>
             <div class="community-activity-card-body">
-              <strong>10개</strong>
+              <strong th:text="${view.community().likedPostCountLabel()}">0개</strong>
               <p>관심 있는 게시글 모음</p>
             </div>
           </article>
@@ -172,7 +163,7 @@
               <a class="mini-button" th:href="@{/mypage/community/scraps}">보기</a>
             </div>
             <div class="community-activity-card-body">
-              <strong>10개</strong>
+              <strong th:text="${view.community().scrapedPostCountLabel()}">0개</strong>
               <p>나중에 다시 볼 글 모음</p>
             </div>
           </article>
@@ -185,7 +176,7 @@
               <a class="mini-button" th:href="@{/mypage/community/posts}">보기</a>
             </div>
             <div class="community-activity-card-body">
-              <strong>10개</strong>
+              <strong th:text="${view.community().writtenPostCountLabel()}">0개</strong>
               <p>내가 작성한 게시글</p>
             </div>
           </article>

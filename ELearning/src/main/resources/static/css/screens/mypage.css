@@ -1017,9 +1017,16 @@ textarea.mypage-field {
   font-weight: 800;
 }
 
-.exam-summary-section .result-badge.retry {
+.exam-summary-section .result-badge.pass {
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--mypage-line));
   background: var(--mypage-primary-soft);
   color: var(--primary);
+}
+
+.exam-summary-section .result-badge.retry {
+  border-color: color-mix(in srgb, var(--danger) 38%, var(--mypage-line));
+  background: var(--mypage-danger-soft);
+  color: var(--danger);
 }
 
 .exam-summary-section .exam-result-row.subtle {
@@ -1030,6 +1037,13 @@ textarea.mypage-field {
 .exam-summary-section .exam-result-row.subtle span {
   font-size: clamp(16px, 2vw, 20px);
   font-weight: 700;
+}
+
+.exam-summary-section .exam-result-row.subtle span {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.4;
+  transform: none;
 }
 
 .exam-result-modal {
@@ -1106,6 +1120,10 @@ textarea.mypage-field {
   border-radius: 16px;
   background: var(--mypage-card);
   padding: 18px 24px;
+}
+
+.exam-modal-row[hidden] {
+  display: none;
 }
 
 .exam-status-dot {
@@ -1394,6 +1412,17 @@ textarea.mypage-field {
   display: grid;
   min-width: 0;
   gap: 8px;
+}
+
+.community-post-detail-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.community-post-detail-link:hover h2,
+.community-post-detail-link:focus-visible h2 {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .community-post-body h2 {
