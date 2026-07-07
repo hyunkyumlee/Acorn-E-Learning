@@ -11,7 +11,6 @@ import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.form.SubjectForm;
-import com.acorn.elearning.admin.mapper.AdminContentMapper;
 import com.acorn.elearning.admin.mapper.AdminLessonMapper;
 import com.acorn.elearning.admin.mapper.AdminProblemMapper;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
@@ -24,13 +23,13 @@ import com.acorn.elearning.practice.mapper.PracticeProblemMapper;
 import com.acorn.elearning.practice.model.PracticeProblem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class AdminContentService {
 
     private final SubjectMapper sm;
-    private final AdminContentMapper acm;
 
     private final CurriculumNodeMapper cm;
 
@@ -86,10 +85,6 @@ public class AdminContentService {
         return sm.update(s);
     }
 
-//    public int deleteSubject(Long subjectId){
-//        return acm.deleteSubjectById(subjectId);
-//    }
-
     //커리큘럼 조회
     public List<CurriculumNode> findAllCurriculumNode(){
         return cm.findAll();
@@ -143,10 +138,6 @@ public class AdminContentService {
     }
 
 
-//    public int deleteCurriculumNode(Long nodeId){
-//        return acm.deleteCurriculumNodeById(nodeId);
-//    }
-
     //이론 자료 조회
     public List<Lesson> findAllLesson(){
         return lm.findAll();
@@ -194,6 +185,13 @@ public class AdminContentService {
 
         return lm.update(lesson);
     }
+
+    @Transactional
+    public int deleteLesson(Long lessonId) {
+        alm.deleteBookmarksByLessonId(lessonId);
+        return alm.deleteById(lessonId);
+    }
+
 
     //관리자 문제 목록 조회
     public List<AdminProblemManageRowResponse> findAllAdminProblem(){

@@ -53,5 +53,14 @@
         ORDER BY l.updated_at DESC, l.lesson_id DESC
     </select>
 
+    <delete id="deleteById">
+        DELETE FROM lessons
+        WHERE lesson_id = #{lessonId}
+    </delete>
+
+    <delete id="deleteBookmarksByLessonId">
+        DELETE FROM lesson_bookmarks
+        WHERE lesson_id = #{lessonId}
+    </delete>
 
 </mapper>

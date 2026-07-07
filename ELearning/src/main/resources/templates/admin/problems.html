@@ -138,7 +138,8 @@
   <section class="problem-form-panel">
     <h2>문제 등록 / 수정 폼</h2>
 
-    <form method="post" action="/admin/problems" th:object="${problemForm}">
+    <form method="post" action="/admin/problems" th:object="${problemForm}"
+          onsubmit="return confirm('문제를 저장하시겠습니까?');">
       <div class="problem-form-layout">
         <div class="problem-form-fields">
           <input type="hidden" name="problemId" id="problemId">
@@ -189,7 +190,6 @@
           <div class="problem-form-actions">
             <button type="submit" class="problem-primary-button">저장</button>
             <button type="reset" class="problem-secondary-button">취소</button>
-            <button type="button" class="problem-secondary-button">삭제</button>
           </div>
         </div>
 
