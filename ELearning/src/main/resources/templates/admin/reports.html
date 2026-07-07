@@ -126,7 +126,8 @@
 
       <div class="admin-report-process">
         <h3>처리 결과 입력</h3>
-        <form id="reportHandleForm" method="post" action="/admin/reports/0" class="admin-report-process-row">
+        <form id="reportHandleForm" method="post" action="/admin/reports/0" class="admin-report-process-row"
+              onsubmit="return confirm('신고 처리 상태를 변경하시겠습니까?');">
           <select name="status" id="reportHandleStatus" aria-label="처리 상태 선택" required>
             <option value="">처리 상태 선택</option>
             <option value="PENDING">대기</option>

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,10 +31,12 @@ public class AdminCommunityController {
     public String updatePostStatus(
             @PathVariable Long postId,
             CommunityStatusForm form,
-            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            RedirectAttributes redirectAttributes
     ) {
 
         service.updatePostStatus(postId, form, sessionUser);
+        redirectAttributes.addFlashAttribute("message", "게시글 상태가 변경되었습니다.");
 
         return "redirect:/admin/community";
     }
@@ -42,10 +45,12 @@ public class AdminCommunityController {
     public String updateCommentStatus(
             @PathVariable Long commentId,
             CommunityStatusForm form,
-            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            RedirectAttributes redirectAttributes
     ) {
 
         service.updateCommentStatus(commentId, form, sessionUser);
+        redirectAttributes.addFlashAttribute("message", "댓글 상태가 변경되었습니다.");
 
         return "redirect:/admin/community";
     }
