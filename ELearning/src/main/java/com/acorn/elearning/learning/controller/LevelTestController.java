@@ -1,10 +1,17 @@
 package com.acorn.elearning.learning.controller;
 
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.learning.form.LevelTestForm;
+import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.LevelTestService;
+import com.acorn.elearning.learning.view.LevelTestQuestionView;
 import com.acorn.elearning.learning.view.LevelTestResultView;
+import com.acorn.elearning.learning.view.OnboardingResultView;
 import com.acorn.elearning.security.SessionUser;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,61 +23,72 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 /**
- * 레벨 테스트(SR-004, LEVEL-001/002) MVC 컨트롤러.
- * 문항 표시(GET) → 제출(POST) → 결과(GET) 세 라우트. 화면은 learning/onboarding 템플릿을 공유한다.
+ * 레벨 테스트(레벨 스캔) MVC 컨트롤러. 문항 표시(GET) → 제출(POST) → 결과(GET).
+ * 화면은 learning/onboarding 템플릿을 온보딩과 공유하며 step=test / step=result 로 렌더한다.
  */
 @Controller
 public class LevelTestController {
 
-    /** 과목 미지정 시 기본 과목: JAVA(subject_id=1). 온보딩의 과목 선택이 붙기 전 dev/스모크용. */
+    /** 과목 미지정 시 기본 과목(JAVA, subject_id=1). */
     private static final Long DEFAULT_SUBJECT_ID = 1L;
 
-    /**
-     * 개발용 fallback 사용자: 로그인/세션은 1번(auth) 담당이라 구현 전까지 세션이 비어 있다.
-     * 세션이 없으면 샘플데이터의 learner(userId=2, 누비학습자)로 확인한다.
-     * (LearningController와 동일 패턴 — 로그인/세션이 붙으면 자연히 미사용)
-     */
+    /** 세션 미구현 구간에서 사용하는 fallback learner(샘플데이터 userId=2). */
     private static final SessionUser DEV_FALLBACK_USER =
             new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
 
-    private final LevelTestService levelTestService;
+    private static final String ATTEMPT_STATUS_SUBMITTED = "SUBMITTED";
 
-    public LevelTestController(LevelTestService levelTestService) {
+    private final LevelTestService levelTestService;
+    private final LearningService learningService;
+
+    public LevelTestController(LevelTestService levelTestService, LearningService learningService) {
         this.levelTestService = levelTestService;
+        this.learningService = learningService;
     }
 
-    /** LEVEL-001: 과목별 레벨 테스트 문항 표시. */
+    /** 과목별 레벨 테스트 문항 표시(step=test). */
     @GetMapping("/learning/level-test")
     public String questions(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(name = "subjectId", required = false) Long subjectId,
-            Model model) {
+            HttpSession session, Model model) {
         Long targetSubjectId = (subjectId != null) ? subjectId : DEFAULT_SUBJECT_ID;
 
         LevelTestForm form = new LevelTestForm();
         form.setSubjectId(targetSubjectId);
 
-        model.addAttribute("questions", levelTestService.getQuestions(targetSubjectId));
+        List<LevelTestQuestionView> questions;
+        try {
+            questions = levelTestService.getQuestions(targetSubjectId);
+        } catch (BusinessException e) {
+            if (e.errorCode() != ErrorCode.COMMON_NOT_FOUND) {
+                throw e;
+            }
+            questions = List.of();
+        }
+
+        model.addAttribute("step", "test");
+        model.addAttribute("questions", questions);
         model.addAttribute("subjectId", targetSubjectId);
         model.addAttribute("levelTestForm", form);
-        model.addAttribute("screen", "learning/onboarding");
+        model.addAttribute("profile", OnboardingController.buildProfile(session, sessionUser, learningService));
         return "learning/onboarding";
     }
 
-    /** LEVEL-002: 답안 제출 → 채점/반영 후 결과 화면으로 redirect. */
+    /** 답안 제출 → 채점/반영 후 결과로 redirect. */
     @PostMapping("/learning/level-test")
     public String submit(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @Valid @ModelAttribute("levelTestForm") LevelTestForm form,
             BindingResult bindingResult,
-            Model model) {
+            HttpSession session, Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
 
         if (bindingResult.hasErrors()) {
-            // 과목 등 필수값 오류 시 문항을 다시 실어 문항 화면을 재표시한다.
+            model.addAttribute("step", "test");
             model.addAttribute("questions", levelTestService.getQuestions(form.getSubjectId()));
             model.addAttribute("subjectId", form.getSubjectId());
-            model.addAttribute("screen", "learning/onboarding");
+            model.addAttribute("profile", OnboardingController.buildProfile(session, sessionUser, learningService));
             return "learning/onboarding";
         }
 
@@ -78,16 +96,29 @@ public class LevelTestController {
         return "redirect:/learning/level-test/result/" + result.attemptId();
     }
 
-    /** LEVEL-002 결과: 등급/정답수 표시. */
+    /** 결과 표시(step=result): 등급/정답수 + 출발 지점. */
     @GetMapping("/learning/level-test/result/{attemptId}")
     public String result(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long attemptId,
-            Model model) {
+            HttpSession session, Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
 
-        model.addAttribute("result", levelTestService.getResult(user, attemptId));
-        model.addAttribute("screen", "learning/onboarding");
+        LevelTestResultView r = levelTestService.getResult(user, attemptId);
+        model.addAttribute("step", "result");
+        model.addAttribute("result", new OnboardingResultView(
+                r.resultLevelCode(), r.correctCount(), r.totalCount(), true, startPlanetNo(r.resultLevelCode())));
+        model.addAttribute("profile", OnboardingController.buildProfile(session, sessionUser, learningService));
         return "learning/onboarding";
+    }
+
+    private static int startPlanetNo(String levelCode) {
+        if ("GOLD".equals(levelCode)) {
+            return 3;
+        }
+        if ("SILVER".equals(levelCode)) {
+            return 2;
+        }
+        return 1;
     }
 }
