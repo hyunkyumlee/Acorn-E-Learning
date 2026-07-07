@@ -12,10 +12,10 @@
 }
 
 .admin-report-toolbar {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(150px, 1fr));
-  gap: 12px;
-  max-width: 760px;
+    display: grid;
+    grid-template-columns: 220px 220px 220px;
+    gap: 12px;
+    align-items: center;
 }
 
 .admin-report-toolbar select,
@@ -43,7 +43,6 @@
   cursor: pointer;
 }
 
-.admin-report-section,
 .admin-report-detail-card {
   border: 1px solid #dfe4ec;
   border-radius: 8px;
@@ -52,7 +51,7 @@
 }
 
 .admin-report-section {
-  padding: 0 0 18px;
+  padding: 0;
 }
 
 .admin-report-section h2,
@@ -64,11 +63,15 @@
 }
 
 .admin-report-section h2 {
-  padding: 16px 18px 0;
+  padding: 0;
 }
 
 .admin-report-table-wrap {
   overflow-x: auto;
+  border: 1px solid #dfe4ec;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.05);
 }
 
 .admin-report-table {

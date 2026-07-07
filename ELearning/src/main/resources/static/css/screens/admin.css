@@ -1,17 +1,56 @@
 .admin-screen .panel { border-left: 4px solid var(--accent); }
 
 :root {
-    --admin-sidebar-width: 184px;
+    --admin-sidebar-width: 200px;
+    --admin-content-x: 28px;
+}
+
+.page-shell.admin-screen {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0 0 32px;
+    background: transparent;
+    gap: 0;
+}
+
+.admin-screen > section:first-child {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    width: 100%;
+    margin: 0 0 22px;
+    padding: 0 var(--admin-content-x);
+    border-bottom: 1px solid #d7dde6;
+    background: #f1f3f6;
+}
+
+.admin-screen > section:not(:first-child),
+.admin-screen > p {
+    width: min(calc(100% - (var(--admin-content-x) * 2)), var(--max-content));
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 22px;
+}
+
+.admin-screen > section:first-child > h1 {
+    margin: 0;
+    color: #111827;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.3;
 }
 
 .admin-sidebar {
     position: fixed;
-    top: var(--header-height);
+    top: 0;
     left: 0;
     z-index: 15;
     display: flex;
     width: var(--admin-sidebar-width);
-    min-height: calc(100vh - var(--header-height));
+    min-height: 100vh;
     flex-direction: column;
     padding: 24px 14px 18px;
     border-right: 1px solid var(--line);
@@ -23,13 +62,13 @@
 }
 
 .admin-sidebar-brand {
-    min-height: 34px;
+    min-height: 38px;
     margin-bottom: 22px;
     padding: 0 8px;
     color: var(--text);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
-    line-height: 34px;
+    line-height: 38px;
 }
 
 .admin-sidebar-nav {
@@ -50,7 +89,7 @@
     min-height: 22px;
     padding: 0 8px 3px;
     color: var(--text);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
 }
 
@@ -68,7 +107,7 @@
     border: 1px solid transparent;
     border-radius: 12px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     line-height: 1.3;
     text-decoration: none;
@@ -104,17 +143,22 @@
 @media (min-width: 769px) {
     .admin-sidebar + .admin-screen,
     .admin-sidebar ~ .admin-screen {
-        width: auto;
-        max-width: var(--max-content);
-        margin-left: calc(
-            var(--admin-sidebar-width) +
-            max(28px, ((100vw - var(--admin-sidebar-width) - var(--max-content)) / 2 + 28px))
-        );
-        margin-right: max(28px, ((100vw - var(--admin-sidebar-width) - var(--max-content)) / 2 + 28px));
+        width: calc(100% - var(--admin-sidebar-width));
+        max-width: none;
+        margin-left: var(--admin-sidebar-width);
+        margin-right: 0;
     }
 }
 
 @media (max-width: 768px) {
+    :root {
+        --admin-content-x: 18px;
+    }
+
+    .page-shell.admin-screen {
+        padding-bottom: 24px;
+    }
+
     .admin-sidebar {
         position: static;
         width: 100%;
