@@ -26,7 +26,7 @@ class AiExamServiceAuthorizationTest {
     void eligibility_rejects_admin_before_exam_lookup() {
         AiExamService service = service();
 
-        BusinessException exception = assertThrows(BusinessException.class, () -> service.eligibility(admin()));
+        BusinessException exception = assertThrows(BusinessException.class, () -> service.eligibility(admin(), 1L, "BRONZE"));
 
         assertEquals(ErrorCode.AUTH_FORBIDDEN, exception.errorCode());
         assertEquals("AI 코딩테스트는 학습자 계정으로만 이용할 수 있습니다.", exception.getMessage());

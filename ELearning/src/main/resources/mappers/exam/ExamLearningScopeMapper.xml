@@ -18,17 +18,16 @@
             COALESCE(NULLIF(l.summary, ''), LEFT(l.content, 500)) AS summary,
             l.example_code AS example_code,
             (cn.sort_order * 100 + l.sort_order) AS sort_order
-        FROM learning_progress lp
-        INNER JOIN curriculum_nodes cn
-            ON cn.node_id = lp.node_id
-        INNER JOIN lessons l
-            ON l.node_id = cn.node_id
-        WHERE lp.user_id = #{userId}
-          AND lp.subject_id = #{subjectId}
-          AND cn.level_code = #{levelCode}
-          AND lp.lesson_completed = 1
-          AND cn.is_active = 1
-          AND l.is_active = 1
+        FROM user_lesson_progress ulp
+        JOIN lessons l ON l.lesson_id = ulp.lesson_id
+        JOIN curriculum_nodes cn ON cn.node_id = l.node_id
+        WHERE ulp.user_id = #{userId}
+            AND cn.subject_id = #{subjectId}
+            AND cn.level_code = #{levelCode}
+            AND cn.node_type = 'PLANET'
+            AND ulp.theory_completed = 1
+            AND cn.is_active = 1
+            AND l.is_active = 1
         ORDER BY cn.sort_order ASC, l.sort_order ASC, l.lesson_id ASC
     </select>
 
@@ -37,63 +36,57 @@
             'PRACTICE' AS source_type,
             cn.title AS node_title,
             pp.question AS title,
-            pp.answer_text AS summary,
+            COALESCE(NULLIF(pp.explanation, ''), pp.answer_text) AS summary,
             pp.answer_text AS example_code,
-            (cn.sort_order * 100 + pp.problem_id) AS sort_order
-        FROM learning_progress lp
-        INNER JOIN curriculum_nodes cn
-            ON cn.node_id = lp.node_id
-        INNER JOIN practice_problems pp
-            ON pp.node_id = cn.node_id
-           AND pp.subject_id = lp.subject_id
-        WHERE lp.user_id = #{userId}
-          AND lp.subject_id = #{subjectId}
-          AND cn.level_code = #{levelCode}
-          AND lp.practice_passed = 1
-          AND cn.is_active = 1
-          AND pp.is_active = 1
+            (cn.sort_order * 100 + l.sort_order) AS sort_order
+        FROM user_lesson_progress ulp
+        JOIN lessons l
+            ON l.lesson_id = ulp.lesson_id
+        JOIN curriculum_nodes cn
+            ON cn.node_id = l.node_id
+        JOIN practice_problems pp
+            ON pp.lesson_id = l.lesson_id
+        WHERE ulp.user_id = #{userId}
+            AND cn.subject_id = #{subjectId}
+            AND cn.level_code = #{levelCode}
+            AND cn.node_type = 'PLANET'
+            AND ulp.practice_passed = 1
+            AND cn.is_active = 1
+            AND l.is_active = 1
+            AND pp.is_active = 1
         ORDER BY sort_order ASC
     </select>
 
-    <select id="countAvailableScopeItems" resultType="int">
+    <select id="countRequiredLessons" resultType="int">
         SELECT COUNT(*)
-        FROM (
-            SELECT l.lesson_id AS scope_item_id
-            FROM learning_progress lp
-            INNER JOIN curriculum_nodes cn
-                ON cn.node_id = lp.node_id
-            INNER JOIN lessons l
-                ON l.node_id = cn.node_id
-            WHERE lp.user_id = #{userId}
-              AND lp.lesson_completed = 1
-              AND cn.is_active = 1
-              AND l.is_active = 1
-            <if test="subjectId != null">
-              AND lp.subject_id = #{subjectId}
-            </if>
-            <if test="levelCode != null and levelCode != ''">
-              AND cn.level_code = #{levelCode}
-            </if>
+        FROM lessons l
+        JOIN curriculum_nodes cn
+            ON cn.node_id = l.node_id
+        WHERE cn.subject_id = #{subjectId}
+            AND cn.level_code = #{levelCode}
+            AND cn.node_type = 'PLANET'
+            AND cn.is_active = 1
+            AND l.is_active = 1
+            AND l.required_for_completion = 1
+    </select>
 
-            UNION ALL
-
-            SELECT DISTINCT pp.problem_id AS scope_item_id
-            FROM learning_progress lp
-            INNER JOIN curriculum_nodes cn
-                ON cn.node_id = lp.node_id
-            INNER JOIN practice_problems pp
-                ON pp.node_id = cn.node_id
-               AND pp.subject_id = lp.subject_id
-            WHERE lp.user_id = #{userId}
-              AND lp.practice_passed = 1
-              AND cn.is_active = 1
-              AND pp.is_active = 1
-            <if test="subjectId != null">
-              AND lp.subject_id = #{subjectId}
-            </if>
-            <if test="levelCode != null and levelCode != ''">
-              AND cn.level_code = #{levelCode}
-            </if>
-        ) available_scope_items
+    <select id="countIncompleteRequiredLessons" resultType="int">
+        SELECT COUNT(*) AS incomplete_required_lesson_count
+        FROM lessons l
+        JOIN curriculum_nodes cn
+            ON cn.node_id = l.node_id
+        LEFT JOIN user_lesson_progress ulp
+            ON ulp.lesson_id = l.lesson_id
+             AND ulp.user_id = #{userId}
+        WHERE cn.subject_id = #{subjectId}
+            AND cn.level_code = #{levelCode}
+            AND cn.node_type = 'PLANET'
+            AND cn.is_active = 1
+            AND l.is_active = 1
+            AND l.required_for_completion = 1
+            AND NOT (
+                COALESCE(ulp.theory_completed, 0) = 1
+                AND COALESCE(ulp.practice_passed, 0) = 1
+            )
     </select>
 </mapper>

@@ -127,4 +127,21 @@ public class AdminStatsService {
         return dm.findStatsTableRows(subject, range);
     }
 
+    public AdminStatsResponse getStats(String summaryScope, String periodUnit, String subject){
+        AdminStatsResponse.Summary summary = new AdminStatsResponse.Summary(
+                countUsers(summaryScope),
+                countActiveUsers(summaryScope),
+                countLearning(summaryScope),
+                countSubmissions(summaryScope),
+                countExamAttempts(summaryScope)
+        );
+
+        return new AdminStatsResponse(
+                summary,
+                dailyLearningChart(periodUnit, null),
+                subjectCompleteChart(periodUnit, subject, null),
+                subjectExamScoreChart(subject, null),
+                findStatsTableRows(subject, null)
+        );
+    }
 }

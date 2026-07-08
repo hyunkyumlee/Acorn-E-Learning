@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
+
 @Controller
 public class LearningController {
 
@@ -33,6 +34,9 @@ public class LearningController {
      */
     private static final SessionUser DEV_FALLBACK_USER =
             new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
+
+    ////subjectid session정보저장
+    public static final String SESSION_LEARNING_SUBJECT_ID = "LEARNING_SUBJECT_ID";
 
     private final LearningService learningService;
     private final CurriculumService curriculumService;
@@ -54,6 +58,8 @@ public class LearningController {
             @RequestParam(name = "subjectId", required = false) Long subjectId,
             @RequestParam(name = "levelCode", required = false) String levelCode,
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            ////subjectid session정보저장
+            jakarta.servlet.http.HttpSession session,
             Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
 
@@ -72,6 +78,10 @@ public class LearningController {
                 : (dashboard.primarySubjectId() != null ? dashboard.primarySubjectId() : DEFAULT_SUBJECT_ID);
         model.addAttribute("roadmapSubjectId", roadmapSubjectId);
         model.addAttribute("roadmapSubjectCode", subjectCodeOf(subjects, roadmapSubjectId));
+
+        ////subjectid session정보저장
+        session.setAttribute(SESSION_LEARNING_SUBJECT_ID, roadmapSubjectId);
+
 
         // 표시 레벨: 요청 levelCode 우선 → 없으면 사용자 현재 레벨 → 그래도 없으면 최저 레벨.
         String selectedLevel = (levelCode != null && !levelCode.isBlank()) ? levelCode

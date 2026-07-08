@@ -78,6 +78,7 @@
         updated_at
         FROM practice_problems
         WHERE subject_id = #{subjectId}
+        AND node_id = #{nodeId}
         AND difficulty_code = #{difficultyCode}
         AND is_active = 1
         ORDER BY RAND()

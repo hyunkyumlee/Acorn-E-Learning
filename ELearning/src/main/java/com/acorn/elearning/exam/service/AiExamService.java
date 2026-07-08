@@ -4,6 +4,7 @@ import com.acorn.elearning.common.ai.ChatGptApiClient;
 import com.acorn.elearning.common.ai.ChatGptRequest;
 import com.acorn.elearning.common.ai.ChatGptResponse;
 import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.exam.service.ExamLearningScopeService.ExamLearningEligibility;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.exam.dto.request.CreateExamRequest;
 import com.acorn.elearning.exam.dto.request.SaveExamAnswerRequest;
@@ -79,17 +80,25 @@ public class AiExamService {
     }
 
     @Transactional(readOnly = true)
-    public ExamEligibilityResponse eligibility(SessionUser sessionUser) {
+    public ExamEligibilityResponse eligibility(SessionUser sessionUser, Long subjectId, String levelCode) {
         Long userId = requireUserId(sessionUser);
         return ExamEligibilityResponse.from(
-                examSessionMapper.findLatestByUserId(userId).orElse(null),
-                examLearningScopeService.eligibility(userId));
+                examSessionMapper.findLatestActiveByUserSubjectLevel(userId, subjectId, levelCode).orElse(null),
+                examLearningScopeService.eligibility(userId, subjectId, levelCode));
     }
 
     @Transactional(noRollbackFor = BusinessException.class)
     public ExamSessionResponse create(SessionUser sessionUser, CreateExamRequest request) {
         Long userId = requireUserId(sessionUser);
+        ExamLearningEligibility eligibility =
+                examLearningScopeService.eligibility(userId, request.subjectId(), request.levelCode());
+
+        if (!eligibility.eligible()) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, eligibility.message());
+        }
+
         ExamLearningScope learningScope = examLearningScopeService.build(userId, request.subjectId(), request.levelCode());
+
         ExamSession activeSession = examSessionMapper.findLatestActiveByUserSubjectLevel(userId, request.subjectId(), request.levelCode()).orElse(null);
         if (activeSession != null) {
             return detail(userId, activeSession.getExamId());

@@ -79,8 +79,6 @@ public class ReviewController {
     public String markReviewed(@PathVariable Long wrongAnswerId,
                                @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                                RedirectAttributes redirectAttributes) {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "/learning/review"; }
 
         wrongAnswerService.markReviewed(sessionUser, wrongAnswerId);
         redirectAttributes.addFlashAttribute("message", "검토 완료되었습니다.");

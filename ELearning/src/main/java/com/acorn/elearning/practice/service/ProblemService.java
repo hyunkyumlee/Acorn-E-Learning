@@ -28,15 +28,16 @@ public class ProblemService {
     }
 
       // 1. 학습을 위한 문제 10개를 조회합니다.
-        public List<PracticeProblem> getProblems(Long subjectId, String difficultyCode) {
-        List<PracticeProblem> problems = practiceProblemMapper.findPracticeProblems(subjectId, difficultyCode);
+      public List<PracticeProblem> getProblems(Long subjectId, Long nodeId, String difficultyCode) {
+          List<PracticeProblem> problems =
+                  practiceProblemMapper.findPracticeProblems(subjectId, nodeId, difficultyCode);
 
-        if (problems.isEmpty()) {
-            throw new IllegalArgumentException("해당 과목과 난이도에 맞는 문제가 없습니다.");
-        }
+          if (problems.isEmpty()) {
+              throw new IllegalArgumentException("해당 과목/단원/난이도에 맞는 문제가 없습니다.");
+          }
 
-        return problems;
-    }
+          return problems;
+      }
 
         //2.특정 문제의 상세 정보를 조회합니다. (채점 로직 등에서 정답 확인용으로 사용)
         public PracticeProblem getProblem(Long problemId) {

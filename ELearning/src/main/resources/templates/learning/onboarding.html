@@ -26,8 +26,12 @@
   <link rel="stylesheet" th:href="@{/css/common/base.css}">
   <link rel="stylesheet" th:href="@{/css/common/components.css}">
   <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <!-- 온보딩 전용 한글 웹폰트(Pretendard): 시스템 맑은고딕은 400/700뿐이라 중간 굵기가 안 나와
+       한글이 얇게 보이는 문제 해결. 공통 폰트는 안 건드리고 이 화면에만 적용, 실패 시 system-ui 폴백. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="stylesheet" th:href="@{/css/screens/onboarding.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
+  <script defer th:src="@{/js/screens/onboarding.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
@@ -45,11 +49,11 @@
         <h1 th:text="${profile != null and profile.nickname != null} ? '환영해요, ' + ${profile.nickname} + '님' : '환영해요'">환영해요</h1>
         <p>몇 가지만 정하면 나만의 학습 항로를 그려 드릴게요. 지식을 얻으며 빛나는 여정, 지금 출발합니다.</p>
         <div class="onb-chip-row">
-          <span class="onb-chip">
+          <span class="onb-chip is-time">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
             언제든 다시 바꿀 수 있어요
           </span>
-          <span class="onb-chip">
+          <span class="onb-chip is-check">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
             레벨 스캔으로 실력 맞춤 시작
           </span>
@@ -65,7 +69,7 @@
          STEP: subject  ·  primary_subject_id 선택 (subjects seed: JAVA/PYTHON/WEB/SQL)
          =================================================================== -->
     <section class="onb-step" th:if="${step == 'subject'}">
-      <div th:replace="~{learning/onboarding :: stepper('subject')}"></div>
+      <div th:replace="~{learning/onboarding-stepper :: stepper('subject')}"></div>
       <div class="page-heading">
         <span class="eyebrow">좌표 설정 · 첫 과목</span>
         <h1>어떤 과목부터 시작할까요?</h1>
@@ -73,13 +77,19 @@
       </div>
       <form class="onb-options" th:action="@{/learning/onboarding/subject}" method="post" style="max-width:none">
         <label class="onb-option" th:each="s : ${subjects}">
-          <input class="onb-radio" type="radio" name="subjectId" th:value="${s.subjectId}"
-                 th:checked="${profile != null and profile.subjectId == s.subjectId}">
+          <input class="onb-radio" type="radio" name="subjectId" th:value="${s.subjectId}">
           <span class="onb-card">
-            <span class="onb-card-code" th:text="${s.subjectCode}">JAVA</span>
+            <span class="onb-card-code" th:classappend="'is-' + ${s.subjectCode}" th:text="${s.subjectCode}">JAVA</span>
             <span class="onb-card-body">
               <strong th:text="${s.subjectName}">Java</strong>
-              <small th:text="${s.description}">과목 설명</small>
+              <!-- 과목 목록/이름은 DB(subjects)에서, 설명 문구만 화면 카피로 코드별 표기(DB description 미사용). -->
+              <small th:switch="${s.subjectCode}">
+                <span th:case="'JAVA'">가장 인기 있는 백엔드 입문 언어</span>
+                <span th:case="'PYTHON'">문법이 쉬워 처음 배우기 좋아요</span>
+                <span th:case="'WEB'">HTML·CSS·JavaScript로 화면을 만들어요</span>
+                <span th:case="'SQL'">데이터를 다루는 필수 언어</span>
+                <span th:case="*" th:text="${s.description}">과목 설명</span>
+              </small>
             </span>
             <span class="onb-card-mark">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>
@@ -101,7 +111,7 @@
          STEP: goal  ·  learning_goal (VARCHAR 500) — 프리셋 라벨을 텍스트로 저장
          =================================================================== -->
     <section class="onb-step" th:if="${step == 'goal'}">
-      <div th:replace="~{learning/onboarding :: stepper('goal')}"></div>
+      <div th:replace="~{learning/onboarding-stepper :: stepper('goal')}"></div>
       <div class="page-heading">
         <span class="eyebrow">항해 목표</span>
         <h1>무엇을 목표로 하나요?</h1>
@@ -110,11 +120,17 @@
       <form class="onb-options" th:action="@{/learning/onboarding/goal}" method="post" style="max-width:none">
         <label class="onb-option" th:each="g : ${ {'취업·이직 준비','코딩테스트 대비','기초 탄탄히','취미로 배우기'} }"
                th:with="descs=${ {'실무와 포트폴리오 중심으로','알고리즘·문제풀이 집중','개념부터 차근차근','부담 없이 꾸준히'} }, i=${gStat.index}">
-          <input class="onb-radio" type="radio" name="learningGoal" th:value="${g}"
-                 th:checked="${profile != null and profile.learningGoal == g}" th:with="gStat=${gStat}">
+          <input class="onb-radio" type="radio" name="learningGoal" th:value="${g}" th:with="gStat=${gStat}">
           <span class="onb-card">
-            <span class="onb-card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"></path><path d="M9 12l2 2 4-4"></path></svg>
+            <span class="onb-card-icon" th:switch="${i}">
+              <!-- 취업·이직: 서류가방 -->
+              <svg th:case="0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+              <!-- 코딩테스트: 코드 브래킷 -->
+              <svg th:case="1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"></path></svg>
+              <!-- 기초 탄탄히: 책 -->
+              <svg th:case="2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <!-- 취미: 하트 -->
+              <svg th:case="*" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"></path></svg>
             </span>
             <span class="onb-card-body">
               <strong th:text="${g}">목표</strong>
@@ -140,7 +156,7 @@
          STEP: startmode  ·  BASIC(기초부터=BRONZE) | SCAN(레벨 스캔 → level-test)
          =================================================================== -->
     <section class="onb-step" th:if="${step == 'startmode'}">
-      <div th:replace="~{learning/onboarding :: stepper('startmode')}"></div>
+      <div th:replace="~{learning/onboarding-stepper :: stepper('startmode')}"></div>
       <div class="page-heading">
         <span class="eyebrow">출발 지점</span>
         <h1>어디서부터 출발할까요?</h1>
@@ -201,7 +217,17 @@
         <h1>진단 문항 <small style="font-size:16px;font-weight:750;color:var(--muted)">(<span th:text="${questions != null} ? ${#lists.size(questions)} : 8">8</span>문항)</small></h1>
       </div>
 
-      <p th:if="${questions == null or #lists.isEmpty(questions)}" class="onb-note">출제할 문항이 없습니다. (level_test_questions seed 확인)</p>
+      <div th:if="${questions == null or #lists.isEmpty(questions)}" class="onb-empty">
+        <span class="onb-empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+        </span>
+        <p class="onb-empty-title">이 과목은 아직 레벨 스캔 문항이 준비 중이에요</p>
+        <p class="onb-empty-desc">문항이 준비되면 실력에 맞게 출발할 수 있어요. 지금은 기초부터 차근차근 시작할 수 있습니다.</p>
+        <a class="button primary onb-btn-lg" th:href="@{/learning/onboarding(step='startmode')}" style="padding:0 26px">
+          출발 방식 다시 고르기
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:8px"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
 
       <form th:if="${questions != null and !#lists.isEmpty(questions)}"
             th:action="@{/learning/level-test}" th:object="${levelTestForm}" method="post" style="max-width:none;display:grid;gap:24px">
@@ -307,19 +333,17 @@
 
   </main>
 
-  <!-- 재사용 fragment: 미션 스텝퍼 (인자 active = 현재 단계 key) -->
-  <!-- 단계 순서: 과목 → 목표 → 출발 방식 (관심 과목은 MVP 제외 — PORTING.md §6) -->
-  <div th:fragment="stepper(active)" class="onb-stepper"
-       th:with="order=${ {'subject','goal','startmode'} }, labels=${ {'과목','목표','출발'} }, cur=${order.indexOf(active)}">
-    <div class="onb-stepper-item" th:each="key,st : ${order}"
-         th:classappend="${st.index < cur} ? 'is-done' : (${st.index == cur} ? 'is-current' : '')">
-      <div class="onb-stepper-cell">
-        <span class="onb-stepper-dot">
-          <svg th:if="${st.index < cur}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>
-        </span>
-        <span class="onb-stepper-label" th:text="${labels[st.index]}">과목</span>
+  <!-- 학습 메인 이동 오버레이: 결과의 [data-launch] 클릭 시 JS가 is-on 부여 → 로고+로딩바 보여주고 이동.
+       우주 star 배경은 welcome 전용이라 여기선 로고+glow+로딩바만 (PORTING.md §3). -->
+  <div class="onb-launching" id="onbLaunching" aria-hidden="true">
+    <div class="onb-launching-box">
+      <div class="onb-launching-logo-wrap">
+        <span class="onb-launching-glow"></span>
+        <img class="onb-launching-logo onb-logo-light" th:src="@{/assets/images/icons/header_logo_light.svg}" alt="Knowva">
+        <img class="onb-launching-logo onb-logo-dark" th:src="@{/assets/images/icons/header_logo_dark.svg}" alt="">
       </div>
-      <span class="onb-stepper-line" th:unless="${st.last}"></span>
+      <div class="onb-launching-bar"><span></span></div>
+      <p class="onb-launching-text">학습 메인으로 이동 중…</p>
     </div>
   </div>
 

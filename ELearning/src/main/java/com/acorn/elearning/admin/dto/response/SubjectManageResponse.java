@@ -1,7 +1,14 @@
 package com.acorn.elearning.admin.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
-public record SubjectManageResponse(String status, Map<String, Object> data) {
-    public static SubjectManageResponse stub() { return new SubjectManageResponse("SKELETON", Map.of()); }
+public record SubjectManageResponse(
+        Long subjectId,
+        String subjectName,
+        String description,
+        Boolean isActive,
+        LocalDateTime createdAt
+){
+
 }
