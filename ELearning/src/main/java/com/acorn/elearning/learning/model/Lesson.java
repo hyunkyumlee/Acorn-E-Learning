@@ -15,6 +15,7 @@ private String content;
 private String exampleCode;
 private Integer sortOrder;
 private Boolean isActive;
+private Boolean requiredForCompletion;
 private Long createdBy;
 private LocalDateTime createdAt;
 private LocalDateTime updatedAt;

@@ -6,9 +6,11 @@
           <id property="problemId" column="problem_id" />
           <result property="subjectId" column="subject_id" />
           <result property="nodeId" column="node_id" />
+          <result property="lessonId" column="lesson_id" />
           <result property="problemType" column="problem_type" />
           <result property="question" column="question" />
           <result property="answerText" column="answer_text" />
+          <result property="explanation" column="explanation" />
           <result property="difficultyCode" column="difficulty_code" />
           <result property="createdBy" column="created_by" />
           <result property="isActive" column="is_active" />
@@ -30,6 +32,8 @@
         INSERT INTO practice_problems (
         subject_id,
         node_id,
+        lesson_id,
+        explanation,
         problem_type,
         question,
         answer_text,
@@ -40,6 +44,8 @@
         ) VALUES (
         #{subjectId},
         #{nodeId},
+        #{lessonId},
+        #{explanation},
         #{problemType},
         #{question},
         #{answerText},
@@ -54,6 +60,8 @@
         UPDATE practice_problems
         SET subject_id = #{subjectId},
         node_id = #{nodeId},
+        lesson_id = #{lessonId},
+        explanation = #{explanation},
         problem_type = #{problemType},
         question = #{question},
         answer_text = #{answerText},
@@ -82,6 +90,28 @@
         AND difficulty_code = #{difficultyCode}
         AND is_active = 1
         ORDER BY RAND()
+        LIMIT 10
+    </select>
+
+    <select id="findPracticeProblemsByLessonId" resultMap="PracticeProblemResultMap">
+        SELECT
+        problem_id,
+        subject_id,
+        node_id,
+        lesson_id,
+        problem_type,
+        question,
+        answer_text,
+        explanation,
+        difficulty_code,
+        created_by,
+        is_active,
+        created_at,
+        updated_at
+        FROM practice_problems
+        WHERE lesson_id = #{lessonId}
+        AND is_active = 1
+        ORDER BY problem_id ASC
         LIMIT 10
     </select>
 

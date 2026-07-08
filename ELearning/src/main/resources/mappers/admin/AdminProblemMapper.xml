@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.admin.mapper.AdminProblemMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="AdminOperationLogResultMap" type="com.acorn.elearning.admin.model.AdminOperationLog">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
 
     <resultMap id="AdminProblemManageRowResultMap"
                type="com.acorn.elearning.admin.dto.response.AdminProblemManageRowResponse">
         <id property="problemId" column="problem_id" />
         <result property="subjectId" column="subject_id" />
         <result property="nodeId" column="node_id" />
+        <result property="lessonId" column="lesson_id" />
+        <result property="lessonTitle" column="lesson_title" />
         <result property="subjectName" column="subject_name" />
         <result property="curriculumTitle" column="curriculum_title" />
         <result property="problemType" column="problem_type" />
@@ -24,34 +20,28 @@
     </resultMap>
 
 
-
-
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="AdminOperationLogResultMap">
-          SELECT /* DDL column list */
-          FROM admin_operation_logs
-          ORDER BY id DESC
-      </select>
-    -->
-
     <select id="findAll" resultMap="AdminProblemManageRowResultMap">
         SELECT
-        p.problem_id,
-        p.subject_id,
-        p.node_id,
-        s.subject_name,
-        c.title AS curriculum_title,
-        p.problem_type,
-        p.question,
-        NULL AS explanation,
-        p.answer_text,
-        p.difficulty_code,
-        p.is_active
+            p.problem_id,
+            p.subject_id,
+            p.node_id,
+            p.lesson_id,
+            l.title AS lesson_title,
+            p.explanation,
+            s.subject_name,
+            c.title AS curriculum_title,
+            p.problem_type,
+            p.question,
+            p.answer_text,
+            p.difficulty_code,
+            p.is_active
         FROM practice_problems p
         LEFT JOIN subjects s
-        ON p.subject_id = s.subject_id
+            ON p.subject_id = s.subject_id
         LEFT JOIN curriculum_nodes c
-        ON p.node_id = c.node_id
+            ON p.node_id = c.node_id
+        LEFT JOIN lessons l
+            ON p.lesson_id = l.lesson_id
         ORDER BY p.problem_id DESC
     </select>
 
