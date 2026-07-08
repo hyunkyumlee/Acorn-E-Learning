@@ -7,11 +7,13 @@ import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
 import com.acorn.elearning.learning.mapper.LearningProgressMapper;
 import com.acorn.elearning.learning.mapper.LessonMapper;
 import com.acorn.elearning.learning.mapper.SubjectMapper;
+import com.acorn.elearning.learning.mapper.UserLessonProgressMapper;
 import com.acorn.elearning.learning.mapper.UserLevelUnlockMapper;
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
 import com.acorn.elearning.learning.model.Lesson;
 import com.acorn.elearning.learning.model.Subject;
+import com.acorn.elearning.learning.model.UserLessonProgress;
 import com.acorn.elearning.learning.model.UserLevelUnlock;
 import java.util.HashMap;
 import java.util.List;
@@ -29,17 +31,20 @@ public class CurriculumService {
     private final SubjectMapper subjectMapper;
     private final LearningProgressMapper learningProgressMapper;
     private final UserLevelUnlockMapper userLevelUnlockMapper;
+    private final UserLessonProgressMapper userLessonProgressMapper;
 
     public CurriculumService(CurriculumNodeMapper curriculumNodeMapper,
                              LessonMapper lessonMapper,
                              SubjectMapper subjectMapper,
                              LearningProgressMapper learningProgressMapper,
-                             UserLevelUnlockMapper userLevelUnlockMapper) {
+                             UserLevelUnlockMapper userLevelUnlockMapper,
+                             UserLessonProgressMapper userLessonProgressMapper) {
         this.curriculumNodeMapper = curriculumNodeMapper;
         this.lessonMapper = lessonMapper;
         this.subjectMapper = subjectMapper;
         this.learningProgressMapper = learningProgressMapper;
         this.userLevelUnlockMapper = userLevelUnlockMapper;
+        this.userLessonProgressMapper = userLessonProgressMapper;
     }
 
     /**
@@ -145,5 +150,48 @@ public class CurriculumService {
             }
         }
         return counts;
+    }
+
+    /** 단일 노드(행성) 상세. 없으면 null. */
+    public CurriculumNode getNodeDetail(Long nodeId) {
+        return curriculumNodeMapper.findById(nodeId).orElse(null);
+    }
+
+    /** 특정 노드(행성)의 활성 레슨 목록(sort_order 오름차순). 레슨 선택 화면용. */
+    public List<Lesson> getLessonsByNode(Long nodeId) {
+        return lessonMapper.findAll().stream()
+                .filter(lesson -> nodeId.equals(lesson.getNodeId()))
+                .filter(lesson -> Boolean.TRUE.equals(lesson.getIsActive()))
+                .sorted(java.util.Comparator.comparing(Lesson::getSortOrder,
+                        java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())))
+                .toList();
+    }
+
+    /** 레슨 선택 화면: 노드의 레슨별 진행상태 맵(lessonId → progress). 없는 레슨은 미기록(진행 0). */
+    public Map<Long, UserLessonProgress> getLessonProgressMap(Long userId, Long nodeId) {
+        Map<Long, UserLessonProgress> map = new HashMap<>();
+        for (UserLessonProgress row : userLessonProgressMapper.findByUserAndNode(userId, nodeId)) {
+            map.put(row.getLessonId(), row);
+        }
+        return map;
+    }
+
+    /** 노드의 완료 계산 대상(활성·required) 레슨 수. */
+    public int countRequiredLessons(Long nodeId) {
+        return (int) getLessonsByNode(nodeId).stream()
+                .filter(l -> Boolean.TRUE.equals(l.getRequiredForCompletion()))
+                .count();
+    }
+
+    /** 노드에서 완료(theory+practice)한 required 레슨 수. */
+    public int countCompletedRequiredLessons(Long userId, Long nodeId) {
+        return userLessonProgressMapper.countCompletedRequiredLessons(userId, nodeId);
+    }
+
+    /** 특정 레슨의 이론 완료 여부(레슨 단위). 이론 학습 화면 완료 표시용. */
+    public boolean isTheoryCompletedForLesson(Long userId, Long lessonId) {
+        return userLessonProgressMapper.findByUserAndLesson(userId, lessonId)
+                .map(p -> Boolean.TRUE.equals(p.getTheoryCompleted()))
+                .orElse(false);
     }
 }

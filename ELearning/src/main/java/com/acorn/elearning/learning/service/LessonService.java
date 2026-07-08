@@ -9,6 +9,7 @@ import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
 import com.acorn.elearning.learning.mapper.LearningProgressMapper;
 import com.acorn.elearning.learning.mapper.LessonBookmarkMapper;
 import com.acorn.elearning.learning.mapper.LessonMapper;
+import com.acorn.elearning.learning.mapper.UserLessonProgressMapper;
 import com.acorn.elearning.learning.mapper.UserLevelUnlockMapper;
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
@@ -38,17 +39,20 @@ public class LessonService {
     private final LearningProgressMapper learningProgressMapper;
     private final UserLevelUnlockMapper userLevelUnlockMapper;
     private final LessonBookmarkMapper lessonBookmarkMapper;
+    private final UserLessonProgressMapper userLessonProgressMapper;
 
     public LessonService(LessonMapper lessonMapper,
                          CurriculumNodeMapper curriculumNodeMapper,
                          LearningProgressMapper learningProgressMapper,
                          UserLevelUnlockMapper userLevelUnlockMapper,
-                         LessonBookmarkMapper lessonBookmarkMapper) {
+                         LessonBookmarkMapper lessonBookmarkMapper,
+                         UserLessonProgressMapper userLessonProgressMapper) {
         this.lessonMapper = lessonMapper;
         this.curriculumNodeMapper = curriculumNodeMapper;
         this.learningProgressMapper = learningProgressMapper;
         this.userLevelUnlockMapper = userLevelUnlockMapper;
         this.lessonBookmarkMapper = lessonBookmarkMapper;
+        this.userLessonProgressMapper = userLessonProgressMapper;
     }
 
     /**
@@ -79,9 +83,11 @@ public class LessonService {
                 .findByUserSubjectNode(userId, subjectId, node.getNodeId())
                 .orElse(null);
 
-        // 409: 이미 이론을 완료한 단원(재완료 방지).
-        // TODO: 전용 코드 신설 시 교체. 지금은 공통 409 재사용.
-        if (progress != null && Boolean.TRUE.equals(progress.getLessonCompleted())) {
+        // 409: 이미 이론을 완료한 '레슨'(레슨 단위 재완료 방지). user_lesson_progress 기준.
+        boolean alreadyTheoryDone = userLessonProgressMapper.findByUserAndLesson(userId, lessonId)
+                .map(p -> Boolean.TRUE.equals(p.getTheoryCompleted()))
+                .orElse(false);
+        if (alreadyTheoryDone) {
             throw new BusinessException(ErrorCode.COMMON_IDEMPOTENCY_CONFLICT, "이미 완료한 학습입니다.");
         }
 
@@ -109,6 +115,9 @@ public class LessonService {
             }
             learningProgressMapper.update(progress);
         }
+
+        // 레슨 단위 진행 기록(source of truth). 레슨 선택 화면·로드맵 집계가 이 값을 읽는다.
+        userLessonProgressMapper.upsertTheoryCompleted(userId, lessonId);
 
         // nextAction 힌트: 문제풀이가 남았으면 START_PRACTICE, 아니면 다음 단원/게이트.
         String nextAction;
