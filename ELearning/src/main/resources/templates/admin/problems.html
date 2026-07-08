@@ -111,6 +111,7 @@
                       th:data-problem-id="${problem.problemId}"
                       th:data-subject-id="${problem.subjectId}"
                       th:data-node-id="${problem.nodeId}"
+                      th:data-lesson-id="${problem.lessonId}"
                       th:data-problem-type="${problem.problemType}"
                       th:data-question="${problem.question}"
                       th:data-answer-text="${problem.answerText}"
@@ -177,6 +178,15 @@
                       th:text="${node.title}"
                       th:data-subject-id="${node.subjectId}">Java 기초</option>
             </select>
+            <select name="lessonId" id="problemLessonId">
+              <option value="">레슨 선택</option>
+              <option th:each="lesson : ${lessonList}"
+                      th:value="${lesson.lessonId}"
+                      th:text="${lesson.lessonTitle}"
+                      th:data-node-id="${lesson.nodeId}">
+                레슨
+              </option>
+            </select>
           </div>
 
           <div class="problem-form-row">
@@ -198,6 +208,7 @@
     </form>
   </section>
 </main>
+
 <script>
   const problemTypeCodeMap = {
     "객관식": "MULTIPLE_CHOICE",
@@ -268,6 +279,7 @@
     document.querySelector("#problemSubjectId").value = "";
     document.querySelector("#problemNodeId").value = "";
     syncProblemCurriculumOptions();
+    document.querySelector("#problemLessonId").value = "";
     document.querySelector("#problemType").value = "";
     document.querySelector("#problemQuestion").value = "";
     document.querySelector("#problemAnswerText").value = "";
@@ -285,6 +297,7 @@
       document.querySelector("#problemSubjectId").value = button.dataset.subjectId;
       document.querySelector("#problemNodeId").value = button.dataset.nodeId;
       syncProblemCurriculumOptions();
+      document.querySelector("#problemLessonId").value = button.dataset.lessonId || "";
       document.querySelector("#problemType").value = problemTypeCodeMap[button.dataset.problemType] || button.dataset.problemType;
       document.querySelector("#problemQuestion").value = button.dataset.question || "";
       document.querySelector("#problemAnswerText").value = button.dataset.answerText || "";
