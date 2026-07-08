@@ -159,8 +159,13 @@ class AiExamServiceStatusTest {
         }
 
         @Override
-        public int countAvailableScopeItems(Long userId, Long subjectId, String levelCode) {
+        public int countRequiredLessons(Long subjectId, String levelCode) {
             return 1;
+        }
+
+        @Override
+        public int countIncompleteRequiredLessons(Long userId, Long subjectId, String levelCode) {
+            return 0;
         }
     }
 

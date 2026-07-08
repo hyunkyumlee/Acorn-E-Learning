@@ -15,8 +15,7 @@ public interface ExamLearningScopeMapper {
             @Param("subjectId") Long subjectId,
             @Param("levelCode") String levelCode);
 
-    int countAvailableScopeItems(
-            @Param("userId") Long userId,
+    int countRequiredLessons(
             @Param("subjectId") Long subjectId,
             @Param("levelCode") String levelCode);
 
