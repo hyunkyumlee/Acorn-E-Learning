@@ -1,129 +1,231 @@
 package com.acorn.elearning.admin.controller;
 
+import com.acorn.elearning.admin.dto.request.UpdateUserStatusRequest;
+import com.acorn.elearning.admin.dto.response.*;
+import com.acorn.elearning.admin.form.CurriculumNodeForm;
+import com.acorn.elearning.admin.form.SubjectForm;
+import com.acorn.elearning.admin.service.*;
 import com.acorn.elearning.common.response.ApiResponse;
+
+import java.util.List;
 import java.util.Map;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import com.acorn.elearning.learning.model.CurriculumNode;
+import com.acorn.elearning.security.SessionUser;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 public class AdminApiController {
 
+    private final AdminStatsService adminStatsService;
+    private final AdminUserService adminUserService;
+    private final AdminReportService adminReportService;
+    private final AdminNoticeService adminNoticeService;
+    private final AdminContentService adminContentService;
+    private final AdminCommunityService adminCommunityService;
+    private final AdminLogService adminLogService;
+
     @GetMapping("/api/admin/stats")
-    public ApiResponse<Map<String, Object>> stats() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // AdminStatsResponse response = adminStatsService.stats(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-001");
+    public ApiResponse<AdminStatsResponse> stats(
+            @RequestParam(defaultValue = "all") String summaryScope,
+            @RequestParam(required = false) String periodUnit,
+            @RequestParam(required = false) String subject) {
+        return ApiResponse.success(
+                adminStatsService.getStats(summaryScope, periodUnit, subject)
+        );
     }
 
     @GetMapping("/api/admin/users")
-    public ApiResponse<Map<String, Object>> users() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // AdminUserPageResponse response = adminUserService.users(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-010");
+    public ApiResponse<List<AdminUserManageRowResponse>> users() {
+
+        return ApiResponse.success(adminUserService.findAll());
     }
 
     @PatchMapping("/api/admin/users/{userId}/status")
-    public ApiResponse<Map<String, Object>> userStatus(@PathVariable Long userId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // UserStatusForm form = request body 또는 form binding 값으로 받으세요.
-        // AdminUserResponse response = adminUserService.userStatus(sessionUser, form, userId);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-010");
+    public ApiResponse<Map<String, Object>> userStatus(
+            @PathVariable Long userId,
+            @RequestBody UpdateUserStatusRequest request,
+            @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser)
+    {
+
+        if(sessionUser == null){
+            return ApiResponse.success(Map.of(
+                    "updated", false,
+                    "message", "로그인이 필요합니다."
+            ));
+        }
+        int updated = adminUserService.updateStatus(userId, request.status(), sessionUser.userId());
+
+        return ApiResponse.success(Map.of(
+                "userId", userId,
+                "status", request.status(),
+                "updated", updated == 1
+        ));
     }
 
     @GetMapping("/api/admin/subjects")
-    public ApiResponse<Map<String, Object>> subjects() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // SubjectListResponse response = adminContentService.subjects(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-020");
+    public ApiResponse<List<SubjectManageResponse>> subjects() {
+
+        return ApiResponse.success(adminContentService.findSubjectResponse());
     }
 
     @PostMapping("/api/admin/subjects")
-    public ApiResponse<Map<String, Object>> createSubject() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // SubjectForm form = request body 또는 form binding 값으로 받으세요.
-        // SubjectManageResponse response = adminContentService.createSubject(sessionUser, form);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-020");
+    public ApiResponse<Map<String, Object>> createSubject(
+            @RequestBody SubjectForm form,
+            @SessionAttribute (name=SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+            )
+    {
+        if(sessionUser == null){
+            return ApiResponse.success(Map.of(
+                    "updated", false,
+                    "message", "로그인이 필요합니다."
+            ));
+        }
+
+        int created = adminContentService.createSubject(form, sessionUser.userId());
+
+        return ApiResponse.success(Map.of(
+                "created", created == 1,
+                "subjectName", form.getSubjectName()
+        ));
+
     }
 
     @PatchMapping("/api/admin/subjects/{subjectId}")
-    public ApiResponse<Map<String, Object>> updateSubject(@PathVariable Long subjectId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // SubjectForm form = request body 또는 form binding 값으로 받으세요.
-        // SubjectManageResponse response = adminContentService.updateSubject(sessionUser, form, subjectId);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-020");
+    public ApiResponse<Map<String, Object>> updateSubject(
+            @PathVariable Long subjectId,
+            @RequestBody SubjectForm form,
+            @SessionAttribute (name=SessionUser.SESSION_KEY, required = false) SessionUser sessionUser)
+    {
+        if(sessionUser == null){
+            return ApiResponse.success(Map.of(
+                    "updated", false,
+                    "message", "로그인이 필요합니다."
+            ));
+        }
+
+        form.setSubjectId(subjectId);
+
+        int updated = adminContentService.updateSubject(form, sessionUser.userId());
+
+        return ApiResponse.success(Map.of(
+                "subjectId", subjectId,
+                "updated", updated == 1,
+                "subjectName", form.getSubjectName()
+        ));
+
     }
 
     @PatchMapping("/api/admin/subjects/{subjectId}/status")
-    public ApiResponse<Map<String, Object>> subjectStatus(@PathVariable Long subjectId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // UpdateStatusForm form = request body 또는 form binding 값으로 받으세요.
-        // SubjectManageResponse response = adminContentService.subjectStatus(sessionUser, form, subjectId);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-020");
+    public ApiResponse<Map<String, Object>> subjectStatus(
+            @PathVariable Long subjectId,
+            @RequestBody SubjectForm form,
+            @SessionAttribute (name=SessionUser.SESSION_KEY, required = false) SessionUser sessionUser)
+    {
+        if(sessionUser == null){
+            return ApiResponse.success(Map.of(
+                    "updated", false,
+                    "message", "로그인이 필요합니다."
+            ));
+        }
+
+        form.setSubjectId(subjectId);
+
+        int updated = adminContentService.updateSubjectStatus(
+                subjectId, form.getIsActive(), sessionUser.userId()
+        );
+
+        return ApiResponse.success(Map.of(
+                "subjectId", subjectId,
+                "isActive", form.getIsActive(),
+                "updated", updated == 1
+        ));
+
     }
 
     @GetMapping("/api/admin/curriculum-nodes")
-    public ApiResponse<Map<String, Object>> nodes() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // CurriculumNodeManageResponse response = adminContentService.nodes(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-020");
+    public ApiResponse<List<CurriculumNodeManageResponse>> nodes() {
+        return ApiResponse.success(adminContentService.findCurriculumNodeResponse());
     }
 
     @PostMapping("/api/admin/curriculum-nodes")
-    public ApiResponse<Map<String, Object>> createNode() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // CurriculumNodeForm form = request body 또는 form binding 값으로 받으세요.
-        // CurriculumNodeManageResponse response = adminContentService.createNode(sessionUser, form);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-020");
+    public ApiResponse<Map<String, Object>> createNode(
+            @RequestBody CurriculumNodeForm form,
+            @SessionAttribute (name=SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+            )
+    {
+        if(sessionUser == null){
+            return ApiResponse.success(Map.of(
+                    "created", false,
+                    "message", "로그인이 필요합니다."
+            ));
+        }
+
+        int created = adminContentService.createCurriculumNode(form, sessionUser.userId());
+
+        return ApiResponse.success(Map.of(
+                "created", created == 1,
+                "curriculumNodeName", form.getTitle()
+        ));
+
     }
 
     @PatchMapping("/api/admin/curriculum-nodes/{nodeId}")
-    public ApiResponse<Map<String, Object>> updateNode(@PathVariable Long nodeId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // CurriculumNodeForm form = request body 또는 form binding 값으로 받으세요.
-        // CurriculumNodeManageResponse response = adminContentService.updateNode(sessionUser, form, nodeId);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-020");
+    public ApiResponse<Map<String, Object>> updateNode(
+            @PathVariable Long nodeId,
+            @RequestBody CurriculumNodeForm form,
+            @SessionAttribute (name=SessionUser.SESSION_KEY, required = false) SessionUser sessionUser)
+
+    {
+        if(sessionUser == null){
+            return ApiResponse.success(Map.of(
+                    "updated", false,
+                    "message", "로그인이 필요합니다."
+            ));
+        }
+
+        form.setNodeId(nodeId);
+
+        int updated = adminContentService.updateCurriculumNode(form, sessionUser.userId());
+
+        return ApiResponse.success(Map.of(
+                "nodeId", nodeId,
+                "updated", updated == 1,
+                "title", form.getTitle()
+        ));
     }
 
     @PatchMapping("/api/admin/curriculum-nodes/{nodeId}/status")
-    public ApiResponse<Map<String, Object>> nodeStatus(@PathVariable Long nodeId) {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // UpdateStatusForm form = request body 또는 form binding 값으로 받으세요.
-        // CurriculumNodeManageResponse response = adminContentService.nodeStatus(sessionUser, form, nodeId);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-020");
+    public ApiResponse<Map<String, Object>> nodeStatus(
+            @PathVariable Long nodeId,
+            @RequestBody CurriculumNodeForm form,
+            @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser)
+
+    {
+        if(sessionUser == null){
+            return ApiResponse.success(Map.of(
+                    "updated", false,
+                    "message", "로그인이 필요합니다."
+            ));
+        }
+
+
+        int updated = adminContentService.updateCurriculumNodeStatus(
+                nodeId, form.getIsActive(), sessionUser.userId()
+        );
+
+        return ApiResponse.success(Map.of(
+                "nodeId", nodeId,
+                "isActive", form.getIsActive(),
+                "updated", updated == 1
+        ));
     }
 
     @GetMapping("/api/admin/lessons")
-    public ApiResponse<Map<String, Object>> lessons() {
-        // TODO 구현 예시입니다. 실제 signature에 필요한 @Validated Form, BindingResult, SessionUser를 추가하세요.
-        // SessionUser sessionUser = currentSessionUser();
-        // LessonManageResponse response = adminContentService.lessons(sessionUser);
-        // return ApiResponse.success(response);
-        return ok("ADMIN-030");
+    public ApiResponse<List<AdminLessonManageRowResponse>> lessons() {
+        return ApiResponse.success(adminContentService.findAllAdminLesson());
     }
 
     @PostMapping("/api/admin/lessons")
