@@ -48,17 +48,24 @@ public class ExamLearningScopeService {
     }
 
     public ExamLearningEligibility eligibility(Long userId, Long subjectId, String levelCode) {
+        int requiredLessonCount = examLearningScopeMapper.countRequiredLessons(subjectId, levelCode);
         int incompleteRequiredLessonCount =
                 examLearningScopeMapper.countIncompleteRequiredLessons(userId, subjectId, levelCode);
 
-        boolean eligible = incompleteRequiredLessonCount == 0;
+        boolean eligible = requiredLessonCount > 0 && incompleteRequiredLessonCount == 0;
+        String message;
+        if (requiredLessonCount == 0) {
+            message = "응시 가능한 필수 레슨이 없습니다.";
+        } else if (eligible) {
+            message = "AI 코딩테스트를 시작할 수 있습니다.";
+        } else {
+            message = "필수 레슨의 이론 학습과 문제풀이를 모두 완료해야 AI 코딩테스트를 시작할 수 있습니다.";
+        }
 
         return new ExamLearningEligibility(
                 eligible,
                 incompleteRequiredLessonCount,
-                eligible
-                    ? "AI 코딩테스트를 시작할 수 있습니다."
-                        : "필수 레슨의 이론 학습과 문제풀이를 모두 완료해야 AI 코딩테스트를 시작할 수 있습니다."
+                message
         );
     }
 
