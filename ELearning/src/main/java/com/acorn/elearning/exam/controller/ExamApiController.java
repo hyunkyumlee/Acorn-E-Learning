@@ -15,12 +15,7 @@ import com.acorn.elearning.exam.service.AiExamService;
 import com.acorn.elearning.exam.service.ExamCodeRunService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ExamApiController {
@@ -34,9 +29,11 @@ public class ExamApiController {
 
     @GetMapping("/api/exams/eligibility")
     public ApiResponse<ExamEligibilityResponse> eligibility(
-            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam Long subjectId,
+            @RequestParam String levelCode
     ) {
-        return ApiResponse.success(aiExamService.eligibility(sessionUser));
+        return ApiResponse.success(aiExamService.eligibility(sessionUser, subjectId, levelCode));
     }
 
     @PostMapping("/api/exams")
