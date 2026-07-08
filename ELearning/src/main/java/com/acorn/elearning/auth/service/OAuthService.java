@@ -89,23 +89,16 @@ public class OAuthService {
             return sessionUser.defaultRedirectPath();
         }
 
-        // (3) 미연동 + provider가 "검증한" email이 기존 회원과 일치 → 비밀번호 로그인 유도(pending)
-        //     ★ 계정 검증 핵심: emailVerified=true 일 때만 기존 계정 매칭 (미검증/없음이면 무시하고 신규 취급)
-        User existing = (info.email() != null && info.emailVerified())
-                ? userMapper.findByEmail(info.email()).orElse(null)
-                : null;
-        if (existing != null) {
-            session.setAttribute(PENDING_SOCIAL_KEY,
-                    new PendingSocialLink(provider, info.providerUserId(), info.email()));
-            return "/login?linkPending=" + enc(provider) + "&email=" + enc(info.email());
+        // (2) 미연동 → 자동 가입/자동 로그인하지 않는다.
+        //     연동할 계정으로 "로그인" 또는 "회원가입 후 로그인" 하도록 로그인 화면으로 유도하고,
+        //     로그인 성공 시(AuthController → consumePendingLink) 방금 시도한 소셜을 그 계정에 자동 연동한다.
+        session.setAttribute(PENDING_SOCIAL_KEY,
+                new PendingSocialLink(provider, info.providerUserId(), info.email()));
+        String redirectUrl = "/login?linkPending=" + enc(provider);
+        if (info.email() != null && !info.email().isBlank()) {
+            redirectUrl += "&email=" + enc(info.email());   // 소셜 이메일 prefill (있을 때만)
         }
-
-        // (2) 비회원 → 소셜 전용 회원가입 + 연동 후 로그인
-        User created = registerSocialUser(provider, info);
-        insertSocialAccount(created.getUserId(), provider, info);
-        SessionUser sessionUser = toSessionUser(created);
-        sessionService.saveUser(session, sessionUser);
-        return sessionUser.defaultRedirectPath();
+        return redirectUrl;
     }
 
     // [Part C] 비밀번호 로그인 성공 직후 호출 — 대기 중(pending) 소셜 연동이 있으면 자동 연동

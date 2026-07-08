@@ -3,6 +3,7 @@ package com.acorn.elearning.config;
 import com.acorn.elearning.security.AdminRequiredInterceptor;
 import com.acorn.elearning.security.GuestOnlyInterceptor;
 import com.acorn.elearning.security.LoginRequiredInterceptor;
+import com.acorn.elearning.security.RememberMeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -12,13 +13,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final LoginRequiredInterceptor loginRequiredInterceptor;
     private final AdminRequiredInterceptor adminRequiredInterceptor;
     private final GuestOnlyInterceptor guestOnlyInterceptor;
-    public WebMvcConfig(LoginRequiredInterceptor loginRequiredInterceptor, AdminRequiredInterceptor adminRequiredInterceptor, GuestOnlyInterceptor guestOnlyInterceptor) {
+
+    private final RememberMeInterceptor rememberMeInterceptor;
+
+    public WebMvcConfig(LoginRequiredInterceptor loginRequiredInterceptor, AdminRequiredInterceptor adminRequiredInterceptor, GuestOnlyInterceptor guestOnlyInterceptor, RememberMeInterceptor rememberMeInterceptor) {
         this.loginRequiredInterceptor = loginRequiredInterceptor;
         this.adminRequiredInterceptor = adminRequiredInterceptor;
         this.guestOnlyInterceptor = guestOnlyInterceptor;
+        this.rememberMeInterceptor = rememberMeInterceptor;
     }
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // [추가] 다른 인터셉터보다 먼저 실행되도록 맨 위에 등록
+        /// 진입 시 WelcomeController가 세션을 확인하기 전에 인터셉터가 쿠키로 세션을 복원하므로, /로 들어오면 자동으로 role별 홈으로 redirect된다.
+        registry.addInterceptor(rememberMeInterceptor).addPathPatterns("/**");
         registry.addInterceptor(guestOnlyInterceptor).addPathPatterns("/login", "/signup");
         registry.addInterceptor(loginRequiredInterceptor).addPathPatterns(
                 "/learning/**",
