@@ -8,7 +8,7 @@ public record ExamEligibilityResponse(
         Long latestExamId,
         String latestStatus,
         String message,
-        int availableScopeCount
+        int incompleteRequiredLessonCount
 ) {
     public static ExamEligibilityResponse from(ExamSession latestExam, ExamLearningEligibility eligibility) {
         return new ExamEligibilityResponse(
@@ -16,6 +16,6 @@ public record ExamEligibilityResponse(
                 latestExam == null ? null : latestExam.getExamId(),
                 latestExam == null ? null : latestExam.getStatus(),
                 eligibility.message(),
-                eligibility.availableScopeCount());
+                eligibility.incompleteRequiredLessonCount());
     }
 }

@@ -47,15 +47,19 @@ public class ExamLearningScopeService {
                         """);
     }
 
-    public ExamLearningEligibility eligibility(Long userId) {
-        int availableScopeCount = examLearningScopeMapper.countAvailableScopeItems(userId, null, null);
-        boolean eligible = availableScopeCount > 0;
+    public ExamLearningEligibility eligibility(Long userId, Long subjectId, String levelCode) {
+        int incompleteRequiredLessonCount =
+                examLearningScopeMapper.countIncompleteRequiredLessons(userId, subjectId, levelCode);
+
+        boolean eligible = incompleteRequiredLessonCount == 0;
+
         return new ExamLearningEligibility(
                 eligible,
-                availableScopeCount,
+                incompleteRequiredLessonCount,
                 eligible
-                        ? "AI 코딩테스트를 시작할 수 있습니다."
-                        : "완료한 이론 학습 또는 문제풀이 범위가 없어 AI 코딩테스트를 시작할 수 없습니다.");
+                    ? "AI 코딩테스트를 시작할 수 있습니다."
+                        : "필수 레슨의 이론 학습과 문제풀이를 모두 완료해야 AI 코딩테스트를 시작할 수 있습니다."
+        );
     }
 
     private LearnedItem toLearnedItem(ExamLearningScopeItem item) {
@@ -117,7 +121,7 @@ public class ExamLearningScopeService {
 
     public record ExamLearningEligibility(
             boolean eligible,
-            int availableScopeCount,
+            int incompleteRequiredLessonCount,
             String message
     ) {}
 
