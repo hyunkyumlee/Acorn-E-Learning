@@ -87,9 +87,10 @@ public class AuthService {
         return signup(session, request.email(), request.password(), request.nickname(), request.primarySubjectId(), request.learningGoal());
     }
 
-    //remember-me 쿠키에서 얻은 userId . SessionUser 만들어 세션에 저장 (자동 로그인 복원)
+    // remember-me 쿠키에서 얻은 userId . SessionUser 만들어 세션에 저장 (자동 로그인 복원)
     public void restoreSession(HttpSession session, Long userId) {
         userMapper.findById(userId)
+                .filter(user -> STATUS_ACTIVE.equals(user.getStatus()))   // [추가] 정지/탈퇴 계정은 자동 복원 금지
                 .ifPresent(user -> sessionService.saveUser(session, toSessionUser(user)));
     }
 
@@ -129,7 +130,7 @@ public class AuthService {
         userLearningProfileMapper.insert(profile);
 
         SessionUser sessionUser = toSessionUser(user);
-        
+
         return sessionService.toSignupResponse(sessionUser);
     }
 
