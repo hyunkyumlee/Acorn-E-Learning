@@ -35,12 +35,14 @@ public class WrongAnswerService {
     private final WrongAnswerMapper wrongAnswerMapper;
     private final PracticeProblemMapper practiceProblemMapper;
     private final PracticeSubmissionMapper practiceSubmissionMapper;
+    private final ScoreService scoreService;
 
-    public WrongAnswerService(WrongAnswerMapper wrongAnswerMapper, PracticeProblemMapper practiceProblemMapper, PracticeSubmissionMapper practiceSubmissionMapper) {
+    public WrongAnswerService(WrongAnswerMapper wrongAnswerMapper, PracticeProblemMapper practiceProblemMapper, PracticeSubmissionMapper practiceSubmissionMapper, ScoreService scoreService) {
 
         this.wrongAnswerMapper = wrongAnswerMapper;
         this.practiceProblemMapper = practiceProblemMapper;
         this.practiceSubmissionMapper = practiceSubmissionMapper;
+        this.scoreService = scoreService;
     }
 
     // 오답을 데이터베이스에 기록합니다.
@@ -151,7 +153,7 @@ public class WrongAnswerService {
 
         PracticeProblem problem = practiceProblemMapper.findById(wrongAnswer.getProblemId())
                 .orElseThrow(() -> new RuntimeException("문제를 찾을 수 없습니다."));
-        
+
         boolean isCorrect = normalizeAnswer(problem.getAnswerText())
                 .equals(normalizeAnswer(form.getSubmittedAnswer()));
 
@@ -162,6 +164,8 @@ public class WrongAnswerService {
                         "WRONG_ANSWER_RETRY"
                 );
 
+        Long latestSubmissionId;
+
         if (existingSubmission.isPresent()) {
             PracticeSubmission submission = existingSubmission.get();
             submission.setSubmittedAnswer(form.getSubmittedAnswer());
@@ -170,8 +174,10 @@ public class WrongAnswerService {
 
             int updatedRows = practiceSubmissionMapper.updateSubmission(submission);
             if (updatedRows == 0) {
-                throw new RuntimeException("재시도 제출 수정에 실패했습니다.");
+                throw new RuntimeException("다시 제출 수정에 실패했습니다.");
             }
+
+            latestSubmissionId = submission.getSubmissionId();
         } else {
             PracticeSubmission submission = new PracticeSubmission();
             submission.setSetAttemptId(wrongAnswer.getSetAttemptId());
@@ -183,10 +189,33 @@ public class WrongAnswerService {
             submission.setIsSkipped(false);
 
             practiceSubmissionMapper.insertSubmission(submission);
+            latestSubmissionId = submission.getSubmissionId();
         }
 
+        //오답재정답시 +5
         if (isCorrect) {
-            wrongAnswerMapper.markWrongAnswerSolved(wrongAnswerId);
+            if (!Boolean.TRUE.equals(wrongAnswer.getRetryBonusAwarded())) {
+                scoreService.giveScore(
+                        sessionUser.userId(),
+                        problem.getSubjectId(),
+                        wrongAnswer.getWrongAnswerId(),
+                        "WRONG_ANSWER_RETRY",
+                        5,
+                        "WRONG_ANSWER_RETRY_CORRECT",
+                        "WRONG_ANSWER_RETRY:" + wrongAnswer.getWrongAnswerId()
+                );
+
+                wrongAnswer.setReviewStatus("SOLVED");
+                wrongAnswer.setRetryBonusAwarded(true);
+                wrongAnswer.setLastSubmissionId(latestSubmissionId);
+
+                int updatedRows = wrongAnswerMapper.updateWrongAnswerOnNewMistake(wrongAnswer);
+                if (updatedRows == 0) {
+                    throw new RuntimeException("오답 보너스 상태 업데이트 실패");
+                }
+            } else {
+                wrongAnswerMapper.markWrongAnswerSolved(wrongAnswerId);
+            }
         }
     }
 

@@ -50,6 +50,8 @@ public class PracticeController {
 
         PracticeSetResponse completeResult =
                 (PracticeSetResponse) session.getAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY);
+
+        //로그확인용 나중에 제거
         System.out.println("index completeResult = " + completeResult);
 
 
@@ -58,6 +60,8 @@ public class PracticeController {
             model.addAttribute("completed", true);
             model.addAttribute("problem", null);
             model.addAttribute("screen", "learning/practice");
+            // 완료 화면 1회 노출 후 제거
+            session.removeAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY);
             return "learning/practice";
         }
 

@@ -10,8 +10,67 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell learning-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>랭킹</h1><p>Notion v1.2/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면이야.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>ranking/index</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둔다.</p></section>
+    <section class="page-heading">
+      <span class="eyebrow">Ranking</span>
+      <h1>랭킹</h1>
+    </section>
+
+    <section class="panel">
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;">
+        <a th:each="tab : ${view.attributes()['subjectTabs']}"
+           th:href="${tab['subjectId'] == ''} ? @{/ranking} : @{/ranking(subjectId=${tab['subjectId']})}"
+           th:text="${tab['label']}"
+           style="padding:10px 20px; border-radius:12px; background:#a8a8a8; color:#fff; text-decoration:none;">
+        </a>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+        <article style="padding:24px; background:#d9d9d9; border-radius:16px;">
+          <h2 style="margin-bottom:20px;">내정보</h2>
+          <p th:text="|현재순위 : ${view.attributes()['mySummary']['rankNo']}위|"></p>
+          <p th:text="|현재 점수 : ${view.attributes()['mySummary']['score']}점|"></p>
+          <p th:text="|선순위와 차이 : ${view.attributes()['mySummary']['gapToPrev']}점|"></p>
+        </article>
+
+        <article style="padding:24px; background:#d9d9d9; border-radius:16px;">
+          <h2 style="margin-bottom:20px;">TOP3</h2>
+          <div th:each="item : ${view.attributes()['top3']}" style="margin-bottom:16px;">
+            <p>
+              <strong th:text="|${item['rankNo']}위 ${item['nickname']}|"></strong>
+            </p>
+            <p th:text="|${item['score']}점|"></p>
+          </div>
+        </article>
+      </div>
+
+      <article style="margin-bottom:24px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+          <tr style="background:#d9d9d9;">
+            <th style="padding:14px;">순위</th>
+            <th style="padding:14px;">이름</th>
+            <th style="padding:14px;">점수</th>
+            <th style="padding:14px;">변화</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="item : ${view.attributes()['rankingList']}">
+            <td style="padding:14px; text-align:center;" th:text="${item['rankNo']}"></td>
+            <td style="padding:14px; text-align:center;" th:text="${item['nickname']}"></td>
+            <td style="padding:14px; text-align:center;" th:text="|${item['score']}점|"></td>
+            <td style="padding:14px; text-align:center;" th:text="${item['change']}"></td>
+          </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article style="padding:24px; background:#d9d9d9; border-radius:16px;">
+        <h2 style="margin-bottom:20px;">점수구성</h2>
+        <p th:text="|문제풀이 ${view.attributes()['scoreBreakdown']['practiceScore']}점|"></p>
+        <p th:text="|시험점수 ${view.attributes()['scoreBreakdown']['examScore']}점|"></p>
+        <p th:text="|일일학습 ${view.attributes()['scoreBreakdown']['dailyScore']}점|"></p>
+      </article>
+    </section>
   </main>
 </body>
 </html>
