@@ -1,0 +1,26 @@
+<!doctype html>
+<!--
+  learning/onboarding-stepper.html · 온보딩 위저드 미션 스텝퍼 fragment
+  onboarding.html의 subject/goal/startmode 단계 상단에 th:replace 로 삽입한다.
+  별도 파일로 둔 이유: 같은 페이지 안에 fragment를 정의하면 정의부가 매 렌더마다
+  그 자리에 그대로 출력돼(하단에 중복 스텝퍼) 렌더가 깨진다. 이 파일은 페이지로
+  직접 렌더되지 않으므로 fragment 정의만 안전하게 재사용된다.
+  인자 active = 현재 단계 key. 단계 순서: 과목 → 목표 → 출발 방식.
+-->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div th:fragment="stepper(active)" class="onb-stepper"
+       th:with="order=${ {'subject','goal','startmode'} }, labels=${ {'과목','목표','출발'} }, cur=${order.indexOf(active)}">
+    <div class="onb-stepper-item" th:each="key,st : ${order}"
+         th:classappend="${st.index < cur} ? 'is-done' : (${st.index == cur} ? 'is-current' : '')">
+      <div class="onb-stepper-cell">
+        <span class="onb-stepper-dot">
+          <svg th:if="${st.index < cur}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>
+        </span>
+        <span class="onb-stepper-label" th:text="${labels[st.index]}">과목</span>
+      </div>
+      <span class="onb-stepper-line" th:unless="${st.last}"></span>
+    </div>
+  </div>
+</body>
+</html>

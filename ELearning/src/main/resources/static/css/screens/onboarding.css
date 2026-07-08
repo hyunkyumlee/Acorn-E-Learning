@@ -8,11 +8,22 @@
    - prefers-reduced-motion 은 common/base.css 에서 전역 처리됨
    ========================================================================= */
 
-/* 온보딩은 좁은 단일 컬럼 흐름 → page-shell 폭을 좁게 재정의 */
-.onboarding-screen {
-  max-width: 640px;
-  gap: var(--space-6);
+/* 온보딩 텍스트는 Pretendard(가변, 모든 굵기 지원) → 한글 중간 굵기가 제대로 나온다.
+   로드 실패 시 system-ui로 폴백. 공통 base.css의 font-family는 그대로 둔다. */
+.onboarding-screen, .onb-launching, .onb-footer {
+  font-family: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
+
+/* 온보딩 = 헤더(78px) 아래 남는 전체 높이를 채우고, 그 안에서 콘텐츠를 세로 중앙정렬.
+   푸터가 있는 단계(과목/목표/출발)는 하단 고정 푸터 높이만큼 아래 여백을 확보해
+   "콘텐츠는 중앙, 푸터는 맨 아래" 배치가 되게 한다(:has). */
+.onboarding-screen {
+  max-width: 660px;
+  gap: var(--space-7, 28px);
+  min-height: calc(100dvh - 78px);
+  align-content: center;
+}
+.onboarding-screen:has(.onb-footer) { padding-bottom: 104px; }
 
 /* ----- 진입 애니메이션: 단계가 바뀔 때(=페이지 로드 시) 패널이 부드럽게 등장 ----- */
 .onb-step {
@@ -23,7 +34,7 @@
 
 @keyframes onbStepIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes onbFadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes onbFloat  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes onbFloat  { 0%, 100% { transform: translate(-4.5%, 0); } 50% { transform: translate(-4.5%, -7px); } }
 @keyframes onbGlow   { 0%, 100% { opacity: 0.35; transform: scale(0.92); } 50% { opacity: 0.7; transform: scale(1.08); } }
 @keyframes onbLoad   { 0% { transform: translateX(-100%); } 100% { transform: translateX(320%); } }
 @keyframes onbPop    { 0% { transform: scale(0.7); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
@@ -37,54 +48,71 @@
 }
 .onb-stepper-item { display: flex; align-items: center; min-width: 0; flex: 1; }
 .onb-stepper-item:last-child { flex: none; }
-.onb-stepper-cell { display: grid; gap: 7px; justify-items: center; flex: none; width: 56px; }
+.onb-stepper-cell { display: grid; gap: 8px; justify-items: center; flex: none; width: 66px; }
 .onb-stepper-dot {
   display: inline-grid; place-items: center;
-  width: 30px; height: 30px; border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 50%;
   background: color-mix(in srgb, var(--surface) 84%, transparent);
   border: 1px solid var(--line);
   color: var(--muted);
   transition: background 200ms ease-out, box-shadow 200ms ease-out;
 }
-.onb-stepper-dot svg { width: 14px; height: 14px; }
+.onb-stepper-dot svg { width: 17px; height: 17px; }
 .onb-stepper-item.is-done .onb-stepper-dot {
   background: var(--success); border-color: var(--success);
-  color: color-mix(in srgb, var(--accent) 80%, black);
+  color: #eafff2; /* 지나온 단계 체크마크를 밝게 → 초록 위에서 잘 보이게 */
 }
 .onb-stepper-item.is-current .onb-stepper-dot {
   background: var(--primary); border-color: var(--primary);
   color: color-mix(in srgb, var(--accent) 82%, black);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 20%, transparent);
 }
-.onb-stepper-label { font-size: 10.5px; font-weight: 800; white-space: nowrap; color: var(--muted); }
+/* 진행중(파랑) dot = 도넛: 가운데 구멍을 페이지 배경색으로 뚫는다. (지나온=초록+체크) */
+.onb-stepper-item.is-current .onb-stepper-dot::after {
+  content: ''; width: 11px; height: 11px; border-radius: 50%;
+  background: var(--bg);
+}
+.onb-stepper-label { font-size: 12.5px; font-weight: 800; white-space: nowrap; color: var(--muted); }
 .onb-stepper-item.is-current .onb-stepper-label { color: var(--primary); }
 .onb-stepper-item.is-done .onb-stepper-label { color: var(--success); }
-.onb-stepper-line { flex: 1; height: 2px; margin: 14px -6px 0; border-radius: 2px; background: var(--line); }
+.onb-stepper-line { flex: 1; height: 2px; margin: 17px -6px 0; border-radius: 2px; background: var(--line); }
 .onb-stepper-item.is-done .onb-stepper-line { background: var(--success); }
 
 /* ===== 인트로 화면 ================================================== */
-.onb-intro { display: grid; justify-items: center; text-align: center; gap: var(--space-5); padding-top: var(--space-6); }
-.onb-intro-logo { height: 66px; width: auto; }
-.onb-intro .eyebrow { letter-spacing: 0.12em; }
-.onb-intro h1 { margin: 0; font-size: 30px; font-weight: 850; letter-spacing: -0.02em; line-height: 1.25; word-break: keep-all; }
-.onb-intro p { margin: 0; max-width: 44ch; color: var(--muted); font-size: 15px; line-height: 1.6; word-break: keep-all; }
+/* 인트로: 레퍼런스처럼 촘촘한 수직 리듬. eyebrow→제목→본문은 타이트하게 묶고
+   로고/칩/버튼 사이만 조금 넓게. (uniform gap 대신 개별 margin으로 리듬 제어) */
+.onb-intro { display: grid; justify-items: center; text-align: center; gap: 14px; }
+/* 로고: SVG가 1536×1024 여백 캔버스라, topbar와 동일하게 object-fit:cover + object-position:43% 50%
+   로 로고만 잘라 보여준다(raw img면 작고 치우쳐 보임). 공식 로고 그대로, 크게·정중앙. */
+.onb-intro-logo { display: block; width: 420px; max-width: 84vw; height: 145px; object-fit: cover; object-position: 50% 50%; margin-bottom: 4px; transform: translateX(-4.5%); }
+.onb-intro .eyebrow { letter-spacing: 0.12em; font-size: 13.5px; font-weight: 850; margin-bottom: -6px; }
+.onb-intro h1 { margin: 0; font-size: 38px; font-weight: 850; letter-spacing: -0.02em; line-height: 1.22; word-break: keep-all; }
+.onb-intro p { margin: 2px 0 6px; max-width: 42ch; color: var(--muted); font-size: 16px; font-weight: 550; line-height: 1.6; word-break: keep-all; }
 .onb-chip-row { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); }
 .onb-chip {
   display: inline-flex; align-items: center; gap: 7px;
-  padding: 8px 14px; border-radius: var(--radius-pill);
+  padding: 9px 16px; border-radius: var(--radius-pill);
   border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 90%, transparent);
-  font-size: 12.5px; font-weight: 700; color: var(--muted);
+  font-size: 13.5px; font-weight: 750; color: var(--text);
 }
-.onb-chip svg { width: 14px; height: 14px; }
+.onb-chip svg { width: 15px; height: 15px; }
+/* 인트로: 칩과 CTA 버튼 사이 살짝 더 띄움(너무 붙지 않게) */
+.onb-intro .onb-btn-lg { margin-top: 12px; }
+/* 칩 아이콘: 시계(다시 바꿀 수 있어요)=cyan, 체크(레벨 스캔)=success 초록 — 서로 다른 색 */
+.onb-chip.is-time svg  { color: var(--primary); }
+.onb-chip.is-check svg { color: var(--success); }
 
 /* ===== 옵션 카드 (과목/목표/출발 방식 공통) =========================== */
 /* 라디오는 시각적으로 숨기고 label 카드로 선택 → :checked 로 하이라이트 (JS 불필요) */
-.onb-options { display: grid; gap: var(--space-3); }
-.onb-options.is-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.onb-options { display: grid; gap: 14px; }
+.onb-options.is-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: stretch; }
+/* 그리드 카드(기초/레벨스캔) 높이 통일 — 설명 길이 달라도 같은 높이 */
+.onb-options.is-grid .onb-option { display: flex; }
+.onb-options.is-grid .onb-card { flex: 1; height: 100%; }
 .onb-radio { position: absolute; opacity: 0; width: 0; height: 0; }
 .onb-card {
-  display: flex; align-items: center; gap: 14px;
-  width: 100%; padding: 15px 16px;
+  display: flex; align-items: center; gap: 16px;
+  width: 100%; padding: 18px 20px;
   border: 1.5px solid var(--line); border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   color: var(--text); cursor: pointer;
@@ -97,27 +125,32 @@
   background: color-mix(in srgb, var(--primary) 10%, var(--surface));
 }
 /* 세로형(출발 방식) */
-.onb-card.is-tall { flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px 18px; }
+.onb-card.is-tall { flex-direction: column; align-items: flex-start; gap: 14px; padding: 24px 22px; }
 
 .onb-card-code {
   display: inline-grid; place-items: center; flex: none;
-  width: 44px; height: 44px; border-radius: 10px;
+  width: 50px; height: 50px; border-radius: 11px;
   background: color-mix(in srgb, var(--surface-soft) 80%, transparent);
   border: 1px solid var(--line);
-  font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; font-weight: 850; color: var(--primary);
+  font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; font-weight: 850; color: var(--primary);
 }
 .onb-card-icon {
   display: grid; place-items: center; flex: none;
-  width: 44px; height: 44px; border-radius: 10px;
+  width: 50px; height: 50px; border-radius: 11px;
   background: color-mix(in srgb, var(--surface-soft) 80%, transparent);
   border: 1px solid var(--line); color: var(--muted);
 }
-.onb-radio:checked + .onb-card .onb-card-icon,
-.onb-radio:checked + .onb-card .onb-card-code { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 36%, var(--line)); }
-.onb-card-icon svg { width: 22px; height: 22px; }
-.onb-card-body { display: grid; gap: 3px; flex: 1; min-width: 0; text-align: left; }
-.onb-card-body strong { font-size: 16px; font-weight: 800; }
-.onb-card-body small { font-size: 12.5px; color: var(--muted); font-weight: 600; line-height: 1.4; word-break: keep-all; }
+.onb-radio:checked + .onb-card .onb-card-icon { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 36%, var(--line)); }
+
+/* 언어별 배지 = 글자(코드) 색만 다르게. 박스(타일 배경/테두리)는 공통 그대로 둔다. */
+.onb-card-code.is-JAVA   { color: #e8792b; }
+.onb-card-code.is-PYTHON { color: #3b82c4; }
+.onb-card-code.is-WEB    { color: #8b5cf6; }
+.onb-card-code.is-SQL    { color: #0ea3b0; }
+.onb-card-icon svg { width: 24px; height: 24px; }
+.onb-card-body { display: grid; gap: 4px; flex: 1; min-width: 0; text-align: left; }
+.onb-card-body strong { font-size: 17.5px; font-weight: 800; }
+.onb-card-body small { font-size: 13.5px; color: var(--muted); font-weight: 600; line-height: 1.45; word-break: keep-all; }
 .onb-card-mark {
   display: inline-grid; place-items: center; flex: none;
   width: 26px; height: 26px; border-radius: 50%;
@@ -181,15 +214,15 @@
 /* ===== 결과 화면 ==================================================== */
 .onb-result { display: grid; justify-items: center; text-align: center; gap: var(--space-5); }
 .onb-badge {
-  width: 116px; height: 116px; display: grid; place-items: center;
+  width: 132px; height: 132px; display: grid; place-items: center;
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   animation: onbPop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
 .onb-badge-inner {
-  width: 100px; height: 100px; display: grid; place-items: center;
+  width: 114px; height: 114px; display: grid; place-items: center;
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
-.onb-badge svg { width: 42px; height: 42px; }
+.onb-badge svg { width: 48px; height: 48px; }
 /* 등급별 색: bronze(warning계) / silver(muted) / gold(primary+accent) — teal 남용 피하려 등급 뱃지만 강조 */
 .onb-badge[data-tier="BRONZE"] { background: linear-gradient(155deg, #87542a, #c98a4e); }
 .onb-badge[data-tier="BRONZE"] .onb-badge-inner { background: linear-gradient(155deg, #e9bd90, #c98a4e); }
@@ -199,8 +232,8 @@
 .onb-badge[data-tier="GOLD"] .onb-badge-inner { background: linear-gradient(155deg, #f4dd9c, #d8aa52); }
 .onb-badge svg { color: #2a2008; }
 
-.onb-result h1 { margin: 0; font-size: 28px; font-weight: 850; letter-spacing: -0.02em; }
-.onb-result p { margin: 0; max-width: 44ch; color: var(--muted); font-size: 14.5px; line-height: 1.6; word-break: keep-all; }
+.onb-result h1 { margin: 0; font-size: 33px; font-weight: 850; letter-spacing: -0.02em; }
+.onb-result p { margin: 0; max-width: 46ch; color: var(--muted); font-size: 15.5px; font-weight: 600; line-height: 1.65; word-break: keep-all; }
 .onb-result-score {
   display: inline-flex; align-items: center; gap: 9px; padding: 9px 16px;
   border-radius: var(--radius-pill); border: 1px solid var(--line);
@@ -254,32 +287,51 @@
 .onb-btn-ghost:hover { border-color: color-mix(in srgb, var(--primary) 40%, var(--line)); color: var(--primary); }
 
 /* ===== 하단 고정 CTA 바 (단계별 계속/다음 버튼) ====================== */
+/* 하단 고정 전체폭 푸터: 뷰포트 맨 아래에 붙고 좌우 끝까지(공통 컴포넌트 아님, 온보딩 전용).
+   내부(onb-footer-inner)만 콘텐츠 폭(660)으로 가운데 정렬 → 버튼이 카드 우측선과 맞음. */
 .onb-footer {
-  position: sticky; bottom: 0; z-index: 15;
-  margin: var(--space-4) calc(var(--space-5) * -1) calc(var(--space-8) * -1);
-  padding: 15px var(--space-5);
-  background: color-mix(in srgb, var(--header-bg) 92%, transparent);
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 15;
+  padding: 16px clamp(20px, 5vw, 48px);
+  background: color-mix(in srgb, var(--header-bg) 94%, transparent);
   border-top: 1px solid var(--line); backdrop-filter: blur(20px);
 }
-.onb-footer-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.onb-footer-inner { max-width: 660px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .onb-footer-hint { font-size: 12.5px; color: var(--muted); font-weight: 700; }
 .onb-footer .button[disabled] { opacity: 0.55; cursor: not-allowed; filter: grayscale(0.3); }
 
 /* ===== 이동 오버레이 (학습 메인으로 로딩) — 우주 배경 아님, 로고 + 로딩바만 ==== */
-.onb-launching { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--bg); animation: onbFadeIn 0.3s ease; }
+.onb-launching { position: fixed; inset: 0; z-index: 100; display: none; place-items: center; background: var(--bg); animation: onbFadeIn 0.3s ease; }
+.onb-launching.is-on { display: grid; }
 .onb-launching-box { display: grid; justify-items: center; gap: 28px; }
 .onb-launching-logo-wrap { position: relative; display: grid; place-items: center; padding: 16px 26px; }
 .onb-launching-glow { position: absolute; top: 50%; left: 50%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--primary) 30%, transparent), transparent 68%); animation: onbGlow 2.4s ease-in-out infinite; }
-.onb-launching-logo { position: relative; height: 60px; width: auto; animation: onbFloat 2.6s ease-in-out infinite; }
+.onb-launching-logo { position: relative; width: 320px; max-width: 80vw; height: 110px; object-fit: cover; object-position: 50% 50%; animation: onbFloat 2.6s ease-in-out infinite; }
 .onb-launching-bar { width: 160px; height: 4px; border-radius: var(--radius-pill); background: var(--line); overflow: hidden; }
 .onb-launching-bar span { display: block; width: 45px; height: 100%; border-radius: var(--radius-pill); background: var(--primary); animation: onbLoad 1.15s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
 .onb-launching-text { color: var(--muted); font-size: 14px; font-weight: 700; }
+
+/* ===== 레벨 스캔 빈 상태 (해당 과목 문항 시드 없음 — 스펙상 정상) ===== */
+.onb-empty {
+  display: grid; justify-items: center; text-align: center; gap: var(--space-4);
+  padding: var(--space-8) var(--space-5);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+}
+.onb-empty-icon {
+  display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%;
+  background: var(--surface-soft); border: 1px solid var(--line); color: var(--muted);
+}
+.onb-empty-icon svg { width: 26px; height: 26px; }
+.onb-empty-title { margin: 0; font-size: 18px; font-weight: 800; color: var(--text); word-break: keep-all; }
+.onb-empty-desc { margin: 0; max-width: 42ch; font-size: 14px; color: var(--muted); font-weight: 600; line-height: 1.6; word-break: keep-all; }
 
 @media (max-width: 640px) {
   .onboarding-screen { gap: var(--space-5); }
   .onb-intro h1 { font-size: 26px; }
   .onb-stepper-cell { width: 44px; }
 }
+
+/* (버튼 색은 공통 components.css 규칙을 그대로 따른다 — 온보딩에서 override 안 함) */
 
 /* 인트로 로고: 테마별 스왑 (brand-logo-light는 다크에서 숨겨지므로 온보딩 전용 스왑 사용) */
 .onb-logo-dark { display: none; }
