@@ -15,6 +15,8 @@
         <result property="subjectName" column="subject_name" />
         <result property="curriculumTitle" column="curriculum_title" />
         <result property="lessonTitle" column="lesson_title" />
+        <result property="requiredForCompletion" column="required_for_completion" />
+        <result property="problemCount" column="problem_count" />
         <result property="content" column="content" />
         <result property="levelCode" column="level_code" />
         <result property="sortOrder" column="sort_order" />
@@ -23,33 +25,39 @@
     </resultMap>
 
 
-
-
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="AdminOperationLogResultMap">
-          SELECT /* DDL column list */
-          FROM admin_operation_logs
-          ORDER BY id DESC
-      </select>
-    -->
-
     <select id="findAll" resultMap="AdminLessonManageRowResultMap">
         SELECT
-        l.lesson_id,
-        l.node_id,
-        s.subject_name,
-        c.title AS curriculum_title,
-        l.title AS lesson_title,
-        l.content,
-        c.level_code,
-        l.sort_order,
-        l.created_at,
-        l.is_active
+            l.lesson_id,
+            l.node_id,
+            s.subject_name,
+            c.title AS curriculum_title,
+            l.title AS lesson_title,
+            l.required_for_completion,
+            COUNT(p.problem_id) AS problem_count,
+            l.content,
+            c.level_code,
+            l.sort_order,
+            l.created_at,
+            l.is_active
         FROM lessons l
         JOIN curriculum_nodes c
-        ON l.node_id = c.node_id
+            ON l.node_id = c.node_id
         JOIN subjects s
-        ON c.subject_id = s.subject_id
+            ON c.subject_id = s.subject_id
+        LEFT JOIN practice_problems p
+            ON p.lesson_id = l.lesson_id
+        GROUP BY
+            l.lesson_id,
+            l.node_id,
+            s.subject_name,
+            c.title,
+            l.title,
+            l.required_for_completion,
+            l.content,
+            c.level_code,
+            l.sort_order,
+            l.created_at,
+            l.is_active
         ORDER BY l.created_at DESC, l.lesson_id DESC
     </select>
 

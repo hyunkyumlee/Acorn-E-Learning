@@ -13,6 +13,8 @@ public class AdminLessonManageRowResponse {
     private String subjectName;
     private String curriculumTitle;
     private String lessonTitle;
+    private Boolean requiredForCompletion;
+    private Integer problemCount;
     private String content;
     private String levelCode;
     private Integer sortOrder;
