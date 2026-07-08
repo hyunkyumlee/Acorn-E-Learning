@@ -56,7 +56,7 @@
             P.comment_count,
             P.created_at,
             P.status
-        ORDER BY P.created_at DESC
+        ORDER BY P.created_at DESC, p.post_id DESC
     </select>
 
     <select id="findComments" resultMap="CommentItemResultMap">

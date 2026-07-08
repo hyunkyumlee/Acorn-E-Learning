@@ -46,7 +46,7 @@
       <div class="admin-dashboard-card-head">
         <h2>일별 학습 활동</h2>
       </div>
-      <div class="admin-dashboard-chart" aria-label="일별 학습 활동 막대 그래프">
+      <div class="admin-dashboard-chart admin-dashboard-chart-centered" aria-label="일별 학습 활동 막대 그래프">
         <div th:each="point : ${dailyLearningChart}"
              class="admin-dashboard-bar"
              th:style="'--bar-height: ' + ${point.percent} + '%'">
