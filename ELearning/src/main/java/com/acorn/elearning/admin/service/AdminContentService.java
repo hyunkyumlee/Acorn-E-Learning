@@ -207,6 +207,9 @@ public class AdminContentService {
         lesson.setNodeId(form.getNodeId());
         lesson.setTitle(form.getTitle());
         lesson.setContent(form.getContent());
+        lesson.setRequiredForCompletion(
+                form.getRequiredForCompletion() == null ? Boolean.TRUE : form.getRequiredForCompletion()
+        );
         lesson.setSortOrder(form.getSortOrder() == null ? 0 : form.getSortOrder());
         lesson.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
@@ -229,6 +232,11 @@ public class AdminContentService {
         lesson.setNodeId(form.getNodeId());
         lesson.setTitle(form.getTitle());
         lesson.setContent(form.getContent());
+        lesson.setRequiredForCompletion(
+                form.getRequiredForCompletion() == null
+                        ? lesson.getRequiredForCompletion()
+                        : form.getRequiredForCompletion()
+        );
         lesson.setSortOrder(form.getSortOrder() == null ? lesson.getSortOrder() : form.getSortOrder());
         lesson.setIsActive(form.getIsActive() == null ? lesson.getIsActive() : form.getIsActive());
 
@@ -297,16 +305,20 @@ public class AdminContentService {
 
     public int createProblem(ProblemForm form, Long adminId){
         PracticeProblem problem = new PracticeProblem();
-        problem.setSubjectId(form.getSubjectId());
-        problem.setNodeId(form.getNodeId());
+
+        Lesson lesson = lm.findById(form.getLessonId())
+                .orElseThrow();
+
+        CurriculumNode node = cm.findById(lesson.getNodeId())
+                .orElseThrow();
+
+        problem.setSubjectId(node.getSubjectId());
+        problem.setNodeId(lesson.getNodeId());
         problem.setProblemType(toProblemTypeCode(form.getProblemType()));
         problem.setQuestion(form.getQuestion());
         problem.setAnswerText(form.getAnswerText());
-
-        /*
-            practice PracticeProblem에 explanation 필드 추가 후 연결
-            problem.setExplanation(form.getExplanation());
-        */
+        problem.setLessonId(lesson.getLessonId());
+        problem.setExplanation(form.getExplanation());
         problem.setDifficultyCode(form.getDifficultyCode());
         problem.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
@@ -325,11 +337,20 @@ public class AdminContentService {
         PracticeProblem problem = ppm.findById(form.getProblemId())
                 .orElseThrow();
 
-        problem.setSubjectId(form.getSubjectId());
-        problem.setNodeId(form.getNodeId());
+
+        Lesson lesson = lm.findById(form.getLessonId())
+                .orElseThrow();
+
+        CurriculumNode node = cm.findById(lesson.getNodeId())
+                .orElseThrow();
+
+        problem.setSubjectId(node.getSubjectId());
+        problem.setNodeId(lesson.getNodeId());
         problem.setProblemType(toProblemTypeCode(form.getProblemType()));
         problem.setQuestion(form.getQuestion());
         problem.setAnswerText(form.getAnswerText());
+        problem.setLessonId(lesson.getLessonId());
+        problem.setExplanation(form.getExplanation());
         problem.setDifficultyCode(form.getDifficultyCode());
         problem.setIsActive(form.getIsActive() == null ? problem.getIsActive() : form.getIsActive());
 

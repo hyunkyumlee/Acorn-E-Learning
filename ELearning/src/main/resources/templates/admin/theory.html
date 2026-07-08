@@ -62,6 +62,7 @@
           <th>커리큘럼</th>
           <th>제목</th>
           <th>레벨</th>
+          <th>문제 수</th>
           <th>등록일</th>
           <th>활성화</th>
           <th>관리</th>
@@ -80,6 +81,10 @@
           <td th:text="${lesson.curriculumTitle}">변수와 자료형</td>
           <td th:text="${lesson.lessonTitle}">Java 변수 이해하기</td>
           <td th:text="${lesson.levelCode}">Lv.1</td>
+          <td>
+            <span th:text="${(lesson.problemCount ?: 0) + '/10'}">0/10</span>
+            <span th:text="${lesson.problemCount == 10 ? '정상' : '부족'}">부족</span>
+          </td>
           <td th:text="${#temporals.format(lesson.createdAt, 'yyyy-MM-dd')}">2026-06-01</td>
           <td th:text="${lesson.isActive} ? '활성' : '비활성'">활성</td>
           <td>
@@ -91,6 +96,7 @@
                       th:data-title="${lesson.lessonTitle}"
                       th:data-content="${lesson.content}"
                       th:data-sort-order="${lesson.sortOrder}"
+                      th:data-required-for-completion="${lesson.requiredForCompletion}"
                       th:data-is-active="${lesson.isActive}">
                 수정
               </button>
@@ -103,7 +109,7 @@
           </td>
         </tr>
         <tr th:if="${#lists.isEmpty(theoryList)}">
-          <td colspan="8" class="theory-empty">등록된 이론 자료가 없습니다.</td>
+          <td colspan="9" class="theory-empty">등록된 이론 자료가 없습니다.</td>
         </tr>
         </tbody>
       </table>
@@ -136,6 +142,11 @@
 
           <div class="theory-form-row">
             <input type="number" name="sortOrder" id="lessonSortOrder" min="0" placeholder="순서">
+            <select name="requiredForCompletion" id="lessonRequiredForCompletion">
+              <option value="">필수 여부 선택</option>
+              <option value="true">필수</option>
+              <option value="false">선택</option>
+            </select>
             <select name="isActive" id="lessonIsActive">
               <option value="">활성화 토글</option>
               <option value="true">활성</option>
@@ -213,6 +224,7 @@
     document.querySelector("#lessonNodeId").value = "";
     syncLessonCurriculumOptions();
     document.querySelector("#lessonSortOrder").value = "";
+    document.querySelector("#lessonRequiredForCompletion").value = "";
     document.querySelector("#lessonIsActive").value = "";
     document.querySelector("#lessonContent").value = "";
 
@@ -228,6 +240,7 @@
       document.querySelector("#lessonSubjectId").value = document.querySelector("#lessonNodeId").selectedOptions[0]?.dataset.subjectId || "";
       syncLessonCurriculumOptions();
       document.querySelector("#lessonSortOrder").value = button.dataset.sortOrder;
+      document.querySelector("#lessonRequiredForCompletion").value = button.dataset.requiredForCompletion || "";
       document.querySelector("#lessonIsActive").value = button.dataset.isActive;
       document.querySelector("#lessonContent").value = button.dataset.content || "";
 

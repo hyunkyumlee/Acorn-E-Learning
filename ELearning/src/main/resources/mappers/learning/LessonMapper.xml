@@ -11,6 +11,7 @@
         <result property="exampleCode" column="example_code" />
         <result property="sortOrder" column="sort_order" />
         <result property="isActive" column="is_active" />
+        <result property="requiredForCompletion" column="required_for_completion" />
         <result property="createdBy" column="created_by" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
@@ -18,7 +19,7 @@
 
     <sql id="columns">
         lesson_id, node_id, title, summary, content, example_code,
-        sort_order, is_active, created_by, created_at, updated_at
+        sort_order, is_active, required_for_completion, created_by, created_at, updated_at
     </sql>
 
     <select id="findById" parameterType="long" resultMap="LessonResultMap">
@@ -36,9 +37,9 @@
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.Lesson"
             useGeneratedKeys="true" keyProperty="lessonId">
         INSERT INTO lessons
-            (node_id, title, summary, content, example_code, sort_order, is_active, created_by)
+            (node_id, title, summary, content, example_code, sort_order, is_active, required_for_completion, created_by)
         VALUES
-            (#{nodeId}, #{title}, #{summary}, #{content}, #{exampleCode}, #{sortOrder}, #{isActive}, #{createdBy})
+            (#{nodeId}, #{title}, #{summary}, #{content}, #{exampleCode}, #{sortOrder}, #{isActive}, #{requiredForCompletion}, #{createdBy})
     </insert>
 
     <update id="update" parameterType="com.acorn.elearning.learning.model.Lesson">
@@ -50,6 +51,7 @@
             example_code = #{exampleCode},
             sort_order   = #{sortOrder},
             is_active    = #{isActive},
+            required_for_completion = #{requiredForCompletion},
             created_by   = #{createdBy},
             updated_at   = NOW()
         WHERE lesson_id = #{lessonId}

@@ -9,6 +9,8 @@ public class AdminProblemManageRowResponse {
     private Long problemId;
     private Long subjectId;
     private Long nodeId;
+    private Long lessonId;
+    private String lessonTitle;
     private String subjectName;
     private String curriculumTitle;
     private String problemType;

@@ -32,6 +32,8 @@
         INSERT INTO practice_problems (
         subject_id,
         node_id,
+        lesson_id,
+        explanation,
         problem_type,
         question,
         answer_text,
@@ -42,6 +44,8 @@
         ) VALUES (
         #{subjectId},
         #{nodeId},
+        #{lessonId},
+        #{explanation},
         #{problemType},
         #{question},
         #{answerText},
@@ -56,6 +60,8 @@
         UPDATE practice_problems
         SET subject_id = #{subjectId},
         node_id = #{nodeId},
+        lesson_id = #{lessonId},
+        explanation = #{explanation},
         problem_type = #{problemType},
         question = #{question},
         answer_text = #{answerText},

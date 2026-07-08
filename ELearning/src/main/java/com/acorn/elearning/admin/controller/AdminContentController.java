@@ -130,6 +130,7 @@ public class AdminContentController {
         model.addAttribute("problemList", service.findAllAdminProblem());
         model.addAttribute("subjectList", service.findAllSubject());
         model.addAttribute("curriculumList", service.findAllCurriculumNode());
+        model.addAttribute("lessonList", service.findAllAdminLesson());
         model.addAttribute("problemForm", new ProblemForm());
         model.addAttribute("screen", "admin/problems");
         return "admin/problems";
