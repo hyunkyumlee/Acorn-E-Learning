@@ -66,15 +66,25 @@
 
     <!-- 수정: 시작 화면도 카드형 블록으로 -->
     <div th:if="${!completed and problem == null}" class="practice-intro">
-      <p>연습 문제를 시작해보세요.</p>
+      <p th:text="|subjectId=${subjectId}, nodeId=${nodeId}, completed=${completed}|"></p>
 
-      <form th:action="@{/learning/practice/sets}" method="post">
-        <input type="hidden" name="subjectId" value="1">
-        <input type="hidden" name="nodeId" value="1">
-        <input type="hidden" name="difficultyCode" value="BRONZE">
+      <p th:if="${subjectId == null}">
+        과목 정보를 찾지 못했습니다. 현재는 기본 과목으로 진입하거나 온보딩 후 다시 시도해 주세요.
+      </p>
+
+      <p th:if="${subjectId != null and nodeId != null}">
+        문제풀이를 시작해보세요.
+      </p>
+
+      <form th:if="${subjectId != null and nodeId != null}"
+            th:action="@{/learning/practice/sets}"
+            method="post">
+        <input type="hidden" name="subjectId" th:value="${subjectId}">
+        <input type="hidden" name="nodeId" th:value="${nodeId}">
+        <input type="hidden" name="difficultyCode" th:value="${difficultyCode}">
 
         <div class="practice-footer">
-          <button type="submit">연습 시작</button>
+          <button type="submit">문제풀이 시작</button>
         </div>
       </form>
     </div>
