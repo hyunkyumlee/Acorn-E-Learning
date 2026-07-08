@@ -2,11 +2,12 @@ package com.acorn.elearning.admin.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
-import com.acorn.elearning.admin.dto.response.AdminLessonManageRowResponse;
-import com.acorn.elearning.admin.dto.response.AdminProblemManageRowResponse;
+import com.acorn.elearning.admin.dto.response.*;
 import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
@@ -57,6 +58,8 @@ public class AdminContentService {
         return sm.findAll();
     }
 
+
+
     //과목 단건 조회
     public Optional<Subject> findBySubjectId(Long id){
         return sm.findById(id);
@@ -71,6 +74,9 @@ public class AdminContentService {
     public int update(Subject model) {
         return sm.update(model);
     }
+
+
+
 
     public int createSubject(SubjectForm form, Long adminId){
 
@@ -349,6 +355,76 @@ public class AdminContentService {
             default -> value;
         };
     }
+
+
+    //API용 메서드
+    public List<SubjectManageResponse> findSubjectResponse(){
+        return sm.findAll().stream()
+                .map(subject -> new SubjectManageResponse(
+                        subject.getSubjectId(),
+                        subject.getSubjectName(),
+                        subject.getDescription(),
+                        subject.getIsActive(),
+                        subject.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    public int updateSubjectStatus(Long subjectId, Boolean isActive, Long adminId){
+        Subject s = sm.findById(subjectId).orElseThrow();
+
+        s.setIsActive(isActive);
+
+        int updated = sm.update(s);
+
+        if(updated == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "SUBJECT_STATUS_UPDATE", "SUBJECT", subjectId)
+            );
+        }
+        return updated;
+    }
+
+    public List<CurriculumNodeManageResponse> findCurriculumNodeResponse(){
+
+
+        List<Subject> subjects = sm.findAll();
+
+        Map<Long, String> subjectNameMap = subjects.stream()
+                .collect(Collectors.toMap(Subject::getSubjectId, Subject::getSubjectName));
+
+        return cm.findAll().stream()
+                .map(node -> new CurriculumNodeManageResponse(
+                        node.getNodeId(),
+                        subjectNameMap.get(node.getSubjectId()),
+                        node.getLevelCode(),
+                        node.getNodeType(),
+                        node.getTitle(),
+                        node.getIsActive()
+
+                        ))
+                .toList();
+
+    }
+
+    public int updateCurriculumNodeStatus(Long nodeId, Boolean isActive, Long adminId){
+        CurriculumNode c = cm.findById(nodeId).orElseThrow();
+
+        c.setIsActive(isActive);
+
+        int updated = cm.update(c);
+
+        if(updated == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "CURRICULUM_NODE_STATUS_UPDATE", "CURRICULUM_NODE", nodeId)
+            );
+        }
+        return updated;
+    }
+
+
+
+
 
 }
 
