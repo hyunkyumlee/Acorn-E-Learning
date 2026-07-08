@@ -68,22 +68,25 @@
     <div th:if="${!completed and problem == null}" class="practice-intro">
       <p th:text="|subjectId=${subjectId}, nodeId=${nodeId}, completed=${completed}|"></p>
 
-      <p th:if="${subjectId == null}">
-        과목 정보를 찾지 못했습니다. 현재는 기본 과목으로 진입하거나 온보딩 후 다시 시도해 주세요.
+      <p th:if="${subjectId == null or nodeId == null or lessonId == null}">
+        문제풀이 시작에 필요한 학습 정보가 없습니다. 학습 화면에서 다시 진입해 주세요.
       </p>
 
       <p th:if="${subjectId != null and nodeId != null}">
         문제풀이를 시작해보세요.
       </p>
 
-      <form th:if="${subjectId != null and nodeId != null}"
+      <form th:if="${subjectId != null and nodeId != null and lessonId != null}"
             th:action="@{/learning/practice/sets}"
             method="post">
         <input type="hidden" name="subjectId" th:value="${subjectId}">
         <input type="hidden" name="nodeId" th:value="${nodeId}">
+        <input type="hidden" name="lessonId" th:value="${lessonId}">
         <input type="hidden" name="difficultyCode" th:value="${difficultyCode}">
 
         <div class="practice-footer">
+
+          <p th:text="|subjectId=${subjectId}, nodeId=${nodeId}, lessonId=${lessonId}, completed=${completed}|"></p>
           <button type="submit">문제풀이 시작</button>
         </div>
       </form>

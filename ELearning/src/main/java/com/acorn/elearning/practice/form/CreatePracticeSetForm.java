@@ -15,10 +15,13 @@ public class CreatePracticeSetForm {
 
     //학습단위
     @NotNull
+    private Long subjectId;
+
+    @NotNull
     private Long nodeId;
 
     @NotNull
-    private Long subjectId;
+    private Long lessonId;
 
     @NotBlank
     private String difficultyCode;

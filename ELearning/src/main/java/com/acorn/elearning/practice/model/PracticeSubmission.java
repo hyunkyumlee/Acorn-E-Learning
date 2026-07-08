@@ -9,6 +9,7 @@
     public class PracticeSubmission {
         private Long submissionId;
         private Long setAttemptId;
+        private Long setItemId;
         private Long userId;
         private Long problemId;
         private String submissionContext;
