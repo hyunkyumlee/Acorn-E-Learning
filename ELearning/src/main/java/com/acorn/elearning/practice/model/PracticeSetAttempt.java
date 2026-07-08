@@ -11,6 +11,7 @@
         private Long userId;
         private Long subjectId; //추가
         private Long nodeId;
+        private Long lessonId; //추가
         private Integer totalCount;
         private Integer correctCount;
         private String status;

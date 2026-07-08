@@ -42,6 +42,7 @@ public class PracticeController {
     public String index(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(required = false) Long nodeId,
+            @RequestParam(required = false) Long lessonId,
             @RequestParam(defaultValue = "BRONZE") String difficultyCode,
             HttpSession session,
             Model model) {
@@ -57,12 +58,15 @@ public class PracticeController {
         if (subjectId == null) {
             subjectId = 1L;
         }
-        
+
+        System.out.println("[PRACTICE] subjectId=" + subjectId + ", nodeId=" + nodeId + ", lessonId=" + lessonId);
+
         PracticeSetResponse completeResult =
                 (PracticeSetResponse) session.getAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY);
 
         model.addAttribute("subjectId", subjectId);
         model.addAttribute("nodeId", nodeId);
+        model.addAttribute("lessonId", lessonId);
         model.addAttribute("difficultyCode", difficultyCode);
 
         if (completeResult != null) {
@@ -87,7 +91,12 @@ public class PracticeController {
             BindingResult bindingResult,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
-
+        /////
+        System.out.println("[CREATE_SET] subjectId=" + form.getSubjectId()
+                + ", nodeId=" + form.getNodeId()
+                + ", lessonId=" + form.getLessonId()
+                + ", difficultyCode=" + form.getDifficultyCode());
+        ////
         if (bindingResult.hasErrors()) {
             return "learning/practice";
         }
