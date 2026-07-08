@@ -74,8 +74,9 @@ public class PracticeService {
         // 1. 문제 조회 ProblemService 위임
         List<PracticeProblem> problems = problemService.getProblems(
                 form.getSubjectId(),
+                form.getNodeId(),
                 form.getDifficultyCode()
-            );
+        );
 
 
         // 2. practice_set_attempts 생성
