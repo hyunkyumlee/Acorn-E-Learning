@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.acorn.elearning.admin.dto.response.AdminPageResponse;
 import com.acorn.elearning.admin.mapper.NoticeMapper;
 import com.acorn.elearning.admin.model.AdminOperationLog;
 import com.acorn.elearning.admin.model.Notice;
@@ -22,6 +23,18 @@ public class AdminNoticeService {
     public List<Notice> findAll(){
 
         return mapper.findAll();
+    }
+
+    public AdminPageResponse<Notice> findPage(int page, int size){
+
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<Notice> items = mapper.findPage(pageSize, offset);
+        long totalCount = mapper.countAll();
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }
 
     public Optional<Notice> findById(Long id){
