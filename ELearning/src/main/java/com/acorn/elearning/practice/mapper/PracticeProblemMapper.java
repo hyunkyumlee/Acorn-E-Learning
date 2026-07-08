@@ -17,6 +17,7 @@ public interface PracticeProblemMapper {
     //일반문제 10개 풀이용
     List<PracticeProblem> findPracticeProblems(
             @Param("subjectId") Long subjectId,
+            @Param("nodeId") Long nodeId,
             @Param("difficultyCode") String difficultyCode
     );
 }

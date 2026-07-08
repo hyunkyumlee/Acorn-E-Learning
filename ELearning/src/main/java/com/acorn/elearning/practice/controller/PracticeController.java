@@ -1,6 +1,5 @@
 package com.acorn.elearning.practice.controller;
 
-import com.acorn.elearning.auth.service.SessionService;
 import com.acorn.elearning.practice.dto.response.PracticeSetResponse;
 import com.acorn.elearning.practice.dto.response.PracticeAnswerResultResponse;
 import com.acorn.elearning.practice.form.CreatePracticeSetForm;
@@ -18,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.acorn.elearning.learning.controller.LearningController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +41,8 @@ public class PracticeController {
     @GetMapping("/learning/practice")
     public String index(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam(required = false) Long nodeId,
+            @RequestParam(defaultValue = "BRONZE") String difficultyCode,
             HttpSession session,
             Model model) {
 
@@ -48,19 +50,26 @@ public class PracticeController {
             return "redirect:/login";
         }
 
+        // subjectId는 learning 화면의 현재 선택 과목을 세션에서 사용.
+        // 세션값이 없으면 개발용 fallback으로 JAVA(subjectId=1) 사용.
+        Long subjectId = (Long) session.getAttribute(LearningController.SESSION_LEARNING_SUBJECT_ID);
+
+        if (subjectId == null) {
+            subjectId = 1L;
+        }
+        
         PracticeSetResponse completeResult =
                 (PracticeSetResponse) session.getAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY);
 
-        //로그확인용 나중에 제거
-        System.out.println("index completeResult = " + completeResult);
-
+        model.addAttribute("subjectId", subjectId);
+        model.addAttribute("nodeId", nodeId);
+        model.addAttribute("difficultyCode", difficultyCode);
 
         if (completeResult != null) {
             model.addAttribute("completeResult", completeResult);
             model.addAttribute("completed", true);
             model.addAttribute("problem", null);
             model.addAttribute("screen", "learning/practice");
-            // 완료 화면 1회 노출 후 제거
             session.removeAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY);
             return "learning/practice";
         }
