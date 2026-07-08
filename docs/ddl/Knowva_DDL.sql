@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.5
+  Source: Notion DB 명세 v1.7
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -57,6 +57,7 @@ DROP TABLE IF EXISTS ranking_scores;
 DROP TABLE IF EXISTS score_events;
 DROP TABLE IF EXISTS wrong_answers;
 DROP TABLE IF EXISTS practice_submissions;
+DROP TABLE IF EXISTS practice_set_items;
 DROP TABLE IF EXISTS problem_choices;
 DROP TABLE IF EXISTS practice_problems;
 DROP TABLE IF EXISTS attendance_records;
@@ -66,6 +67,7 @@ DROP TABLE IF EXISTS level_test_answers;
 DROP TABLE IF EXISTS level_test_attempts;
 DROP TABLE IF EXISTS level_test_choices;
 DROP TABLE IF EXISTS level_test_questions;
+DROP TABLE IF EXISTS user_lesson_progress;
 DROP TABLE IF EXISTS lesson_bookmarks;
 DROP TABLE IF EXISTS lessons;
 DROP TABLE IF EXISTS user_learning_profiles;
@@ -212,11 +214,13 @@ CREATE TABLE lessons (
   example_code TEXT NULL,
   sort_order INT UNSIGNED NOT NULL DEFAULT 0,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
+  required_for_completion TINYINT(1) NOT NULL DEFAULT 1,
   created_by BIGINT UNSIGNED NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (lesson_id),
   KEY idx_lessons_node (node_id),
+  KEY idx_lessons_node_sort (node_id, is_active, required_for_completion, sort_order, lesson_id),
   KEY idx_lessons_active (is_active),
   KEY idx_lessons_created_by (created_by),
   CONSTRAINT fk_lessons_node FOREIGN KEY (node_id) REFERENCES curriculum_nodes (node_id) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -234,6 +238,24 @@ CREATE TABLE lesson_bookmarks (
   KEY idx_lesson_bookmarks_lesson (lesson_id),
   CONSTRAINT fk_lesson_bookmarks_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_lesson_bookmarks_lesson FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE user_lesson_progress (
+  lesson_progress_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id BIGINT UNSIGNED NOT NULL,
+  lesson_id BIGINT UNSIGNED NOT NULL,
+  theory_completed TINYINT(1) NOT NULL DEFAULT 0,
+  practice_passed TINYINT(1) NOT NULL DEFAULT 0,
+  progress_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+  completed_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (lesson_progress_id),
+  UNIQUE KEY uk_user_lesson_progress (user_id, lesson_id),
+  KEY idx_user_lesson_progress_lesson (lesson_id),
+  KEY idx_user_lesson_progress_user_completed (user_id, completed_at),
+  CONSTRAINT fk_user_lesson_progress_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_user_lesson_progress_lesson FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE level_test_questions (
@@ -323,6 +345,7 @@ CREATE TABLE practice_set_attempts (
   user_id BIGINT UNSIGNED NOT NULL,
   subject_id BIGINT UNSIGNED NOT NULL,
   node_id BIGINT UNSIGNED NOT NULL,
+  lesson_id BIGINT UNSIGNED NULL,
   total_count TINYINT UNSIGNED NOT NULL DEFAULT 10,
   correct_count TINYINT UNSIGNED NOT NULL DEFAULT 0,
   status VARCHAR(30) NOT NULL DEFAULT 'IN_PROGRESS',
@@ -332,11 +355,13 @@ CREATE TABLE practice_set_attempts (
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (set_attempt_id),
   KEY idx_practice_set_attempt_user_node (user_id, node_id),
+  KEY idx_practice_set_attempt_lesson (user_id, lesson_id),
   KEY idx_practice_set_attempt_subject (subject_id),
   KEY idx_practice_set_attempt_completed_at (completed_at),
   CONSTRAINT fk_practice_set_attempts_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_practice_set_attempts_subject FOREIGN KEY (subject_id) REFERENCES subjects (subject_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT fk_practice_set_attempts_node FOREIGN KEY (node_id) REFERENCES curriculum_nodes (node_id) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT fk_practice_set_attempts_node FOREIGN KEY (node_id) REFERENCES curriculum_nodes (node_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_practice_set_attempts_lesson FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE attendance_records (
@@ -359,9 +384,11 @@ CREATE TABLE practice_problems (
   problem_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   subject_id BIGINT UNSIGNED NOT NULL,
   node_id BIGINT UNSIGNED NOT NULL,
+  lesson_id BIGINT UNSIGNED NULL,
   problem_type VARCHAR(30) NOT NULL DEFAULT 'MULTIPLE_CHOICE',
   question TEXT NOT NULL,
   answer_text TEXT NULL,
+  explanation TEXT NULL,
   difficulty_code VARCHAR(30) NOT NULL DEFAULT 'BRONZE',
   created_by BIGINT UNSIGNED NULL,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
@@ -369,10 +396,12 @@ CREATE TABLE practice_problems (
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (problem_id),
   KEY idx_practice_problems_subject_node (subject_id, node_id),
+  KEY idx_practice_problems_lesson (lesson_id, is_active),
   KEY idx_practice_problems_created_by (created_by),
   KEY idx_practice_problems_active (is_active),
   CONSTRAINT fk_practice_problems_subject FOREIGN KEY (subject_id) REFERENCES subjects (subject_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_practice_problems_node FOREIGN KEY (node_id) REFERENCES curriculum_nodes (node_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_practice_problems_lesson FOREIGN KEY (lesson_id) REFERENCES lessons (lesson_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_practice_problems_created_by FOREIGN KEY (created_by) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -389,9 +418,24 @@ CREATE TABLE problem_choices (
   CONSTRAINT fk_problem_choices_problem FOREIGN KEY (problem_id) REFERENCES practice_problems (problem_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE practice_set_items (
+  set_item_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  set_attempt_id BIGINT UNSIGNED NOT NULL,
+  problem_id BIGINT UNSIGNED NOT NULL,
+  sort_order TINYINT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (set_item_id),
+  UNIQUE KEY uk_practice_set_item_order (set_attempt_id, sort_order),
+  UNIQUE KEY uk_practice_set_item_problem (set_attempt_id, problem_id),
+  KEY idx_practice_set_items_problem (problem_id),
+  CONSTRAINT fk_practice_set_items_attempt FOREIGN KEY (set_attempt_id) REFERENCES practice_set_attempts (set_attempt_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_practice_set_items_problem FOREIGN KEY (problem_id) REFERENCES practice_problems (problem_id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE practice_submissions (
   submission_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   set_attempt_id BIGINT UNSIGNED NOT NULL,
+  set_item_id BIGINT UNSIGNED NULL,
   user_id BIGINT UNSIGNED NOT NULL,
   problem_id BIGINT UNSIGNED NOT NULL,
   submission_context VARCHAR(30) NOT NULL DEFAULT 'PRACTICE_SET',
@@ -402,10 +446,12 @@ CREATE TABLE practice_submissions (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (submission_id),
   UNIQUE KEY uk_practice_submission_set_problem (set_attempt_id, problem_id, submission_context),
+  KEY idx_practice_submissions_set_item (set_item_id),
   KEY idx_practice_submissions_user (user_id),
   KEY idx_practice_submissions_problem (problem_id),
   KEY idx_practice_submissions_solved_at (solved_at),
   CONSTRAINT fk_practice_submissions_set_attempt FOREIGN KEY (set_attempt_id) REFERENCES practice_set_attempts (set_attempt_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_practice_submissions_set_item FOREIGN KEY (set_item_id) REFERENCES practice_set_items (set_item_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_practice_submissions_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_practice_submissions_problem FOREIGN KEY (problem_id) REFERENCES practice_problems (problem_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

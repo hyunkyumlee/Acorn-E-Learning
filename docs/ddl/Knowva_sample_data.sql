@@ -1,5 +1,6 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
+  Source: Notion DB 명세 v1.7 / 레슨 단위 학습 구조
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Sample login accounts
@@ -229,34 +230,14 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO lessons (
-  lesson_id, node_id, title, summary, content, example_code, sort_order, is_active, created_by, created_at, updated_at
-)
-VALUES
-  (1, 1, '변수 선언과 출력', '값을 저장하고 출력하는 첫 Java 문법입니다.', '변수는 값을 저장하는 이름입니다. 자료형을 먼저 쓰고 변수명을 작성합니다.', 'int score = 100;\nSystem.out.println(score);', 1, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (2, 2, '조건문으로 흐름 나누기', '조건에 따라 다른 코드를 실행합니다.', 'if 문은 조건식이 true일 때 코드 블록을 실행합니다.', 'if (score >= 70) {\n    System.out.println("pass");\n}', 1, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, 3, '반복문으로 여러 번 실행하기', '같은 코드를 반복 실행합니다.', 'for 문은 시작값, 조건식, 증감식을 한 줄에 작성합니다.', 'for (int i = 0; i < 3; i++) {\n    System.out.println(i);\n}', 1, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (4, 4, '배열에 여러 값 담기', '같은 자료형 값을 묶어서 저장합니다.', '배열은 index를 사용해 값에 접근합니다.', 'int[] scores = {80, 90, 100};\nSystem.out.println(scores[0]);', 1, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (5, 5, '메서드로 코드 나누기', '반복되는 코드를 이름 붙여 분리합니다.', '메서드는 입력값을 받아 결과를 반환할 수 있습니다.', 'int add(int a, int b) {\n    return a + b;\n}', 1, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-ON DUPLICATE KEY UPDATE
-  node_id = VALUES(node_id),
-  title = VALUES(title),
-  summary = VALUES(summary),
-  content = VALUES(content),
-  example_code = VALUES(example_code),
-  sort_order = VALUES(sort_order),
-  is_active = VALUES(is_active),
-  created_by = VALUES(created_by),
-  updated_at = CURRENT_TIMESTAMP;
-
-INSERT INTO lessons (
-  lesson_id, node_id, title, summary, content, example_code, sort_order, is_active, created_by, created_at, updated_at
+  lesson_id, node_id, title, summary, content, example_code, sort_order, is_active, required_for_completion, created_by, created_at, updated_at
 )
 SELECT
-  node.node_id AS lesson_id,
+  (node.node_id * 100) + lesson_step.lesson_no AS lesson_id,
   node.node_id,
-  REPLACE(node.title, ' 행성', ' 핵심 이론') AS title,
-  node.description AS summary,
-  CONCAT(node.title, '에서는 ', node.description, ' 예제와 문제풀이를 통해 개념을 확인합니다.') AS content,
+  CONCAT(REPLACE(node.title, ' 행성', ''), ' ', LPAD(lesson_step.lesson_no, 2, '0'), ' - ', lesson_step.topic) AS title,
+  CONCAT(node.description, ' ', lesson_step.topic, ' 레슨입니다.') AS summary,
+  CONCAT(node.title, '의 ', lesson_step.topic, ' 개념을 짧게 학습하고 레슨별 10문제로 확인합니다.') AS content,
   CASE subject.subject_code
     WHEN 'JAVA' THEN 'int value = 10;\nSystem.out.println(value);'
     WHEN 'PYTHON' THEN 'value = 10\nprint(value)'
@@ -264,15 +245,28 @@ SELECT
     WHEN 'SQL' THEN 'SELECT title\nFROM lessons\nWHERE is_active = 1;'
     ELSE 'System.out.println("Knowva");'
   END AS example_code,
-  1 AS sort_order,
+  lesson_step.lesson_no AS sort_order,
   1 AS is_active,
+  1 AS required_for_completion,
   1 AS created_by,
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
 FROM curriculum_nodes node
 JOIN subjects subject ON subject.subject_id = node.subject_id
+CROSS JOIN (
+  SELECT 1 AS lesson_no, '핵심 개념' AS topic
+  UNION ALL SELECT 2, '기본 문법'
+  UNION ALL SELECT 3, '실행 흐름'
+  UNION ALL SELECT 4, '예제 분석'
+  UNION ALL SELECT 5, '조건과 분기'
+  UNION ALL SELECT 6, '반복과 누적'
+  UNION ALL SELECT 7, '자료 다루기'
+  UNION ALL SELECT 8, '함수화'
+  UNION ALL SELECT 9, '오류 점검'
+  UNION ALL SELECT 10, '종합 연습'
+) lesson_step
 WHERE node.node_type = 'PLANET'
-  AND NOT (subject.subject_code = 'JAVA' AND node.level_code = 'BRONZE')
+  AND node.is_active = 1
 ON DUPLICATE KEY UPDATE
   node_id = VALUES(node_id),
   title = VALUES(title),
@@ -281,13 +275,14 @@ ON DUPLICATE KEY UPDATE
   example_code = VALUES(example_code),
   sort_order = VALUES(sort_order),
   is_active = VALUES(is_active),
+  required_for_completion = VALUES(required_for_completion),
   created_by = VALUES(created_by),
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO lesson_bookmarks (bookmark_id, user_id, lesson_id, created_at)
 VALUES
-  (1, 2, 1, CURRENT_TIMESTAMP),
-  (2, 3, 3, CURRENT_TIMESTAMP)
+  (1, 2, 101, CURRENT_TIMESTAMP),
+  (2, 3, 303, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   lesson_id = VALUES(lesson_id);
@@ -457,16 +452,85 @@ ON DUPLICATE KEY UPDATE
   completed_at = VALUES(completed_at),
   updated_at = CURRENT_TIMESTAMP;
 
+INSERT INTO user_lesson_progress (
+  lesson_progress_id, user_id, lesson_id, theory_completed, practice_passed, progress_rate, completed_at, created_at, updated_at
+)
+SELECT
+  seed_lesson_progress.lesson_progress_id,
+  seed_lesson_progress.user_id,
+  seed_lesson_progress.lesson_id,
+  seed_lesson_progress.theory_completed,
+  seed_lesson_progress.practice_passed,
+  seed_lesson_progress.progress_rate,
+  seed_lesson_progress.completed_at,
+  seed_lesson_progress.created_at,
+  seed_lesson_progress.updated_at
+FROM (
+  SELECT
+    100000 + lesson.lesson_id AS lesson_progress_id,
+    2 AS user_id,
+    lesson.lesson_id,
+    1 AS theory_completed,
+    1 AS practice_passed,
+    100.00 AS progress_rate,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY) AS completed_at,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY) AS created_at,
+    CURRENT_TIMESTAMP AS updated_at
+  FROM lessons lesson
+  WHERE lesson.node_id = 1
+    AND lesson.required_for_completion = 1
+  UNION ALL
+  SELECT
+    110000 + lesson.lesson_id AS lesson_progress_id,
+    2 AS user_id,
+    lesson.lesson_id,
+    1 AS theory_completed,
+    0 AS practice_passed,
+    50.00 AS progress_rate,
+    NULL AS completed_at,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY) AS created_at,
+    CURRENT_TIMESTAMP AS updated_at
+  FROM lessons lesson
+  WHERE lesson.node_id = 2
+    AND lesson.sort_order <= 10
+    AND lesson.required_for_completion = 1
+  UNION ALL
+  SELECT
+    200000 + lesson.lesson_id AS lesson_progress_id,
+    3 AS user_id,
+    lesson.lesson_id,
+    1 AS theory_completed,
+    1 AS practice_passed,
+    100.00 AS progress_rate,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY) AS completed_at,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY) AS created_at,
+    CURRENT_TIMESTAMP AS updated_at
+  FROM lessons lesson
+  JOIN curriculum_nodes node ON node.node_id = lesson.node_id
+  WHERE node.node_type = 'PLANET'
+    AND node.is_active = 1
+    AND lesson.required_for_completion = 1
+) seed_lesson_progress
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  lesson_id = VALUES(lesson_id),
+  theory_completed = VALUES(theory_completed),
+  practice_passed = VALUES(practice_passed),
+  progress_rate = VALUES(progress_rate),
+  completed_at = VALUES(completed_at),
+  updated_at = CURRENT_TIMESTAMP;
+
 INSERT INTO practice_set_attempts (
-  set_attempt_id, user_id, subject_id, node_id, total_count, correct_count, status, passed, completed_at, created_at, updated_at
+  set_attempt_id, user_id, subject_id, node_id, lesson_id, total_count, correct_count, status, passed, completed_at, created_at, updated_at
 )
 VALUES
-  (1, 2, @java_subject_id, 1, 10, 7, 'COMPLETED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (2, 3, @java_subject_id, 5, 10, 9, 'COMPLETED', 1, CURRENT_TIMESTAMP, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP)
+  (1, 2, @java_subject_id, 1, 101, 10, 7, 'COMPLETED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (2, 3, @java_subject_id, 5, 501, 10, 9, 'COMPLETED', 1, CURRENT_TIMESTAMP, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   subject_id = VALUES(subject_id),
   node_id = VALUES(node_id),
+  lesson_id = VALUES(lesson_id),
   total_count = VALUES(total_count),
   correct_count = VALUES(correct_count),
   status = VALUES(status),
@@ -475,27 +539,64 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO practice_set_attempts (
-  set_attempt_id, user_id, subject_id, node_id, total_count, correct_count, status, passed, completed_at, created_at, updated_at
+  set_attempt_id, user_id, subject_id, node_id, lesson_id, total_count, correct_count, status, passed, completed_at, created_at, updated_at
 )
 SELECT
-  10000 + node.node_id AS set_attempt_id,
-  3 AS user_id,
-  node.subject_id,
-  node.node_id,
-  10 AS total_count,
-  10 AS correct_count,
-  'COMPLETED' AS status,
-  1 AS passed,
-  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY) AS completed_at,
-  DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY) AS created_at,
-  CURRENT_TIMESTAMP AS updated_at
-FROM curriculum_nodes node
-WHERE node.node_type = 'PLANET'
-  AND node.is_active = 1
+  seed_attempt.set_attempt_id,
+  seed_attempt.user_id,
+  seed_attempt.subject_id,
+  seed_attempt.node_id,
+  seed_attempt.lesson_id,
+  seed_attempt.total_count,
+  seed_attempt.correct_count,
+  seed_attempt.status,
+  seed_attempt.passed,
+  seed_attempt.completed_at,
+  seed_attempt.created_at,
+  seed_attempt.updated_at
+FROM (
+  SELECT
+    200000 + lesson.lesson_id AS set_attempt_id,
+    3 AS user_id,
+    node.subject_id,
+    node.node_id,
+    lesson.lesson_id,
+    10 AS total_count,
+    10 AS correct_count,
+    'COMPLETED' AS status,
+    1 AS passed,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY) AS completed_at,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY) AS created_at,
+    CURRENT_TIMESTAMP AS updated_at
+  FROM curriculum_nodes node
+  JOIN lessons lesson ON lesson.node_id = node.node_id
+  WHERE node.node_type = 'PLANET'
+    AND node.is_active = 1
+    AND lesson.required_for_completion = 1
+  UNION ALL
+  SELECT
+    100000 + lesson.lesson_id AS set_attempt_id,
+    2 AS user_id,
+    node.subject_id,
+    node.node_id,
+    lesson.lesson_id,
+    10 AS total_count,
+    7 AS correct_count,
+    'COMPLETED' AS status,
+    1 AS passed,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY) AS completed_at,
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY) AS created_at,
+    CURRENT_TIMESTAMP AS updated_at
+  FROM curriculum_nodes node
+  JOIN lessons lesson ON lesson.node_id = node.node_id
+  WHERE node.node_id = 1
+    AND lesson.required_for_completion = 1
+) seed_attempt
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   subject_id = VALUES(subject_id),
   node_id = VALUES(node_id),
+  lesson_id = VALUES(lesson_id),
   total_count = VALUES(total_count),
   correct_count = VALUES(correct_count),
   status = VALUES(status),
@@ -519,94 +620,51 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO practice_problems (
-  problem_id, subject_id, node_id, problem_type, question, answer_text, difficulty_code, created_by, is_active, created_at, updated_at
-)
-VALUES
-  (1, @java_subject_id, 1, 'MULTIPLE_CHOICE', '정수 변수 score를 선언하는 코드로 올바른 것은?', 'int score = 10;', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (2, @java_subject_id, 1, 'FILL_BLANK', '문자열 name을 저장하려면 어떤 자료형을 사용하나요?', 'String', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, @java_subject_id, 2, 'MULTIPLE_CHOICE', 'score가 70 이상이면 pass를 출력하는 조건은?', 'score >= 70', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (4, @java_subject_id, 2, 'CODE_SHORT', '정수 n이 짝수면 true를 반환하는 조건식을 작성하세요.', 'n % 2 == 0', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (5, @java_subject_id, 3, 'MULTIPLE_CHOICE', '0부터 4까지 5번 반복하는 for 조건은?', 'i < 5', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (6, @java_subject_id, 3, 'CODE_SHORT', '1부터 5까지 합을 구할 때 누적 변수에 더하는 코드를 작성하세요.', 'sum += i;', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (7, @java_subject_id, 4, 'MULTIPLE_CHOICE', '배열 arr의 길이를 구하는 표현식은?', 'arr.length', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (8, @java_subject_id, 4, 'FILL_BLANK', '배열 첫 번째 값을 읽는 index는?', '0', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (9, @java_subject_id, 5, 'MULTIPLE_CHOICE', '메서드 결과를 반환하는 keyword는?', 'return', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (10, @java_subject_id, 5, 'CODE_SHORT', '두 정수 a, b의 합을 반환하는 문장을 작성하세요.', 'return a + b;', 'BRONZE', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-ON DUPLICATE KEY UPDATE
-  subject_id = VALUES(subject_id),
-  node_id = VALUES(node_id),
-  problem_type = VALUES(problem_type),
-  question = VALUES(question),
-  answer_text = VALUES(answer_text),
-  difficulty_code = VALUES(difficulty_code),
-  created_by = VALUES(created_by),
-  is_active = VALUES(is_active),
-  updated_at = CURRENT_TIMESTAMP;
-
-INSERT INTO practice_problems (
-  problem_id, subject_id, node_id, problem_type, question, answer_text, difficulty_code, created_by, is_active, created_at, updated_at
+  problem_id, subject_id, node_id, lesson_id, problem_type, question, answer_text, explanation, difficulty_code, created_by, is_active, created_at, updated_at
 )
 SELECT
-  seed_subject.problem_base + seed_level.problem_offset + ((node.planet_no - 1) * 2) + seed_variant.variant_no AS problem_id,
+  (lesson.lesson_id * 100) + problem_step.problem_no AS problem_id,
   node.subject_id,
   node.node_id,
-  seed_variant.problem_type,
-  IF(
-    seed_variant.problem_type = 'MULTIPLE_CHOICE',
-    CONCAT(node.title, '의 핵심 개념으로 가장 알맞은 것은?'),
-    CONCAT(node.title, '의 핵심 표현을 입력하세요.')
-  ) AS question,
-  REPLACE(REPLACE(node.title, CONCAT(seed_subject.subject_name, ' '), ''), ' 행성', '') AS answer_text,
+  lesson.lesson_id,
+  problem_step.problem_type,
+  CONCAT(lesson.title, ' 문제 ', problem_step.problem_no, '. ', problem_step.prompt) AS question,
+  problem_step.answer_text,
+  CONCAT('해설: ', lesson.title, '의 ', problem_step.prompt, ' 기준 정답은 ', problem_step.answer_text, '입니다.') AS explanation,
   node.level_code AS difficulty_code,
   1 AS created_by,
   1 AS is_active,
   CURRENT_TIMESTAMP,
   CURRENT_TIMESTAMP
-FROM curriculum_nodes node
-JOIN (
-  SELECT @java_subject_id AS subject_id, 'Java' AS subject_name, 0 AS problem_base
-  UNION ALL SELECT @python_subject_id, 'Python', 1000
-  UNION ALL SELECT @web_subject_id, 'Web', 2000
-  UNION ALL SELECT @sql_subject_id, 'SQL', 3000
-) seed_subject
-  ON seed_subject.subject_id = node.subject_id
-JOIN (
-  SELECT 'BRONZE' AS level_code, 0 AS problem_offset
-  UNION ALL SELECT 'SILVER', 100
-  UNION ALL SELECT 'GOLD', 200
-) seed_level
-  ON seed_level.level_code = node.level_code
+FROM lessons lesson
+JOIN curriculum_nodes node ON node.node_id = lesson.node_id
 CROSS JOIN (
-  SELECT 1 AS variant_no, 'MULTIPLE_CHOICE' AS problem_type
-  UNION ALL SELECT 2, 'FILL_BLANK'
-) seed_variant
+  SELECT 1 AS problem_no, 'MULTIPLE_CHOICE' AS problem_type, '핵심 개념으로 가장 알맞은 것을 고르세요.' AS prompt, '핵심 개념' AS answer_text
+  UNION ALL SELECT 2, 'MULTIPLE_CHOICE', '기본 문법으로 맞는 것을 고르세요.', '기본 문법'
+  UNION ALL SELECT 3, 'MULTIPLE_CHOICE', '실행 흐름으로 맞는 것을 고르세요.', '실행 흐름'
+  UNION ALL SELECT 4, 'MULTIPLE_CHOICE', '예제의 결과로 알맞은 것을 고르세요.', '예제 결과'
+  UNION ALL SELECT 5, 'FILL_BLANK', '빈칸에 들어갈 핵심 표현을 입력하세요.', '핵심 표현'
+  UNION ALL SELECT 6, 'FILL_BLANK', '조건 또는 반복 흐름의 핵심 단어를 입력하세요.', '흐름 제어'
+  UNION ALL SELECT 7, 'FILL_BLANK', '자료를 다룰 때 필요한 표현을 입력하세요.', '자료 접근'
+  UNION ALL SELECT 8, 'CODE_SHORT', '짧은 코드 조각을 작성하세요.', 'return value;'
+  UNION ALL SELECT 9, 'CODE_SHORT', '오류를 줄이는 검증 코드를 작성하세요.', 'if (value == null) return;'
+  UNION ALL SELECT 10, 'CODE_SHORT', '레슨 내용을 종합한 코드를 작성하세요.', 'System.out.println(value);'
+) problem_step
 WHERE node.node_type = 'PLANET'
   AND node.is_active = 1
-  AND NOT (seed_subject.subject_name = 'Java' AND node.level_code = 'BRONZE')
+  AND lesson.is_active = 1
 ON DUPLICATE KEY UPDATE
   subject_id = VALUES(subject_id),
   node_id = VALUES(node_id),
+  lesson_id = VALUES(lesson_id),
   problem_type = VALUES(problem_type),
   question = VALUES(question),
   answer_text = VALUES(answer_text),
+  explanation = VALUES(explanation),
   difficulty_code = VALUES(difficulty_code),
   created_by = VALUES(created_by),
   is_active = VALUES(is_active),
   updated_at = CURRENT_TIMESTAMP;
-
-INSERT INTO problem_choices (choice_id, problem_id, choice_label, choice_text, is_correct, sort_order)
-VALUES
-  (1, 1, 'A', 'int score = 10;', 1, 1), (2, 1, 'B', 'score int = 10;', 0, 2), (3, 1, 'C', 'number score = 10;', 0, 3), (4, 1, 'D', 'var score int;', 0, 4),
-  (5, 3, 'A', 'score = 70', 0, 1), (6, 3, 'B', 'score >= 70', 1, 2), (7, 3, 'C', 'score < 70', 0, 3), (8, 3, 'D', 'score ! 70', 0, 4),
-  (9, 5, 'A', 'i <= 5', 0, 1), (10, 5, 'B', 'i < 5', 1, 2), (11, 5, 'C', 'i == 5', 0, 3), (12, 5, 'D', 'i != 0', 0, 4),
-  (13, 7, 'A', 'arr.size', 0, 1), (14, 7, 'B', 'arr.count', 0, 2), (15, 7, 'C', 'arr.length', 1, 3), (16, 7, 'D', 'length(arr)', 0, 4),
-  (17, 9, 'A', 'break', 0, 1), (18, 9, 'B', 'continue', 0, 2), (19, 9, 'C', 'return', 1, 3), (20, 9, 'D', 'print', 0, 4)
-ON DUPLICATE KEY UPDATE
-  problem_id = VALUES(problem_id),
-  choice_label = VALUES(choice_label),
-  choice_text = VALUES(choice_text),
-  is_correct = VALUES(is_correct),
-  sort_order = VALUES(sort_order);
 
 INSERT INTO problem_choices (choice_id, problem_id, choice_label, choice_text, is_correct, sort_order)
 SELECT
@@ -629,7 +687,6 @@ CROSS JOIN (
   UNION ALL SELECT 4, 'D'
 ) seed_choice
 WHERE problem.problem_type = 'MULTIPLE_CHOICE'
-  AND problem.problem_id > 10
 ON DUPLICATE KEY UPDATE
   problem_id = VALUES(problem_id),
   choice_label = VALUES(choice_label),
@@ -637,22 +694,49 @@ ON DUPLICATE KEY UPDATE
   is_correct = VALUES(is_correct),
   sort_order = VALUES(sort_order);
 
-INSERT INTO practice_submissions (
-  submission_id, set_attempt_id, user_id, problem_id, submission_context, submitted_answer, is_correct, is_skipped, solved_at, created_at
-)
-VALUES
-  (1, 1, 2, 1, 'PRACTICE_SET', 'int score = 10;', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (2, 1, 2, 2, 'PRACTICE_SET', 'String', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (3, 1, 2, 3, 'PRACTICE_SET', 'score = 70', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (4, 1, 2, 4, 'PRACTICE_SET', 'n / 2 == 0', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (5, 1, 2, 5, 'PRACTICE_SET', 'i < 5', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (6, 1, 2, 6, 'PRACTICE_SET', 'sum += i;', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (7, 1, 2, 7, 'PRACTICE_SET', 'arr.length', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (8, 1, 2, 8, 'PRACTICE_SET', '0', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (9, 1, 2, 9, 'PRACTICE_SET', 'return', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
-  (10, 1, 2, 10, 'PRACTICE_SET', 'return a - b;', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP)
+INSERT INTO practice_set_items (set_item_id, set_attempt_id, problem_id, sort_order, created_at)
+SELECT
+  (attempt.set_attempt_id * 100) + problem_step.problem_no AS set_item_id,
+  attempt.set_attempt_id,
+  (attempt.lesson_id * 100) + problem_step.problem_no AS problem_id,
+  problem_step.problem_no AS sort_order,
+  CURRENT_TIMESTAMP AS created_at
+FROM practice_set_attempts attempt
+CROSS JOIN (
+  SELECT 1 AS problem_no
+  UNION ALL SELECT 2
+  UNION ALL SELECT 3
+  UNION ALL SELECT 4
+  UNION ALL SELECT 5
+  UNION ALL SELECT 6
+  UNION ALL SELECT 7
+  UNION ALL SELECT 8
+  UNION ALL SELECT 9
+  UNION ALL SELECT 10
+) problem_step
+WHERE attempt.lesson_id IS NOT NULL
 ON DUPLICATE KEY UPDATE
   set_attempt_id = VALUES(set_attempt_id),
+  problem_id = VALUES(problem_id),
+  sort_order = VALUES(sort_order);
+
+INSERT INTO practice_submissions (
+  submission_id, set_attempt_id, set_item_id, user_id, problem_id, submission_context, submitted_answer, is_correct, is_skipped, solved_at, created_at
+)
+VALUES
+  (1, 1, 101, 2, 10101, 'PRACTICE_SET', '핵심 개념', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (2, 1, 102, 2, 10102, 'PRACTICE_SET', '기본 문법', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (3, 1, 103, 2, 10103, 'PRACTICE_SET', '틀린 흐름', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (4, 1, 104, 2, 10104, 'PRACTICE_SET', '틀린 예제', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (5, 1, 105, 2, 10105, 'PRACTICE_SET', '핵심 표현', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (6, 1, 106, 2, 10106, 'PRACTICE_SET', '흐름 제어', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (7, 1, 107, 2, 10107, 'PRACTICE_SET', '자료 접근', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (8, 1, 108, 2, 10108, 'PRACTICE_SET', 'return value;', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (9, 1, 109, 2, 10109, 'PRACTICE_SET', 'if (value == null) return;', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (10, 1, 110, 2, 10110, 'PRACTICE_SET', 'System.out.println(wrong);', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  set_attempt_id = VALUES(set_attempt_id),
+  set_item_id = VALUES(set_item_id),
   user_id = VALUES(user_id),
   problem_id = VALUES(problem_id),
   submission_context = VALUES(submission_context),
@@ -665,8 +749,8 @@ INSERT INTO wrong_answers (
   wrong_answer_id, user_id, set_attempt_id, problem_id, last_submission_id, wrong_count, review_status, retry_bonus_awarded, created_at, updated_at
 )
 VALUES
-  (1, 2, 1, 3, 3, 1, 'OPEN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (2, 2, 1, 10, 10, 1, 'OPEN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (1, 2, 1, 10103, 3, 1, 'OPEN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (2, 2, 1, 10110, 10, 1, 'OPEN', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   set_attempt_id = VALUES(set_attempt_id),

@@ -5,7 +5,9 @@ import com.acorn.elearning.auth.form.SignupForm;
 import com.acorn.elearning.auth.service.AuthService;
 import com.acorn.elearning.auth.service.OAuthService;
 import com.acorn.elearning.auth.service.SessionService;
+import com.acorn.elearning.security.RememberMeCookie;
 import com.acorn.elearning.security.SessionUser;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -20,11 +22,13 @@ public class AuthController {
     private final AuthService authService;
     private final SessionService sessionService;
     private final OAuthService oAuthService;
+    private final RememberMeCookie rememberMeCookie;
 
-    public AuthController(AuthService authService, SessionService sessionService, OAuthService oAuthService) {
+    public AuthController(AuthService authService, SessionService sessionService, OAuthService oAuthService, RememberMeCookie rememberMeCookie) {
         this.authService = authService;
         this.sessionService = sessionService;
         this.oAuthService = oAuthService;
+        this.rememberMeCookie = rememberMeCookie;
     }
 
     //testhtml 용
@@ -55,41 +59,49 @@ public class AuthController {
         }
 
         LoginForm form = new LoginForm();
-        if(email != null && !email.isBlank()) {
-            form.setEmail(email); // 소셜 이메일 미리 채움
+        if (email != null && !email.isBlank()) {
+            form.setEmail(email);
         }
 
-        model.addAttribute("loginForm", new LoginForm());
+        model.addAttribute("loginForm", form);  // ★ new LoginForm() → form
         model.addAttribute("redirect", redirect);
         model.addAttribute("linkPendingProvider", linkPending);
+        model.addAttribute("linkPendingProviderLabel", providerLabel(linkPending));  // ★ 추가
         model.addAttribute("screen", "auth/login");
         return "auth/login";
     }
 
     @PostMapping("/login")
-    public String login(
-            HttpSession session,
-            @Valid @ModelAttribute("loginForm") LoginForm loginForm,
-            BindingResult bindingResult,
-            @RequestParam(required = false) String redirect,
-            RedirectAttributes redirectAttributes,
-            Model model) {
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("redirect", redirect);
-            return "auth/login";
-        }
+    public String login(HttpSession session,
+                        @Valid @ModelAttribute("loginForm") LoginForm loginForm,
+                        BindingResult bindingResult,
+                        @RequestParam(required = false) String redirect,
+                        HttpServletResponse response,           // [추가]
+                        RedirectAttributes redirectAttributes,
+                        Model model) {
+        if (bindingResult.hasErrors()) { model.addAttribute("redirect", redirect); return "auth/login"; }
         try {
             authService.login(session, loginForm);
-            sessionService.getUser(session).ifPresent(u -> oAuthService.consumePendingLink(session, u));
-        } catch (RuntimeException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            if (redirect != null && !redirect.isBlank()) {
-                redirectAttributes.addAttribute("redirect", redirect);
-            }
-            return "redirect:/login";
-        }
-        // redirect 없으면 role별 home — admin → /admin
+            sessionService.getUser(session).ifPresent(u -> {
+                oAuthService.consumePendingLink(session, u);
+                if (loginForm.isRememberMe()) {                 // [추가] 체크 시에만 영속 쿠키
+                    rememberMeCookie.issue(response, u.userId());
+                }
+            });
+        } catch (RuntimeException ex) { /* 기존과 동일 */ }
         return "redirect:" + safeRedirect(redirect, sessionUserRedirect(session));
+    }
+
+    /** [추가] linkPending 쿼리값(google/github) → 화면 표시명 */
+    private static String providerLabel(String provider) {
+        if (provider == null || provider.isBlank()) {
+            return null;
+        }
+        return switch (provider.toLowerCase()) {
+            case "google" -> "Google";
+            case "github" -> "GitHub";
+            default -> provider;
+        };
     }
 
     @GetMapping("/signup")
@@ -123,9 +135,12 @@ public class AuthController {
         }
     }
 
+    // 로그아웃: HttpServletResponse 추가, 쿠키도 삭제
     @PostMapping("/logout")
-    public String logout(HttpSession session, @RequestParam(required = false) String redirect) {
+    public String logout(HttpSession session, HttpServletResponse response,   // [추가]
+                         @RequestParam(required = false) String redirect) {
         authService.logout(session);
+        rememberMeCookie.clear(response);   // [추가]
         return "redirect:" + safeRedirect(redirect, "/login");
     }
 

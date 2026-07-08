@@ -87,6 +87,12 @@ public class AuthService {
         return signup(session, request.email(), request.password(), request.nickname(), request.primarySubjectId(), request.learningGoal());
     }
 
+    //remember-me 쿠키에서 얻은 userId . SessionUser 만들어 세션에 저장 (자동 로그인 복원)
+    public void restoreSession(HttpSession session, Long userId) {
+        userMapper.findById(userId)
+                .ifPresent(user -> sessionService.saveUser(session, toSessionUser(user)));
+    }
+
     private UserSessionResponse signup (HttpSession session, String email, String rawPassword, String nickname, Long primarySubjectId, String learningGoal) {
         if (userMapper.findByEmail(email).isPresent()) {
             throw new BusinessException(ErrorCode.AUTH_EMAIL_DUPLICATED);
@@ -132,19 +138,4 @@ public class AuthService {
         return new SessionUser(user.getUserId(), user.getEmail(), user.getNickname(), user.getRole(), premiumActive, user.getProfileImageUrl());
     }
 
-
-
-//    public Map<String, Object> stub(String action) {
-//        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-//        // LoginForm form = ...; SignupForm signupForm = ...;
-//        // UserCredential credential = userCredentialMapper.findByEmail(form.getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.AUTH_REQUIRED));
-//        // SessionUser sessionUser = sessionService.createSessionUser(credential.userId());
-//        // return Map.of("session", sessionUser);
-//        return Map.of(
-//                "action", action,
-//                "status", "SKELETON",
-//                "redirectUrlByRole", Map.of(
-//                        SessionUser.ROLE_USER, "/learning",
-//                        SessionUser.ROLE_ADMIN, "/admin"));
-//    }
 }
