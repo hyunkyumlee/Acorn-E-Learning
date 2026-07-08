@@ -26,6 +26,16 @@ public class ProblemService {
         this.practiceProblemMapper = practiceProblemMapper;
 
     }
+      //lesson id에 맞는 문제 추출
+      public List<PracticeProblem> getProblemsByLessonId(Long lessonId) {
+            List<PracticeProblem> problems = practiceProblemMapper.findPracticeProblemsByLessonId(lessonId);
+
+            if (problems.isEmpty()) {
+                throw new IllegalArgumentException("해당 lesson에 맞는 문제가 없습니다.");
+            }
+
+            return problems;
+    }
 
       // 1. 학습을 위한 문제 10개를 조회합니다.
       public List<PracticeProblem> getProblems(Long subjectId, Long nodeId, String difficultyCode) {

@@ -14,10 +14,15 @@ public interface PracticeProblemMapper {
     int insert(PracticeProblem model);
     int update(PracticeProblem model);
 
+    //lessonid기준 문제추출
+    List<PracticeProblem> findPracticeProblemsByLessonId(
+            @Param("lessonId") Long lessonId);
     //일반문제 10개 풀이용
     List<PracticeProblem> findPracticeProblems(
             @Param("subjectId") Long subjectId,
             @Param("nodeId") Long nodeId,
             @Param("difficultyCode") String difficultyCode
     );
+
+
 }
