@@ -51,8 +51,16 @@
 
       <div class="practice-footer">
         <a th:href="@{/learning/review/list}">오답노트 보기</a>
+        <!--5단원 완료후 제대로 뜨는지 확인-->
         <a th:if="${completeResult != null}"
-           th:href="${completeResult.data()['nextPath']}">다음 학습으로 이동</a>
+           th:href="${completeResult.data()['nextPath']}"
+           th:text="${completeResult.data()['isTestStep']} ? '코딩테스트로 이동' : '다음 학습으로 이동'">
+          다음 학습으로 이동
+        </a>
+        <!-- -->
+        <!--확인용 나중에 삭제-->
+        <p th:text="${completeResult.data()['nextPath']}"></p>
+        <!-- -->
       </div>
     </div>
 

@@ -21,7 +21,7 @@
         INSERT INTO score_events (
         user_id, subject_id, source_type, source_id, score_delta, reason_code, idempotency_key, created_at
         ) VALUES (
-        #{userId}, #{subjectId}, #{sourceType}, #{subjectId}, #{scoreDelta}, #{reasonCode}, #{idempotencyKey}, NOW()
+        #{userId}, #{subjectId}, #{sourceType}, #{sourceId}, #{scoreDelta}, #{reasonCode}, #{idempotencyKey}, NOW()
         )
     </insert>
     <!-- TODO update 구현 예시입니다.

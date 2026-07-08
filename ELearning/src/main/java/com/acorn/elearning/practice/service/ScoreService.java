@@ -29,15 +29,25 @@ public class ScoreService {
 
     // 점수를 부여하고 이벤트를 기록
     @Transactional
-    public void giveScore(Long userId, Long subjectId, int scoreDelta, String reasonCode, String idempotencyKey) {
+    public void giveScore(Long userId,
+                          Long subjectId,
+                          Long sourceId,
+                          String sourceType,
+                          int scoreDelta,
+                          String reasonCode,
+                          String idempotencyKey) {
         ScoreEvent event = new ScoreEvent();
         event.setUserId(userId);
         event.setSubjectId(subjectId);
+        event.setSourceId(sourceId);
+        event.setSourceType(sourceType);
         event.setScoreDelta(scoreDelta);
         event.setReasonCode(reasonCode);
         event.setIdempotencyKey(idempotencyKey);
-        event.setSourceType("PRACTICE"); // 연습 문제 풀이 출처
 
         scoreEventMapper.insert(event);
+
     }
+
 }
+

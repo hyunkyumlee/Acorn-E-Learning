@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.acorn.elearning.learning.mapper.LessonMapper;
+import com.acorn.elearning.learning.model.CurriculumNode;
+import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.practice.dto.response.PracticeAnswerResultResponse;
 import com.acorn.elearning.practice.dto.response.PracticeSetResponse;
 import com.acorn.elearning.practice.form.CreatePracticeSetForm;
@@ -43,9 +46,14 @@ public class PracticeService {
     private final AttendanceService attendanceService;
     private final ProblemChoiceMapper problemChoiceMapper;
 
+    //다음단원이동
+    private final CurriculumService curriculumService;
+    private final LessonMapper lessonMapper;
+
+
 
     //생성자 주입
-    public PracticeService(PracticeSetAttemptMapper practiceSetAttemptMapper, ProblemService problemService, WrongAnswerService wrongAnswerService, PracticeSubmissionMapper practiceSubmissionMapper, ScoreService scoreService, ProgressService progressService, AttendanceService attendanceService, ProblemChoiceMapper problemChoiceMapper) {
+    public PracticeService(PracticeSetAttemptMapper practiceSetAttemptMapper, ProblemService problemService, WrongAnswerService wrongAnswerService, PracticeSubmissionMapper practiceSubmissionMapper, ScoreService scoreService, ProgressService progressService, AttendanceService attendanceService, ProblemChoiceMapper problemChoiceMapper, CurriculumService curriculumService, LessonMapper lessonMapper) {
         this.practiceSetAttemptMapper = practiceSetAttemptMapper;
         this.problemService = problemService;
         this.wrongAnswerService = wrongAnswerService;
@@ -54,6 +62,9 @@ public class PracticeService {
         this.progressService = progressService;
         this.attendanceService = attendanceService;
         this.problemChoiceMapper = problemChoiceMapper;
+        this.curriculumService = curriculumService;
+        this.lessonMapper = lessonMapper;
+
     }
 
     //문제조회
@@ -98,43 +109,58 @@ public class PracticeService {
         //submission 관련 business logic
         @Transactional
         public PracticeAnswerResultResponse submitAnswers(SessionUser user, PracticeSetCompleteForm completeForm) {
-                Long setAttemptId = completeForm.getSetAttemptId();
-                List<PracticeAnswerForm.SingleAnswer> answerList = completeForm.getAnswers();
+            Long setAttemptId = completeForm.getSetAttemptId();
+            List<PracticeAnswerForm.SingleAnswer> answerList = completeForm.getAnswers();
 
-        // 1. 세트 이력 조회 (DB에서 subjectId를 포함한 attempt 객체를 가져옴)
-        PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
-               .orElseThrow(() -> new RuntimeException("존재하지 않는 세트입니다."));
+            // 1. 세트 이력 조회
+            PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
+                    .orElseThrow(() -> new RuntimeException("존재하지 않는 세트입니다."));
 
-        int correctCount = 0;
+            int correctCount = 0;
 
-        // 2. 답안 채점 및 기록
-        for (PracticeAnswerForm.SingleAnswer answerForm : answerList) {
-            PracticeProblem problem = problemService.getProblem(answerForm.getProblemId());
+            // 2. 답안 채점 및 기록
+            for (PracticeAnswerForm.SingleAnswer answerForm : answerList) {
+                PracticeProblem problem = problemService.getProblem(answerForm.getProblemId());
 
-            boolean isCorrect = normalizeAnswer(problem.getAnswerText())
-                    .equals(normalizeAnswer(answerForm.getSubmittedAnswer()));
+                boolean isCorrect = normalizeAnswer(problem.getAnswerText())
+                        .equals(normalizeAnswer(answerForm.getSubmittedAnswer()));
 
+                PracticeSubmission submission = new PracticeSubmission();
+                submission.setSetAttemptId(setAttemptId);
+                submission.setUserId(user.userId());
+                submission.setProblemId(answerForm.getProblemId());
+                submission.setSubmissionContext("PRACTICE_SET");
+                submission.setSubmittedAnswer(answerForm.getSubmittedAnswer());
+                submission.setIsCorrect(isCorrect);
+                submission.setIsSkipped(false);
 
-            PracticeSubmission submission = new PracticeSubmission();
-            submission.setSetAttemptId(setAttemptId);
-            submission.setUserId(user.userId());
-            submission.setProblemId(answerForm.getProblemId());
-            submission.setSubmissionContext("PRACTICE_SET");
-            submission.setSubmittedAnswer(answerForm.getSubmittedAnswer());
-            submission.setIsCorrect(isCorrect);
-            submission.setIsSkipped(false);
+                practiceSubmissionMapper.insertSubmission(submission);
+                Long submissionId = submission.getSubmissionId();
 
-            practiceSubmissionMapper.insertSubmission(submission);
-            Long submissionId = submission.getSubmissionId();
-
-            if (!isCorrect) {
-                wrongAnswerService.recordWrongAnswer(setAttemptId, user.userId(), answerForm.getProblemId(), submissionId);
-                } else {
+                if (isCorrect) {
                     correctCount++;
+
+                    // 3. 점수 처리
+                    scoreService.giveScore(
+                            user.userId(),
+                            attempt.getSubjectId(),
+                            submissionId,
+                            "PRACTICE_SUBMISSION",
+                            10,
+                            "PRACTICE_CORRECT",
+                            "PRACTICE_CORRECT:" + submissionId
+                    );
+                } else {
+                    wrongAnswerService.recordWrongAnswer(
+                            setAttemptId,
+                            user.userId(),
+                            answerForm.getProblemId(),
+                            submissionId
+                    );
                 }
             }
 
-            // 3. 세트 완료 처리
+            // 4. 세트 완료 처리
             attempt.setCorrectCount(correctCount);
             attempt.setStatus("COMPLETED");
             attempt.setPassed(correctCount >= 7);
@@ -143,15 +169,6 @@ public class PracticeService {
             if (updatedRows == 0) {
                 throw new RuntimeException("세트 기록 업데이트 실패: " + setAttemptId);
             }
-
-            // 4. 점수 처리 (모델에서 바로 가져온 subjectId 사용)
-            scoreService.giveScore(
-                    user.userId(),
-                    attempt.getSubjectId(), // 모델에서 직접 조회
-                    10,
-                    "PRACTICE_COMPLETE",
-                    completeForm.getIdempotencyToken()
-            );
 
             return PracticeAnswerResultResponse.from(correctCount, answerList.size());
         }
@@ -168,28 +185,76 @@ public class PracticeService {
                 practiceSetAttemptMapper.updateAttempt(attempt);
             }
 
-            // 세트 통과 시 학습 로드맵 진행률과 출석을 기록한다.
+            // 세트 통과 시 학습 로드맵 진행률과 출석 기록
             if (Boolean.TRUE.equals(attempt.getPassed())) {
                 progressService.markPracticePassed(attempt.getUserId(), attempt.getSubjectId(), attempt.getNodeId());
                 attendanceService.recordAttendanceOnPracticePass(attempt.getUserId(), attempt.getSetAttemptId());
+
+                //세트완료시 +50점
+                scoreService.giveScore(
+                        attempt.getUserId(),
+                        attempt.getSubjectId(),
+                        attempt.getSetAttemptId(),
+                        "PRACTICE_SET",
+                        50,
+                        "PRACTICE_SET_PASS",
+                        "PRACTICE_SET_PASS:" + attempt.getSetAttemptId()
+                );
             }
 
-            // 2. 이동 경로 로직
+            // 2. 이동 경로 로직 (1-4단원: 다음단원 5단원: 테스트)
             boolean isTestStep = false;
             String nextPath = "/learning";
 
+            if (Boolean.TRUE.equals(attempt.getPassed())) {
+                List<CurriculumNode> planetNodes = curriculumService.getRoadmap(attempt.getSubjectId()).stream()
+                        .filter(node -> "PLANET".equals(node.getNodeType()))
+                        .toList();
+
+                int currentIndex = -1;
+                for (int i = 0; i < planetNodes.size(); i++) {
+                    if (planetNodes.get(i).getNodeId().equals(attempt.getNodeId())) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+
+                if (currentIndex >= 0 && currentIndex < planetNodes.size() - 1) {
+                    CurriculumNode nextNode = planetNodes.get(currentIndex + 1);
+
+                    Long nextLessonId = lessonMapper.findAll().stream()
+                            .filter(lesson -> Boolean.TRUE.equals(lesson.getIsActive()))
+                            .filter(lesson -> nextNode.getNodeId().equals(lesson.getNodeId()))
+                            .sorted((a, b) -> {
+                                int sortCompare = Integer.compare(a.getSortOrder(), b.getSortOrder());
+                                if (sortCompare != 0) {
+                                    return sortCompare;
+                                }
+                                return Long.compare(a.getLessonId(), b.getLessonId());
+                            })
+                            .map(lesson -> lesson.getLessonId())
+                            .findFirst()
+                            .orElse(null);
+
+                    nextPath = (nextLessonId != null)
+                            ? "/learning/lessons/" + nextLessonId
+                            : "/learning";
+                } else {
+                    isTestStep = true;
+                    nextPath = "/exams/coding-test";
+                }
+            }
+
+            //테스트 이동 확인용
+            /*
+            isTestStep = true;
+            nextPath = "/exams/coding-test";
+            */
             Map<String, Object> data = Map.of(
                     "passed", attempt.getPassed(),
                     "nextPath", nextPath,
                     "isTestStep", isTestStep
             );
-            /* 다음 단원과 테스트 분기용 예시
-            boolean isTestStep = (attempt.getSubjectId() == 5);
-            String nextPath = isTestStep ? "/learning/test/start" : "/learning";
-
-            boolean isTestStep = (attempt.getSubjectId() == 5);
-            String nextPath = isTestStep ? "/learning/test/start" : "/learning/subject/" + (attempt.getSubjectId() + 1);
-            */
 
             // 4. 기존 응답 객체 반환
             return PracticeSetResponse.success(data);

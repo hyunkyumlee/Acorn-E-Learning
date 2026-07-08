@@ -1,37 +1,62 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.ranking.mapper.RankingScoreMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="RankingScoreResultMap" type="com.acorn.elearning.ranking.model.RankingScore">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="RankingScoreResultMap">
-          SELECT /* DDL column list */
-          FROM ranking_scores
-          WHERE id = #{id}
-      </select>
-    -->
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="RankingScoreResultMap">
-          SELECT /* DDL column list */
-          FROM ranking_scores
-          ORDER BY id DESC
-      </select>
-    -->
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.ranking.model.RankingScore" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO ranking_scores (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.ranking.model.RankingScore">
-          UPDATE ranking_scores
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <resultMap id="RankingScoreResultMap" type="com.acorn.elearning.ranking.model.RankingScore">
+        <id property="rankingId" column="ranking_id" />
+        <result property="userId" column="user_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="scopeType" column="scope_type" />
+        <result property="scopeKey" column="scope_key" />
+        <result property="periodType" column="period_type" />
+        <result property="periodKey" column="period_key" />
+        <result property="score" column="score" />
+        <result property="rankNo" column="rank_no" />
+        <result property="calculatedAt" column="calculated_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        ranking_id, user_id, subject_id, scope_type, scope_key,
+        period_type, period_key, score, rank_no, calculated_at, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="RankingScoreResultMap">
+        SELECT <include refid="columns" />
+        FROM ranking_scores
+        WHERE ranking_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="RankingScoreResultMap">
+        SELECT <include refid="columns" />
+        FROM ranking_scores
+        ORDER BY rank_no ASC, score DESC, ranking_id ASC
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.ranking.model.RankingScore"
+            useGeneratedKeys="true" keyProperty="rankingId">
+        INSERT INTO ranking_scores (
+        user_id, subject_id, scope_type, scope_key,
+        period_type, period_key, score, rank_no, calculated_at, created_at
+        ) VALUES (
+        #{userId}, #{subjectId}, #{scopeType}, #{scopeKey},
+        #{periodType}, #{periodKey}, #{score}, #{rankNo}, #{calculatedAt}, NOW()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.ranking.model.RankingScore">
+        UPDATE ranking_scores
+        SET user_id = #{userId},
+        subject_id = #{subjectId},
+        scope_type = #{scopeType},
+        scope_key = #{scopeKey},
+        period_type = #{periodType},
+        period_key = #{periodKey},
+        score = #{score},
+        rank_no = #{rankNo},
+        calculated_at = #{calculatedAt},
+        updated_at = NOW()
+        WHERE ranking_id = #{rankingId}
+    </update>
 </mapper>
