@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.learning.mapper.UserLessonProgressMapper">
+
+    <resultMap id="UserLessonProgressResultMap" type="com.acorn.elearning.learning.model.UserLessonProgress">
+        <id property="lessonProgressId" column="lesson_progress_id" />
+        <result property="userId" column="user_id" />
+        <result property="lessonId" column="lesson_id" />
+        <result property="theoryCompleted" column="theory_completed" />
+        <result property="practicePassed" column="practice_passed" />
+        <result property="progressRate" column="progress_rate" />
+        <result property="completedAt" column="completed_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        lesson_progress_id, user_id, lesson_id, theory_completed, practice_passed,
+        progress_rate, completed_at, created_at, updated_at
+    </sql>
+
+    <select id="findByUserAndLesson" resultMap="UserLessonProgressResultMap">
+        SELECT <include refid="columns" />
+        FROM user_lesson_progress
+        WHERE user_id = #{userId} AND lesson_id = #{lessonId}
+    </select>
+
+    <select id="findByUserAndNode" resultMap="UserLessonProgressResultMap">
+        SELECT ulp.lesson_progress_id, ulp.user_id, ulp.lesson_id, ulp.theory_completed, ulp.practice_passed,
+               ulp.progress_rate, ulp.completed_at, ulp.created_at, ulp.updated_at
+        FROM user_lesson_progress ulp
+        JOIN lessons l ON l.lesson_id = ulp.lesson_id
+        WHERE ulp.user_id = #{userId} AND l.node_id = #{nodeId}
+    </select>
+
+    <insert id="upsertTheoryCompleted">
+        INSERT INTO user_lesson_progress (user_id, lesson_id, theory_completed, practice_passed, progress_rate)
+        VALUES (#{userId}, #{lessonId}, 1, 0, 50.00)
+        ON DUPLICATE KEY UPDATE
+            theory_completed = 1,
+            progress_rate    = IF(practice_passed = 1, 100.00, 50.00),
+            completed_at     = IF(practice_passed = 1, NOW(), completed_at),
+            updated_at       = NOW()
+    </insert>
+
+    <select id="countCompletedRequiredLessons" resultType="int">
+        SELECT COUNT(*)
+        FROM lessons l
+        JOIN user_lesson_progress ulp
+          ON ulp.lesson_id = l.lesson_id AND ulp.user_id = #{userId}
+        WHERE l.node_id = #{nodeId}
+          AND l.is_active = 1
+          AND l.required_for_completion = 1
+          AND ulp.theory_completed = 1
+          AND ulp.practice_passed = 1
+    </select>
+
+</mapper>
