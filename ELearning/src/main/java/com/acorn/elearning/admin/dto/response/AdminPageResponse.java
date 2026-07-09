@@ -11,6 +11,8 @@ public class AdminPageResponse <T>{
     private final int pageSize;
     private final long totalCount;
     private final int totalPages;
+    private final int startPage;
+    private final int endPage;
     private final boolean hasPrevious;
     private final boolean hasNext;
 
@@ -20,6 +22,8 @@ public class AdminPageResponse <T>{
         this.pageSize = pageSize;
         this.totalCount = totalCount;
         this.totalPages = (int) Math.ceil((double) totalCount / pageSize);
+        this.startPage = ((currentPage - 1) / 10) * 10 + 1;
+        this.endPage = Math.min(startPage + 9, totalPages);
         this.hasPrevious = currentPage > 1;
         this.hasNext = currentPage < totalPages;
     }

@@ -28,21 +28,43 @@
     </select>
 
 
-    <select id="findAll" resultMap="NoticeResultMap">
+    <select id="findPage" resultMap="NoticeResultMap">
         SELECT n.notice_id, n.writer_id, u.nickname AS writer_nickname, n.title,
-        n.content, n.status, n.published_at, n.view_count
+        n.content, n.status, n.published_at,
         n.created_at, n.updated_at
         FROM notices n
         LEFT JOIN users u
             ON n.writer_id = u.user_id
+        <include refid="NoticeFilterWhere" />
         ORDER BY n.notice_id DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <select id="countAll" resultType="long">
         SELECT  COUNT(*)
-        FROM notices
+        FROM notices n
+        <include refid="NoticeFilterWhere" />
     </select>
+
+    <sql id="NoticeFilterWhere">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND n.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND n.status = #{status}
+            </if>
+            <if test="period == 'today'">
+                AND DATE(COALESCE(n.published_at, n.created_at)) = CURDATE()
+            </if>
+            <if test="period == 'week'">
+                AND COALESCE(n.published_at, n.created_at) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            </if>
+            <if test="period == 'month'">
+                AND COALESCE(n.published_at, n.created_at) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            </if>
+        </where>
+    </sql>
 
     <insert id="insert" parameterType="com.acorn.elearning.admin.model.Notice" useGeneratedKeys="true" keyProperty="noticeId">
         INSERT INTO notices (

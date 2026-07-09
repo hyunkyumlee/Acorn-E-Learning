@@ -3,6 +3,7 @@ package com.acorn.elearning.admin.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.acorn.elearning.admin.dto.response.AdminPageResponse;
 import com.acorn.elearning.admin.dto.response.ReportPageResponse;
 import com.acorn.elearning.admin.form.ReportHandleForm;
 import com.acorn.elearning.admin.mapper.AdminReportMapper;
@@ -20,9 +21,21 @@ public class AdminReportService {
     private final AdminLogService adminLogService;
 
 
-    public ReportPageResponse findPage() {
-        List<ReportPageResponse.ReportItem> reports = rm.findAll();
-        return new ReportPageResponse(reports);
+    public AdminPageResponse<ReportPageResponse.ReportItem> findPage(
+            int page,
+            int size,
+            String targetType,
+            String status,
+            String reportDate
+    ) {
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<ReportPageResponse.ReportItem> items = rm.findPage(pageSize, offset, targetType, status, reportDate);
+        long totalCount = rm.countAll(targetType, status, reportDate);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }
 
     public void handle(Long reportId, ReportHandleForm form, SessionUser sessionUser) {

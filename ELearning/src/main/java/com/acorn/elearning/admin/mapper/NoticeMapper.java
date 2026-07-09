@@ -8,13 +8,17 @@ import java.util.Optional;
 
 public interface NoticeMapper {
     Optional<Notice> findById(Long id);
-    List<Notice> findAll();
     int insert(Notice model);
     int update(Notice model);
     int deleteById(Long noticeId);
 
     List<Notice> findPage(@Param("limit") int limit,
-                          @Param("offset") int offest);
+                          @Param("offset") int offset,
+                          @Param("keyword") String keyword,
+                          @Param("period") String period,
+                          @Param("status") String status);
 
-    long countAll();
+    long countAll(@Param("keyword") String keyword,
+                  @Param("period") String period,
+                  @Param("status") String status);
 }

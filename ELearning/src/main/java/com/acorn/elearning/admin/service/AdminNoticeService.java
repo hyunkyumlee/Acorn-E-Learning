@@ -20,19 +20,14 @@ public class AdminNoticeService {
 
     private final AdminLogService adminLogService;
 
-    public List<Notice> findAll(){
-
-        return mapper.findAll();
-    }
-
-    public AdminPageResponse<Notice> findPage(int page, int size){
+    public AdminPageResponse<Notice> findPage(int page, int size, String keyword, String period, String status){
 
         int currentPage = Math.max(page, 1);
         int pageSize = Math.max(size, 1);
         int offset = (currentPage - 1) * pageSize;
 
-        List<Notice> items = mapper.findPage(pageSize, offset);
-        long totalCount = mapper.countAll();
+        List<Notice> items = mapper.findPage(pageSize, offset, keyword, period, status);
+        long totalCount = mapper.countAll(keyword, period, status);
 
         return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }

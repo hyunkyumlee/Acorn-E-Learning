@@ -20,6 +20,7 @@
         <result property="content" column="content" />
         <result property="levelCode" column="level_code" />
         <result property="sortOrder" column="sort_order" />
+        <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
         <result property="isActive" column="is_active" />
     </resultMap>
@@ -38,6 +39,7 @@
             c.level_code,
             l.sort_order,
             l.created_at,
+            l.updated_at,
             l.is_active
         FROM lessons l
         JOIN curriculum_nodes c
@@ -57,9 +59,81 @@
             c.level_code,
             l.sort_order,
             l.created_at,
+            l.updated_at,
             l.is_active
         ORDER BY l.created_at DESC, l.lesson_id DESC
     </select>
+
+    <select id="findPage" resultMap="AdminLessonManageRowResultMap">
+        SELECT
+        l.lesson_id,
+        l.node_id,
+        s.subject_name,
+        c.title AS curriculum_title,
+        l.title AS lesson_title,
+        l.required_for_completion,
+        COUNT(p.problem_id) AS problem_count,
+        l.content,
+        c.level_code,
+        l.sort_order,
+        l.created_at,
+        l.updated_at,
+        l.is_active
+        FROM lessons l
+        JOIN curriculum_nodes c
+        ON l.node_id = c.node_id
+        JOIN subjects s
+        ON c.subject_id = s.subject_id
+        LEFT JOIN practice_problems p
+        ON p.lesson_id = l.lesson_id
+        <include refid="LessonFilterWhere" />
+        GROUP BY
+        l.lesson_id,
+        l.node_id,
+        s.subject_name,
+        c.title,
+        l.title,
+        l.required_for_completion,
+        l.content,
+        c.level_code,
+        l.sort_order,
+        l.created_at,
+        l.updated_at,
+        l.is_active
+        ORDER BY l.created_at DESC, l.lesson_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM lessons l
+        JOIN curriculum_nodes c
+            ON l.node_id = c.node_id
+        JOIN subjects s
+            ON c.subject_id = s.subject_id
+        <include refid="LessonFilterWhere" />
+    </select>
+
+    <sql id="LessonFilterWhere">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND l.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="subjectName != null and subjectName != ''">
+                AND s.subject_name = #{subjectName}
+            </if>
+            <if test="curriculumTitle != null and curriculumTitle != ''">
+                AND c.title = #{curriculumTitle}
+            </if>
+            <if test="levelCode != null and levelCode != ''">
+                AND c.level_code = #{levelCode}
+            </if>
+            <if test="isActive != null">
+                AND l.is_active = #{isActive}
+            </if>
+        </where>
+    </sql>
 
     <delete id="deleteById">
         DELETE FROM lessons

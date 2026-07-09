@@ -1,7 +1,9 @@
 package com.acorn.elearning.admin.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import com.acorn.elearning.admin.dto.response.AdminPageResponse;
 import com.acorn.elearning.admin.dto.response.AdminCommunityPageResponse;
 import com.acorn.elearning.admin.form.CommunityStatusForm;
 import com.acorn.elearning.admin.mapper.AdminCommunityMapper;
@@ -18,8 +20,41 @@ public class AdminCommunityService {
 
     private final AdminLogService adminLogService;
 
-    public AdminCommunityPageResponse findPage() {
-        return new AdminCommunityPageResponse(cm.findPosts(), cm.findComments());
+    public AdminCommunityPageResponse findPage(
+            int postPage,
+            int commentPage,
+            int size,
+            String boardType,
+            String status,
+            String keyword
+    ) {
+        int pageSize = Math.max(size, 1);
+        int currentPostPage = Math.max(postPage, 1);
+        int currentCommentPage = Math.max(commentPage, 1);
+        int postOffset = (currentPostPage - 1) * pageSize;
+        int commentOffset = (currentCommentPage - 1) * pageSize;
+
+        List<AdminCommunityPageResponse.PostItem> posts = cm.findPostPage(
+                pageSize,
+                postOffset,
+                boardType,
+                status,
+                keyword
+        );
+        long postTotalCount = cm.countPosts(boardType, status, keyword);
+
+        List<AdminCommunityPageResponse.CommentItem> comments = cm.findCommentPage(
+                pageSize,
+                commentOffset,
+                status,
+                keyword
+        );
+        long commentTotalCount = cm.countComments(status, keyword);
+
+        return new AdminCommunityPageResponse(
+                new AdminPageResponse<>(posts, currentPostPage, pageSize, postTotalCount),
+                new AdminPageResponse<>(comments, currentCommentPage, pageSize, commentTotalCount)
+        );
     }
 
     public void updatePostStatus(Long postId, CommunityStatusForm form, SessionUser sessionUser) {

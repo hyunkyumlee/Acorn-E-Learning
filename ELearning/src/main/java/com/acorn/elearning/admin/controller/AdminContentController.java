@@ -10,10 +10,7 @@ import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -81,11 +78,31 @@ public class AdminContentController {
 
 
     @GetMapping("/admin/theory")
-    public String theory(Model model) {
-        model.addAttribute("theoryList", service.findAllAdminLesson());
+    public String theory(Model model,
+                         @RequestParam(defaultValue = "1") int page,
+                         @RequestParam(defaultValue = "10") int size,
+                         @RequestParam(required = false) String keyword,
+                         @RequestParam(required = false) String subjectName,
+                         @RequestParam(required = false) String curriculumTitle,
+                         @RequestParam(required = false) String levelCode,
+                         @RequestParam(required = false) Boolean isActive) {
+        model.addAttribute("theoryPage", service.findLessonPage(
+                page,
+                size,
+                keyword,
+                subjectName,
+                curriculumTitle,
+                levelCode,
+                isActive
+        ));
         model.addAttribute("subjectList", service.findAllSubject());
         model.addAttribute("curriculumList", service.findAllCurriculumNode());
         model.addAttribute("lessonForm", new LessonForm());
+        model.addAttribute("selectedKeyword", keyword);
+        model.addAttribute("selectedSubjectName", subjectName);
+        model.addAttribute("selectedCurriculumTitle", curriculumTitle);
+        model.addAttribute("selectedLevelCode", levelCode);
+        model.addAttribute("selectedIsActive", isActive);
         model.addAttribute("screen", "admin/theory");
         return "admin/theory";
     }

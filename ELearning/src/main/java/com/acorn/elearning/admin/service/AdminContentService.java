@@ -187,6 +187,33 @@ public class AdminContentService {
         return alm.findAll();
     }
 
+    public AdminPageResponse<AdminLessonManageRowResponse> findLessonPage(
+            int page,
+            int size,
+            String keyword,
+            String subjectName,
+            String curriculumTitle,
+            String levelCode,
+            Boolean isActive
+    ) {
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<AdminLessonManageRowResponse> items = alm.findPage(
+                pageSize,
+                offset,
+                keyword,
+                subjectName,
+                curriculumTitle,
+                levelCode,
+                isActive
+        );
+        long totalCount = alm.countAll(keyword, subjectName, curriculumTitle, levelCode, isActive);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
+    }
+
     //이론 자료 단건 조회
     public Optional<Lesson> findByLessonId(Long id){
         return lm.findById(id);
