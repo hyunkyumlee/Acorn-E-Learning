@@ -841,10 +841,44 @@ a.roadmap-level:hover {
   cursor: pointer;
 }
 
-/* 잠긴 노드는 링크 없음 → 클릭/호버 확대 제외 */
+/* 잠긴 노드는 링크 없음 → 빈 href 클릭 시 재로드되지 않게 클릭 자체를 막는다(호버 카드는 부모 .roadmap-node로 유지). */
 .roadmap-node-link.is-static {
   cursor: default;
+  pointer-events: none;
 }
+
+/* ── 레슨 선택 화면(/learning/nodes/{nodeId}/lessons) ── */
+.lesson-list-desc { color: var(--ui-text-muted, #9aa0aa); margin-top: 4px; }
+.lesson-list-progress { margin-top: 8px; font-size: 14px; color: var(--ui-text-muted, #9aa0aa); }
+.lesson-list-progress strong { color: var(--kv-cyan, #22b8c8); }
+.lesson-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.lesson-list-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 8px;
+  background: var(--ui-surface-2, #202127);
+}
+.lesson-list-no {
+  flex: 0 0 auto; width: 34px; height: 34px;
+  display: grid; place-items: center; border-radius: 8px;
+  background: var(--ui-surface-3, #2a2b32);
+  font-weight: 700; font-size: 13px; color: var(--ui-text-muted, #9aa0aa);
+}
+.lesson-list-body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lesson-list-title { font-weight: 600; color: var(--ui-text-strong, #f2f4f7); }
+.lesson-list-summary {
+  font-size: 13px; color: var(--ui-text-muted, #9aa0aa);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lesson-list-status {
+  flex: 0 0 auto; font-size: 12px; font-weight: 600;
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+.lesson-list-status.is-todo { color: #9aa0aa; background: rgba(154, 160, 170, 0.14); }
+.lesson-list-status.is-theory { color: #e0b64a; background: rgba(224, 182, 74, 0.16); }
+.lesson-list-status.is-done { color: #4ac77e; background: rgba(74, 199, 126, 0.16); }
+.lesson-list-cta { flex: 0 0 auto; }
+.lesson-list-back { margin-top: 18px; }
+.lesson-list-empty { color: var(--ui-text-muted, #9aa0aa); padding: 8px 0; }
 
 /* 호버로 위에 오도록 (잠긴 것 포함 모든 노드 호버 반응) */
 .roadmap-node:hover {

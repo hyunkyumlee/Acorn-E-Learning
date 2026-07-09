@@ -41,7 +41,7 @@
           </span>
           <h2 class="mission-title" th:text="${currentNode.title}">Java 배열 행성</h2>
           <p class="mission-desc" th:text="${currentNode.description}">현재 학습 중인 단원입니다.</p>
-          <a class="button primary mission-cta" th:href="@{/learning/lessons/{id}(id=${currentNode.nodeId})}">
+          <a class="button primary mission-cta" th:href="@{/learning/nodes/{id}/lessons(id=${currentNode.nodeId})}">
             이어서 학습하기
             <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
           </a>
@@ -184,9 +184,9 @@
             <div class="roadmap-layer">
               <ol class="roadmap" aria-label="커리큘럼 로드맵 경로">
                 <!--
-                  navHref: 접근 가능한 노드만 링크. 완료/현재 행성 → 그 단원 학습(/learning/lessons/{nodeId},
-                  오늘의 미션 카드와 동일 패턴), 응시 가능 게이트 → 코딩테스트. 잠긴 노드는 null(클릭 불가).
-                  ※ 컨텍스트 경로 root 기준 raw path. 멀티레벨/노드-레슨 매핑 정밀화는 후속(현재 seed는 nodeId=lessonId).
+                  navHref: 접근 가능한 노드만 링크. 완료/현재 행성 → 그 행성의 레슨 선택 화면(/learning/nodes/{nodeId}/lessons),
+                  응시 가능 게이트 → 코딩테스트. 잠긴 노드는 null(클릭 불가).
+                  ※ 컨텍스트 경로 root 기준 raw path.
                 -->
                 <li th:each="node,it : ${roadmap}"
                     class="roadmap-node"
@@ -198,7 +198,7 @@
                     th:style="'top:' + ${topArr[it.index % 6]} + '%;left:' + ${leftArr[it.index % 6]} + '%;width:' + ${sizeArr[it.index % 6]} + '%'"
                     th:with="navHref=${node.nodeType == 'GATE'
                         ? (gateState != 'locked' ? ('/exams/coding-test?subjectId=' + roadmapSubjectId + '&amp;levelCode=' + selectedLevel) : null)
-                        : (node.planetNo <= completedPlanets + 1 ? ('/learning/lessons/' + node.nodeId) : null)},
+                        : (node.planetNo <= completedPlanets + 1 ? ('/learning/nodes/' + node.nodeId + '/lessons') : null)},
                         nodeState=${node.nodeType == 'GATE'
                         ? gateState
                         : (node.planetNo <= completedPlanets ? 'done'
@@ -207,7 +207,7 @@
                   <a class="roadmap-node-link"
                      th:classappend="${navHref == null} ? 'is-static' : ''"
                      th:href="${navHref}"
-                     th:attr="aria-label=${navHref == null ? node.title + ' (잠김)' : node.title}">
+                     th:attr="aria-label=${navHref == null ? node.title + ' (잠김)' : node.title}, tabindex=${navHref == null ? '-1' : null}">
                     <span class="roadmap-planet" aria-hidden="true">
                       <img th:if="${node.nodeType != 'GATE'}" class="roadmap-planet-img"
                            th:src="@{'/assets/images/planets/' + ${planetArt[(node.planetNo - 1) % 5]} + '.svg'}"
