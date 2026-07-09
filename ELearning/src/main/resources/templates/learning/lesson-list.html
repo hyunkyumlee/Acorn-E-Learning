@@ -27,20 +27,38 @@
 
     <section class="panel" th:if="${node != null}">
       <ol class="lesson-list">
+
         <li class="lesson-list-item" th:each="lesson,it : ${lessons}"
             th:with="prog=${userLessonProgressMap != null ? userLessonProgressMap.get(lesson.lessonId) : null},
-                     theoryDone=${prog != null and prog.theoryCompleted},
-                     practiceDone=${prog != null and prog.practicePassed}">
+             theoryDone=${prog != null and prog.theoryCompleted},
+             practiceDone=${prog != null and prog.practicePassed}">
           <span class="lesson-list-no" th:text="${it.count < 10 ? '0' + it.count : it.count}">01</span>
+
           <span class="lesson-list-body">
-            <span class="lesson-list-title" th:text="${lesson.title}">레슨 제목</span>
-            <span class="lesson-list-summary" th:if="${lesson.summary != null}" th:text="${lesson.summary}">요약</span>
-          </span>
+    <span class="lesson-list-title" th:text="${lesson.title}">레슨 제목</span>
+    <span class="lesson-list-summary" th:if="${lesson.summary != null}" th:text="${lesson.summary}">요약</span>
+  </span>
+          <!--문제풀이 완료부분 추가-->
           <span class="lesson-list-status"
-                th:classappend="${(theoryDone and practiceDone) ? ' is-done' : (theoryDone ? ' is-theory' : ' is-todo')}"
-                th:text="${(theoryDone and practiceDone) ? '완료' : (theoryDone ? '이론 완료' : '학습 전')}">상태</span>
-          <a class="button primary lesson-list-cta" th:href="@{/learning/lessons/{id}(id=${lesson.lessonId})}">이론 학습</a>
+                th:classappend="${(theoryDone and practiceDone) ? ' is-done' : (practiceDone ? ' is-practice' : (theoryDone ? ' is-theory' : ' is-todo'))}"
+                th:text="${(theoryDone and practiceDone) ? '완료' : (practiceDone ? '문제풀이 완료' : (theoryDone ? '이론 완료' : '학습 전'))}">
+    상태
+  </span>
+
+          <div class="lesson-list-actions">
+            <a class="button lesson-list-cta"
+               th:href="@{/learning/lessons/{id}(id=${lesson.lessonId})}">
+              학습하기
+            </a>
+
+            <a class="button primary lesson-list-cta"
+               th:href="@{/learning/practice(nodeId=${lesson.nodeId}, lessonId=${lesson.lessonId})}"
+               th:text="${practiceDone ? '문제 다시풀기' : '문제풀이'}">
+              문제풀이
+            </a>
+          </div>
         </li>
+        <!-- 여기까지 추가함 -->
         <li th:if="${lessons == null or lessons.isEmpty()}" class="lesson-list-empty">이 행성에 레슨이 없습니다.</li>
       </ol>
       <a class="button lesson-list-back" th:href="@{/learning}">← 학습 메인으로</a>

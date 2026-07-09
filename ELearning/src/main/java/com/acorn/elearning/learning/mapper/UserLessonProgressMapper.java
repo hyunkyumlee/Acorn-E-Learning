@@ -14,4 +14,7 @@ public interface UserLessonProgressMapper {
     int upsertTheoryCompleted(@Param("userId") Long userId, @Param("lessonId") Long lessonId);
 
     int countCompletedRequiredLessons(@Param("userId") Long userId, @Param("nodeId") Long nodeId);
+
+    //문제풀이 상태값 저장용
+    int upsertPracticePassed(@Param("userId") Long userId, @Param("lessonId") Long lessonId);
 }

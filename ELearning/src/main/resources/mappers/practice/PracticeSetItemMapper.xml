@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.acorn.elearning.practice.mapper.PracticeSetItemMapper">
+
+    <insert id="insertSetItem" parameterType="com.acorn.elearning.practice.model.PracticeSetItem"
+            useGeneratedKeys="true" keyProperty="setItemId">
+        INSERT INTO practice_set_items (
+        set_attempt_id,
+        problem_id,
+        sort_order
+        )
+        VALUES (
+        #{setAttemptId},
+        #{problemId},
+        #{sortOrder}
+        )
+    </insert>
+
+    <select id="findBySetAttemptIdAndProblemId"
+            resultType="com.acorn.elearning.practice.model.PracticeSetItem">
+        SELECT
+        set_item_id,
+        set_attempt_id,
+        problem_id,
+        sort_order
+        FROM practice_set_items
+        WHERE set_attempt_id = #{setAttemptId}
+        AND problem_id = #{problemId}
+        LIMIT 1
+    </select>
+
+</mapper>
