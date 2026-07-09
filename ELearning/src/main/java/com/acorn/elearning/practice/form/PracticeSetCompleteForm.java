@@ -16,7 +16,7 @@ public class PracticeSetCompleteForm {
     //private String skeletonValue = "TODO";
     //private Long id;
 
-    // 1. 세트 ID (어떤 세트를 완료하는지 식별)
+    // 1. 세트 ID
     @NotNull
     private Long setAttemptId;
 

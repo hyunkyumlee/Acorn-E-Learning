@@ -26,7 +26,6 @@ public class ScoreService {
         this.scoreEventMapper = scoreEventMapper;
     }
 
-
     // 점수를 부여하고 이벤트를 기록
     @Transactional
     public void giveScore(Long userId,

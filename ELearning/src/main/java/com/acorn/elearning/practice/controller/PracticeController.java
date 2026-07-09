@@ -52,8 +52,7 @@ public class PracticeController {
         }
 
         // subjectId는 learning 화면의 현재 선택 과목을 세션에서 사용.
-        // 세션값이 없으면 개발용 fallback으로 JAVA(subjectId=1) 사용.
-        Long subjectId = (Long) session.getAttribute(LearningController.SESSION_LEARNING_SUBJECT_ID);
+       Long subjectId = (Long) session.getAttribute(LearningController.SESSION_LEARNING_SUBJECT_ID);
 
         if (subjectId == null) {
             subjectId = 1L;
@@ -91,12 +90,7 @@ public class PracticeController {
             BindingResult bindingResult,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
-        /////
-        System.out.println("[CREATE_SET] subjectId=" + form.getSubjectId()
-                + ", nodeId=" + form.getNodeId()
-                + ", lessonId=" + form.getLessonId()
-                + ", difficultyCode=" + form.getDifficultyCode());
-        ////
+
         if (bindingResult.hasErrors()) {
             return "learning/practice";
         }

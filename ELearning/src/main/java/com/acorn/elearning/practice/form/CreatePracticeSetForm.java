@@ -13,7 +13,6 @@ public class CreatePracticeSetForm {
     private String idempotencyToken;
     private Long id;
 
-    //학습단위
     @NotNull
     private Long subjectId;
 

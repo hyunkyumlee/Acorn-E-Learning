@@ -42,31 +42,27 @@
         </span>
       </p>
 
-
-
-      <p th:if="${completeResult != null}">
-        다음 이동 경로:
-        <span th:text="${completeResult.data()['nextPath']}">/learning/next</span>
-      </p>
-
+      <!--이동경로 -->
       <div class="practice-footer">
         <a th:href="@{/learning/review/list}">오답노트 보기</a>
-        <!--5단원 완료후 제대로 뜨는지 확인-->
-        <a th:if="${completeResult != null}"
-           th:href="${completeResult.data()['nextPath']}"
-           th:text="${completeResult.data()['isTestStep']} ? '코딩테스트로 이동' : '다음 학습으로 이동'">
-          다음 학습으로 이동
+        <a th:if="${completeResult != null and completeResult.data()['primaryPath'] != null}"
+           th:href="${completeResult.data()['primaryPath']}"
+           th:text="${completeResult.data()['primaryLabel']}">
+          메인 이동
         </a>
-        <!-- -->
-        <!--확인용 나중에 삭제-->
-        <p th:text="${completeResult.data()['nextPath']}"></p>
+
+        <a th:if="${completeResult != null and completeResult.data()['secondaryPath'] != null}"
+           th:href="${completeResult.data()['secondaryPath']}"
+           th:text="${completeResult.data()['secondaryLabel']}">
+          보조 이동
+        </a>
+      </div>
         <!-- -->
       </div>
     </div>
 
     <!-- 수정: 시작 화면도 카드형 블록으로 -->
     <div th:if="${!completed and problem == null}" class="practice-intro">
-      <p th:text="|subjectId=${subjectId}, nodeId=${nodeId}, completed=${completed}|"></p>
 
       <p th:if="${subjectId == null or nodeId == null or lessonId == null}">
         문제풀이 시작에 필요한 학습 정보가 없습니다. 학습 화면에서 다시 진입해 주세요.
@@ -86,15 +82,14 @@
 
         <div class="practice-footer">
 
-          <p th:text="|subjectId=${subjectId}, nodeId=${nodeId}, lessonId=${lessonId}, completed=${completed}|"></p>
           <button type="submit">문제풀이 시작</button>
         </div>
       </form>
     </div>
 
-    <!-- 수정: 문제 화면 전체를 큰 카드 블록으로 -->
+    <!-- 문제 화면 전체-->
     <div th:if="${!completed and problem != null}" class="practice-problem-card">
-      <!-- 수정: 문제 메타 스타일링용 -->
+      <!-- 문제 -->
       <p class="practice-problem-meta">
         문제
         <span th:text="${currentIndex + 1}">1</span>

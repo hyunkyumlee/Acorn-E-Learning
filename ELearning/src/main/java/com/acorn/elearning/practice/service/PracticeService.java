@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import com.acorn.elearning.learning.mapper.LessonMapper;
 import com.acorn.elearning.learning.mapper.UserLessonProgressMapper;
-import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.practice.dto.response.PracticeAnswerResultResponse;
 import com.acorn.elearning.practice.dto.response.PracticeSetResponse;
@@ -77,7 +76,7 @@ public class PracticeService {
     @Transactional
     public PracticeSetView createPracticeSet(SessionUser user, CreatePracticeSetForm form) {
 
-        // 1. 문제 조회 ProblemService 위임-lessonid로 조회
+        // 1. 문제 조회
         if (form.getLessonId() == null) {
             throw new IllegalArgumentException("lessonId가 없습니다.");
         }
@@ -92,8 +91,8 @@ public class PracticeService {
         // 2. practice_set_attempts 생성
         PracticeSetAttempt attempt = new PracticeSetAttempt();
         attempt.setUserId(user.userId());
-        attempt.setSubjectId(form.getSubjectId()); //🔆과목
-        attempt.setNodeId(form.getNodeId());
+        attempt.setSubjectId(form.getSubjectId()); //과목
+        attempt.setNodeId(form.getNodeId()); //단원id -행성
         attempt.setLessonId(form.getLessonId());//lessonid
         attempt.setTotalCount(problems.size()); // 10개
         attempt.setCorrectCount(0); // 시작할때 정답은 0개
@@ -213,7 +212,7 @@ public class PracticeService {
             return PracticeAnswerResultResponse.from(correctCount, answerList.size());
         }
 
-        //다음단원이동여부
+        //다음단원이동여부 및 경로
         @Transactional
         public PracticeSetResponse completeSet(SessionUser user, Long setAttemptId) {
             PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
@@ -225,13 +224,24 @@ public class PracticeService {
                 practiceSetAttemptMapper.updateAttempt(attempt);
             }
 
-            // 세트 통과 시 학습 로드맵 진행률과 출석 기록
+            // 통과 시 학습 진행/출석/점수 반영
             if (Boolean.TRUE.equals(attempt.getPassed())) {
-                progressService.markPracticePassed(attempt.getUserId(), attempt.getSubjectId(), attempt.getNodeId());
-                userLessonProgressMapper.upsertPracticePassed(attempt.getUserId(), attempt.getLessonId());
-                attendanceService.recordAttendanceOnPracticePass(attempt.getUserId(), attempt.getSetAttemptId());
+                progressService.markPracticePassed(
+                        attempt.getUserId(),
+                        attempt.getSubjectId(),
+                        attempt.getNodeId()
+                );
 
-                //세트완료시 +50점
+                userLessonProgressMapper.upsertPracticePassed(
+                        attempt.getUserId(),
+                        attempt.getLessonId()
+                );
+
+                attendanceService.recordAttendanceOnPracticePass(
+                        attempt.getUserId(),
+                        attempt.getSetAttemptId()
+                );
+
                 scoreService.giveScore(
                         attempt.getUserId(),
                         attempt.getSubjectId(),
@@ -242,65 +252,84 @@ public class PracticeService {
                         "PRACTICE_SET_PASS:" + attempt.getSetAttemptId()
                 );
             }
-
-            // 2. 이동 경로 로직 (1-4단원: 다음단원 5단원: 테스트)
+            //다음단원이동 경로
             boolean isTestStep = false;
             String nextPath = "/learning";
 
-            if (Boolean.TRUE.equals(attempt.getPassed())) {
-                List<CurriculumNode> planetNodes = curriculumService.getRoadmap(attempt.getSubjectId()).stream()
-                        .filter(node -> "PLANET".equals(node.getNodeType()))
+            String primaryPath;
+            String primaryLabel;
+            String secondaryPath;
+            String secondaryLabel;
+
+            if (!Boolean.TRUE.equals(attempt.getPassed())) {
+
+                //실패시 nextstep 분기
+                primaryPath = "/learning/practice?nodeId=" + attempt.getNodeId()
+                        + "&lessonId=" + attempt.getLessonId();
+                primaryLabel = "문제 다시풀기";
+
+                secondaryPath = "/learning/nodes/" + attempt.getNodeId() + "/lessons";
+                secondaryLabel = "레슨 목록으로";
+
+                nextPath = primaryPath;
+            }
+            //성공시 nextstep 분기
+            else {
+                List<com.acorn.elearning.learning.model.Lesson> lessonsInNode = lessonMapper.findAll().stream()
+                        .filter(lesson -> Boolean.TRUE.equals(lesson.getIsActive()))
+                        .filter(lesson -> attempt.getNodeId().equals(lesson.getNodeId()))
+                        .sorted((a, b) -> {
+                            int sortCompare = Integer.compare(a.getSortOrder(), b.getSortOrder());
+                            if (sortCompare != 0) {
+                                return sortCompare;
+                            }
+                            return Long.compare(a.getLessonId(), b.getLessonId());
+                        })
                         .toList();
 
-                int currentIndex = -1;
-                for (int i = 0; i < planetNodes.size(); i++) {
-                    if (planetNodes.get(i).getNodeId().equals(attempt.getNodeId())) {
-                        currentIndex = i;
+                Long nextLessonId = null;
+
+                for (int i = 0; i < lessonsInNode.size(); i++) {
+                    if (lessonsInNode.get(i).getLessonId().equals(attempt.getLessonId())) {
+                        if (i < lessonsInNode.size() - 1) {
+                            nextLessonId = lessonsInNode.get(i + 1).getLessonId();
+                        }
                         break;
                     }
                 }
 
-                if (currentIndex >= 0 && currentIndex < planetNodes.size() - 1) {
-                    CurriculumNode nextNode = planetNodes.get(currentIndex + 1);
+                if (nextLessonId != null) {
+                    primaryPath = "/learning/lessons/" + nextLessonId;
+                    primaryLabel = "다음 레슨으로";
 
-                    Long nextLessonId = lessonMapper.findAll().stream()
-                            .filter(lesson -> Boolean.TRUE.equals(lesson.getIsActive()))
-                            .filter(lesson -> nextNode.getNodeId().equals(lesson.getNodeId()))
-                            .sorted((a, b) -> {
-                                int sortCompare = Integer.compare(a.getSortOrder(), b.getSortOrder());
-                                if (sortCompare != 0) {
-                                    return sortCompare;
-                                }
-                                return Long.compare(a.getLessonId(), b.getLessonId());
-                            })
-                            .map(lesson -> lesson.getLessonId())
-                            .findFirst()
-                            .orElse(null);
+                    secondaryPath = "/learning";
+                    secondaryLabel = "학습 메인으로";
 
-                    nextPath = (nextLessonId != null)
-                            ? "/learning/lessons/" + nextLessonId
-                            : "/learning";
+                    nextPath = primaryPath;
                 } else {
-                    isTestStep = true;
-                    nextPath = "/exams/coding-test";
+                    primaryPath = "/learning";
+                    primaryLabel = "학습 메인으로";
+
+                    secondaryPath = "/learning/nodes/" + attempt.getNodeId() + "/lessons";
+                    secondaryLabel = "레슨 목록으로";
+
+                    nextPath = primaryPath;
                 }
             }
 
-            //테스트 이동 확인용
-            /*
-            isTestStep = true;
-            nextPath = "/exams/coding-test";
-            */
             Map<String, Object> data = Map.of(
                     "passed", attempt.getPassed(),
                     "nextPath", nextPath,
-                    "isTestStep", isTestStep
+                    "isTestStep", isTestStep,
+                    "primaryPath", primaryPath,
+                    "primaryLabel", primaryLabel,
+                    "secondaryPath", secondaryPath,
+                    "secondaryLabel", secondaryLabel
             );
 
-            // 4. 기존 응답 객체 반환
             return PracticeSetResponse.success(data);
         }
-
+    //답안사이 스페이스무시용
     private String normalizeAnswer(String value) {
         return value == null ? "" : value.replaceAll("\\s+", "");
     }

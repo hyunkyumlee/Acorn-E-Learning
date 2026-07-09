@@ -7,7 +7,7 @@ public record PracticeAnswerResultResponse(String status, Map<String, Object> da
         return new PracticeAnswerResultResponse("SKELETON", Map.of());
     }
 
-    // 채점 결과 반환용 정적 팩토리 메서드
+    // 채점 결과 반환
     public static PracticeAnswerResultResponse from(int correctCount, int totalCount) {
         return new PracticeAnswerResultResponse("SUCCESS", Map.of(
                 "correctCount", correctCount,

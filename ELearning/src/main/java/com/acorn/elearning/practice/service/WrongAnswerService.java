@@ -45,7 +45,7 @@ public class WrongAnswerService {
         this.scoreService = scoreService;
     }
 
-    // 오답을 데이터베이스에 기록합니다.
+    // 오답을 데이터베이스에 기록
     @Transactional
     public void recordWrongAnswer(Long setAttemptId, Long userId, Long problemId, Long submissionId) {
         Optional<WrongAnswer> existing = wrongAnswerMapper.findByUserIdAndProblemId(userId, problemId);
@@ -82,13 +82,6 @@ public class WrongAnswerService {
     }
 
 
-/*
-    // 2. 오답 해결 --상태변경
-    @Transactional
-    public int solveWrongAnswer(SessionUser user, Long wrongAnswerId) {
-        return 0;
-    }
-*/
     //오답목록조회
     public WrongAnswerSummaryView summary(SessionUser sessionUser) {
         List<WrongAnswer> wrongAnswers =
