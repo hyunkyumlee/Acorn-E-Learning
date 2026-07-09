@@ -23,6 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 public class AuthService {
     private static final String STATUS_ACTIVE = "ACTIVE";
@@ -54,7 +56,7 @@ public class AuthService {
     }
 
     private UserSessionResponse login(HttpSession session, String email, String rawPassword) {
-        LoginUserRow row = userCredentialMapper.findByEmail(email).orElseThrow( () -> new BusinessException(ErrorCode.AUTH_INVALID_CREDENTIALS));
+        LoginUserRow row = userCredentialMapper.findByLoginEmail(email).orElseThrow( () -> new BusinessException(ErrorCode.AUTH_INVALID_CREDENTIALS));
         if (!STATUS_ACTIVE.equals(row.getStatus())) {
             throw new BusinessException(ErrorCode.AUTH_SUSPENDED);
         }
@@ -95,7 +97,7 @@ public class AuthService {
     }
 
     private UserSessionResponse signup (HttpSession session, String email, String rawPassword, String nickname, Long primarySubjectId, String learningGoal) {
-        if (userMapper.findByEmail(email).isPresent()) {
+        if (userCredentialMapper.findByLoginEmail(email).isPresent()) {
             throw new BusinessException(ErrorCode.AUTH_EMAIL_DUPLICATED);
         }
         if (userMapper.existByNickname(nickname)) {
@@ -111,7 +113,9 @@ public class AuthService {
 
         UserCredential credential = new UserCredential();
         credential.setUserId(user.getUserId());
+        credential.setLoginEmail(email);
         credential.setPasswordHash(passwordEncoder.encode(rawPassword));
+        credential.setEmailVerifiedAt(LocalDateTime.now());
         userCredentialMapper.insert(credential);
 
         UserSetting setting = new UserSetting();

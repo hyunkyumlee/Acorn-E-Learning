@@ -51,23 +51,14 @@ public class AuthController {
     public String loginForm(
             HttpSession session,
             @RequestParam(required = false) String redirect,
-            @RequestParam(required = false) String linkPending,
-            @RequestParam(required = false) String email,
             Model model) {
         SessionUser sessionUser = currentUser(session);
         if (sessionUser != null) {
             return "redirect:" + safeRedirect(redirect, sessionUser.defaultRedirectPath());
         }
 
-        LoginForm form = new LoginForm();
-        if (email != null && !email.isBlank()) {
-            form.setEmail(email);
-        }
-
-        model.addAttribute("loginForm", form);
+        model.addAttribute("loginForm", new LoginForm());
         model.addAttribute("redirect", redirect);
-        model.addAttribute("linkPendingProvider", linkPending);
-        model.addAttribute("linkPendingProviderLabel", providerLabel(linkPending));
         model.addAttribute("screen", "auth/login");
         return "auth/login";
     }
@@ -84,7 +75,6 @@ public class AuthController {
         try {
             authService.login(session, loginForm);
             sessionService.getUser(session).ifPresent(u -> {
-                oAuthService.consumePendingLink(session, u);
                 if (loginForm.isRememberMe()) {                 // 체크 시에만 영속 쿠키
                     rememberMeCookie.issue(response, u.userId());
                 }
@@ -96,18 +86,6 @@ public class AuthController {
             return "auth/login";                                // [추가] redirect 대신 폼 재렌더(입력값·오류 유지)
         }
         return "redirect:" + safeRedirect(redirect, sessionUserRedirect(session));
-    }
-
-    /** linkPending 쿼리값(google/github) → 화면 표시명 */
-    private static String providerLabel(String provider) {
-        if (provider == null || provider.isBlank()) {
-            return null;
-        }
-        return switch (provider.toLowerCase()) {
-            case "google" -> "Google";
-            case "github" -> "GitHub";
-            default -> provider;
-        };
     }
 
     @GetMapping("/signup")
