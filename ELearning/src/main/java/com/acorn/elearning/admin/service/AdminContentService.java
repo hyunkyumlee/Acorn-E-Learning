@@ -360,6 +360,7 @@ public class AdminContentService {
         problem.setLessonId(lesson.getLessonId());
         problem.setExplanation(form.getExplanation());
         problem.setDifficultyCode(form.getDifficultyCode());
+        problem.setCreatedBy(adminId);
         problem.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
         int inserted = ppm.insert(problem);
@@ -401,6 +402,27 @@ public class AdminContentService {
                     operationLog(adminId, "PROBLEM_UPDATE", "PROBLEM", problem.getProblemId())
             );
         }
+        return updated;
+    }
+
+    public int updateProblemStatus(Long problemId, Boolean isActive, Long adminId) {
+        if (isActive == null) {
+            return 0;
+        }
+
+        PracticeProblem problem = ppm.findById(problemId)
+                .orElseThrow();
+
+        problem.setIsActive(isActive);
+
+        int updated = ppm.update(problem);
+
+        if (updated == 1) {
+            adminLogService.insert(
+                    operationLog(adminId, "PROBLEM_STATUS_UPDATE", "PROBLEM", problemId)
+            );
+        }
+
         return updated;
     }
 
@@ -501,6 +523,26 @@ public class AdminContentService {
         if(updated == 1){
             adminLogService.insert(
                     operationLog(adminId, "CURRICULUM_NODE_STATUS_UPDATE", "CURRICULUM_NODE", nodeId)
+            );
+        }
+        return updated;
+    }
+
+    public int updateLessonStatus(Long lessonId, Boolean isActive, Long adminId){
+
+        if(isActive == null){
+            return 0;
+        }
+
+        Lesson l = lm.findById(lessonId).orElseThrow();
+
+        l.setIsActive(isActive);
+
+        int updated = lm.update(l);
+
+        if(updated == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "LESSON_STATUS_UPDATE", "LESSON", lessonId)
             );
         }
         return updated;
