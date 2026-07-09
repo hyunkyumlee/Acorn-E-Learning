@@ -1,5 +1,10 @@
 package com.acorn.elearning.user.service;
 
+import com.acorn.elearning.auth.service.OAuthService;
+import com.acorn.elearning.auth.dto.response.SocialAccountListResponse;
+import com.acorn.elearning.auth.dto.response.SocialAccountResponse;
+import com.acorn.elearning.auth.mapper.UserCredentialMapper;
+import com.acorn.elearning.auth.model.UserCredential;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.security.SessionUser;
@@ -24,15 +29,21 @@ public class SettingsService {
     private final UserService userService;
     private final UserSettingMapper userSettingMapper;
     private final ObjectProvider<PasswordChangePort> passwordChangePort;
+    private final OAuthService oAuthService;
+    private final UserCredentialMapper userCredentialMapper;
 
     public SettingsService(
             UserService userService,
             UserSettingMapper userSettingMapper,
-            ObjectProvider<PasswordChangePort> passwordChangePort
+            ObjectProvider<PasswordChangePort> passwordChangePort,
+            OAuthService oAuthService,
+            UserCredentialMapper userCredentialMapper
     ) {
         this.userService = userService;
         this.userSettingMapper = userSettingMapper;
         this.passwordChangePort = passwordChangePort;
+        this.oAuthService = oAuthService;
+        this.userCredentialMapper = userCredentialMapper;
     }
 
     @Transactional(readOnly = true)
@@ -74,7 +85,15 @@ public class SettingsService {
 
     @Transactional(readOnly = true)
     public SocialAccountView social(SessionUser sessionUser) {
-        return new SocialAccountView("연동된 소셜 계정", userService.me(sessionUser));
+        Long userId = userService.requireUserId(sessionUser);
+        UserProfileResponse profile = userService.me(sessionUser);
+        SocialAccountListResponse socialAccounts = oAuthService.socialAccounts(sessionUser);
+        return new SocialAccountView(
+                "연동된 계정",
+                profile,
+                socialAccounts,
+                resolveLoginAccount(userId, profile, socialAccounts)
+        );
     }
 
     @Transactional(readOnly = true)
@@ -137,5 +156,46 @@ public class SettingsService {
             return "KO";
         }
         return displayLanguage.trim();
+    }
+
+    private SocialAccountView.LoginAccount resolveLoginAccount(
+            Long userId,
+            UserProfileResponse profile,
+            SocialAccountListResponse socialAccounts
+    ) {
+        UserCredential credential = userCredentialMapper.findByUserId(userId).orElse(null);
+        if (credential != null) {
+            return SocialAccountView.LoginAccount.email(firstText(credential.getLoginEmail(), profile.email()));
+        }
+
+        SocialAccountResponse socialAccount = activeSocialAccount(socialAccounts);
+        if (socialAccount != null) {
+            return SocialAccountView.LoginAccount.social(
+                    socialAccount.provider(),
+                    firstText(socialAccount.providerEmail(), profile.email())
+            );
+        }
+
+        return SocialAccountView.LoginAccount.unknown(profile.email());
+    }
+
+    private SocialAccountResponse activeSocialAccount(SocialAccountListResponse socialAccounts) {
+        if (socialAccounts == null || socialAccounts.accounts() == null) {
+            return null;
+        }
+        return socialAccounts.accounts().stream()
+                .filter(SocialAccountResponse::active)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String firstText(String primary, String fallback) {
+        if (primary != null && !primary.isBlank()) {
+            return primary;
+        }
+        if (fallback != null && !fallback.isBlank()) {
+            return fallback;
+        }
+        return "-";
     }
 }

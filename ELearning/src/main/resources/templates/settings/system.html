@@ -108,6 +108,10 @@
         document.documentElement.dataset.theme = isDark ? "knowva-ion-dark" : "knowva-ion-light";
         document.documentElement.style.colorScheme = mode;
         document.body.classList.toggle("theme-dark", isDark);
+        document.querySelectorAll("[data-theme-toggle]").forEach(function (button) {
+          button.setAttribute("aria-pressed", String(isDark));
+          button.setAttribute("aria-label", isDark ? "라이트모드로 전환" : "다크모드로 전환");
+        });
         try {
           localStorage.setItem("knowva-ui-theme", mode);
         } catch (error) {
