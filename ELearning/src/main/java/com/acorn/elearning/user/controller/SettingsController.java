@@ -20,7 +20,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
@@ -169,24 +168,6 @@ public class SettingsController {
         return "settings/social";
     }
 
-    @PostMapping("/settings/social/{provider}/disconnect")
-    public String disconnectSocial(
-            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
-            @PathVariable String provider,
-            RedirectAttributes redirectAttributes
-    ) {
-        if (sessionUser == null) {
-            return "redirect:/login";
-        }
-        try {
-            String disconnectedProvider = settingsService.disconnectSocial(sessionUser, provider);
-            redirectAttributes.addFlashAttribute("message", socialProviderLabel(disconnectedProvider) + " 계정 연동이 해제되었습니다.");
-        } catch (BusinessException exception) {
-            redirectAttributes.addFlashAttribute("message", exception.getMessage());
-        }
-        return "redirect:/settings/social";
-    }
-
     @GetMapping("/settings/system")
     public String system(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
@@ -326,16 +307,5 @@ public class SettingsController {
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new WithdrawUserForm());
         }
-    }
-
-    private String socialProviderLabel(String provider) {
-        if (provider == null || provider.isBlank()) {
-            return "소셜";
-        }
-        return switch (provider.toLowerCase()) {
-            case "google" -> "Google";
-            case "github" -> "GitHub";
-            default -> provider;
-        };
     }
 }

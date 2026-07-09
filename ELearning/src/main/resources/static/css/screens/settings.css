@@ -538,6 +538,34 @@ textarea.figma-field {
   justify-self: end;
 }
 
+.figma-login-account-card {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.figma-login-account-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  min-height: 56px;
+  border-radius: 10px;
+  background: var(--settings-primary-soft);
+  padding: 14px 18px;
+}
+
+.figma-login-account-row span {
+  color: var(--text);
+  font-weight: 950;
+}
+
+.figma-login-account-row strong {
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 900;
+  word-break: break-all;
+}
+
 .figma-social-disconnect {
   min-width: 100px;
   border-color: color-mix(in srgb, var(--text) 10%, var(--line));
