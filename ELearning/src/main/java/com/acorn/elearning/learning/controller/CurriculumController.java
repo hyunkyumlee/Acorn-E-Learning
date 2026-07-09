@@ -43,7 +43,7 @@ public class CurriculumController {
         model.addAttribute("bookmarked", lessonService.isBookmarked(user, lessonId));
         // 이론 완료 상태: 완료된 레슨은 액션 버튼 대신 완료 표시(재클릭 시 409도 예방)
         model.addAttribute("lessonCompleted",
-                lesson != null && curriculumService.isLessonTheoryCompleted(user.userId(), lesson.getNodeId()));
+                lesson != null && curriculumService.isTheoryCompletedForLesson(user.userId(), lessonId));
         model.addAttribute("screen", "learning/curriculum");
         return "learning/curriculum";
     }

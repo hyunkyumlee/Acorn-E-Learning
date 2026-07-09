@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>레슨 선택 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+</head>
+<body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="page-shell learning-screen">
+    <section class="page-heading">
+      <span class="eyebrow">Learning</span>
+      <h1 th:text="${node != null ? node.title : '레슨 선택'}">행성 레슨</h1>
+      <p class="lesson-list-desc" th:if="${node != null and node.description != null}" th:text="${node.description}">단원 설명</p>
+      <p class="lesson-list-progress" th:if="${node != null}">
+        완료 <strong th:text="${completedRequiredLessonCount}">0</strong>
+        / <span th:text="${totalRequiredLessonCount}">0</span> 레슨
+      </p>
+    </section>
+
+    <section class="panel" th:if="${node == null}">
+      <p>해당 행성(노드)을 찾을 수 없습니다.</p>
+      <a class="button" th:href="@{/learning}">← 학습 메인으로</a>
+    </section>
+
+    <section class="panel" th:if="${node != null}">
+      <ol class="lesson-list">
+        <li class="lesson-list-item" th:each="lesson,it : ${lessons}"
+            th:with="prog=${userLessonProgressMap != null ? userLessonProgressMap.get(lesson.lessonId) : null},
+                     theoryDone=${prog != null and prog.theoryCompleted},
+                     practiceDone=${prog != null and prog.practicePassed}">
+          <span class="lesson-list-no" th:text="${it.count < 10 ? '0' + it.count : it.count}">01</span>
+          <span class="lesson-list-body">
+            <span class="lesson-list-title" th:text="${lesson.title}">레슨 제목</span>
+            <span class="lesson-list-summary" th:if="${lesson.summary != null}" th:text="${lesson.summary}">요약</span>
+          </span>
+          <span class="lesson-list-status"
+                th:classappend="${(theoryDone and practiceDone) ? ' is-done' : (theoryDone ? ' is-theory' : ' is-todo')}"
+                th:text="${(theoryDone and practiceDone) ? '완료' : (theoryDone ? '이론 완료' : '학습 전')}">상태</span>
+          <a class="button primary lesson-list-cta" th:href="@{/learning/lessons/{id}(id=${lesson.lessonId})}">이론 학습</a>
+        </li>
+        <li th:if="${lessons == null or lessons.isEmpty()}" class="lesson-list-empty">이 행성에 레슨이 없습니다.</li>
+      </ol>
+      <a class="button lesson-list-back" th:href="@{/learning}">← 학습 메인으로</a>
+    </section>
+  </main>
+</body>
+</html>
