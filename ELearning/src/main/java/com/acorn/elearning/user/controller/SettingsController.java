@@ -20,7 +20,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
@@ -167,16 +166,6 @@ public class SettingsController {
         model.addAttribute("screen", "settings/social");
         model.addAttribute("view", settingsService.social(sessionUser));
         return "settings/social";
-    }
-
-    @PostMapping("/settings/social/{provider}/disconnect")
-    public String disconnectSocial(@PathVariable String provider) {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "settings/social"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // settingsService.disconnectSocial(sessionUser, form);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
-        return "redirect:/settings/social";
     }
 
     @GetMapping("/settings/system")

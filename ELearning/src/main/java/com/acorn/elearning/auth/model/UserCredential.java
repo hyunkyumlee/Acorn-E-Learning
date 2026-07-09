@@ -9,7 +9,9 @@ import lombok.Setter;
 public class UserCredential {
     private Long credentialId;
     private Long userId;
+    private String loginEmail;
     private String passwordHash;
+    private LocalDateTime emailVerifiedAt;
     private LocalDateTime passwordUpdatedAt;
     private Integer failedLoginCount;
     private LocalDateTime lockedUntil;

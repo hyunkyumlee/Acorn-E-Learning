@@ -30,25 +30,18 @@
       <section class="figma-settings-main">
         <article class="figma-settings-panel">
           <h1>연동된 소셜 계정</h1>
-          <p>소셜 로그인 계정을 연동하거나 해제합니다.</p>
+          <p>연동된 계정을 확인하세요</p>
+          <p class="figma-flash" th:if="${message != null}" th:text="${message}">처리되었습니다.</p>
           <section class="figma-social-grid">
-            <article class="figma-social-card">
-              <div>
-                <h2>Google</h2>
-                <p th:text="${view != null && view.profile() != null ? view.profile().email() : 'jeongha@gmail.com'}">jeongha@gmail.com</p>
+            <article class="figma-social-card figma-login-account-card">
+              <div class="figma-login-account-row">
+                <span>로그인 방식</span>
+                <strong th:text="${view != null ? view.loginProviderLabel : '확인 필요'}">이메일</strong>
               </div>
-              <form method="post" th:action="@{/settings/social/google/disconnect}">
-                <button class="figma-button figma-social-disconnect" type="submit">연동 해제</button>
-              </form>
-            </article>
-            <article class="figma-social-card">
-              <div>
-                <h2>Kakao</h2>
-                <p>연동되지 않음</p>
+              <div class="figma-login-account-row">
+                <span>이메일</span>
+                <strong th:text="${view != null ? view.loginEmail : '-'}">learner@knowva.local</strong>
               </div>
-              <form method="post" th:action="@{/settings/social/kakao/disconnect}">
-                <button class="figma-button figma-social-disconnect" type="submit">연동 해제</button>
-              </form>
             </article>
           </section>
         </article>

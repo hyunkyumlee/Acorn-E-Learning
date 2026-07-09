@@ -4,6 +4,7 @@
   --settings-panel-strong: var(--surface);
   --settings-soft: color-mix(in srgb, var(--surface-soft) 76%, var(--surface));
   --settings-primary-soft: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  --settings-primary-button-text: #0b3440;
   --settings-danger-soft: color-mix(in srgb, var(--danger) 10%, var(--surface));
   width: min(1160px, calc(100% - 40px));
   min-height: calc(100vh - 104px);
@@ -324,7 +325,7 @@ textarea.figma-field {
 .figma-button.primary {
   border-color: color-mix(in srgb, var(--primary) 74%, var(--accent));
   background: var(--primary);
-  color: color-mix(in srgb, var(--accent) 82%, black);
+  color: var(--settings-primary-button-text);
 }
 
 .figma-profile-save {
@@ -535,6 +536,34 @@ textarea.figma-field {
 
 .figma-social-card form {
   justify-self: end;
+}
+
+.figma-login-account-card {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.figma-login-account-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  min-height: 56px;
+  border-radius: 10px;
+  background: var(--settings-primary-soft);
+  padding: 14px 18px;
+}
+
+.figma-login-account-row span {
+  color: var(--text);
+  font-weight: 950;
+}
+
+.figma-login-account-row strong {
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 900;
+  word-break: break-all;
 }
 
 .figma-social-disconnect {
