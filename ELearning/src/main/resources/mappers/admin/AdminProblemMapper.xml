@@ -45,9 +45,67 @@
         ORDER BY p.problem_id DESC
     </select>
 
+    <select id="findPage" resultMap="AdminProblemManageRowResultMap">
+        SELECT
+            p.problem_id,
+            p.subject_id,
+            p.node_id,
+            p.lesson_id,
+            l.title AS lesson_title,
+            p.explanation,
+            s.subject_name,
+            c.title AS curriculum_title,
+            p.problem_type,
+            p.question,
+            p.answer_text,
+            p.difficulty_code,
+            p.is_active
+        FROM practice_problems p
+        LEFT JOIN subjects s
+            ON p.subject_id = s.subject_id
+        LEFT JOIN curriculum_nodes c
+            ON p.node_id = c.node_id
+        LEFT JOIN lessons l
+            ON p.lesson_id = l.lesson_id
+        <include refid="ProblemFilterWhere" />
+        ORDER BY p.problem_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM practice_problems p
+        LEFT JOIN subjects s ON p.subject_id = s.subject_id
+        LEFT JOIN curriculum_nodes c ON p.node_id = c.node_id
+        LEFT JOIN lessons l ON p.lesson_id = l.lesson_id
+        <include refid="ProblemFilterWhere" />
+    </select>
+
     <delete id="deleteById" parameterType="long">
         DELETE FROM practice_problems
         WHERE problem_id = #{problemId}
     </delete>
 
+    <sql id="ProblemFilterWhere">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND p.question LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="subjectId != null">
+                AND p.subject_id = #{subjectId}
+            </if>
+            <if test="nodeId != null">
+                AND p.node_id = #{nodeId}
+            </if>
+            <if test="problemType != null and problemType != ''">
+                AND p.problem_type = #{problemType}
+            </if>
+            <if test="difficultyCode != null and difficultyCode != ''">
+                AND p.difficulty_code = #{difficultyCode}
+            </if>
+            <if test="isActive != null">
+                AND p.is_active = #{isActive}
+            </if>
+        </where>
+    </sql>
 </mapper>

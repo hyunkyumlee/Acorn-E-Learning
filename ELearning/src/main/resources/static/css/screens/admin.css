@@ -152,6 +152,47 @@
     cursor: pointer;
 }
 
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 14px 0 0;
+}
+
+.admin-pagination span {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.admin-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 9px;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 999px;
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.admin-page-link:hover {
+    border-color: #94a3b8 !important;
+    background: #f3f4f6 !important;
+}
+
+.admin-page-current {
+    border-color: #111827 !important;
+    background: #111827 !important;
+    color: #ffffff !important;
+}
+
 @media (min-width: 769px) {
     .admin-sidebar + .admin-screen,
     .admin-sidebar ~ .admin-screen {

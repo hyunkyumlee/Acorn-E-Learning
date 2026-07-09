@@ -61,6 +61,58 @@
         ON U.user_id = P.user_id
     </select>
 
+    <select id="findPage" resultMap="AdminUserManageRowResultMap">
+        SELECT
+            U.user_id,
+            U.email,
+            U.nickname,
+            S.subject_name,
+            L.grade_code,
+            L.total_score,
+            U.role,
+            U.created_at,
+            U.status,
+            COALESCE(P.progress_count, 0) AS progress_count,
+            COALESCE(P.completed_count, 0) AS completed_count,
+            COALESCE(P.average_progress_rate, 0) AS average_progress_rate
+        FROM users U
+        LEFT JOIN user_learning_profiles L
+            ON U.user_id = L.user_id
+        LEFT JOIN subjects S
+            ON L.primary_subject_id = S.subject_id
+        LEFT JOIN (
+            SELECT
+                user_id,
+                COUNT(progress_id) AS progress_count,
+                SUM(
+                CASE
+                    WHEN lesson_completed = 1
+                        OR practice_passed = 1
+                        OR completed_at IS NOT NULL
+                    THEN 1
+                    ELSE 0
+                END
+                ) AS completed_count,
+                AVG(progress_rate) AS average_progress_rate
+            FROM learning_progress
+            GROUP BY user_id
+        ) P
+            ON U.user_id = P.user_id
+        <include refid="UserFilterWhere" />
+        ORDER BY U.user_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM users U
+        LEFT JOIN user_learning_profiles L
+            ON U.user_id = L.user_id
+        LEFT JOIN subjects S
+            ON L.primary_subject_id = S.subject_id
+        <include refid="UserFilterWhere" />
+    </select>
+
     <select id="findById" parameterType="long" resultMap="AdminUserManageRowResultMap">
         SELECT
             U.user_id,
@@ -112,5 +164,28 @@
         SET role = #{role}
         WHERE user_id = #{userId}
     </update>
+
+    <sql id="UserFilterWhere">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    U.email LIKE CONCAT('%', #{keyword}, '%')
+                    OR U.nickname LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="subjectName != null and subjectName != ''">
+                AND S.subject_name = #{subjectName}
+            </if>
+            <if test="gradeCode != null and gradeCode != ''">
+                AND L.grade_code = #{gradeCode}
+            </if>
+            <if test="role != null and role != ''">
+                AND U.role = #{role}
+            </if>
+            <if test="status != null and status != ''">
+                AND U.status = #{status}
+            </if>
+        </where>
+    </sql>
 
 </mapper>

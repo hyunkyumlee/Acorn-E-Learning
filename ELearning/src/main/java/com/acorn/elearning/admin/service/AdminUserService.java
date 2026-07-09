@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.acorn.elearning.admin.dto.response.AdminPageResponse;
 import com.acorn.elearning.admin.dto.response.AdminUserManageRowResponse;
 import com.acorn.elearning.admin.mapper.AdminUserMapper;
 import com.acorn.elearning.admin.model.AdminOperationLog;
@@ -21,6 +22,26 @@ public class AdminUserService {
 
     public List<AdminUserManageRowResponse> findAll(){
         return mapper.findAll();
+    }
+
+    public AdminPageResponse<AdminUserManageRowResponse> findPage(
+            int page,
+            int size,
+            String keyword,
+            String subjectName,
+            String gradeCode,
+            String role,
+            String status
+    ) {
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<AdminUserManageRowResponse> items =
+                mapper.findPage(pageSize, offset, keyword, subjectName, gradeCode, role, status);
+        long totalCount = mapper.countAll(keyword, subjectName, gradeCode, role, status);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }
 
     public Optional<AdminUserManageRowResponse> findById(Long userId){

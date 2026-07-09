@@ -121,19 +121,34 @@
 
   <section class="course-tab-panel course-curriculum-panel">
     <div class="course-toolbar">
-      <div class="course-filter">
-        <input type="search" id="searchCurriculum" placeholder="커리큘럼명 검색">
-        <select id="curriculumSubjectFilter">
+      <form method="get" action="/admin/courses" class="course-filter" id="curriculumFilterForm">
+        <input type="hidden" name="tab" value="curriculum">
+        <input type="hidden" name="page" value="1">
+        <input type="hidden" name="size" th:value="${curriculumPage.pageSize}">
+
+        <input type="search"
+               name="keyword"
+               id="searchCurriculum"
+               placeholder="커리큘럼명 검색"
+               th:value="${selectedCurriculumKeyword}">
+
+        <select name="subjectId" id="curriculumSubjectFilter">
           <option value="">과목 선택</option>
-          <option th:each="subject : ${subjectList}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
+          <option th:each="subject : ${subjectList}"
+                  th:value="${subject.subjectId}"
+                  th:text="${subject.subjectName}"
+                  th:selected="${selectedCurriculumSubjectId != null and selectedCurriculumSubjectId == subject.subjectId}">
+            Java
+          </option>
         </select>
-        <select id="curriculumLevelFilter">
+
+        <select name="levelCode" id="curriculumLevelFilter">
           <option value="">레벨</option>
-          <option value="BRONZE">BRONZE</option>
-          <option value="SILVER">SILVER</option>
-          <option value="GOLD">GOLD</option>
+          <option value="BRONZE" th:selected="${selectedCurriculumLevelCode == 'BRONZE'}">BRONZE</option>
+          <option value="SILVER" th:selected="${selectedCurriculumLevelCode == 'SILVER'}">SILVER</option>
+          <option value="GOLD" th:selected="${selectedCurriculumLevelCode == 'GOLD'}">GOLD</option>
         </select>
-      </div>
+      </form>
       <button type="button" class="course-primary-button curriculum-create-button">+ 커리큘럼 등록</button>
     </div>
 
@@ -157,7 +172,7 @@
           </thead>
 
           <tbody>
-          <tr th:each="node : ${curriculumList}" class="curriculum-row"
+          <tr th:each="node : ${curriculumPage.items}" class="curriculum-row"
               th:data-title="${node.title}"
               th:data-subject-id="${node.subjectId}"
               th:data-level-code="${node.levelCode}">
@@ -184,12 +199,62 @@
               </div>
             </td>
           </tr>
-          <tr th:if="${#lists.isEmpty(curriculumList)}">
+          <tr th:if="${#lists.isEmpty(curriculumPage.items)}">
             <td colspan="7" class="course-empty">등록된 커리큘럼이 없습니다.</td>
           </tr>
           </tbody>
         </table>
       </div>
+
+      <nav class="admin-pagination" th:if="${curriculumPage.totalPages >= 1}" aria-label="커리큘럼 관리 페이지">
+        <a class="admin-page-link"
+           th:if="${curriculumPage.hasPrevious}"
+           th:href="@{/admin/courses(
+                      tab='curriculum',
+                      page=${curriculumPage.currentPage - 1},
+                      size=${curriculumPage.pageSize},
+                      keyword=${selectedCurriculumKeyword},
+                      subjectId=${selectedCurriculumSubjectId},
+                      levelCode=${selectedCurriculumLevelCode}
+                    )}">
+          &lt;
+        </a>
+
+        <span th:each="pageNumber : ${#numbers.sequence(curriculumPage.startPage, curriculumPage.endPage)}">
+          <a class="admin-page-link"
+             th:if="${pageNumber != curriculumPage.currentPage}"
+             th:href="@{/admin/courses(
+                        tab='curriculum',
+                        page=${pageNumber},
+                        size=${curriculumPage.pageSize},
+                        keyword=${selectedCurriculumKeyword},
+                        subjectId=${selectedCurriculumSubjectId},
+                        levelCode=${selectedCurriculumLevelCode}
+                      )}"
+             th:text="${pageNumber}">
+            1
+          </a>
+
+          <strong class="admin-page-link admin-page-current"
+                  th:if="${pageNumber == curriculumPage.currentPage}"
+                  th:text="${pageNumber}">
+            1
+          </strong>
+        </span>
+
+        <a class="admin-page-link"
+           th:if="${curriculumPage.hasNext}"
+           th:href="@{/admin/courses(
+                      tab='curriculum',
+                      page=${curriculumPage.currentPage + 1},
+                      size=${curriculumPage.pageSize},
+                      keyword=${selectedCurriculumKeyword},
+                      subjectId=${selectedCurriculumSubjectId},
+                      levelCode=${selectedCurriculumLevelCode}
+                    )}">
+          &gt;
+        </a>
+      </nav>
     </section>
 
     <section class="course-form-panel">
@@ -265,27 +330,17 @@
   document.querySelector("#searchSubject")?.addEventListener("input", applySubjectFilters);
   document.querySelector("#subjectStatus")?.addEventListener("change", applySubjectFilters);
 
-  function applyCurriculumFilters() {
-    const keyword = document.querySelector("#searchCurriculum").value.trim().toLowerCase();
-    const subjectId = document.querySelector("#curriculumSubjectFilter").value;
-    const levelCode = document.querySelector("#curriculumLevelFilter").value;
+  const curriculumFilterForm = document.querySelector("#curriculumFilterForm");
 
-    document.querySelectorAll(".curriculum-row").forEach((row) => {
-      const title = (row.dataset.title || "").toLowerCase();
-      const rowSubjectId = row.dataset.subjectId || "";
-      const rowLevelCode = row.dataset.levelCode || "";
-
-      const matchesTitle = title.includes(keyword);
-      const matchesSubject = subjectId === "" || rowSubjectId === subjectId;
-      const matchesLevel = levelCode === "" || rowLevelCode === levelCode;
-
-      row.style.display = matchesTitle && matchesSubject && matchesLevel ? "" : "none";
-    });
-  }
-
-  document.querySelector("#searchCurriculum")?.addEventListener("input", applyCurriculumFilters);
-  document.querySelector("#curriculumSubjectFilter")?.addEventListener("change", applyCurriculumFilters);
-  document.querySelector("#curriculumLevelFilter")?.addEventListener("change", applyCurriculumFilters);
+  document.querySelector("#searchCurriculum")?.addEventListener("change", () => {
+    curriculumFilterForm?.submit();
+  });
+  document.querySelector("#curriculumSubjectFilter")?.addEventListener("change", () => {
+    curriculumFilterForm?.submit();
+  });
+  document.querySelector("#curriculumLevelFilter")?.addEventListener("change", () => {
+    curriculumFilterForm?.submit();
+  });
 
 
   document.querySelector(".subject-create-button")?.addEventListener("click", () => {
