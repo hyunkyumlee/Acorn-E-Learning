@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.7
+  Source: Notion DB 명세 v1.8
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -22,6 +22,8 @@
     각 table의 BIGINT UNSIGNED PK에 AUTO_INCREMENT를 지정해 sequence 역할을 처리한다.
   - FK 기본 정책은 DB 명세 기준 ON DELETE RESTRICT, ON UPDATE CASCADE다.
   - AI 시험 정답/오답 판정은 AI 점수가 아니라 testcase 실행 결과로 저장한다.
+  - 인증 수단별 독립 계정 정책: users.email은 연락처/표시 정보이며 계정 병합 기준으로 사용하지 않는다.
+    이메일 로그인은 user_credentials.login_email, 소셜 로그인은 social_accounts(provider, provider_user_id)로 식별한다.
 */
 
 SET NAMES utf8mb4;
@@ -92,7 +94,6 @@ CREATE TABLE users (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (user_id),
-  UNIQUE KEY uk_users_email (email),
   UNIQUE KEY uk_users_nickname (nickname),
   KEY idx_users_role_status (role, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -148,7 +149,9 @@ CREATE TABLE payment_products (
 CREATE TABLE user_credentials (
   credential_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT UNSIGNED NOT NULL,
+  login_email VARCHAR(255) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
+  email_verified_at DATETIME NOT NULL,
   password_updated_at DATETIME NULL,
   failed_login_count INT UNSIGNED NOT NULL DEFAULT 0,
   locked_until DATETIME NULL,
@@ -156,6 +159,7 @@ CREATE TABLE user_credentials (
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (credential_id),
   UNIQUE KEY uk_user_credentials_user_id (user_id),
+  UNIQUE KEY uk_user_credentials_login_email (login_email),
   CONSTRAINT fk_user_credentials_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -165,6 +169,7 @@ CREATE TABLE social_accounts (
   provider VARCHAR(30) NOT NULL,
   provider_user_id VARCHAR(191) NOT NULL,
   provider_email VARCHAR(255) NULL,
+  provider_email_verified TINYINT(1) NOT NULL DEFAULT 0,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   connected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   disconnected_at DATETIME NULL,
