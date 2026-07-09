@@ -5,6 +5,7 @@ import com.acorn.elearning.auth.form.SignupForm;
 import com.acorn.elearning.auth.service.AuthService;
 import com.acorn.elearning.auth.service.OAuthService;
 import com.acorn.elearning.auth.service.SessionService;
+import com.acorn.elearning.common.exception.BusinessException;   // [추가] 로그인 실패 예외 import
 import com.acorn.elearning.security.RememberMeCookie;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpServletResponse;
@@ -63,10 +64,10 @@ public class AuthController {
             form.setEmail(email);
         }
 
-        model.addAttribute("loginForm", form);  // ★ new LoginForm() → form
+        model.addAttribute("loginForm", form);
         model.addAttribute("redirect", redirect);
         model.addAttribute("linkPendingProvider", linkPending);
-        model.addAttribute("linkPendingProviderLabel", providerLabel(linkPending));  // ★ 추가
+        model.addAttribute("linkPendingProviderLabel", providerLabel(linkPending));
         model.addAttribute("screen", "auth/login");
         return "auth/login";
     }
@@ -76,7 +77,7 @@ public class AuthController {
                         @Valid @ModelAttribute("loginForm") LoginForm loginForm,
                         BindingResult bindingResult,
                         @RequestParam(required = false) String redirect,
-                        HttpServletResponse response,           // [추가]
+                        HttpServletResponse response,
                         RedirectAttributes redirectAttributes,
                         Model model) {
         if (bindingResult.hasErrors()) { model.addAttribute("redirect", redirect); return "auth/login"; }
@@ -84,15 +85,20 @@ public class AuthController {
             authService.login(session, loginForm);
             sessionService.getUser(session).ifPresent(u -> {
                 oAuthService.consumePendingLink(session, u);
-                if (loginForm.isRememberMe()) {                 // [추가] 체크 시에만 영속 쿠키
+                if (loginForm.isRememberMe()) {                 // 체크 시에만 영속 쿠키
                     rememberMeCookie.issue(response, u.userId());
                 }
             });
-        } catch (RuntimeException ex) { /* 기존과 동일 */ }
+        } catch (BusinessException ex) {                         // [수정] 빈 catch(RuntimeException) → 실패를 화면에 표시
+            model.addAttribute("redirect", redirect);           // [추가] redirect 파라미터 유지
+            model.addAttribute("screen", "auth/login");         // [추가] 레이아웃용 screen 속성
+            model.addAttribute("errorMessage", ex.getMessage());// [추가] login.html의 errorMessage 표시부로 전달
+            return "auth/login";                                // [추가] redirect 대신 폼 재렌더(입력값·오류 유지)
+        }
         return "redirect:" + safeRedirect(redirect, sessionUserRedirect(session));
     }
 
-    /** [추가] linkPending 쿼리값(google/github) → 화면 표시명 */
+    /** linkPending 쿼리값(google/github) → 화면 표시명 */
     private static String providerLabel(String provider) {
         if (provider == null || provider.isBlank()) {
             return null;
@@ -137,10 +143,10 @@ public class AuthController {
 
     // 로그아웃: HttpServletResponse 추가, 쿠키도 삭제
     @PostMapping("/logout")
-    public String logout(HttpSession session, HttpServletResponse response,   // [추가]
+    public String logout(HttpSession session, HttpServletResponse response,
                          @RequestParam(required = false) String redirect) {
         authService.logout(session);
-        rememberMeCookie.clear(response);   // [추가]
+        rememberMeCookie.clear(response);
         return "redirect:" + safeRedirect(redirect, "/login");
     }
 
