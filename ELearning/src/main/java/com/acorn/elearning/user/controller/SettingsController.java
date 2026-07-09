@@ -170,12 +170,20 @@ public class SettingsController {
     }
 
     @PostMapping("/settings/social/{provider}/disconnect")
-    public String disconnectSocial(@PathVariable String provider) {
-        // TODO 구현 예시입니다. 실제 signature에 @Validated Form, BindingResult, RedirectAttributes를 추가하세요.
-        // if (bindingResult.hasErrors()) { return "settings/social"; }
-        // SessionUser sessionUser = currentSessionUser();
-        // settingsService.disconnectSocial(sessionUser, form);
-        // redirectAttributes.addFlashAttribute("message", "처리되었습니다.");
+    public String disconnectSocial(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable String provider,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        try {
+            String disconnectedProvider = settingsService.disconnectSocial(sessionUser, provider);
+            redirectAttributes.addFlashAttribute("message", socialProviderLabel(disconnectedProvider) + " 계정 연동이 해제되었습니다.");
+        } catch (BusinessException exception) {
+            redirectAttributes.addFlashAttribute("message", exception.getMessage());
+        }
         return "redirect:/settings/social";
     }
 
@@ -318,5 +326,16 @@ public class SettingsController {
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new WithdrawUserForm());
         }
+    }
+
+    private String socialProviderLabel(String provider) {
+        if (provider == null || provider.isBlank()) {
+            return "소셜";
+        }
+        return switch (provider.toLowerCase()) {
+            case "google" -> "Google";
+            case "github" -> "GitHub";
+            default -> provider;
+        };
     }
 }

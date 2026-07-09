@@ -1,5 +1,6 @@
 package com.acorn.elearning.user.service;
 
+import com.acorn.elearning.auth.service.OAuthService;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.security.SessionUser;
@@ -24,15 +25,18 @@ public class SettingsService {
     private final UserService userService;
     private final UserSettingMapper userSettingMapper;
     private final ObjectProvider<PasswordChangePort> passwordChangePort;
+    private final OAuthService oAuthService;
 
     public SettingsService(
             UserService userService,
             UserSettingMapper userSettingMapper,
-            ObjectProvider<PasswordChangePort> passwordChangePort
+            ObjectProvider<PasswordChangePort> passwordChangePort,
+            OAuthService oAuthService
     ) {
         this.userService = userService;
         this.userSettingMapper = userSettingMapper;
         this.passwordChangePort = passwordChangePort;
+        this.oAuthService = oAuthService;
     }
 
     @Transactional(readOnly = true)
@@ -74,7 +78,14 @@ public class SettingsService {
 
     @Transactional(readOnly = true)
     public SocialAccountView social(SessionUser sessionUser) {
-        return new SocialAccountView("연동된 소셜 계정", userService.me(sessionUser));
+        return new SocialAccountView("연동된 소셜 계정", userService.me(sessionUser), oAuthService.socialAccounts(sessionUser));
+    }
+
+    @Transactional
+    public String disconnectSocial(SessionUser sessionUser, String provider) {
+        String normalizedProvider = normalizeSocialProvider(provider);
+        oAuthService.deleteSocialAccount(sessionUser, normalizedProvider);
+        return normalizedProvider;
     }
 
     @Transactional(readOnly = true)
@@ -137,5 +148,16 @@ public class SettingsService {
             return "KO";
         }
         return displayLanguage.trim();
+    }
+
+    private String normalizeSocialProvider(String provider) {
+        if (provider == null || provider.isBlank()) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "소셜 계정 정보가 올바르지 않습니다.");
+        }
+        String normalizedProvider = provider.trim().toLowerCase();
+        return switch (normalizedProvider) {
+            case "google", "github" -> normalizedProvider;
+            default -> throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "지원하지 않는 소셜 계정입니다.");
+        };
     }
 }

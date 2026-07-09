@@ -31,11 +31,12 @@
         <article class="figma-settings-panel">
           <h1>연동된 소셜 계정</h1>
           <p>소셜 로그인 계정을 연동하거나 해제합니다.</p>
+          <p class="figma-flash" th:if="${message != null}" th:text="${message}">처리되었습니다.</p>
           <section class="figma-social-grid">
             <article class="figma-social-card">
               <div>
                 <h2>Google</h2>
-                <p th:text="${view != null && view.profile() != null ? view.profile().email() : 'jeongha@gmail.com'}">jeongha@gmail.com</p>
+                <p th:text="${view != null ? view.accountLabel('google') : '연동되지 않음'}">연동되지 않음</p>
               </div>
               <form method="post" th:action="@{/settings/social/google/disconnect}">
                 <button class="figma-button figma-social-disconnect" type="submit">연동 해제</button>
@@ -43,10 +44,10 @@
             </article>
             <article class="figma-social-card">
               <div>
-                <h2>Kakao</h2>
-                <p>연동되지 않음</p>
+                <h2>GitHub</h2>
+                <p th:text="${view != null ? view.accountLabel('github') : '연동되지 않음'}">연동되지 않음</p>
               </div>
-              <form method="post" th:action="@{/settings/social/kakao/disconnect}">
+              <form method="post" th:action="@{/settings/social/github/disconnect}">
                 <button class="figma-button figma-social-disconnect" type="submit">연동 해제</button>
               </form>
             </article>
