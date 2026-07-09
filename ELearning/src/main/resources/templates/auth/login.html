@@ -13,8 +13,26 @@
   <link rel="stylesheet" th:href="@{/css/screens/auth.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
-<body>
-<div th:replace="~{fragments/guest-header :: guestHeader}"></div>
+<body class="auth-bg">
+<div class="bg-fx" aria-hidden="true">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <span class="blob blob-3"></span>
+</div>
+<button class="header-icon theme-toggle theme-toggle-floating" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
+  <span class="theme-symbol" aria-hidden="true">
+    <svg class="theme-symbol-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <title>다크모드</title>
+      <path d="M20.4 14.7A7.7 7.7 0 0 1 9.3 3.6 8.7 8.7 0 1 0 20.4 14.7Z"></path>
+      <path d="M16.7 3.8h.01M19.4 6.7h.01"></path>
+    </svg>
+    <svg class="theme-symbol-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <title>라이트모드</title>
+      <circle cx="12" cy="12" r="4.2"></circle>
+      <path d="M12 2.5v2.1M12 19.4v2.1M4.6 4.6l1.5 1.5M17.9 17.9l1.5 1.5M2.5 12h2.1M19.4 12h2.1M4.6 19.4l1.5-1.5M17.9 6.1l1.5-1.5"></path>
+    </svg>
+  </span>
+</button>
 <main class="page-shell auth-screen login-screen">
   <section class="auth-grid">
     <div class="form-panel">
