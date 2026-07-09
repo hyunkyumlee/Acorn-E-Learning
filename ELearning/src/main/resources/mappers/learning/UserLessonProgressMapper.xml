@@ -54,5 +54,26 @@
           AND ulp.theory_completed = 1
           AND ulp.practice_passed = 1
     </select>
+    <!--추가한 부분-->
+    <insert id="upsertPracticePassed">
+        INSERT INTO user_lesson_progress (
+        user_id,
+        lesson_id,
+        theory_completed,
+        practice_passed,
+        completed_at
+        )
+        VALUES (
+        #{userId},
+        #{lessonId},
+        0,
+        1,
+        NOW()
+        )
+        ON DUPLICATE KEY UPDATE
+        practice_passed = 1,
+        completed_at = NOW()
+    </insert>
+    <!-- -->
 
 </mapper>
