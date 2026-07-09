@@ -12,19 +12,30 @@
   --welcome-star: color-mix(in srgb, var(--text) 18%, transparent);
   --welcome-guide-bg: color-mix(in srgb, var(--surface) 92%, transparent);
   --welcome-guide-line: color-mix(in srgb, var(--primary) 28%, var(--line));
-  background:
-    radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 27%),
-    radial-gradient(circle at 15% 82%, color-mix(in srgb, var(--success) 14%, transparent), transparent 24%),
-    linear-gradient(135deg, var(--bg) 0%, var(--surface-soft) 52%, var(--bg) 100%);
   color: var(--welcome-copy-ink);
+  position: relative;   /* 배경 blob(.bg-fx) 위에 콘텐츠 표시 */
+  z-index: 1;
+}
+
+/* 배경을 뷰포트 전체에 꽉 차게 — body 배경으로 적용(박스처럼 안 보이게) */
+body.welcome-bg {
+  background:
+    radial-gradient(circle at 82% 12%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 48%),
+    radial-gradient(circle at 8% 90%, color-mix(in srgb, var(--success) 24%, transparent), transparent 48%),
+    linear-gradient(140deg, var(--surface-soft) 0%, var(--bg) 42%, color-mix(in srgb, var(--primary) 9%, var(--bg)) 100%);
+  background-attachment: fixed;
 }
 
 :root[data-theme="knowva-ion-dark"] .welcome-screen {
   --welcome-star: color-mix(in srgb, var(--text) 42%, transparent);
+}
+
+:root[data-theme="knowva-ion-dark"] body.welcome-bg {
   background:
-    radial-gradient(circle at 76% 17%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 29%),
-    radial-gradient(circle at 16% 80%, color-mix(in srgb, var(--success) 12%, transparent), transparent 25%),
-    linear-gradient(135deg, #070a18 0%, #111833 54%, #0d1720 100%);
+    radial-gradient(circle at 82% 12%, color-mix(in srgb, var(--primary) 40%, transparent), transparent 50%),
+    radial-gradient(circle at 8% 90%, color-mix(in srgb, var(--success) 24%, transparent), transparent 50%),
+    linear-gradient(140deg, #0a1022 0%, #14213e 55%, #0d1720 100%);
+  background-attachment: fixed;
 }
 
 /* --- hero layout --- */
@@ -210,4 +221,95 @@
   .welcome-orbit-center {
     animation: none;
   }
+}
+
+/* =========================================================================
+   SR-001 튜토리얼 — 웰컴 페이지 '안에서' 화면 전환 (별도 route 없음)
+   ========================================================================= */
+
+/* 뷰 전환: 웰컴 뷰 / 튜토리얼 뷰 중 하나만 표시 */
+.welcome-launch[hidden],
+.tut-view[hidden] { display: none !important; }
+
+/* '화면이 바뀌는' 느낌의 진입 애니메이션 */
+@keyframes tutViewIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.tut-view {
+  display: grid;
+  align-items: center;
+  min-height: calc(100vh - var(--header-height) - var(--space-10));
+  padding: var(--space-8) 0 var(--space-10);
+  animation: tutViewIn 0.3s ease-out;
+}
+
+.tut-card {
+  display: grid;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: clamp(24px, 4vw, 44px);
+  box-shadow: var(--shadow-elevated);
+}
+.tut-card:focus { outline: none; }
+
+.tut-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(20px, 4vw, 40px);
+}
+
+.tut-media {
+  position: relative;
+  display: grid; place-items: center;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  color: var(--muted);
+  overflow: hidden;
+}
+.tut-media img { width: 100%; height: 100%; object-fit: cover; }
+.tut-media-label { font-size: 15px; font-weight: 800; }
+
+.tut-body { display: grid; gap: var(--space-3); min-width: 0; }
+
+.tut-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.tut-step-badge { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: 0.04em; color: var(--primary); }
+
+/* 활성 1장만 노출: hidden 슬라이드는 반드시 숨김 (display:grid 가 [hidden] 을 덮지 않도록 명시) */
+.tut-slide { display: grid; gap: var(--space-3); animation: tutSlideIn 0.28s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.tut-slide[hidden] { display: none; }
+@keyframes tutSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.tut-title { margin: 0; font-size: clamp(24px, 3vw, 34px); font-weight: 850; line-height: 1.22; word-break: keep-all; }
+.tut-desc { margin: 0; color: var(--muted); font-size: clamp(15px, 1.6vw, 17px); line-height: 1.65; word-break: keep-all; }
+
+.tut-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.tut-btn { min-width: 96px; }
+.tut-prev[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+.tut-dots { display: flex; align-items: center; gap: 10px; }
+.tut-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--line); background: transparent; padding: 0; cursor: pointer; transition: background 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out; }
+.tut-dot:hover { border-color: color-mix(in srgb, var(--primary) 40%, var(--line)); }
+.tut-dot.is-active { background: var(--primary); border-color: var(--primary); transform: scale(1.15); }
+
+.tut-skip { margin: 0; text-align: center; }
+.tut-back { border: none; background: transparent; color: var(--muted); font-size: 14px; cursor: pointer; text-decoration: underline; }
+
+@media (max-width: 720px) {
+  .tut-stage { grid-template-columns: 1fr; }
+  .tut-media { aspect-ratio: 16 / 10; }
+  .tut-footer { flex-wrap: wrap; justify-content: center; }
+  .tut-dots { order: 3; width: 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tut-view, .tut-slide { animation: none; }
 }
