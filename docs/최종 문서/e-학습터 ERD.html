@@ -127,9 +127,9 @@
 <body>
   <section class="page">
     <h1>Knowva ERD</h1>
-    <p class="source">Source: Notion DB 명세 v1.5 Mermaid ERD. HTML 원본을 Mermaid로 렌더한 뒤 HeadlessChrome으로 PDF 내보냄.</p>
+    <p class="source">Source: Notion DB 명세 v1.8 Mermaid ERD. 인증 수단별 독립 계정 정책과 DDL을 반영한 HTML 원본.</p>
     <div class="summary">
-      <div class="summary-card"><strong>Version</strong><span>v1.5</span></div>
+      <div class="summary-card"><strong>Version</strong><span>v1.8</span></div>
       <div class="summary-card"><strong>Tables</strong><span>40</span></div>
       <div class="summary-card"><strong>Foreign Keys</strong><span>71</span></div>
       <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
@@ -184,7 +184,7 @@
     <div class="diagram-box full-diagram"><pre class="mermaid">erDiagram
     users {
         BIGINT user_id PK
-        VARCHAR email UK
+        VARCHAR email
         VARCHAR nickname UK
         VARCHAR role
         VARCHAR status
@@ -226,7 +226,9 @@
     user_credentials {
         BIGINT credential_id PK
         BIGINT user_id FK
+        VARCHAR login_email UK
         VARCHAR password_hash
+        DATETIME email_verified_at
         DATETIME password_updated_at
         INT failed_login_count
         DATETIME locked_until
@@ -239,6 +241,7 @@
         VARCHAR provider UK
         VARCHAR provider_user_id UK
         VARCHAR provider_email
+        BOOLEAN provider_email_verified
         BOOLEAN is_active
         DATETIME connected_at
         DATETIME disconnected_at
@@ -670,7 +673,7 @@
               <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
     users {
         BIGINT user_id PK
-        VARCHAR email UK
+        VARCHAR email
         VARCHAR nickname UK
         VARCHAR role
         VARCHAR status
@@ -682,7 +685,9 @@
     user_credentials {
         BIGINT credential_id PK
         BIGINT user_id FK
+        VARCHAR login_email UK
         VARCHAR password_hash
+        DATETIME email_verified_at
         DATETIME password_updated_at
         INT failed_login_count
         DATETIME locked_until
@@ -695,6 +700,7 @@
         VARCHAR provider UK
         VARCHAR provider_user_id UK
         VARCHAR provider_email
+        BOOLEAN provider_email_verified
         BOOLEAN is_active
         DATETIME connected_at
         DATETIME disconnected_at
@@ -752,7 +758,7 @@
                   <table class="small-table">
                     <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
                     <tbody><tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
-<tr><td>email</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>email</td><td>VARCHAR(255) NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>nickname</td><td>VARCHAR(50) NOT NULL</td><td>UK</td><td>NN</td></tr>
 <tr><td>role</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ROLE_USER&#x27;</td><td></td><td>NN</td></tr>
 <tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
@@ -770,7 +776,9 @@
                     <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
                     <tbody><tr><td>credential_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
 <tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>login_email</td><td>VARCHAR(255) NOT NULL</td><td>UK</td><td>NN</td></tr>
 <tr><td>password_hash</td><td>VARCHAR(255) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>email_verified_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>password_updated_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
 <tr><td>failed_login_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
 <tr><td>locked_until</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
@@ -788,6 +796,7 @@
 <tr><td>provider</td><td>VARCHAR(30) NOT NULL</td><td>UK</td><td>NN</td></tr>
 <tr><td>provider_user_id</td><td>VARCHAR(191) NOT NULL</td><td>UK</td><td>NN</td></tr>
 <tr><td>provider_email</td><td>VARCHAR(255) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>provider_email_verified</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
 <tr><td>is_active</td><td>TINYINT(1) NOT NULL DEFAULT 1</td><td></td><td>NN</td></tr>
 <tr><td>connected_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
 <tr><td>disconnected_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr></tbody>
@@ -1079,7 +1088,7 @@
               <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
     users {
         BIGINT user_id PK
-        VARCHAR email UK
+        VARCHAR email
         VARCHAR nickname UK
         VARCHAR role
         VARCHAR status
@@ -1504,7 +1513,7 @@
               <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
     users {
         BIGINT user_id PK
-        VARCHAR email UK
+        VARCHAR email
         VARCHAR nickname UK
         VARCHAR role
         VARCHAR status
@@ -1790,7 +1799,7 @@
               <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
     users {
         BIGINT user_id PK
-        VARCHAR email UK
+        VARCHAR email
         VARCHAR nickname UK
         VARCHAR role
         VARCHAR status
@@ -2026,7 +2035,7 @@
               <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
     users {
         BIGINT user_id PK
-        VARCHAR email UK
+        VARCHAR email
         VARCHAR nickname UK
         VARCHAR role
         VARCHAR status
@@ -2153,7 +2162,7 @@
               <div class="diagram-box section-diagram"><pre class="mermaid">erDiagram
     users {
         BIGINT user_id PK
-        VARCHAR email UK
+        VARCHAR email
         VARCHAR nickname UK
         VARCHAR role
         VARCHAR status
@@ -2327,6 +2336,16 @@
             
 
   <section class="page">
+    <h2>v1.8 변경 요약</h2>
+    <section class="callout">
+      <h2>인증 수단별 독립 계정 정책</h2>
+      <ul>
+        <li><code>users.email</code>: UNIQUE 제거. 이메일은 연락처/표시 정보이며 계정 병합 기준으로 사용하지 않음.</li>
+        <li><code>user_credentials.login_email</code>: 이메일/비밀번호 로그인 식별자. 이메일 가입은 인증 완료 후 별도 계정으로 생성.</li>
+        <li><code>social_accounts.provider + provider_user_id</code>: Google/GitHub 소셜 로그인 식별자. provider 이메일이 기존 회원과 같아도 새 <code>users</code> 계정 생성.</li>
+        <li><code>provider</code>: <code>google</code>, <code>github</code> 소문자 값으로 통일.</li>
+      </ul>
+    </section>
     <h2>v1.5 변경 요약</h2>
     
       <section class="callout">
