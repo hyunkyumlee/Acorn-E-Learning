@@ -57,20 +57,24 @@ public class AdminCommunityService {
         );
     }
 
-    public void updatePostStatus(Long postId, CommunityStatusForm form, SessionUser sessionUser) {
+    public int updatePostStatus(Long postId, CommunityStatusForm form, SessionUser sessionUser) {
         int updated = cm.updatePostStatus(postId, form.getStatus());
 
         if (updated == 1) {
             adminLogService.insert(operationLog(sessionUser, "COMMUNITY_POST_STATUS_UPDATE", "POST", postId));
         }
+
+        return updated;
     }
 
-    public void updateCommentStatus(Long commentId, CommunityStatusForm form, SessionUser sessionUser) {
+    public int updateCommentStatus(Long commentId, CommunityStatusForm form, SessionUser sessionUser) {
         int updated = cm.updateCommentStatus(commentId, form.getStatus());
 
         if (updated == 1) {
             adminLogService.insert(operationLog(sessionUser, "COMMUNITY_COMMENT_STATUS_UPDATE", "COMMENT", commentId));
         }
+
+        return updated;
     }
 
     private AdminOperationLog operationLog(SessionUser sessionUser, String actionType, String targetType, Long targetId) {

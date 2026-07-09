@@ -38,7 +38,7 @@ public class AdminReportService {
         return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }
 
-    public void handle(Long reportId, ReportHandleForm form, SessionUser sessionUser) {
+    public int handle(Long reportId, ReportHandleForm form, SessionUser sessionUser) {
         int updated = rm.updateStatus(reportId, form.getStatus());
 
         if (updated == 1) {
@@ -53,6 +53,8 @@ public class AdminReportService {
 
             adminLogService.insert(log);
         }
+
+        return updated;
     }
 
     private Long requireAdminId(SessionUser sessionUser) {
