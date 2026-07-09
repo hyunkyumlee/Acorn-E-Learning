@@ -6,6 +6,8 @@ import com.acorn.elearning.auth.service.AuthService;
 import com.acorn.elearning.auth.service.OAuthService;
 import com.acorn.elearning.auth.service.SessionService;
 import com.acorn.elearning.common.exception.BusinessException;   // [추가] 로그인 실패 예외 import
+import com.acorn.elearning.learning.mapper.SubjectMapper;        // [추가] 관심 과목 목록(name 표시) 조회용
+import com.acorn.elearning.learning.model.Subject;               // [추가]
 import com.acorn.elearning.security.RememberMeCookie;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +19,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;   // [추가]
+
 @Controller
 public class AuthController {
 
@@ -24,12 +28,14 @@ public class AuthController {
     private final SessionService sessionService;
     private final OAuthService oAuthService;
     private final RememberMeCookie rememberMeCookie;
+    private final SubjectMapper subjectMapper;   // [추가] 관심 과목 dropdown(name 표시)용
 
-    public AuthController(AuthService authService, SessionService sessionService, OAuthService oAuthService, RememberMeCookie rememberMeCookie) {
+    public AuthController(AuthService authService, SessionService sessionService, OAuthService oAuthService, RememberMeCookie rememberMeCookie, SubjectMapper subjectMapper) {   // [수정] subjectMapper 주입
         this.authService = authService;
         this.sessionService = sessionService;
         this.oAuthService = oAuthService;
         this.rememberMeCookie = rememberMeCookie;
+        this.subjectMapper = subjectMapper;   // [추가]
     }
 
     //testhtml 용
@@ -95,6 +101,7 @@ public class AuthController {
         }
         model.addAttribute("signupForm", new SignupForm());
         model.addAttribute("screen", "auth/signup");
+        addSubjectOptions(model);   // [추가] 관심 과목을 name으로 보여주기 위한 목록
         return "auth/signup";
     }
 
@@ -107,6 +114,7 @@ public class AuthController {
             RedirectAttributes redirectAttributes,
             Model model) {
         if (bindingResult.hasErrors()) {
+            addSubjectOptions(model);   // [추가] 검증 실패로 폼을 다시 그릴 때도 과목 목록 유지
             return "auth/signup";
         }
         try {
@@ -126,6 +134,14 @@ public class AuthController {
         authService.logout(session);
         rememberMeCookie.clear(response);
         return "redirect:" + safeRedirect(redirect, "/login");
+    }
+
+    // [추가] 회원가입 화면의 "관심 과목" 을 ID 입력이 아니라 name dropdown 으로 보여주기 위한 활성 과목 목록
+    private void addSubjectOptions(Model model) {
+        List<Subject> subjects = subjectMapper.findAll().stream()
+                .filter(s -> Boolean.TRUE.equals(s.getIsActive()))   // 활성 과목만 노출
+                .toList();
+        model.addAttribute("subjects", subjects);
     }
 
     private SessionUser currentUser(HttpSession session) {
