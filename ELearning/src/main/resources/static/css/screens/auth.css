@@ -69,8 +69,23 @@ body.auth-bg {
 }
 
 .auth-screen .field input,
-.auth-screen .field textarea {
+.auth-screen .field textarea,
+.auth-screen .field select {
   min-height: 44px;
+}
+
+/* placeholder 색을 브라우저 기본값에 맡기지 않고 직접 지정 →
+   input/textarea 의 placeholder 와 select 미선택 상태가 "완전히 같은 값"을 쓰게 해서 픽셀 단위로 일치시킴. */
+.auth-screen .field input::placeholder,
+.auth-screen .field textarea::placeholder,
+.auth-screen .field select {
+  color: color-mix(in srgb, var(--text) 45%, transparent);   /* placeholder 톤 통일 */
+  opacity: 1;   /* Firefox 등의 기본 placeholder 반투명 제거(이중 적용 방지) */
+}
+
+/* 관심 과목(java 등)을 실제로 고르면 그때만 일반 입력값처럼 text 색으로 밝아지게 한다. */
+.auth-screen .field select:has(option:not([value=""]):checked) {
+  color: var(--text);
 }
 
 .auth-screen .checkbox {
@@ -269,6 +284,16 @@ body.auth-bg {
 .auth-screen.login-screen .form-panel {
   padding-block: var(--space-6);
   gap: var(--space-4);
+}
+
+/* 제목(회원가입)과 폼 박스 사이 여백 확대 (기본 page-shell gap 위에 추가) */
+.auth-screen.login-screen .page-heading {
+  margin-bottom: var(--space-6);
+}
+
+/* 정보 기입 칸 사이 간격 확대 (기본 form gap: space-3 → space-5) */
+.auth-screen.login-screen .form-panel form {
+  gap: var(--space-5);
 }
 
 /* --- 로컬 테스트 계정 복붙 영역 --- */
