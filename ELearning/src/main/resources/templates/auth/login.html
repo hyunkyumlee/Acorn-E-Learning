@@ -38,10 +38,6 @@
     <div class="form-panel">
       <h3>로그인</h3>
 
-      <!-- 소셜 로그인 시도 → 연동할 계정으로 로그인/회원가입 유도 배너 -->
-      <p class="form-info" th:if="${linkPendingProviderLabel}"
-         th:text="|${linkPendingProviderLabel} 계정을 연동하려면 연동할 계정으로 로그인하세요. 계정이 없으면 아래 회원가입 후 로그인하면 자동으로 연동됩니다.|">연동 안내</p>
-
       <p class="form-success" th:if="${successMessage}" th:text="${successMessage}">가입 완료 메시지</p>
       <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
 

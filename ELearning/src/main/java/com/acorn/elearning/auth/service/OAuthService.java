@@ -1,6 +1,5 @@
 package com.acorn.elearning.auth.service;
 
-import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -36,7 +35,6 @@ public class OAuthService {
 
     private static final String OAUTH_STATE_KEY = "OAUTH_STATE";
     private static final String STATUS_ACTIVE = "ACTIVE";
-    private static final String PENDING_SOCIAL_KEY = "PENDING_SOCIAL_LINK";
     private static final String GITHUB_EMAILS_URI = "https://api.github.com/user/emails";   // [추가] GitHub 이메일 2차 조회
 
     private final SocialAccountMapper socialAccountMapper;
@@ -89,38 +87,17 @@ public class OAuthService {
             return sessionUser.defaultRedirectPath();
         }
 
-        // (2) 미연동 → 자동 가입/자동 로그인하지 않는다.
-        //     연동할 계정으로 "로그인" 또는 "회원가입 후 로그인" 하도록 로그인 화면으로 유도하고,
-        //     로그인 성공 시(AuthController → consumePendingLink) 방금 시도한 소셜을 그 계정에 자동 연동한다.
-        session.setAttribute(PENDING_SOCIAL_KEY,
-                new PendingSocialLink(provider, info.providerUserId(), info.email()));
-        String redirectUrl = "/login?linkPending=" + enc(provider);
-        if (info.email() != null && !info.email().isBlank()) {
-            redirectUrl += "&email=" + enc(info.email());   // 소셜 이메일 prefill (있을 때만)
-        }
-        return redirectUrl;
+        // (2) [수정] 미연동 -> pending link 대신 새 계정을 즉시 생성하고 바로 로그인시킨다.
+        //     users.email 중복 여부는 검사하지 않는다 (정책상 허용).
+        //     registerSocialUser 안에서 UserSetting/UserLearningProfile까지 이미 생성하므로 여기서는 호출만 한다.
+        User user = registerSocialUser(provider, info);
+        insertSocialAccount(user.getUserId(), provider, info);
+
+        SessionUser sessionUser = toSessionUser(user);
+        sessionService.saveUser(session, sessionUser);
+        return sessionUser.defaultRedirectPath();
     }
 
-    // [Part C] 비밀번호 로그인 성공 직후 호출 — 대기 중(pending) 소셜 연동이 있으면 자동 연동
-    @Transactional
-    public void consumePendingLink(HttpSession session, SessionUser sessionUser) {
-        Object v = session.getAttribute(PENDING_SOCIAL_KEY);
-        if (!(v instanceof PendingSocialLink pending)) {
-            return;
-        }
-        session.removeAttribute(PENDING_SOCIAL_KEY);
-
-        boolean already = socialAccountMapper
-                .findByProviderAndProviderUserId(pending.provider(), pending.providerUserId())
-                .filter(a -> Boolean.TRUE.equals(a.getIsActive()))
-                .isPresent();
-        if (already) {
-            return;
-        }
-        // pending은 검증된 이메일일 때만 저장되므로 emailVerified=true로 취급
-        OAuthUserInfo info = new OAuthUserInfo(pending.providerUserId(), pending.providerEmail(), null, true);
-        insertSocialAccount(sessionUser.userId(), pending.provider(), info);
-    }
 
     // ================= AUTH-009: 설정 화면 소셜 연결 redirect =================
     public String startConnectRedirect(String provider, SessionUser sessionUser, HttpSession session) {
@@ -141,7 +118,9 @@ public class OAuthService {
         OAuthUserInfo info = fetchUserInfo(provider, cfg, code);
         socialAccountMapper.findByProviderAndProviderUserId(provider, info.providerUserId())
                 .filter(a -> Boolean.TRUE.equals(a.getIsActive()))
-                .ifPresent(a -> { throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "이미 연결된 소셜 계정입니다."); });
+                .ifPresent(a -> {
+                    throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "이미 연결된 소셜 계정입니다.");
+                });
         insertSocialAccount(sessionUser.userId(), provider, info);
         return "/settings/social";
     }
@@ -202,9 +181,10 @@ public class OAuthService {
     private void insertSocialAccount(Long userId, String provider, OAuthUserInfo info) {
         SocialAccount account = new SocialAccount();
         account.setUserId(userId);
-        account.setProvider(provider);
+        account.setProvider(provider.toLowerCase(java.util.Locale.ROOT));
         account.setProviderUserId(info.providerUserId());
         account.setProviderEmail(info.email());
+        account.setProviderEmailVerified(info.emailVerified());
         account.setIsActive(true);
         socialAccountMapper.insert(account);
     }
@@ -345,9 +325,6 @@ public class OAuthService {
 
     // provider 사용자 식별 정보 (내부 전용 record)
     // [수정] emailVerified 추가 — 검증된 이메일만 기존 계정 연동에 사용
-    private record OAuthUserInfo(String providerUserId, String email, String name, boolean emailVerified) {}
-
-    // 세션에 임시 저장되는 연동 대기 정보 (세션 직렬화 대상 → Serializable)
-    public record PendingSocialLink(String provider, String providerUserId, String providerEmail)
-            implements Serializable {}
+    private record OAuthUserInfo(String providerUserId, String email, String name, boolean emailVerified) {
+    }
 }
