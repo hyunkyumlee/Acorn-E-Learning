@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.admin.mapper.AdminCurriculumNodeMapper">
+
+    <resultMap id="CurriculumNodeResultMap" type="com.acorn.elearning.learning.model.CurriculumNode">
+        <id property="nodeId" column="node_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="parentNodeId" column="parent_node_id" />
+        <result property="levelCode" column="level_code" />
+        <result property="nodeType" column="node_type" />
+        <result property="planetNo" column="planet_no" />
+        <result property="title" column="title" />
+        <result property="description" column="description" />
+        <result property="sortOrder" column="sort_order" />
+        <result property="gateCondition" column="gate_condition" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+    
+
+    
+    <select id="findPage" resultMap="CurriculumNodeResultMap">
+        SELECT
+            node_id,
+            subject_id,
+            parent_node_id,
+            level_code,
+            node_type,
+            planet_no,
+            title,
+            description,
+            sort_order,
+            gate_condition,
+            is_active,
+            created_at,
+            updated_at
+        FROM curriculum_nodes
+        <include refid="CurriculumFilterWhere" />
+        ORDER BY subject_id ASC, level_code ASC, sort_order ASC, node_id ASC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM curriculum_nodes
+        <include refid="CurriculumFilterWhere" />
+    </select>
+
+    <sql id="CurriculumFilterWhere">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="subjectId != null">
+                AND subject_id = #{subjectId}
+            </if>
+            <if test="levelCode != null and levelCode != ''">
+                AND level_code = #{levelCode}
+            </if>
+        </where>
+    </sql>
+</mapper>

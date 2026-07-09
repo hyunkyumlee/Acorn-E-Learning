@@ -16,10 +16,24 @@
     grid-template-columns: 220px 220px 220px;
     gap: 12px;
     align-items: center;
+    justify-content: start;
+    width: min(calc(100% - (var(--admin-content-x) * 2)), var(--max-content));
+    max-width: none;
+    margin: 0 auto 22px;
 }
 
 .admin-report-toolbar select,
-.admin-report-toolbar input,
+.admin-report-toolbar input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+  background: #fff;
+  color: #242a35;
+  font-size: 14px;
+  padding: 0 14px;
+}
+
 .admin-report-process-row select,
 .admin-report-process-row input {
   width: 100%;
@@ -144,6 +158,48 @@
   font-weight: 700;
   padding: 0 14px;
   cursor: pointer;
+}
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.admin-pagination span {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.admin-page-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid #cfd6df;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.admin-page-link:hover {
+  background: #f3f7f9;
+  border-color: #aebdca;
+}
+
+.admin-page-current {
+  background: #d7dde3;
+  border-color: #c6ced8;
+  color: #111827;
 }
 
 .admin-report-detail-card {

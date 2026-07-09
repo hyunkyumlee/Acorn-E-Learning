@@ -36,9 +36,13 @@
 
 .admin-community-toolbar {
   display: grid;
-  grid-template-columns: 200px 200px minmax(260px, 1fr);
+  grid-template-columns: 200px 200px 260px;
   gap: 12px;
   align-items: center;
+  justify-content: start;
+  width: min(calc(100% - (var(--admin-content-x) * 2)), var(--max-content));
+  max-width: none;
+  margin: 0 auto 22px;
 }
 
 .admin-community-toolbar select,
@@ -155,6 +159,34 @@
 .admin-community-empty {
   color: #7b8492;
   text-align: center;
+}
+
+.admin-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.admin-page-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border: 1px solid #cfd6e2;
+  border-radius: 999px;
+  background: #fff;
+  color: #2e3440;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-page-current {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
 }
 
 @media (max-width: 900px) {

@@ -12,6 +12,7 @@ import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.form.SubjectForm;
+import com.acorn.elearning.admin.mapper.AdminCurriculumNodeMapper;
 import com.acorn.elearning.admin.mapper.AdminLessonMapper;
 import com.acorn.elearning.admin.mapper.AdminProblemMapper;
 import com.acorn.elearning.admin.model.AdminOperationLog;
@@ -37,6 +38,7 @@ public class AdminContentService {
     private final PracticeProblemMapper ppm;
     private final AdminLessonMapper alm;
     private final AdminProblemMapper apm;
+    private final AdminCurriculumNodeMapper acm;
 
     private final AdminLogService adminLogService;
 
@@ -176,6 +178,17 @@ public class AdminContentService {
         return updated;
     }
 
+    public AdminPageResponse<CurriculumNode> findCurriculumPage(int page, int size, String keyword, Long subjectId, String levelCode){
+
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<CurriculumNode> items = acm.findPage(pageSize, offset, keyword, subjectId, levelCode);
+        long totalCount = acm.countAll(keyword, subjectId, levelCode);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
+    }
 
     //이론 자료 조회
     public List<Lesson> findAllLesson(){
@@ -185,6 +198,33 @@ public class AdminContentService {
     //관리자 화면 이론 조회
     public List<AdminLessonManageRowResponse> findAllAdminLesson(){
         return alm.findAll();
+    }
+
+    public AdminPageResponse<AdminLessonManageRowResponse> findLessonPage(
+            int page,
+            int size,
+            String keyword,
+            String subjectName,
+            String curriculumTitle,
+            String levelCode,
+            Boolean isActive
+    ) {
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<AdminLessonManageRowResponse> items = alm.findPage(
+                pageSize,
+                offset,
+                keyword,
+                subjectName,
+                curriculumTitle,
+                levelCode,
+                isActive
+        );
+        long totalCount = alm.countAll(keyword, subjectName, curriculumTitle, levelCode, isActive);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }
 
     //이론 자료 단건 조회
@@ -375,6 +415,29 @@ public class AdminContentService {
             case "간단 코드 입력", "SHORT_CODE" -> "CODE_SHORT";
             default -> value;
         };
+    }
+
+    public AdminPageResponse<AdminProblemManageRowResponse> findProblemPage(
+            int page,
+            int size,
+            String keyword,
+            Long subjectId,
+            Long nodeId,
+            String problemType,
+            String difficultyCode,
+            Boolean isActive
+    ) {
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<AdminProblemManageRowResponse> items =
+                apm.findPage(pageSize, offset, keyword, subjectId, nodeId, problemType, difficultyCode, isActive);
+
+        long totalCount =
+                apm.countAll(keyword, subjectId, nodeId, problemType, difficultyCode, isActive);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }
 
 

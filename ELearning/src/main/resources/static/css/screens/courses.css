@@ -131,6 +131,7 @@
     grid-template-columns: 220px 160px 160px;
     gap: 12px;
     width: max-content;
+    max-width: none;
     padding: 0;
     border: 0;
     background: transparent;
@@ -250,6 +251,40 @@
     height: 76px;
     text-align: center;
     color: #6b7280;
+}
+
+.admin-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 14px 0 0;
+}
+
+.admin-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.admin-page-link:hover {
+    background: #f3f4f6;
+}
+
+.admin-page-current {
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
 }
 
 .course-form-panel {

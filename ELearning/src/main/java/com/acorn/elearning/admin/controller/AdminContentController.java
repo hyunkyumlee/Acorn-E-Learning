@@ -10,10 +10,7 @@ import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -29,7 +26,14 @@ public class AdminContentController {
 
 
     @GetMapping("/admin/courses")
-    public String courses(Model model) {
+    public String courses(Model model,
+                          @RequestParam(defaultValue = "1") int page,
+                          @RequestParam(defaultValue = "10") int size,
+                          @RequestParam(required = false) String keyword,
+                          @RequestParam(required = false) Long subjectId,
+                          @RequestParam(required = false) String levelCode
+                          )
+    {
 
         List<Subject> subjectList = service.findAllSubject();
         Map<Long, String> subjectNameMap = subjectList.stream()
@@ -38,7 +42,12 @@ public class AdminContentController {
         model.addAttribute("subjectList", subjectList);
         model.addAttribute("subjectNameMap", subjectNameMap);
 
+        model.addAttribute("curriculumPage", service.findCurriculumPage(page, size, keyword, subjectId, levelCode));
         model.addAttribute("curriculumList", service.findAllCurriculumNode());
+        model.addAttribute("selectedCurriculumKeyword", keyword);
+        model.addAttribute("selectedCurriculumSubjectId", subjectId);
+        model.addAttribute("selectedCurriculumLevelCode", levelCode);
+
 
         model.addAttribute("subjectForm", new SubjectForm());
         model.addAttribute("curriculumNodeForm", new CurriculumNodeForm());
@@ -80,12 +89,34 @@ public class AdminContentController {
     }
 
 
+
+
     @GetMapping("/admin/theory")
-    public String theory(Model model) {
-        model.addAttribute("theoryList", service.findAllAdminLesson());
+    public String theory(Model model,
+                         @RequestParam(defaultValue = "1") int page,
+                         @RequestParam(defaultValue = "10") int size,
+                         @RequestParam(required = false) String keyword,
+                         @RequestParam(required = false) String subjectName,
+                         @RequestParam(required = false) String curriculumTitle,
+                         @RequestParam(required = false) String levelCode,
+                         @RequestParam(required = false) Boolean isActive) {
+        model.addAttribute("theoryPage", service.findLessonPage(
+                page,
+                size,
+                keyword,
+                subjectName,
+                curriculumTitle,
+                levelCode,
+                isActive
+        ));
         model.addAttribute("subjectList", service.findAllSubject());
         model.addAttribute("curriculumList", service.findAllCurriculumNode());
         model.addAttribute("lessonForm", new LessonForm());
+        model.addAttribute("selectedKeyword", keyword);
+        model.addAttribute("selectedSubjectName", subjectName);
+        model.addAttribute("selectedCurriculumTitle", curriculumTitle);
+        model.addAttribute("selectedLevelCode", levelCode);
+        model.addAttribute("selectedIsActive", isActive);
         model.addAttribute("screen", "admin/theory");
         return "admin/theory";
     }
@@ -125,13 +156,30 @@ public class AdminContentController {
 
 
     @GetMapping("/admin/problems")
-    public String problems(Model model) {
+    public String problems(Model model,
+                           @RequestParam(defaultValue = "1") int page,
+                           @RequestParam(defaultValue = "10") int size,
+                           @RequestParam(required = false) String keyword,
+                           @RequestParam(required = false) Long subjectId,
+                           @RequestParam(required = false) Long nodeId,
+                           @RequestParam(required = false) String problemType,
+                           @RequestParam(required = false) String difficultyCode,
+                           @RequestParam(required = false) Boolean isActive)
+    {
 
-        model.addAttribute("problemList", service.findAllAdminProblem());
+        model.addAttribute("problemPage",
+                service.findProblemPage(page, size, keyword, subjectId, nodeId, problemType, difficultyCode, isActive));
         model.addAttribute("subjectList", service.findAllSubject());
         model.addAttribute("curriculumList", service.findAllCurriculumNode());
         model.addAttribute("lessonList", service.findAllAdminLesson());
         model.addAttribute("problemForm", new ProblemForm());
+
+        model.addAttribute("selectedKeyword", keyword);
+        model.addAttribute("selectedSubjectId", subjectId);
+        model.addAttribute("selectedNodeId", nodeId);
+        model.addAttribute("selectedProblemType", problemType);
+        model.addAttribute("selectedDifficultyCode", difficultyCode);
+        model.addAttribute("selectedIsActive", isActive);
         model.addAttribute("screen", "admin/problems");
         return "admin/problems";
     }

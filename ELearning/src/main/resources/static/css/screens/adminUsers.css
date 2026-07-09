@@ -32,6 +32,7 @@
     display: grid;
     grid-template-columns: 220px repeat(4, 150px);
     gap: 12px;
+    max-width: none;
 }
 
 .admin-user-filter input,

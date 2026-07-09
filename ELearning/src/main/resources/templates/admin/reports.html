@@ -22,21 +22,22 @@
     <h1>신고 관리</h1>
   </section>
 
-  <section class="admin-report-toolbar" aria-label="신고 검색 조건">
-    <select id="reportTypeFilter" aria-label="신고 유형">
+  <form method="get" action="/admin/reports" class="admin-report-toolbar" aria-label="신고 검색 조건">
+    <input type="hidden" name="size" th:value="${reportPage.pageSize}">
+    <select id="reportTypeFilter" name="targetType" aria-label="신고 유형" onchange="this.form.submit()">
       <option value="">신고 유형</option>
-      <option value="게시글">게시글</option>
-      <option value="댓글">댓글</option>
+      <option value="POST" th:selected="${selectedTargetType == 'POST'}">게시글</option>
+      <option value="COMMENT" th:selected="${selectedTargetType == 'COMMENT'}">댓글</option>
     </select>
-    <select id="reportStatusFilter" aria-label="처리 상태">
+    <select id="reportStatusFilter" name="status" aria-label="처리 상태" onchange="this.form.submit()">
       <option value="">처리 상태</option>
-      <option value="대기">대기</option>
-      <option value="검토 중">검토 중</option>
-      <option value="처리 완료">처리 완료</option>
-      <option value="반려">반려</option>
+      <option value="PENDING" th:selected="${selectedReportStatus == 'PENDING'}">대기</option>
+      <option value="IN_PROGRESS" th:selected="${selectedReportStatus == 'IN_PROGRESS'}">검토 중</option>
+      <option value="RESOLVED" th:selected="${selectedReportStatus == 'RESOLVED'}">처리 완료</option>
+      <option value="REJECTED" th:selected="${selectedReportStatus == 'REJECTED'}">반려</option>
     </select>
-    <input type="date" id="reportDateFilter" aria-label="검색 날짜">
-  </section>
+    <input type="date" id="reportDateFilter" name="reportDate" th:value="${selectedReportDate}" aria-label="검색 날짜" onchange="this.form.submit()">
+  </form>
 
   <section class="admin-report-section" aria-label="신고 목록">
     <h2>신고 목록</h2>
@@ -55,11 +56,12 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="report : ${reportPage.reports}"
+        <tr th:each="report : ${reportPage.items}"
             class="admin-report-row"
             th:data-report-id="${report.reportId}"
             th:data-reporter="${report.reporterNickname}"
             th:data-type="${report.targetTypeLabel()}"
+            th:data-type-code="${report.targetType}"
             th:data-date="${report.createdAt != null ? #temporals.format(report.createdAt, 'MM/dd') : '-'}"
             th:data-full-date="${report.createdAt != null ? #temporals.format(report.createdAt, 'yyyy-MM-dd') : ''}"
             th:data-status-code="${report.status}"
@@ -82,7 +84,7 @@
             <button type="button" class="admin-report-table-button admin-report-detail-button">상세보기</button>
           </td>
         </tr>
-        <tr th:if="${#lists.isEmpty(reportPage.reports)}">
+        <tr th:if="${#lists.isEmpty(reportPage.items)}">
           <td colspan="8" class="admin-report-empty">등록된 신고가 없습니다.</td>
         </tr>
         <tr class="admin-report-filter-empty is-hidden">
@@ -91,6 +93,35 @@
         </tbody>
       </table>
     </div>
+
+    <nav class="admin-pagination" th:if="${reportPage.totalPages >= 1}" aria-label="신고관리 페이지">
+      <a class="admin-page-link"
+         th:if="${reportPage.hasPrevious}"
+         th:href="@{/admin/reports(page=${reportPage.currentPage - 1}, size=${reportPage.pageSize}, targetType=${selectedTargetType}, status=${selectedReportStatus}, reportDate=${selectedReportDate})}">
+        &lt;
+      </a>
+
+      <span th:each="pageNumber : ${#numbers.sequence(reportPage.startPage, reportPage.endPage)}">
+        <a class="admin-page-link"
+           th:if="${pageNumber != reportPage.currentPage}"
+           th:href="@{/admin/reports(page=${pageNumber}, size=${reportPage.pageSize}, targetType=${selectedTargetType}, status=${selectedReportStatus}, reportDate=${selectedReportDate})}"
+           th:text="${pageNumber}">
+          1
+        </a>
+
+        <strong class="admin-page-link admin-page-current"
+                th:if="${pageNumber == reportPage.currentPage}"
+                th:text="${pageNumber}">
+          1
+        </strong>
+      </span>
+
+      <a class="admin-page-link"
+         th:if="${reportPage.hasNext}"
+         th:href="@{/admin/reports(page=${reportPage.currentPage + 1}, size=${reportPage.pageSize}, targetType=${selectedTargetType}, status=${selectedReportStatus}, reportDate=${selectedReportDate})}">
+        &gt;
+      </a>
+    </nav>
   </section>
 
   <section class="admin-report-detail" aria-label="신고 상세 보기">
@@ -212,8 +243,8 @@
     let visibleCount = 0;
 
     document.querySelectorAll(".admin-report-row").forEach((row) => {
-      const matchesType = selectedType === "" || row.dataset.type === selectedType;
-      const matchesStatus = selectedStatus === "" || row.dataset.status === selectedStatus;
+      const matchesType = selectedType === "" || row.dataset.typeCode === selectedType;
+      const matchesStatus = selectedStatus === "" || row.dataset.statusCode === selectedStatus;
       const matchesDate = selectedDate === "" || row.dataset.fullDate === selectedDate;
       const visible = matchesType && matchesStatus && matchesDate;
 

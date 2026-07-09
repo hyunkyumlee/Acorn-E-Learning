@@ -23,28 +23,35 @@
   </section>
 
   <section class="theory-toolbar">
-    <div class="theory-filter">
-      <input type="search" id="searchTheory" placeholder="제목 검색">
-      <select id="theorySubjectFilter">
+    <form method="get" action="/admin/theory" class="theory-filter">
+      <input type="hidden" name="size" th:value="${theoryPage.pageSize}">
+      <input type="search" id="searchTheory" name="keyword" th:value="${selectedKeyword}" placeholder="제목 검색" onchange="this.form.submit()">
+      <select id="theorySubjectFilter" name="subjectName" onchange="this.form.submit()">
         <option value="">과목</option>
-        <option th:each="subject : ${subjectList}" th:value="${subject.subjectName}" th:text="${subject.subjectName}">Java</option>
+        <option th:each="subject : ${subjectList}"
+                th:value="${subject.subjectName}"
+                th:text="${subject.subjectName}"
+                th:selected="${selectedSubjectName == subject.subjectName}">Java</option>
       </select>
-      <select id="theoryCurriculumFilter">
+      <select id="theoryCurriculumFilter" name="curriculumTitle" onchange="this.form.submit()">
         <option value="">커리큘럼</option>
-        <option th:each="node : ${curriculumList}" th:value="${node.title}" th:text="${node.title}">Java 기초</option>
+        <option th:each="node : ${curriculumList}"
+                th:value="${node.title}"
+                th:text="${node.title}"
+                th:selected="${selectedCurriculumTitle == node.title}">Java 기초</option>
       </select>
-      <select id="theoryLevelFilter">
+      <select id="theoryLevelFilter" name="levelCode" onchange="this.form.submit()">
         <option value="">레벨</option>
-        <option value="BRONZE">BRONZE</option>
-        <option value="SILVER">SILVER</option>
-        <option value="GOLD">GOLD</option>
+        <option value="BRONZE" th:selected="${selectedLevelCode == 'BRONZE'}">BRONZE</option>
+        <option value="SILVER" th:selected="${selectedLevelCode == 'SILVER'}">SILVER</option>
+        <option value="GOLD" th:selected="${selectedLevelCode == 'GOLD'}">GOLD</option>
       </select>
-      <select id="theoryActiveFilter">
+      <select id="theoryActiveFilter" name="isActive" onchange="this.form.submit()">
         <option value="">활성화 상태</option>
-        <option value="true">활성</option>
-        <option value="false">비활성</option>
+        <option value="true" th:selected="${selectedIsActive != null and selectedIsActive}">활성</option>
+        <option value="false" th:selected="${selectedIsActive != null and !selectedIsActive}">비활성</option>
       </select>
-    </div>
+    </form>
     <button type="button" class="theory-primary-button">+ 자료 등록</button>
   </section>
 
@@ -70,7 +77,7 @@
         </thead>
 
         <tbody>
-        <tr th:each="lesson : ${theoryList}" class="theory-row"
+        <tr th:each="lesson : ${theoryPage.items}" class="theory-row"
             th:data-subject-name="${lesson.subjectName}"
             th:data-curriculum-title="${lesson.curriculumTitle}"
             th:data-title="${lesson.lessonTitle}"
@@ -108,12 +115,41 @@
             </div>
           </td>
         </tr>
-        <tr th:if="${#lists.isEmpty(theoryList)}">
+        <tr th:if="${#lists.isEmpty(theoryPage.items)}">
           <td colspan="9" class="theory-empty">등록된 이론 자료가 없습니다.</td>
         </tr>
         </tbody>
       </table>
     </div>
+
+    <nav class="admin-pagination" th:if="${theoryPage.totalPages >= 1}" aria-label="이론 자료 관리 페이지">
+      <a class="admin-page-link"
+         th:if="${theoryPage.hasPrevious}"
+         th:href="@{/admin/theory(page=${theoryPage.currentPage - 1}, size=${theoryPage.pageSize}, keyword=${selectedKeyword}, subjectName=${selectedSubjectName}, curriculumTitle=${selectedCurriculumTitle}, levelCode=${selectedLevelCode}, isActive=${selectedIsActive})}">
+        &lt;
+      </a>
+
+      <span th:each="pageNumber : ${#numbers.sequence(theoryPage.startPage, theoryPage.endPage)}">
+        <a class="admin-page-link"
+           th:if="${pageNumber != theoryPage.currentPage}"
+           th:href="@{/admin/theory(page=${pageNumber}, size=${theoryPage.pageSize}, keyword=${selectedKeyword}, subjectName=${selectedSubjectName}, curriculumTitle=${selectedCurriculumTitle}, levelCode=${selectedLevelCode}, isActive=${selectedIsActive})}"
+           th:text="${pageNumber}">
+          1
+        </a>
+
+        <strong class="admin-page-link admin-page-current"
+                th:if="${pageNumber == theoryPage.currentPage}"
+                th:text="${pageNumber}">
+          1
+        </strong>
+      </span>
+
+      <a class="admin-page-link"
+         th:if="${theoryPage.hasNext}"
+         th:href="@{/admin/theory(page=${theoryPage.currentPage + 1}, size=${theoryPage.pageSize}, keyword=${selectedKeyword}, subjectName=${selectedSubjectName}, curriculumTitle=${selectedCurriculumTitle}, levelCode=${selectedLevelCode}, isActive=${selectedIsActive})}">
+        &gt;
+      </a>
+    </nav>
   </section>
 
   <section class="theory-form-panel">
