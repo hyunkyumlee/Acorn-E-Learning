@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>북마크한 이론 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+</head>
+<body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="page-shell learning-screen">
+    <section class="page-heading">
+      <span class="eyebrow">Learning</span>
+      <h1>북마크한 이론</h1>
+      <p class="lesson-list-progress" th:if="${bookmarks != null}">
+        저장한 이론 <strong th:text="${bookmarks.totalCount}">0</strong>개
+      </p>
+    </section>
+
+    <section class="panel">
+      <ul class="bookmark-list" th:if="${bookmarks != null and !bookmarks.items.isEmpty()}">
+        <li class="bookmark-item" th:each="item : ${bookmarks.items}">
+          <span class="bookmark-level" th:text="${item.levelCode}">BRONZE</span>
+          <span class="bookmark-body">
+            <span class="bookmark-title" th:text="${item.lessonTitle}">레슨 제목</span>
+            <span class="bookmark-node" th:if="${item.nodeTitle != null}" th:text="${item.nodeTitle}">행성</span>
+          </span>
+          <a class="button primary bookmark-cta"
+             th:href="@{/learning/lessons/{id}(id=${item.lessonId})}">이어보기</a>
+        </li>
+      </ul>
+
+      <p class="bookmark-empty" th:if="${bookmarks == null or bookmarks.items.isEmpty()}">
+        아직 북마크한 이론이 없어요. 이론 학습 화면에서 북마크(리본)를 눌러 저장하면 여기 모여요.
+      </p>
+    </section>
+
+    <p class="lesson-list-back"><a th:href="@{/learning}">← 학습 메인으로</a></p>
+  </main>
+</body>
+</html>
