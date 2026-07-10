@@ -29,18 +29,33 @@ public class AdminCommunityController {
                             @RequestParam(required = false) String status,
                             @RequestParam(required = false) String keyword) {
 
+        String selectedTab = tab == null || tab.isBlank() ? "posts" : tab;
+        boolean commentTab = "comments".equals(selectedTab);
+        String postBoardType = commentTab ? null : boardType;
+        String postStatus = commentTab ? null : status;
+        String postKeyword = commentTab ? null : keyword;
+        String commentStatus = commentTab ? status : null;
+        String commentKeyword = commentTab ? keyword : null;
+
         model.addAttribute("communityPage", service.findPage(
                 postPage,
                 commentPage,
                 size,
-                boardType,
-                status,
-                keyword
+                postBoardType,
+                postStatus,
+                postKeyword,
+                commentStatus,
+                commentKeyword
         ));
-        model.addAttribute("selectedTab", tab == null || tab.isBlank() ? "posts" : tab);
+        model.addAttribute("selectedTab", selectedTab);
         model.addAttribute("selectedBoardType", boardType);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("selectedKeyword", keyword);
+        model.addAttribute("selectedPostBoardType", postBoardType);
+        model.addAttribute("selectedPostStatus", postStatus);
+        model.addAttribute("selectedPostKeyword", postKeyword);
+        model.addAttribute("selectedCommentStatus", commentStatus);
+        model.addAttribute("selectedCommentKeyword", commentKeyword);
 
         model.addAttribute("screen", "admin/community");
         return "admin/community";

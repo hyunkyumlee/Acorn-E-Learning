@@ -147,7 +147,8 @@
     display: block;
     width: 44px;
     height: var(--bar-height);
-    min-height: 34px;
+    min-height: 0;
+    flex: 0 0 var(--bar-height);
     border-radius: 5px 5px 2px 2px;
     background: #cfd5df;
 }

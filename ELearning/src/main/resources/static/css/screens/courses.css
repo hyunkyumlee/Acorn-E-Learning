@@ -128,7 +128,7 @@
 
 .course-filter {
     display: grid;
-    grid-template-columns: 220px 160px 160px;
+    grid-template-columns: 220px 160px 160px 80px;
     gap: 12px;
     width: max-content;
     max-width: none;
@@ -151,9 +151,25 @@
 }
 
 .course-filter input,
-.course-filter select {
+.course-filter select,
+.course-filter-button {
     height: 36px;
     padding: 0 12px;
+}
+
+.course-filter-button {
+    border: 1px solid #111827;
+    border-radius: 6px;
+    background: #111827;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.course-filter-button:hover {
+    background: #374151;
 }
 
 .course-section {

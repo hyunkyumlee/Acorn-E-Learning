@@ -30,7 +30,7 @@
 
 .admin-user-filter {
     display: grid;
-    grid-template-columns: 220px repeat(4, 150px);
+    grid-template-columns: 220px repeat(4, 150px) 80px;
     gap: 12px;
     max-width: none;
 }
@@ -48,14 +48,16 @@
 }
 
 .admin-user-filter input,
-.admin-user-filter select {
+.admin-user-filter select,
+.admin-user-filter-button {
     height: 36px;
     padding: 0 12px;
 }
 
 .admin-user-primary-button,
 .admin-user-secondary-button,
-.admin-user-table-button {
+.admin-user-table-button,
+.admin-user-filter-button {
     border-radius: 7px;
     border: 1px solid #d1d5db;
     cursor: pointer;
@@ -71,6 +73,12 @@
     color: #ffffff;
 }
 
+.admin-user-filter-button {
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
+}
+
 .admin-user-secondary-button {
     height: 38px;
     padding: 0 18px;
@@ -78,7 +86,8 @@
     color: #111827;
 }
 
-.admin-user-primary-button:hover {
+.admin-user-primary-button:hover,
+.admin-user-filter-button:hover {
     background: #374151;
 }
 

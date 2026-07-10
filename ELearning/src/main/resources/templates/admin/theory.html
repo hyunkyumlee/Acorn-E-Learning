@@ -25,32 +25,33 @@
   <section class="theory-toolbar">
     <form method="get" action="/admin/theory" class="theory-filter">
       <input type="hidden" name="size" th:value="${theoryPage.pageSize}">
-      <input type="search" id="searchTheory" name="keyword" th:value="${selectedKeyword}" placeholder="제목 검색" onchange="this.form.submit()">
-      <select id="theorySubjectFilter" name="subjectName" onchange="this.form.submit()">
+      <input type="search" id="searchTheory" name="keyword" th:value="${selectedKeyword}" placeholder="제목 검색">
+      <select id="theorySubjectFilter" name="subjectName">
         <option value="">과목</option>
         <option th:each="subject : ${subjectList}"
                 th:value="${subject.subjectName}"
                 th:text="${subject.subjectName}"
                 th:selected="${selectedSubjectName == subject.subjectName}">Java</option>
       </select>
-      <select id="theoryCurriculumFilter" name="curriculumTitle" onchange="this.form.submit()">
+      <select id="theoryCurriculumFilter" name="curriculumTitle">
         <option value="">커리큘럼</option>
         <option th:each="node : ${curriculumList}"
                 th:value="${node.title}"
                 th:text="${node.title}"
                 th:selected="${selectedCurriculumTitle == node.title}">Java 기초</option>
       </select>
-      <select id="theoryLevelFilter" name="levelCode" onchange="this.form.submit()">
+      <select id="theoryLevelFilter" name="levelCode">
         <option value="">레벨</option>
         <option value="BRONZE" th:selected="${selectedLevelCode == 'BRONZE'}">BRONZE</option>
         <option value="SILVER" th:selected="${selectedLevelCode == 'SILVER'}">SILVER</option>
         <option value="GOLD" th:selected="${selectedLevelCode == 'GOLD'}">GOLD</option>
       </select>
-      <select id="theoryActiveFilter" name="isActive" onchange="this.form.submit()">
+      <select id="theoryActiveFilter" name="isActive">
         <option value="">활성화 상태</option>
         <option value="true" th:selected="${selectedIsActive != null and selectedIsActive}">활성</option>
         <option value="false" th:selected="${selectedIsActive != null and !selectedIsActive}">비활성</option>
       </select>
+      <button type="submit" class="theory-filter-button">검색</button>
     </form>
     <button type="button" class="theory-primary-button">+ 자료 등록</button>
   </section>
@@ -64,7 +65,7 @@
       <table class="theory-table">
         <thead>
         <tr>
-          <th>자료 ID</th>
+          <th>번호</th>
           <th>과목</th>
           <th>커리큘럼</th>
           <th>제목</th>
@@ -77,13 +78,13 @@
         </thead>
 
         <tbody>
-        <tr th:each="lesson : ${theoryPage.items}" class="theory-row"
+        <tr th:each="lesson, stat : ${theoryPage.items}" class="theory-row"
             th:data-subject-name="${lesson.subjectName}"
             th:data-curriculum-title="${lesson.curriculumTitle}"
             th:data-title="${lesson.lessonTitle}"
             th:data-level-code="${lesson.levelCode}"
             th:data-is-active="${lesson.isActive}">
-          <td th:text="${'#' + lesson.lessonId}">#001</td>
+          <td th:text="${((theoryPage.currentPage - 1) * theoryPage.pageSize) + stat.count}">1</td>
           <td th:text="${lesson.subjectName}">Java</td>
           <td th:text="${lesson.curriculumTitle}">변수와 자료형</td>
           <td th:text="${lesson.lessonTitle}">Java 변수 이해하기</td>
@@ -202,36 +203,6 @@
   </section>
 </main>
 <script>
-  function applyTheoryFilters() {
-    const keyword = document.querySelector("#searchTheory").value.trim().toLowerCase();
-    const subjectName = document.querySelector("#theorySubjectFilter").value;
-    const curriculumTitle = document.querySelector("#theoryCurriculumFilter").value;
-    const levelCode = document.querySelector("#theoryLevelFilter").value;
-    const isActive = document.querySelector("#theoryActiveFilter").value;
-
-    document.querySelectorAll(".theory-row").forEach((row) => {
-      const rowTitle = (row.dataset.title || "").toLowerCase();
-      const rowSubjectName = row.dataset.subjectName || "";
-      const rowCurriculumTitle = row.dataset.curriculumTitle || "";
-      const rowLevelCode = row.dataset.levelCode || "";
-      const rowIsActive = row.dataset.isActive || "";
-
-      const matchesTitle = rowTitle.includes(keyword);
-      const matchesSubject = subjectName === "" || rowSubjectName === subjectName;
-      const matchesCurriculum = curriculumTitle === "" || rowCurriculumTitle === curriculumTitle;
-      const matchesLevel = levelCode === "" || rowLevelCode === levelCode;
-      const matchesActive = isActive === "" || rowIsActive === isActive;
-
-      row.style.display = matchesTitle && matchesSubject && matchesCurriculum && matchesLevel && matchesActive ? "" : "none";
-    });
-  }
-
-  document.querySelector("#searchTheory")?.addEventListener("input", applyTheoryFilters);
-  document.querySelector("#theorySubjectFilter")?.addEventListener("change", applyTheoryFilters);
-  document.querySelector("#theoryCurriculumFilter")?.addEventListener("change", applyTheoryFilters);
-  document.querySelector("#theoryLevelFilter")?.addEventListener("change", applyTheoryFilters);
-  document.querySelector("#theoryActiveFilter")?.addEventListener("change", applyTheoryFilters);
-
   document.querySelector("#lessonNodeId")?.addEventListener("change", (event) => {
     const selectedOption = event.target.selectedOptions[0];
     document.querySelector("#lessonSubjectId").value = selectedOption?.dataset.subjectId || "";
