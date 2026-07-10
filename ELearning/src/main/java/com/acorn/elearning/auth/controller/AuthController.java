@@ -5,9 +5,9 @@ import com.acorn.elearning.auth.form.SignupForm;
 import com.acorn.elearning.auth.service.AuthService;
 import com.acorn.elearning.auth.service.OAuthService;
 import com.acorn.elearning.auth.service.SessionService;
-import com.acorn.elearning.common.exception.BusinessException;   // [추가] 로그인 실패 예외 import
-import com.acorn.elearning.learning.mapper.SubjectMapper;        // [추가] 관심 과목 목록(name 표시) 조회용
-import com.acorn.elearning.learning.model.Subject;               // [추가]
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.learning.mapper.SubjectMapper;
+import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.security.RememberMeCookie;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;   // [추가]
+import java.util.List;
 
 @Controller
 public class AuthController {
@@ -28,30 +28,16 @@ public class AuthController {
     private final SessionService sessionService;
     private final OAuthService oAuthService;
     private final RememberMeCookie rememberMeCookie;
-    private final SubjectMapper subjectMapper;   // [추가] 관심 과목 dropdown(name 표시)용
+    private final SubjectMapper subjectMapper;
 
     public AuthController(AuthService authService, SessionService sessionService, OAuthService oAuthService, RememberMeCookie rememberMeCookie, SubjectMapper subjectMapper) {   // [수정] subjectMapper 주입
         this.authService = authService;
         this.sessionService = sessionService;
         this.oAuthService = oAuthService;
         this.rememberMeCookie = rememberMeCookie;
-        this.subjectMapper = subjectMapper;   // [추가]
+        this.subjectMapper = subjectMapper;
     }
 
-    //testhtml 용
-    @GetMapping("/auth/testlogin")
-    public String testLoginForm(HttpSession session, Model model) {
-        model.addAttribute("loginForm", new LoginForm());
-        model.addAttribute("sessionUser", currentUser(session));
-        return "auth/testlogin";
-    }
-    @GetMapping("/auth/testsignup")
-    public String testSignupForm(HttpSession session, Model model) {
-        model.addAttribute("signupForm", new SignupForm());
-        model.addAttribute("sessionUser", currentUser(session));
-        return "auth/testsignup";
-    }
-    //------------
 
     @GetMapping("/login")
     public String loginForm(
@@ -82,14 +68,15 @@ public class AuthController {
             authService.login(session, loginForm);
             sessionService.getUser(session).ifPresent(u -> {
                 if (loginForm.isRememberMe()) {                 // 체크 시에만 영속 쿠키
-                    rememberMeCookie.issue(response, u.userId());
+                    // 발급 시점의 계정 버전을 함께 심는다(비번 변경시 자동 무효화)
+                    rememberMeCookie.issue(response, u.userId(), authService.currentTokenVersion(u.userId()));
                 }
             });
-        } catch (BusinessException ex) {                         // [수정] 빈 catch(RuntimeException) → 실패를 화면에 표시
-            model.addAttribute("redirect", redirect);           // [추가] redirect 파라미터 유지
-            model.addAttribute("screen", "auth/login");         // [추가] 레이아웃용 screen 속성
-            model.addAttribute("errorMessage", ex.getMessage());// [추가] login.html의 errorMessage 표시부로 전달
-            return "auth/login";                                // [추가] redirect 대신 폼 재렌더(입력값·오류 유지)
+        } catch (BusinessException ex) {                         // 빈 catch(RuntimeException) → 실패를 화면에 표시
+            model.addAttribute("redirect", redirect);
+            model.addAttribute("screen", "auth/login");
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "auth/login";
         }
         return "redirect:" + safeRedirect(redirect, sessionUserRedirect(session));
     }

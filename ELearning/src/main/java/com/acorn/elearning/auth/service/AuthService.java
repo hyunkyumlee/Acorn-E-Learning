@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 public class AuthService {
@@ -90,10 +91,17 @@ public class AuthService {
     }
 
     // remember-me 쿠키에서 얻은 userId . SessionUser 만들어 세션에 저장 (자동 로그인 복원)
-    public void restoreSession(HttpSession session, Long userId) {
+    //tokenVersion 인자 추가 - 쿠키의 버전이 현재 계정 버전과 같을 때만 복원 (비번 변경 후 옛 쿠키 거부)
+    public void restoreSession(HttpSession session, Long userId, long tokenVersion) {
         userMapper.findById(userId)
-                .filter(user -> STATUS_ACTIVE.equals(user.getStatus()))   // [추가] 정지/탈퇴 계정은 자동 복원 금지
+                .filter(user -> STATUS_ACTIVE.equals(user.getStatus()))   // 정지/탈퇴 계정은 자동 복원 금지
+                .filter(user -> tokenVersion == currentTokenVersion(userId)) // 버전 불일치 (비번 변경후)
                 .ifPresent(user -> sessionService.saveUser(session, toSessionUser(user)));
+    }
+    // 발급(AuthController)과 복원(바로 위 코드)에서 같은 값을 계산해 비교하므로 public
+    public long currentTokenVersion(Long userId) {
+        return userCredentialMapper.findByUserId(userId)
+                .map(c -> c.getPasswordUpdatedAt() == null ? 0L : c.getPasswordUpdatedAt().toEpochSecond(ZoneOffset.UTC)). orElse(0L);
     }
 
     private UserSessionResponse signup (HttpSession session, String email, String rawPassword, String nickname, Long primarySubjectId, String learningGoal) {
