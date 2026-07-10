@@ -1500,3 +1500,21 @@ a.roadmap-level:hover {
 .bookmark-toggle .bookmark-icon {
   flex: none;
 }
+
+/* 북마크한 이론 목록 (테마 대응 토큰 — 라이트/다크 양쪽) */
+.bookmark-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.bookmark-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 8px;
+  background: var(--surface, #ffffff); border: 1px solid var(--line, #d9e7ee);
+}
+.bookmark-level {
+  flex: 0 0 auto; font-size: 12px; font-weight: 700; letter-spacing: .3px;
+  padding: 4px 10px; border-radius: 999px;
+  color: var(--kv-cyan, #22b8c8); background: rgba(34, 184, 200, 0.14);
+}
+.bookmark-body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bookmark-title { font-weight: 600; color: var(--text, #132331); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bookmark-node { font-size: 13px; color: var(--muted, #607181); }
+.bookmark-cta { flex: 0 0 auto; }
+.bookmark-empty { color: var(--muted, #607181); padding: 10px 2px; }

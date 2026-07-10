@@ -9,9 +9,7 @@ import com.acorn.elearning.learning.model.LearningProgress;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +27,14 @@ public class ProgressService {
 
     private final LearningProgressMapper learningProgressMapper;
     private final CurriculumNodeMapper curriculumNodeMapper;
+    private final CurriculumService curriculumService;
 
     public ProgressService(LearningProgressMapper learningProgressMapper,
-                           CurriculumNodeMapper curriculumNodeMapper) {
+                           CurriculumNodeMapper curriculumNodeMapper,
+                           CurriculumService curriculumService) {
         this.learningProgressMapper = learningProgressMapper;
         this.curriculumNodeMapper = curriculumNodeMapper;
+        this.curriculumService = curriculumService;
     }
 
     /**
@@ -93,19 +94,15 @@ public class ProgressService {
     }
 
     /**
-     * 로드맵의 완료/현재/잠금 판정을 노드별 learning_progress로 계산한다. (평균 근사치 아님)
-     * - completedPlanets: planetNo 오름차순으로 "완료된 행성"이 앞에서부터 몇 개 연속인지.
-     *   행성은 순차 학습이라 첫 미완료 행성에서 멈춘다(그 뒤 행성이 완료 상태여도 잠금으로 본다).
-     *   완료 기준 = 이론 완료 AND 문제풀이 7/10 통과 (lesson_completed=1 AND practice_passed=1).
-     * - progressPercent: 전체 행성 대비 진행률 = 행성별 progress_rate 합 / 전체 행성 수(진행 행이 없는 행성은 0%).
+     * 로드맵의 완료/현재/잠금 판정을 행성별 "레슨 단위" 집계로 계산한다.
+     * (노드 플래그 learning_progress가 아니라 user_lesson_progress 집계가 source of truth —
+     *  노드 플래그는 첫 레슨 완료에도 켜져 행성 조기완료로 잘못 뜨던 문제를 해소한다.)
+     * - 행성 완료 = required(활성·필수) 레슨이 1개 이상이고, 그 전부가 theory+practice 완료.
+     * - completedPlanets: planetNo 오름차순으로 앞에서부터 연속 완료된 행성 수.
+     *   행성은 순차 학습이라 첫 미완료 행성에서 멈춘다(그 뒤 완료여도 잠금으로 본다).
+     * - progressPercent: 행성별 (완료 required / 전체 required)의 평균(%). required 0인 행성은 0%.
      */
     public RoadmapProgress computeRoadmapProgress(Long userId, Long subjectId, List<CurriculumNode> roadmap) {
-        // (user, subject) 진행 행을 nodeId로 매핑 — learning_progress는 (user,subject,node) UNIQUE라 노드당 최대 1행.
-        Map<Long, LearningProgress> byNodeId = new HashMap<>();
-        for (LearningProgress row : learningProgressMapper.findByUserIdAndSubjectId(userId, subjectId)) {
-            byNodeId.put(row.getNodeId(), row);
-        }
-
         List<CurriculumNode> planets = roadmap.stream()
                 .filter(node -> NODE_TYPE_PLANET.equals(node.getNodeType()) && node.getPlanetNo() != null)
                 .sorted(Comparator.comparingInt(CurriculumNode::getPlanetNo))
@@ -117,12 +114,15 @@ public class ProgressService {
         double rateSum = 0d;
 
         for (CurriculumNode planet : planets) {
-            LearningProgress row = byNodeId.get(planet.getNodeId());
-            if (row != null && row.getProgressRate() != null) {
-                rateSum += row.getProgressRate().doubleValue();
-            }
+            Long nodeId = planet.getNodeId();
+            int required = curriculumService.countRequiredLessons(nodeId);
+            int completed = curriculumService.countCompletedRequiredLessons(userId, nodeId);
+            boolean planetDone = required > 0 && completed >= required;
+
+            rateSum += (required > 0) ? (completed * 100.0 / required) : 0d;
+
             if (contiguous) {
-                if (isCompleted(row)) {
+                if (planetDone) {
                     completedPlanets++;
                 } else {
                     contiguous = false;
@@ -132,13 +132,6 @@ public class ProgressService {
 
         int progressPercent = (planetCount == 0) ? 0 : (int) Math.round(rateSum / planetCount);
         return new RoadmapProgress(completedPlanets, planetCount, progressPercent);
-    }
-
-    /** 단원(행성) 완료 = 이론 완료 AND 문제풀이 통과 (10문제 중 7개 이상 정답이면 통과). */
-    private boolean isCompleted(LearningProgress row) {
-        return row != null
-                && Boolean.TRUE.equals(row.getLessonCompleted())
-                && Boolean.TRUE.equals(row.getPracticePassed());
     }
 
     /**
