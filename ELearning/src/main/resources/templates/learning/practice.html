@@ -44,7 +44,13 @@
 
       <!--이동경로 -->
       <div class="practice-footer">
-        <a th:href="@{/learning/review/list}">오답노트 보기</a>
+        <a th:if="${completeResult != null}"
+           th:href="@{/learning/review/list(
+           nodeId=${completeResult.data()['nodeId']},
+           lessonId=${completeResult.data()['lessonId']}
+           )}">
+          오답노트 보기
+        </a>
         <a th:if="${completeResult != null and completeResult.data()['primaryPath'] != null}"
            th:href="${completeResult.data()['primaryPath']}"
            th:text="${completeResult.data()['primaryLabel']}">

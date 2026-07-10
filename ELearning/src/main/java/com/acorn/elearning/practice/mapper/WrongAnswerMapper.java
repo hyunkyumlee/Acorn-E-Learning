@@ -17,5 +17,8 @@ public interface WrongAnswerMapper {
 
     int updateWrongAnswerOnNewMistake(WrongAnswer wrongAnswer);
 
+    //추가
+    List<WrongAnswer> findWrongAnswersByUserIdAndNodeId(Long userId, Long nodeId);
+    List<WrongAnswer> findWrongAnswersByUserIdAndLessonId(Long userId, Long lessonId);
 
 }

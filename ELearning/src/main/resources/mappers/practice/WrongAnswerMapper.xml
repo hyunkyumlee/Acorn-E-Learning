@@ -72,4 +72,24 @@
         updated_at = NOW()
         WHERE wrong_answer_id = #{wrongAnswerId}
     </update>
+
+    <!--추가-->
+    <select id="findWrongAnswersByUserIdAndNodeId" resultMap="WrongAnswerResultMap">
+        SELECT wa.*
+        FROM wrong_answers wa
+        JOIN practice_problems pp ON wa.problem_id = pp.problem_id
+        JOIN lessons l ON pp.lesson_id = l.lesson_id
+        WHERE wa.user_id = #{userId}
+        AND l.node_id = #{nodeId}
+        ORDER BY wa.updated_at DESC, wa.wrong_answer_id DESC
+    </select>
+
+    <select id="findWrongAnswersByUserIdAndLessonId" resultMap="WrongAnswerResultMap">
+        SELECT wa.*
+        FROM wrong_answers wa
+        JOIN practice_problems pp ON wa.problem_id = pp.problem_id
+        WHERE wa.user_id = #{userId}
+        AND pp.lesson_id = #{lessonId}
+        ORDER BY wa.wrong_answer_id DESC
+    </select>
 </mapper>

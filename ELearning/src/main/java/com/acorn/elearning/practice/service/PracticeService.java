@@ -324,7 +324,9 @@ public class PracticeService {
                     "primaryPath", primaryPath,
                     "primaryLabel", primaryLabel,
                     "secondaryPath", secondaryPath,
-                    "secondaryLabel", secondaryLabel
+                    "secondaryLabel", secondaryLabel,
+                    "nodeId", attempt.getNodeId(),
+                    "lessonId", attempt.getLessonId()
             );
 
             return PracticeSetResponse.success(data);

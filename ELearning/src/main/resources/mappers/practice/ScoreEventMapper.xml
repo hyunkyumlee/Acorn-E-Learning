@@ -25,4 +25,10 @@
         )
     </insert>
 
+    <select id="countByIdempotencyKey" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM score_events
+        WHERE idempotency_key = #{idempotencyKey}
+    </select>
+
 </mapper>

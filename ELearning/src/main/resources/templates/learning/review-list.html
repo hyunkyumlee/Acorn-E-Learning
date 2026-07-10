@@ -21,9 +21,28 @@
 <div th:replace="~{fragments/topbar :: topbar}"></div>
 
 <main class="page-shell learning-screen">
+  <!--
   <section class="practice-header">
     <h1 th:text="${view.title()}">오답 목록</h1>
     <p>틀린 문제를 확인하고 다시 학습해보세요.</p>
+  </section>
+-->
+  <section class="practice-header">
+    <h1 th:text="${view.title()}">오답 목록</h1>
+    <p>틀린 문제를 확인하고 다시 학습해보세요.</p>
+    <!-- 오답표시 기준-->
+    <p th:if="${lessonId != null}">
+      현재 레슨(lessonId=<span th:text="${lessonId}">0</span>) 기준 오답만 표시 중입니다.
+    </p>
+
+    <p th:if="${lessonId == null and nodeId != null}">
+      현재 행성(nodeId=<span th:text="${nodeId}">0</span>) 기준 오답만 표시 중입니다.
+    </p>
+
+    <p th:if="${lessonId == null and nodeId == null}">
+      전체 오답을 표시 중입니다.
+    </p>
+    <!-- -->
   </section>
 
   <section class="practice-body">
@@ -43,10 +62,16 @@
                  th:each="item : ${view.attributes()['wrongAnswers']}">
           <h2 th:text="${item['question']}">문제 내용</h2>
 
+          <p th:if="${item.lessonId != null}">
+            레슨 ID: <span th:text="${item.lessonId}">0</span>
+          </p>
+
           <p>
             문제 ID:
             <span th:text="${item['problemId']}">1</span>
           </p>
+
+
 
           <p>
             오답 횟수:
