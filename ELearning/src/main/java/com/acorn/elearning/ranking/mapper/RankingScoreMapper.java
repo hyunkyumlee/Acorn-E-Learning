@@ -2,6 +2,7 @@ package com.acorn.elearning.ranking.mapper;
 
 import com.acorn.elearning.ranking.model.RankingScore;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface RankingScoreMapper {
@@ -9,4 +10,12 @@ public interface RankingScoreMapper {
     List<RankingScore> findAll();
     int insert(RankingScore model);
     int update(RankingScore model);
+
+    List<Map<String, Object>> findWeeklyGlobalRanking();
+
+    List<Map<String, Object>> findWeeklySubjectRanking(Long subjectId);
+
+    Integer findWeeklyUserScore(Long userId);
+
+    Integer findWeeklyUserSubjectScore(Long userId, Long subjectId);
 }
