@@ -32,7 +32,8 @@ public class SessionService {
     }
 
     public void logout(HttpSession session) {
-        session.removeAttribute(SessionUser.SESSION_KEY);
+        // removeAttribute 만 하면 세션 ID가 유지돼 세션 고정(session fixation) 공격에 취약 -> 세션 자체를 폐기
+        session.invalidate();
     }
 
     public UserSessionResponse toLoginResponse(SessionUser sessionUser) {
@@ -52,14 +53,4 @@ public class SessionService {
     public UserSessionResponse toSignupResponse(SessionUser sessionUser) {
         return UserSessionResponse.fromSignup(sessionUser);
     }
-
-
-
-//    public Map<String, Object> stub(String action) {
-//        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-//        // SessionUser sessionUser = (SessionUser) httpSession.getAttribute("LOGIN_USER");
-//        // if (sessionUser == null) { return Map.of("authenticated", false); }
-//        // return Map.of("authenticated", true, "user", sessionUser);
-//        return Map.of("action", action, "status", "SKELETON");
-//    }
 }

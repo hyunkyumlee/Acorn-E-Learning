@@ -52,7 +52,10 @@
 
     <update id="update" parameterType="com.acorn.elearning.auth.model.SocialAccount">
         update social_accounts
-        set provider_email = #{providerEmail}, is_active = #{isActive}, disconnected_at = #{disconnectedAt}
+        set provider_email = #{providerEmail},
+            provider_email_verified = #{providerEmailVerified},
+            is_active = #{isActive},
+            disconnected_at = #{disconnectedAt}
         where social_account_id = #{socialAccountId}
     </update>
 
