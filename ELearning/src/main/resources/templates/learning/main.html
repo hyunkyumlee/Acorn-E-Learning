@@ -42,7 +42,7 @@
           <h2 class="mission-title" th:text="${currentNode.title}">Java 배열 행성</h2>
           <p class="mission-desc" th:text="${currentNode.description}">현재 학습 중인 단원입니다.</p>
           <a class="button primary mission-cta" th:href="@{/learning/nodes/{id}/lessons(id=${currentNode.nodeId})}">
-            이어서 학습하기
+            <span th:text="${currentPlanetStarted} ? '이어서 학습하기' : '학습 시작하기'">이어서 학습하기</span>
             <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
           </a>
         </section>
@@ -230,7 +230,7 @@
                       <span th:text="${node.nodeType == 'GATE'
                               ? (gateState == 'passed' ? '통과 · 재응시' : (gateState == 'ready' ? '응시 가능' : '잠김'))
                               : (node.planetNo <= completedPlanets ? '완료'
-                                  : (node.planetNo == completedPlanets + 1 ? '학습 중' : '잠김'))}">상태</span>
+                                  : (node.planetNo == completedPlanets + 1 ? (currentPlanetStarted ? '학습 중' : '학습 전') : '잠김'))}">상태</span>
                     </span>
                   </a>
                   <!-- hover/focus 카드: 지그재그 빈 쪽에 상태태그·이름·설명·CTA (참고 카드 구조를 charcoal로) -->
@@ -248,7 +248,7 @@
                             th:text="${node.nodeType == 'GATE'
                                 ? (gateState == 'passed' ? '통과 · 재응시' : (gateState == 'ready' ? '응시 가능' : '잠김'))
                                 : (node.planetNo <= completedPlanets ? '완료'
-                                    : (node.planetNo == completedPlanets + 1 ? '학습 중' : '잠김'))}">완료</span>
+                                    : (node.planetNo == completedPlanets + 1 ? (currentPlanetStarted ? '학습 중' : '학습 전') : '잠김'))}">완료</span>
                     </div>
                     <div class="roadmap-card-body">
                       <strong class="roadmap-card-title" th:text="${node.title}">행성 이름</strong>
@@ -301,7 +301,7 @@
           <h2 class="console-card-title">단원 진행 현황</h2>
           <div class="progress-meter">
             <div class="progress-meter-head">
-              <span>이론 학습</span>
+              <span>진행률</span>
               <strong th:text="${progressPercent} + '%'">0%</strong>
             </div>
             <div class="progress-bar"><span th:style="'width:' + ${progressPercent} + '%'"></span></div>
@@ -317,11 +317,14 @@
           <p class="status-sub" th:if="${currentNode != null}">다음 단원: <strong th:text="${currentNode.title}">배열</strong> 🔒</p>
         </section>
 
-        <!-- 내 랭킹 (ranking 도메인 미연결 → placeholder) -->
-        <section class="console-card status-card is-placeholder">
+        <!-- 내 랭킹 (ranking 도메인 read: 주간 통합 기준) -->
+        <section class="console-card status-card">
           <h2 class="console-card-title">내 랭킹</h2>
-          <p class="status-sub">통합 –위 · Java –위 · 알고리즘 –위</p>
-          <p class="status-sub">데이터 연결 예정 (ranking 도메인). 출석은 랭킹 점수 제외.</p>
+          <p class="status-sub">
+            통합 <strong th:text="${myRanking != null ? myRanking.rankNo : '–'}">–</strong>위
+            · <strong th:text="${myRanking != null ? myRanking.score : 0}">0</strong>점
+          </p>
+          <p class="status-sub">주간 기준 · 출석은 랭킹 점수 제외.</p>
         </section>
       </aside>
     </div>

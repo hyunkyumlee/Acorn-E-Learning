@@ -8,8 +8,10 @@ import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.ProgressService;
 import com.acorn.elearning.learning.view.LearningDashboardView;
 import com.acorn.elearning.learning.view.RoadmapLevelTab;
+import com.acorn.elearning.ranking.service.RankingService;
 import com.acorn.elearning.security.SessionUser;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,15 +44,18 @@ public class LearningController {
     private final CurriculumService curriculumService;
     private final ProgressService progressService;
     private final AttendanceService attendanceService;
+    private final RankingService rankingService;
 
     public LearningController(LearningService learningService,
                               CurriculumService curriculumService,
                               ProgressService progressService,
-                              AttendanceService attendanceService) {
+                              AttendanceService attendanceService,
+                              RankingService rankingService) {
         this.learningService = learningService;
         this.curriculumService = curriculumService;
         this.progressService = progressService;
         this.attendanceService = attendanceService;
+        this.rankingService = rankingService;
     }
 
     @GetMapping("/learning")
@@ -128,6 +133,21 @@ public class LearningController {
                 .findFirst()
                 .orElse(null);
         model.addAttribute("currentNode", currentNode);
+
+        // 현재 행성을 시작했는지(이론 또는 문제 중 하나라도 손댄 레슨이 있으면 시작) → 라벨 '학습 중'(시작함) vs '학습 전'(미시작).
+        // 한 번도 안 한 과목은 1행성이 current지만 진행 전무 → '학습 전'으로 표시.
+        boolean currentPlanetStarted = currentNode != null
+                && curriculumService.getLessonProgressMap(user.userId(), currentNode.getNodeId())
+                        .values().stream()
+                        .anyMatch(pr -> pr != null
+                                && (Boolean.TRUE.equals(pr.getTheoryCompleted())
+                                    || Boolean.TRUE.equals(pr.getPracticePassed())));
+        model.addAttribute("currentPlanetStarted", currentPlanetStarted);
+
+        // 내 랭킹(주간 통합 기준) = ranking 도메인 read. 출석/streak 점수는 랭킹에서 제외됨.
+        Map<String, Object> myRanking =
+                (Map<String, Object>) rankingService.myRanking(user, null).data().get("mySummary");
+        model.addAttribute("myRanking", myRanking);
 
         model.addAttribute("screen", "learning/main");
         return "learning/main";

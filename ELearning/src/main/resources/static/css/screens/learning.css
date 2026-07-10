@@ -848,37 +848,46 @@ a.roadmap-level:hover {
 }
 
 /* ── 레슨 선택 화면(/learning/nodes/{nodeId}/lessons) ── */
-.lesson-list-desc { color: var(--ui-text-muted, #9aa0aa); margin-top: 4px; }
-.lesson-list-progress { margin-top: 8px; font-size: 14px; color: var(--ui-text-muted, #9aa0aa); }
-.lesson-list-progress strong { color: var(--kv-cyan, #22b8c8); }
-.lesson-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.lesson-list-desc { color: var(--muted, #607181); margin-top: 4px; }
+.lesson-list-progress { margin-top: 8px; font-size: 14px; color: var(--muted, #607181); }
+.lesson-list-progress strong { color: var(--primary, #22b8c8); }
+.lesson-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3, 12px); }
 .lesson-list-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 16px; border-radius: 8px;
-  background: var(--ui-surface-2, #202127);
+  display: flex; align-items: center; gap: var(--space-4, 16px);
+  padding: var(--space-4, 16px) var(--space-5, 20px); border-radius: 12px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--line, #d9e7ee);
+  transition: border-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
+}
+.lesson-list-item:hover {
+  border-color: var(--primary, #22b8c8);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
 }
 .lesson-list-no {
-  flex: 0 0 auto; width: 34px; height: 34px;
-  display: grid; place-items: center; border-radius: 8px;
-  background: var(--ui-surface-3, #2a2b32);
-  font-weight: 700; font-size: 13px; color: var(--ui-text-muted, #9aa0aa);
+  flex: 0 0 auto; width: 36px; height: 36px;
+  display: grid; place-items: center; border-radius: 10px;
+  background: var(--surface-soft, #eef8fb);
+  border: 1px solid var(--line, #d9e7ee);
+  font-weight: 700; font-size: 13px; color: var(--muted, #607181);
 }
 .lesson-list-body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.lesson-list-title { font-weight: 600; color: var(--ui-text-strong, #f2f4f7); }
+.lesson-list-title { font-weight: 700; color: var(--text, #132331); }
 .lesson-list-summary {
-  font-size: 13px; color: var(--ui-text-muted, #9aa0aa);
+  font-size: 13px; color: var(--muted, #607181);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .lesson-list-status {
-  flex: 0 0 auto; font-size: 12px; font-weight: 600;
+  flex: 0 0 auto; font-size: 12px; font-weight: 700;
   padding: 4px 10px; border-radius: 999px; white-space: nowrap;
 }
-.lesson-list-status.is-todo { color: #9aa0aa; background: rgba(154, 160, 170, 0.14); }
-.lesson-list-status.is-theory { color: #e0b64a; background: rgba(224, 182, 74, 0.16); }
-.lesson-list-status.is-done { color: #4ac77e; background: rgba(74, 199, 126, 0.16); }
+.lesson-list-status.is-todo { color: var(--muted, #607181); background: color-mix(in srgb, var(--muted, #607181) 12%, transparent); }
+.lesson-list-status.is-theory { color: var(--warning, #b7791f); background: color-mix(in srgb, var(--warning, #b7791f) 14%, transparent); }
+.lesson-list-status.is-practice { color: var(--primary, #22b8c8); background: color-mix(in srgb, var(--primary, #22b8c8) 14%, transparent); }
+.lesson-list-status.is-done { color: var(--success, #15803d); background: color-mix(in srgb, var(--success, #15803d) 14%, transparent); }
 .lesson-list-cta { flex: 0 0 auto; }
 .lesson-list-back { margin-top: 18px; }
-.lesson-list-empty { color: var(--ui-text-muted, #9aa0aa); padding: 8px 0; }
+.lesson-list-empty { color: var(--muted, #607181); padding: 8px 0; }
 
 /* 호버로 위에 오도록 (잠긴 것 포함 모든 노드 호버 반응) */
 .roadmap-node:hover {
@@ -1090,23 +1099,23 @@ a.roadmap-level:hover {
   visibility: hidden;
   pointer-events: none;
   transform: translateY(-50%) scale(0.96);
-  transition: opacity 150ms ease, transform 200ms cubic-bezier(0.34, 1.2, 0.5, 1);
+  /* 이탈 시 160ms 유예 후 사라짐 → 행성→카드(학습하기)로 마우스 옮길 시간 확보. 표시는 hover 규칙에서 즉시. */
+  transition: opacity 150ms ease 160ms, visibility 0s linear 310ms, transform 200ms cubic-bezier(0.34, 1.2, 0.5, 1) 160ms;
   z-index: 20;
 }
-/* 행성이 좌측(card-right) → 카드 오른쪽 / 우측(card-left) → 카드 왼쪽. 둘 다 중앙 쪽으로 열려 화면 밖으로 안 나감.
-   간격을 넉넉히(26px) 두어 행성과 카드가 붙어 보이지 않게. */
-.roadmap-node.card-right .roadmap-card { left: calc(100% + 26px); }
-.roadmap-node.card-left  .roadmap-card { right: calc(100% + 26px); }
-/* 행성↔카드 사이 투명 브릿지: 넓어진 간격을 덮어 마우스 이동 시 hover 안 끊기게 */
+/* 행성이 좌측(card-right) → 카드 오른쪽 / 우측(card-left) → 카드 왼쪽. 둘 다 중앙 쪽으로 열려 화면 밖으로 안 나감. */
+.roadmap-node.card-right .roadmap-card { left: calc(100% + 16px); }
+.roadmap-node.card-left  .roadmap-card { right: calc(100% + 16px); }
+/* 행성↔카드 사이 투명 브릿지: 간격+상하 여유까지 덮어 마우스 이동 시 hover 안 끊기게 */
 .roadmap-card::before {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 30px;
+  top: -16px;
+  bottom: -16px;
+  width: 26px;
 }
-.roadmap-node.card-right .roadmap-card::before { left: -30px; }
-.roadmap-node.card-left  .roadmap-card::before { right: -30px; }
+.roadmap-node.card-right .roadmap-card::before { left: -24px; }
+.roadmap-node.card-left  .roadmap-card::before { right: -24px; }
 
 .roadmap-node:hover .roadmap-card,
 .roadmap-node:focus-within .roadmap-card {
@@ -1114,6 +1123,7 @@ a.roadmap-level:hover {
   visibility: visible;
   pointer-events: auto;
   transform: translateY(-50%) scale(1);
+  transition-delay: 0s; /* 표시는 즉시 */
 }
 
 /* 카드 상단 cover: 미니 행성 + 번호(좌) + 상태 태그(우). 상태색 그라데이션 배경. */
@@ -1438,8 +1448,36 @@ a.roadmap-level:hover {
 
 /* 본문 가독성 */
 .lesson-summary { color: var(--muted); }
-.lesson-content { white-space: pre-wrap; line-height: 1.7; }
+.lesson-content { white-space: pre-wrap; line-height: 1.75; color: var(--text); font-size: 16px; }
 .lesson-meta { margin-top: var(--space-3); font-size: 13px; color: var(--muted); }
+
+/* 이론 상세/북마크는 읽기 페이지 → 대시보드(1480px)보다 좁은 읽기 폭.
+   내용이 짧을 때 상단에 몰리고 아래가 텅 비어 보이므로 세로 중앙 배치(safe center로 긴 내용은 자연히 위정렬). */
+.page-shell.learning-screen.lesson-reading {
+  max-width: 900px;
+  min-height: calc(100dvh - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+}
+
+/* 예시 코드 블록(pre) — 인라인 코드배지와 구분되는 실제 코드 패널 */
+.learning-screen pre {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow-x: auto;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.learning-screen pre code {
+  border: 0; background: none; padding: 0;
+  border-radius: 0; font-size: inherit; color: inherit;
+}
 
 /* 이론학습 제목 줄: 제목 좌 + 완료 상태 칩 우 */
 .lesson-head {
@@ -1502,19 +1540,33 @@ a.roadmap-level:hover {
 }
 
 /* 북마크한 이론 목록 (테마 대응 토큰 — 라이트/다크 양쪽) */
-.bookmark-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.bookmark-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3, 12px); }
 .bookmark-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 16px; border-radius: 8px;
+  display: flex; align-items: center; gap: var(--space-4, 16px);
+  padding: var(--space-4, 16px) var(--space-5, 20px); border-radius: 12px;
   background: var(--surface, #ffffff); border: 1px solid var(--line, #d9e7ee);
+  transition: border-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
+}
+.bookmark-item:hover {
+  border-color: var(--primary, #22b8c8);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
 }
 .bookmark-level {
   flex: 0 0 auto; font-size: 12px; font-weight: 700; letter-spacing: .3px;
   padding: 4px 10px; border-radius: 999px;
-  color: var(--kv-cyan, #22b8c8); background: rgba(34, 184, 200, 0.14);
+  color: var(--primary, #22b8c8);
+  background: color-mix(in srgb, var(--primary, #22b8c8) 14%, transparent);
 }
 .bookmark-body { flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.bookmark-title { font-weight: 600; color: var(--text, #132331); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bookmark-title { font-weight: 700; color: var(--text, #132331); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bookmark-node { font-size: 13px; color: var(--muted, #607181); }
 .bookmark-cta { flex: 0 0 auto; }
-.bookmark-empty { color: var(--muted, #607181); padding: 10px 2px; }
+.bookmark-empty {
+  color: var(--muted, #607181);
+  text-align: center;
+  padding: var(--space-10, 40px) var(--space-4, 16px);
+  border: 1px dashed var(--line, #d9e7ee);
+  border-radius: 12px;
+  background: var(--surface-soft, #eef8fb);
+}
