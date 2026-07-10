@@ -32,7 +32,8 @@
   animation: onbStepIn 0.38s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-@keyframes onbStepIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+/* transform(translateY) 사용 금지: transform 조상은 position:fixed 푸터의 기준을 바꿔 애니메이션 동안 푸터를 끌어올렸다 정상화되는 튐을 유발. 순수 페이드만. */
+@keyframes onbStepIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes onbFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes onbFloat  { 0%, 100% { transform: translate(-4.5%, 0); } 50% { transform: translate(-4.5%, -7px); } }
 @keyframes onbGlow   { 0%, 100% { opacity: 0.35; transform: scale(0.92); } 50% { opacity: 0.7; transform: scale(1.08); } }

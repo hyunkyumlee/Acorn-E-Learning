@@ -164,10 +164,13 @@ public class LevelTestService {
         // 4) 프로필 레벨 반영(learning 전용 write 매퍼 — 6번 공유 매퍼 미사용).
         profileWriteMapper.updateLevel(userId, resultLevel);
 
-        // 5) unlock 이력 반영(멱등). DB 명세: "Bronze는 레벨 테스트 이후 활성화, Silver/Gold unlock은 AI 시험 2/3 통과 시 생성".
-        //    → 레벨 테스트 결과가 Silver/Gold여도 여기서 여는 unlock 행은 BRONZE 1건. (상위 레벨 언락은 AI 시험 소관)
-        //    ⚠️ REST 응답은 unlockedLevels[](복수)이나 행 개수 규칙이 명세에 확정 안 됨 → 팀장 확인 대상(현재는 DB 비고 기준 BRONZE).
-        upsertUnlock(userId, subjectId, LEVEL_BRONZE);
+        // 5) unlock 이력 반영(멱등). 레벨 테스트는 배치(placement) 성격 → 판정 등급까지의 레벨을 모두 연다.
+        //    (예: GOLD 판정 → BRONZE·SILVER·GOLD 3건). current_level_code와 user_level_unlocks가 일치해야
+        //    해당 레벨 학습이 403(AUTH_FORBIDDEN)으로 막히지 않는다. 상위 레벨의 정규 진행 해금은
+        //    별도로 AI 코딩테스트 통과(UnlockService) 경로에서 생성된다.
+        for (String level : levelsUpTo(resultLevel)) {
+            upsertUnlock(userId, subjectId, level);
+        }
 
         return new LevelTestResultView(attemptId, subjectId, resultLevel, correctCount, totalCount);
     }
@@ -197,6 +200,17 @@ public class LevelTestService {
         return unlockMapper.findByUserAndSubject(userId, subjectId).stream()
                 .map(UserLevelUnlock::getLevelCode)
                 .toList();
+    }
+
+    /** 낮은 레벨 → 판정 레벨(포함)까지의 레벨 코드 목록. BRONZE ≤ SILVER ≤ GOLD 순. */
+    private static List<String> levelsUpTo(String resultLevel) {
+        if (LEVEL_GOLD.equals(resultLevel)) {
+            return List.of(LEVEL_BRONZE, LEVEL_SILVER, LEVEL_GOLD);
+        }
+        if (LEVEL_SILVER.equals(resultLevel)) {
+            return List.of(LEVEL_BRONZE, LEVEL_SILVER);
+        }
+        return List.of(LEVEL_BRONZE);
     }
 
     /** 정답 개수 → 등급. 0-2 Bronze / 3-5 Silver / 6-8 Gold. */

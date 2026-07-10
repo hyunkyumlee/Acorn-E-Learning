@@ -1,6 +1,8 @@
 package com.acorn.elearning.learning.controller;
 
+import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.service.CurriculumService;
+import com.acorn.elearning.learning.support.PlanetCatalog;
 import com.acorn.elearning.security.SessionUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +31,13 @@ public class LessonSelectionController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long nodeId, Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
-        model.addAttribute("node", curriculumService.getNodeDetail(nodeId));
+        CurriculumNode node = curriculumService.getNodeDetail(nodeId);
+        model.addAttribute("node", node);
+        // 행성 히어로용 표시 메타(이름 · 테마 스토리). GATE/행성 아님 노드는 히어로 미표시.
+        if (node != null && !"GATE".equals(node.getNodeType()) && node.getPlanetNo() != null) {
+            model.addAttribute("planet",
+                    PlanetCatalog.resolve(node.getLevelCode(), node.getPlanetNo(), node.getTitle(), null));
+        }
         model.addAttribute("lessons", curriculumService.getLessonsByNode(nodeId));
         model.addAttribute("userLessonProgressMap",
                 curriculumService.getLessonProgressMap(user.userId(), nodeId));
