@@ -10,21 +10,23 @@
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
   <main class="page-shell learning-screen lesson-reading">
-    <!-- 화면 설명 문구 제거(팀장 지침: 기능 구현되면 삭제). 제목만 유지. -->
-    <section class="page-heading"><span class="eyebrow">Learning</span><h1>이론 학습</h1></section>
+    <a class="lesson-back-link" th:href="${lesson != null ? '/learning/nodes/' + lesson.nodeId + '/lessons' : '/learning'}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+      <span th:text="${lesson != null ? '레슨 목록으로' : '학습 로드맵으로'}">레슨 목록으로</span>
+    </a>
+    <section class="page-heading"><span class="eyebrow">이론 학습</span><h1 th:text="${lesson != null ? lesson.title : '이론 학습'}">이론 학습</h1></section>
 
     <!-- 이론 완료(LEARN-005) 후 redirect flash 메시지 -->
     <p class="flash-message" th:if="${message != null}" th:text="${message}">처리되었습니다.</p>
 
     <section class="panel" th:if="${lesson != null}">
       <div class="lesson-head">
-        <h2 class="lesson-title" th:text="${lesson.title}">lesson 제목</h2>
+        <p class="lesson-summary" th:if="${lesson.summary != null}" th:text="${lesson.summary}">요약</p>
         <span th:if="${lessonCompleted}" class="lesson-status-chip">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"></path></svg>
           이론 완료됨
         </span>
       </div>
-      <p class="lesson-summary" th:if="${lesson.summary != null}" th:text="${lesson.summary}">요약</p>
       <hr/>
       <div class="lesson-content" th:text="${lesson.content}">본문</div>
       <pre th:if="${lesson.exampleCode != null}"><code th:text="${lesson.exampleCode}">예시 코드</code></pre>
@@ -58,12 +60,14 @@
       </div>
     </section>
 
-    <section class="panel" th:if="${lesson == null}">
-      <h2>lesson을 찾을 수 없습니다</h2>
-      <p>해당 lessonId의 데이터가 없습니다. (lessons seed 확인)</p>
+    <section class="panel bookmark-empty-panel" th:if="${lesson == null}">
+      <span class="empty-illo" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      </span>
+      <p class="empty-title">이론을 찾을 수 없어요</p>
+      <p class="empty-sub">요청한 레슨이 없거나 아직 준비 중이에요. 학습 로드맵에서 다시 선택해 주세요.</p>
+      <a class="button primary" th:href="@{/learning}">학습 로드맵으로 가기</a>
     </section>
-
-    <p class="lesson-back"><a th:href="@{/learning}">← 학습 메인으로</a></p>
   </main>
 </body>
 </html>

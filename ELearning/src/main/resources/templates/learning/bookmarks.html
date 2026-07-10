@@ -9,18 +9,28 @@
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell learning-screen lesson-reading">
-    <section class="page-heading">
-      <span class="eyebrow">Learning</span>
+  <main class="page-shell learning-screen">
+    <a class="lesson-back-link" th:href="@{/learning}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+      학습 로드맵으로
+    </a>
+
+    <section class="page-heading bookmark-heading">
+      <span class="eyebrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path></svg>
+        Learning
+      </span>
       <h1>북마크한 이론</h1>
-      <p class="lesson-list-progress" th:if="${bookmarks != null}">
-        저장한 이론 <strong th:text="${bookmarks.totalCount}">0</strong>개
-      </p>
+      <p class="page-heading-sub">이론 학습 중 저장해 둔 레슨을 한곳에서 다시 펼쳐 볼 수 있어요.</p>
     </section>
 
-    <section class="panel">
-      <ul class="bookmark-list" th:if="${bookmarks != null and !bookmarks.items.isEmpty()}">
+    <section class="panel bookmark-panel" th:if="${bookmarks != null and !bookmarks.items.isEmpty()}">
+      <div class="bookmark-count">저장한 이론 <strong th:text="${bookmarks.totalCount}">0</strong>개</div>
+      <ul class="bookmark-list">
         <li class="bookmark-item" th:each="item : ${bookmarks.items}">
+          <span class="bookmark-ribbon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path></svg>
+          </span>
           <span class="bookmark-level" th:text="${item.levelCode}">BRONZE</span>
           <span class="bookmark-body">
             <span class="bookmark-title" th:text="${item.lessonTitle}">레슨 제목</span>
@@ -30,13 +40,16 @@
              th:href="@{/learning/lessons/{id}(id=${item.lessonId})}">이어보기</a>
         </li>
       </ul>
-
-      <p class="bookmark-empty" th:if="${bookmarks == null or bookmarks.items.isEmpty()}">
-        아직 북마크한 이론이 없어요. 이론 학습 화면에서 북마크(리본)를 눌러 저장하면 여기 모여요.
-      </p>
     </section>
 
-    <p class="lesson-list-back"><a th:href="@{/learning}">← 학습 메인으로</a></p>
+    <section class="panel bookmark-empty-panel" th:if="${bookmarks == null or bookmarks.items.isEmpty()}">
+      <span class="empty-illo" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path></svg>
+      </span>
+      <p class="empty-title">아직 북마크한 이론이 없어요</p>
+      <p class="empty-sub">이론 학습 화면에서 리본 아이콘을 누르면 저장되어 여기 모여요.</p>
+      <a class="button primary" th:href="@{/learning}">학습 로드맵으로 가기</a>
+    </section>
   </main>
 </body>
 </html>

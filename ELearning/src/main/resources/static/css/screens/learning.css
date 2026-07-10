@@ -349,8 +349,7 @@
   gap: var(--space-2);
   border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line));
   border-radius: var(--radius);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, var(--surface)), var(--surface));
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface));
   padding: var(--space-5);
 }
 
@@ -460,7 +459,7 @@
 /* 코딩테스트 Gate 카드(우패널 상단): 아이콘 헤더 + 단계바 + unlock 박스. warning 톤 강조. */
 .gate-card {
   border-color: color-mix(in srgb, var(--warning) 30%, var(--line));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--warning) 8%, var(--surface)), var(--surface));
+  background: color-mix(in srgb, var(--warning) 5%, var(--surface));
 }
 
 .gate-card-head {
@@ -889,6 +888,106 @@ a.roadmap-level:hover {
 .lesson-list-back { margin-top: 18px; }
 .lesson-list-empty { color: var(--muted, #607181); padding: 8px 0; }
 
+/* ── 행성 상세: 되돌아가기 / 스토리 히어로 / 학습내용 소개 / 목록 헤더 ── */
+.lesson-back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 16px; font-size: 13.5px; font-weight: 700;
+  color: var(--muted); text-decoration: none;
+}
+.lesson-back-link:hover { color: var(--primary); }
+.lesson-empty-panel { display: grid; gap: 14px; justify-items: start; }
+
+.planet-hero {
+  --lv: var(--primary);
+  position: relative;
+  display: flex; align-items: center; gap: clamp(16px, 4vw, 32px);
+  padding: clamp(20px, 4vw, 34px);
+  border-radius: 20px; border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.planet-hero.level-bronze { --lv: #d9883f; }
+.planet-hero.level-silver { --lv: #8ea6b8; }
+.planet-hero.level-gold   { --lv: #e6b23c; }
+
+.planet-hero-art {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(96px, 22vw, 150px); height: clamp(96px, 22vw, 150px);
+  display: grid; place-items: center;
+  /* 행성 실루엣(SVG 투명 영역)을 통해 비치는 은은한 원형 글로우 — 행성에 밀착. */
+  background: radial-gradient(circle at 50% 48%,
+    color-mix(in srgb, var(--lv) 20%, transparent) 0%, transparent 64%);
+}
+.planet-hero-art img {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%; object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22));
+  animation: planet-float 7s ease-in-out infinite;
+}
+@keyframes planet-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .planet-hero-art img { animation: none; } }
+
+.planet-hero-text { min-width: 0; display: grid; gap: 8px; }
+.planet-hero-level {
+  justify-self: start; font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+  padding: 3px 10px; border-radius: 999px; color: var(--lv);
+  background: color-mix(in srgb, var(--lv) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lv) 34%, var(--line));
+}
+.planet-hero-name {
+  margin: 0; font-size: clamp(22px, 3.4vw, 30px); font-weight: 850;
+  line-height: 1.15; letter-spacing: -0.01em; color: var(--text);
+}
+.planet-hero-story {
+  margin: 0; max-width: 60ch; font-size: 14px; line-height: 1.65;
+  color: color-mix(in srgb, var(--text) 74%, var(--muted)); word-break: keep-all;
+}
+.planet-hero-progress { display: flex; align-items: center; gap: 12px; margin-top: 4px; flex-wrap: wrap; }
+.planet-hero-bar {
+  flex: 1 1 160px; min-width: 120px; max-width: 280px; height: 8px;
+  border-radius: 999px; overflow: hidden;
+  background: color-mix(in srgb, var(--muted) 22%, transparent);
+}
+.planet-hero-bar i {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--lv), color-mix(in srgb, var(--lv) 60%, #ffffff));
+}
+.planet-hero-count { font-size: 13px; font-weight: 700; color: var(--muted); }
+.planet-hero-count strong { color: var(--lv); }
+
+.planet-about {
+  margin-top: 18px; padding: clamp(18px, 3vw, 26px);
+  border-radius: 16px; border: 1px solid var(--line);
+  border-left: 4px solid var(--primary); background: var(--surface);
+}
+.planet-about-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 800; letter-spacing: 0.02em; color: var(--primary);
+}
+.planet-about-title {
+  margin: 8px 0 6px; font-size: clamp(18px, 2.6vw, 22px);
+  font-weight: 800; color: var(--text); word-break: keep-all;
+}
+.planet-about-desc {
+  margin: 0; font-size: 14.5px; line-height: 1.7;
+  color: color-mix(in srgb, var(--text) 82%, var(--muted)); word-break: keep-all;
+}
+
+.lesson-list-panel { margin-top: 18px; }
+.lesson-list-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px;
+}
+.lesson-list-heading { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
+.lesson-list-head-count { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .planet-hero { flex-direction: column; text-align: center; }
+  .planet-hero-text { justify-items: center; }
+  .planet-hero-progress { justify-content: center; }
+}
+
 /* 호버로 위에 오도록 (잠긴 것 포함 모든 노드 호버 반응) */
 .roadmap-node:hover {
   z-index: 5;
@@ -1126,7 +1225,7 @@ a.roadmap-level:hover {
   transition-delay: 0s; /* 표시는 즉시 */
 }
 
-/* 카드 상단 cover: 미니 행성 + 번호(좌) + 상태 태그(우). 상태색 그라데이션 배경. */
+/* 카드 상단 cover: 미니 행성 + 행성 이름(좌) + 상태 태그(우). 상태색 그라데이션 배경. */
 .roadmap-card-cover {
   display: flex;
   align-items: center;
@@ -1180,11 +1279,18 @@ a.roadmap-level:hover {
   padding: 14px;
 }
 
-.roadmap-card-num {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 12px;
+/* 카드 상단 행성 이름(번호 대체). 미니 아트 옆에 굵게. 남는 폭을 차지하고 길면 줄바꿈. */
+.roadmap-card-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14px;
   font-weight: 850;
-  letter-spacing: 0.04em;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  word-break: keep-all;
+}
+.roadmap-node.is-locked .roadmap-card-name {
   color: var(--muted);
 }
 
@@ -1195,6 +1301,8 @@ a.roadmap-level:hover {
 /* 카드 상단 상태 태그 pill (참고: 카드 내 레벨/상태 pill). 색은 노드 상태 기준. */
 .roadmap-card-tag {
   justify-self: start;
+  flex: 0 0 auto;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1231,33 +1339,34 @@ a.roadmap-level:hover {
   border-color: color-mix(in srgb, var(--warning) 34%, var(--line));
 }
 
-.roadmap-card-title {
-  font-size: 18px;
-  font-weight: 850;
-  line-height: 1.3;
-  color: var(--text);
-  word-break: keep-all;
-}
-
-/* hover 카드 메타: "N개 레슨" (레슨 아이콘 + 텍스트) */
+/* hover 카드 메타: 실제 단원명(강조) + N개 레슨(보조). 스토리 아래 줄. */
 .roadmap-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.roadmap-card-topic {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  font-weight: 700;
+  max-width: 100%;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  color: var(--text);
+  background: color-mix(in srgb, var(--muted) 12%, transparent);
+  border: 1px solid var(--line);
+  word-break: keep-all;
+}
+.roadmap-card-lessons {
   color: var(--muted);
 }
-
-.roadmap-card-meta svg {
-  width: 13px;
-  height: 13px;
-  flex: none;
-}
+/* 스토리 설명: 카드 본문 히어로 텍스트(2~3줄). */
 .roadmap-card-desc {
   font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--muted);
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--text) 78%, var(--muted));
   word-break: keep-all;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -1455,10 +1564,8 @@ a.roadmap-level:hover {
    내용이 짧을 때 상단에 몰리고 아래가 텅 비어 보이므로 세로 중앙 배치(safe center로 긴 내용은 자연히 위정렬). */
 .page-shell.learning-screen.lesson-reading {
   max-width: 900px;
-  min-height: calc(100dvh - 200px);
   display: flex;
   flex-direction: column;
-  justify-content: safe center;
 }
 
 /* 예시 코드 블록(pre) — 인라인 코드배지와 구분되는 실제 코드 패널 */
@@ -1570,3 +1677,29 @@ a.roadmap-level:hover {
   border-radius: 12px;
   background: var(--surface-soft, #eef8fb);
 }
+
+/* 북마크 화면 보강: 헤더 서브 · 리본 아이콘 · 카운트 · 빈 상태 일러스트 */
+.page-heading-sub { margin-top: 6px; font-size: 14px; color: var(--muted); }
+.bookmark-heading .eyebrow { display: inline-flex; align-items: center; gap: 6px; }
+.bookmark-panel { display: grid; gap: 14px; }
+.bookmark-count { font-size: 13px; font-weight: 700; color: var(--muted); }
+.bookmark-count strong { color: var(--primary); }
+.bookmark-ribbon {
+  flex: 0 0 auto; width: 38px; height: 38px; display: grid; place-items: center;
+  border-radius: 10px; color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--line));
+}
+.bookmark-empty-panel {
+  display: grid; justify-items: center; gap: 10px; text-align: center;
+  padding: clamp(36px, 6vw, 64px) var(--space-5, 20px);
+}
+.empty-illo {
+  width: 76px; height: 76px; display: grid; place-items: center; border-radius: 50%;
+  color: var(--primary); margin-bottom: 4px;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--line));
+}
+.empty-title { font-size: 17px; font-weight: 800; color: var(--text); }
+.empty-sub { font-size: 13.5px; color: var(--muted); max-width: 38ch; line-height: 1.6; }
+.bookmark-empty-panel .button { margin-top: 8px; }

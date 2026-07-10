@@ -6,10 +6,13 @@ import com.acorn.elearning.learning.service.AttendanceService;
 import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.ProgressService;
+import com.acorn.elearning.learning.support.PlanetCatalog;
+import com.acorn.elearning.learning.support.PlanetCatalog.PlanetView;
 import com.acorn.elearning.learning.view.LearningDashboardView;
 import com.acorn.elearning.learning.view.RoadmapLevelTab;
 import com.acorn.elearning.ranking.service.RankingService;
 import com.acorn.elearning.security.SessionUser;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,8 +84,9 @@ public class LearningController {
         // 로드맵 대상 과목: 과목칩 선택(subjectId) 우선 → 프로필 주 과목 → JAVA fallback.
         Long roadmapSubjectId = (subjectId != null) ? subjectId
                 : (dashboard.primarySubjectId() != null ? dashboard.primarySubjectId() : DEFAULT_SUBJECT_ID);
+        String roadmapSubjectCode = subjectCodeOf(subjects, roadmapSubjectId);
         model.addAttribute("roadmapSubjectId", roadmapSubjectId);
-        model.addAttribute("roadmapSubjectCode", subjectCodeOf(subjects, roadmapSubjectId));
+        model.addAttribute("roadmapSubjectCode", roadmapSubjectCode);
 
         ////subjectid session정보저장
         session.setAttribute(SESSION_LEARNING_SUBJECT_ID, roadmapSubjectId);
@@ -106,6 +110,17 @@ public class LearningController {
         // 로드맵은 선택 레벨의 노드(한 판)만 표시 — 레벨이 섞여 planet_no가 충돌하지 않게 레벨로 스코핑.
         List<CurriculumNode> roadmap = curriculumService.getRoadmap(roadmapSubjectId, selectedLevel);
         model.addAttribute("roadmap", roadmap);
+
+        // 노드별 행성 표시 메타(아트 파일 · 이름 · 테마 스토리) = PlanetCatalog 단일 소스.
+        // (레벨, planet_no)로 15종 중 하나. GATE 노드는 행성 아트가 아니므로 제외.
+        Map<Long, PlanetView> nodePlanets = new LinkedHashMap<>();
+        for (CurriculumNode node : roadmap) {
+            if (!"GATE".equals(node.getNodeType())) {
+                nodePlanets.put(node.getNodeId(), PlanetCatalog.resolve(
+                        node.getLevelCode(), node.getPlanetNo(), node.getTitle(), roadmapSubjectCode));
+            }
+        }
+        model.addAttribute("nodePlanets", nodePlanets);
 
         // hover 카드 "N개 레슨" 메타: 노드별 활성 레슨 수(nodeId → count)
         model.addAttribute("nodeLessonCounts", curriculumService.getLessonCountsByNodes(roadmap));
