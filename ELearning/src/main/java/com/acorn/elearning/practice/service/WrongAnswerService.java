@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.acorn.elearning.practice.form.WrongAnswerRetryForm;
 import com.acorn.elearning.practice.mapper.PracticeProblemMapper;
 import com.acorn.elearning.practice.mapper.PracticeSubmissionMapper;
+import com.acorn.elearning.practice.mapper.ScoreEventMapper;
 import com.acorn.elearning.practice.mapper.WrongAnswerMapper;
 import com.acorn.elearning.practice.model.PracticeProblem;
 import com.acorn.elearning.practice.model.PracticeSubmission;
@@ -18,6 +19,8 @@ import com.acorn.elearning.practice.view.WrongAnswerSummaryView;
 import com.acorn.elearning.security.SessionUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DuplicateKeyException;
+
 
 @Service
 public class WrongAnswerService {
@@ -35,13 +38,15 @@ public class WrongAnswerService {
     private final WrongAnswerMapper wrongAnswerMapper;
     private final PracticeProblemMapper practiceProblemMapper;
     private final PracticeSubmissionMapper practiceSubmissionMapper;
+    private final ScoreEventMapper scoreEventMapper;
     private final ScoreService scoreService;
 
-    public WrongAnswerService(WrongAnswerMapper wrongAnswerMapper, PracticeProblemMapper practiceProblemMapper, PracticeSubmissionMapper practiceSubmissionMapper, ScoreService scoreService) {
+    public WrongAnswerService(WrongAnswerMapper wrongAnswerMapper, PracticeProblemMapper practiceProblemMapper, PracticeSubmissionMapper practiceSubmissionMapper, ScoreEventMapper scoreEventMapper, ScoreService scoreService) {
 
         this.wrongAnswerMapper = wrongAnswerMapper;
         this.practiceProblemMapper = practiceProblemMapper;
         this.practiceSubmissionMapper = practiceSubmissionMapper;
+        this.scoreEventMapper = scoreEventMapper;
         this.scoreService = scoreService;
     }
 
@@ -98,7 +103,9 @@ public class WrongAnswerService {
         return WrongAnswerSummaryView.from(total, pending, solved);
     }
 
-    public WrongAnswerPageView list(SessionUser sessionUser) {
+    //시그니처에 nodeId 추가
+    public WrongAnswerPageView list(SessionUser sessionUser, Long nodeId, Long lessonId) {
+        /*
         List<WrongAnswer> wrongAnswers =
                 wrongAnswerMapper.findAllWrongAnswersByUserId(sessionUser.userId());
 
@@ -119,6 +126,41 @@ public class WrongAnswerService {
 
         return WrongAnswerPageView.from(items);
     }
+    */
+        //nodeid용 분기 추가
+            List<WrongAnswer> wrongAnswers;
+        if (lessonId != null) {
+            wrongAnswers = wrongAnswerMapper.findWrongAnswersByUserIdAndLessonId(
+                    sessionUser.userId(),
+                    lessonId
+            );
+        } else if (nodeId != null) {
+                wrongAnswers = wrongAnswerMapper.findWrongAnswersByUserIdAndNodeId(
+                        sessionUser.userId(),
+                        nodeId
+                );
+            } else {
+                wrongAnswers = wrongAnswerMapper.findAllWrongAnswersByUserId(sessionUser.userId());
+            }
+
+            List<Map<String, Object>> items = wrongAnswers.stream()
+                    .map(w -> {
+                        PracticeProblem problem = practiceProblemMapper.findById(w.getProblemId())
+                                .orElseThrow(() -> new RuntimeException("문제를 찾을 수 없습니다."));
+
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("wrongAnswerId", w.getWrongAnswerId());
+                        item.put("problemId", w.getProblemId());
+                        item.put("lessonId", problem.getLessonId());
+                        item.put("question", problem.getQuestion());
+                        item.put("wrongCount", w.getWrongCount());
+                        item.put("reviewStatus", w.getReviewStatus());
+                        return item;
+                    })
+                    .toList();
+
+            return WrongAnswerPageView.from(items);
+        }
 
     public WrongAnswerDetailView detail(SessionUser sessionUser, Long wrongAnswerId) {
         WrongAnswer wrongAnswer = getOwnedWrongAnswer(sessionUser, wrongAnswerId);
@@ -131,6 +173,9 @@ public class WrongAnswerService {
                 problem.getProblemId(),
                 problem.getQuestion(),
                 problem.getAnswerText(),
+                problem.getExplanation(),
+                problem.getLessonId(),
+                problem.getNodeId(),
                 wrongAnswer.getWrongCount(),
                 wrongAnswer.getReviewStatus(),
                 wrongAnswer.getRetryBonusAwarded()
@@ -138,7 +183,7 @@ public class WrongAnswerService {
     }
 
     @Transactional
-    public void retry(SessionUser sessionUser,
+    public boolean retry(SessionUser sessionUser,
                       WrongAnswerRetryForm form,
                       Long wrongAnswerId) {
 
@@ -187,7 +232,20 @@ public class WrongAnswerService {
 
         //오답재정답시 +5
         if (isCorrect) {
-            if (!Boolean.TRUE.equals(wrongAnswer.getRetryBonusAwarded())) {
+            String retryIdempotencyKey = "WRONG_ANSWER_RETRY:" + wrongAnswer.getWrongAnswerId();
+
+            wrongAnswer.setReviewStatus("SOLVED");
+            wrongAnswer.setRetryBonusAwarded(true);
+            wrongAnswer.setLastSubmissionId(latestSubmissionId);
+
+            int updatedRows = wrongAnswerMapper.updateWrongAnswerOnNewMistake(wrongAnswer);
+            if (updatedRows == 0) {
+                throw new RuntimeException("오답 보너스 상태 업데이트 실패");
+            }
+
+            int existingScoreEventCount = scoreEventMapper.countByIdempotencyKey(retryIdempotencyKey);
+
+            if (existingScoreEventCount == 0) {
                 scoreService.giveScore(
                         sessionUser.userId(),
                         problem.getSubjectId(),
@@ -195,21 +253,12 @@ public class WrongAnswerService {
                         "WRONG_ANSWER_RETRY",
                         5,
                         "WRONG_ANSWER_RETRY_CORRECT",
-                        "WRONG_ANSWER_RETRY:" + wrongAnswer.getWrongAnswerId()
+                        retryIdempotencyKey
                 );
-
-                wrongAnswer.setReviewStatus("SOLVED");
-                wrongAnswer.setRetryBonusAwarded(true);
-                wrongAnswer.setLastSubmissionId(latestSubmissionId);
-
-                int updatedRows = wrongAnswerMapper.updateWrongAnswerOnNewMistake(wrongAnswer);
-                if (updatedRows == 0) {
-                    throw new RuntimeException("오답 보너스 상태 업데이트 실패");
-                }
-            } else {
-                wrongAnswerMapper.markWrongAnswerSolved(wrongAnswerId);
             }
         }
+
+        return isCorrect;
     }
 
     @Transactional

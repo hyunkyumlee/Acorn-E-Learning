@@ -9,4 +9,7 @@ public interface ScoreEventMapper {
     List<ScoreEvent> findAll();
     int insert(ScoreEvent model);
     int update(ScoreEvent model);
+
+
+    int countByIdempotencyKey(String idempotencyKey);
 }

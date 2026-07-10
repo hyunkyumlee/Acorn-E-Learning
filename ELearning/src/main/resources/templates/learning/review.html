@@ -29,7 +29,16 @@
 
     <div class="practice-footer">
       <a th:href="@{/learning}">학습 메인으로</a>
-      <a th:href="@{/learning/review/list}">오답 목록으로</a>
+
+      <p th:if="${view.attributes()['wrongAnswerId'] != null}"
+         th:text="|wrongAnswerId=${view.attributes()['wrongAnswerId']}, lessonId=${view.attributes()['lessonId']}, nodeId=${view.attributes()['nodeId']}|">
+        debug
+      </p>
+
+      <a th:if="${view.attributes()['wrongAnswerId'] != null}"
+         th:href="@{/learning/review/list(lessonId=${view.attributes()['lessonId']})}">
+        오답 목록으로
+      </a>
     </div>
 
     <!-- 요약 화면 -->
@@ -52,7 +61,8 @@
       </p>
 
       <div class="practice-footer">
-        <a th:href="@{/learning/review/list}">오답 목록 확인</a>
+        <!--전체오답-->
+        <a th:href="@{/learning/review/list}">오답 목록</a>
       </div>
     </div>
 
@@ -77,12 +87,7 @@
                 th:classappend="${view.attributes()['reviewStatus'] == 'SOLVED'} ? ' is-solved' : ' is-pending'"
                 th:text="${view.attributes()['reviewStatus']}">PENDING</span>
         </p>
-
-        <p>
-          정답:
-          <strong th:text="${view.attributes()['answerText']}">정답</strong>
-        </p>
-
+        <!-- -->
         <p>
           재시도 보상 지급 여부:
           <span th:text="${view.attributes()['retryBonusAwarded']}">false</span>
@@ -91,10 +96,13 @@
 
       <hr>
 
-      <section>
+      <section th:if="${retryResultMessage == null}" class="review-retry-section">
         <h3>다시 풀기</h3>
 
-        <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/retry|}" method="post">
+        <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/retry|}"
+              method="post"
+              class="review-retry-form">
+          <input type="hidden" name="lessonId" th:value="${view.attributes()['lessonId']}">
           <div>
             <label for="submittedAnswer">답안 입력</label>
             <input id="submittedAnswer" name="submittedAnswer" type="text" required>
@@ -104,12 +112,32 @@
         </form>
       </section>
 
+      <section th:if="${retryResultMessage != null}">
+        <h3 th:text="${retryResultMessage}">정답입니다.</h3>
+
+        <p>
+          정답:
+          <strong th:text="${view.attributes()['answerText']}">정답</strong>
+        </p>
+
+        <section th:if="${view.attributes()['explanation'] != null}">
+          <h3>해설</h3>
+          <p th:text="${view.attributes()['explanation']}">해설 내용</p>
+        </section>
+
+        <div th:if="${retryResultMessage == '오답입니다.'}" class="practice-footer">
+          <a th:href="@{|/learning/review/${view.attributes()['wrongAnswerId']}|}" class="practice-footer-a">다시풀기</a>
+        </div>
+
+      </section>
+<!-- -->
       <hr>
 
       <section>
         <h3>검토 완료</h3>
 
         <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/reviewed|}" method="post">
+          <input type="hidden" name="lessonId" th:value="${view.attributes()['lessonId']}">
           <button type="submit">검토 완료 처리</button>
         </form>
       </section>
