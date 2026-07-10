@@ -25,18 +25,19 @@
   <section class="notice-toolbar">
     <form method="get" action="/admin/notices" class="notice-filter">
       <input type="hidden" name="size" th:value="${noticePage.pageSize}">
-      <input type="search" id="searchNotice" name="keyword" th:value="${selectedKeyword}" placeholder="제목 검색" onchange="this.form.submit()">
-      <select id="noticePeriodFilter" name="period" onchange="this.form.submit()">
+      <input type="search" id="searchNotice" name="keyword" th:value="${selectedKeyword}" placeholder="제목 검색">
+      <select id="noticePeriodFilter" name="period">
         <option value="">기간</option>
         <option value="today" th:selected="${selectedPeriod == 'today'}">오늘</option>
         <option value="week" th:selected="${selectedPeriod == 'week'}">최근 7일</option>
         <option value="month" th:selected="${selectedPeriod == 'month'}">최근 30일</option>
       </select>
-      <select id="noticeStatusFilter" name="status" onchange="this.form.submit()">
+      <select id="noticeStatusFilter" name="status">
         <option value="">공개 상태</option>
         <option value="PUBLISHED" th:selected="${selectedStatus == 'PUBLISHED'}">공개</option>
         <option value="DRAFT" th:selected="${selectedStatus == 'DRAFT'}">비공개</option>
       </select>
+      <button type="submit" class="notice-filter-button">검색</button>
     </form>
     <button type="button" id="noticeCreateButton" class="notice-primary-button">+ 공지사항 작성</button>
   </section>
@@ -154,47 +155,6 @@
 
 </main>
 <script>
-  function applyNoticeFilters() {
-    const keyword = document.querySelector("#searchNotice").value.trim().toLowerCase();
-    const status = document.querySelector("#noticeStatusFilter").value;
-    const period = document.querySelector("#noticePeriodFilter").value;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    document.querySelectorAll(".notice-row").forEach((row) => {
-      const rowTitle = (row.dataset.title || "").toLowerCase();
-      const rowStatus = row.dataset.status || "";
-      const rowDate = row.dataset.date ? new Date(row.dataset.date) : null;
-
-      const matchesKeyword = rowTitle.includes(keyword);
-      const matchesStatus = status === "" || rowStatus === status;
-      let matchesPeriod = true;
-
-      if (period !== "") {
-        if (!rowDate) {
-          matchesPeriod = false;
-        } else {
-          rowDate.setHours(0, 0, 0, 0);
-          const diffDays = Math.floor((today - rowDate) / 86400000);
-
-          if (period === "today") {
-            matchesPeriod = diffDays === 0;
-          } else if (period === "week") {
-            matchesPeriod = diffDays >= 0 && diffDays <= 7;
-          } else if (period === "month") {
-            matchesPeriod = diffDays >= 0 && diffDays <= 30;
-          }
-        }
-      }
-
-      row.style.display = matchesKeyword && matchesStatus && matchesPeriod ? "" : "none";
-    });
-  }
-
-  document.querySelector("#searchNotice")?.addEventListener("input", applyNoticeFilters);
-  document.querySelector("#noticePeriodFilter")?.addEventListener("change", applyNoticeFilters);
-  document.querySelector("#noticeStatusFilter")?.addEventListener("change", applyNoticeFilters);
-
   const noticeForm = document.querySelector("#noticeForm");
   const noticeTitle = document.querySelector("#noticeTitle");
   const noticeStatus = document.querySelector("#noticeStatus");

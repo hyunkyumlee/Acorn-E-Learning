@@ -31,7 +31,7 @@
 
 .notice-filter {
     display: grid;
-    grid-template-columns: 220px 150px 150px;
+    grid-template-columns: 220px 150px 150px 80px;
     gap: 12px;
 }
 
@@ -51,6 +51,7 @@
 
 .notice-filter input,
 .notice-filter select,
+.notice-filter-button,
 .notice-form-panel input,
 .notice-form-panel select {
     height: 36px;
@@ -59,7 +60,8 @@
 
 .notice-primary-button,
 .notice-secondary-button,
-.notice-table-button {
+.notice-table-button,
+.notice-filter-button {
     border-radius: 7px;
     border: 1px solid #d1d5db;
     cursor: pointer;
@@ -75,7 +77,14 @@
     color: #ffffff;
 }
 
-.notice-primary-button:hover {
+.notice-filter-button {
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
+}
+
+.notice-primary-button:hover,
+.notice-filter-button:hover {
     background: #374151;
 }
 

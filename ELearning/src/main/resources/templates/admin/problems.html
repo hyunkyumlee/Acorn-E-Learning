@@ -75,6 +75,8 @@
         <option value="true" th:selected="${selectedIsActive != null and selectedIsActive == true}">활성</option>
         <option value="false" th:selected="${selectedIsActive != null and selectedIsActive == false}">비활성</option>
       </select>
+
+      <button type="submit" class="problem-filter-button">검색</button>
     </form>
     <button type="button" class="problem-primary-button">+ 문제 등록</button>
   </section>
@@ -88,7 +90,7 @@
       <table class="problem-table">
         <thead>
         <tr>
-          <th>문제 ID</th>
+          <th>번호</th>
           <th>과목</th>
           <th>커리큘럼</th>
           <th>유형</th>
@@ -100,7 +102,7 @@
         </thead>
 
         <tbody>
-        <tr th:each="problem : ${problemPage.items}" class="problem-row"
+        <tr th:each="problem, stat : ${problemPage.items}" class="problem-row"
             th:data-subject-id="${problem.subjectId}"
             th:data-node-id="${problem.nodeId}"
             th:data-lesson-id="${problem.lessonId}"
@@ -108,7 +110,7 @@
             th:data-question="${problem.question}"
             th:data-difficulty-code="${problem.difficultyCode}"
             th:data-is-active="${problem.isActive}">
-          <td th:text="${'#' + problem.problemId}">#001</td>
+          <td th:text="${((problemPage.currentPage - 1) * problemPage.pageSize) + stat.count}">1</td>
           <td th:text="${problem.subjectName}">Java</td>
           <td th:text="${problem.curriculumTitle}">변수와 자료형</td>
           <td th:switch="${problem.problemType}">
@@ -295,23 +297,11 @@
 
   const problemFilterForm = document.querySelector("#problemFilterForm");
 
-  document.querySelector("#searchProblem")?.addEventListener("change", () => {
-    problemFilterForm?.submit();
-  });
-  document.querySelector("#problemSubjectFilter")?.addEventListener("change", () => {
-    problemFilterForm?.submit();
-  });
-  document.querySelector("#problemCurriculumFilter")?.addEventListener("change", () => {
-    problemFilterForm?.submit();
-  });
-  document.querySelector("#problemTypeFilter")?.addEventListener("change", () => {
-    problemFilterForm?.submit();
-  });
-  document.querySelector("#problemDifficultyFilter")?.addEventListener("change", () => {
-    problemFilterForm?.submit();
-  });
-  document.querySelector("#problemActiveFilter")?.addEventListener("change", () => {
-    problemFilterForm?.submit();
+  problemFilterForm?.addEventListener("submit", () => {
+    const pageInput = problemFilterForm.querySelector("input[name='page']");
+    if (pageInput) {
+      pageInput.value = "1";
+    }
   });
 
   document.querySelector("#problemNodeId")?.addEventListener("change", (event) => {

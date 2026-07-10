@@ -36,7 +36,7 @@
 
 .admin-community-toolbar {
   display: grid;
-  grid-template-columns: 200px 200px 260px;
+  grid-template-columns: 200px 200px 260px 80px;
   gap: 12px;
   align-items: center;
   justify-content: start;
@@ -46,7 +46,8 @@
 }
 
 .admin-community-toolbar select,
-.admin-community-toolbar input {
+.admin-community-toolbar input,
+.admin-community-filter-button {
   width: 100%;
   min-height: 44px;
   border: 1px solid #d9dee8;
@@ -92,6 +93,19 @@
   min-width: 980px;
   border-collapse: collapse;
   font-size: 14px;
+}
+
+.admin-community-filter-button {
+  border-color: #111827;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-community-filter-button:hover {
+  background: #374151;
 }
 
 .admin-community-table th {
@@ -158,7 +172,7 @@
 
 .admin-community-empty {
   color: #7b8492;
-  text-align: center;
+  text-align: left;
 }
 
 .admin-pagination {

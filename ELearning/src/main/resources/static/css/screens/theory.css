@@ -30,7 +30,7 @@
 
 .theory-filter {
     display: grid;
-    grid-template-columns: 190px repeat(4, 150px);
+    grid-template-columns: 190px repeat(4, 150px) 80px;
     gap: 12px;
 }
 
@@ -48,14 +48,16 @@
 }
 
 .theory-filter input,
-.theory-filter select {
+.theory-filter select,
+.theory-filter-button {
     height: 36px;
     padding: 0 12px;
 }
 
 .theory-primary-button,
 .theory-secondary-button,
-.theory-table-button {
+.theory-table-button,
+.theory-filter-button {
     border-radius: 7px;
     border: 1px solid #d1d5db;
     cursor: pointer;
@@ -71,6 +73,12 @@
     color: #ffffff;
 }
 
+.theory-filter-button {
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
+}
+
 .theory-secondary-button {
     height: 38px;
     padding: 0 18px;
@@ -78,7 +86,8 @@
     color: #111827;
 }
 
-.theory-primary-button:hover {
+.theory-primary-button:hover,
+.theory-filter-button:hover {
     background: #374151;
 }
 

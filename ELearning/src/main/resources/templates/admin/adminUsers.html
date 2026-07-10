@@ -62,6 +62,8 @@
         <option value="SUSPENDED" th:selected="${selectedStatus == 'SUSPENDED'}">정지</option>
         <option value="WITHDRAWN" th:selected="${selectedStatus == 'WITHDRAWN'}">탈퇴</option>
       </select>
+
+      <button type="submit" class="admin-user-filter-button">검색</button>
     </form>
   </section>
 
@@ -222,20 +224,11 @@
 <script>
   const userFilterForm = document.querySelector("#userFilterForm");
 
-  document.querySelector("#searchUser")?.addEventListener("change", () => {
-    userFilterForm?.submit();
-  });
-  document.querySelector("#userSubjectFilter")?.addEventListener("change", () => {
-    userFilterForm?.submit();
-  });
-  document.querySelector("#userGradeFilter")?.addEventListener("change", () => {
-    userFilterForm?.submit();
-  });
-  document.querySelector("#userRoleFilter")?.addEventListener("change", () => {
-    userFilterForm?.submit();
-  });
-  document.querySelector("#userStatusFilter")?.addEventListener("change", () => {
-    userFilterForm?.submit();
+  userFilterForm?.addEventListener("submit", () => {
+    const pageInput = userFilterForm.querySelector("input[name='page']");
+    if (pageInput) {
+      pageInput.value = "1";
+    }
   });
 
   document.querySelectorAll(".admin-user-detail-button").forEach((button) => {

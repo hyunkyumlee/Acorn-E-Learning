@@ -89,6 +89,9 @@
           <tr th:if="${#lists.isEmpty(subjectList)}">
             <td colspan="6" class="course-empty">등록된 과목이 없습니다.</td>
           </tr>
+          <tr class="subject-filter-empty" style="display: none;">
+            <td colspan="6" class="course-empty">조건에 맞는 과목이 없습니다.</td>
+          </tr>
           </tbody>
         </table>
       </div>
@@ -148,6 +151,8 @@
           <option value="SILVER" th:selected="${selectedCurriculumLevelCode == 'SILVER'}">SILVER</option>
           <option value="GOLD" th:selected="${selectedCurriculumLevelCode == 'GOLD'}">GOLD</option>
         </select>
+
+        <button type="submit" class="course-filter-button">검색</button>
       </form>
       <button type="button" class="course-primary-button curriculum-create-button">+ 커리큘럼 등록</button>
     </div>
@@ -161,7 +166,7 @@
         <table class="course-table">
           <thead>
           <tr>
-            <th>노드 ID</th>
+            <th>번호</th>
             <th>과목명</th>
             <th>레벨</th>
             <th>타입</th>
@@ -172,11 +177,11 @@
           </thead>
 
           <tbody>
-          <tr th:each="node : ${curriculumPage.items}" class="curriculum-row"
+          <tr th:each="node, stat : ${curriculumPage.items}" class="curriculum-row"
               th:data-title="${node.title}"
               th:data-subject-id="${node.subjectId}"
               th:data-level-code="${node.levelCode}">
-            <td th:text="${'#' + node.nodeId}">#001</td>
+            <td th:text="${((curriculumPage.currentPage - 1) * curriculumPage.pageSize) + stat.count}">1</td>
             <td th:text="${subjectNameMap[node.subjectId] ?: '-'}">Java</td>
             <td th:text="${node.levelCode}">BRONZE</td>
             <td th:text="${node.nodeType}">LESSON</td>
@@ -200,7 +205,7 @@
             </td>
           </tr>
           <tr th:if="${#lists.isEmpty(curriculumPage.items)}">
-            <td colspan="7" class="course-empty">등록된 커리큘럼이 없습니다.</td>
+            <td colspan="7" class="course-empty">조건에 맞는 커리큘럼이 없습니다.</td>
           </tr>
           </tbody>
         </table>
@@ -316,15 +321,27 @@
       const status = document.querySelector("#subjectStatus").value;
 
 
-      document.querySelectorAll(".subject-row").forEach((row) => {
+      const rows = document.querySelectorAll(".subject-row");
+      let visibleCount = 0;
+
+      rows.forEach((row) => {
         const subjectName = (row.dataset.subjectName || "").toLowerCase();
         const isActive = row.dataset.isActive;
 
         const matchesName = subjectName.includes(keyword);
         const matchesStatus = status === "" || isActive === status;
+        const isVisible = matchesName && matchesStatus;
 
-        row.style.display = matchesName && matchesStatus ? "" : "none";
+        row.style.display = isVisible ? "" : "none";
+        if (isVisible) {
+          visibleCount += 1;
+        }
       });
+
+      const emptyRow = document.querySelector(".subject-filter-empty");
+      if (emptyRow) {
+        emptyRow.style.display = rows.length > 0 && visibleCount === 0 ? "" : "none";
+      }
   }
 
   document.querySelector("#searchSubject")?.addEventListener("input", applySubjectFilters);
@@ -332,14 +349,11 @@
 
   const curriculumFilterForm = document.querySelector("#curriculumFilterForm");
 
-  document.querySelector("#searchCurriculum")?.addEventListener("change", () => {
-    curriculumFilterForm?.submit();
-  });
-  document.querySelector("#curriculumSubjectFilter")?.addEventListener("change", () => {
-    curriculumFilterForm?.submit();
-  });
-  document.querySelector("#curriculumLevelFilter")?.addEventListener("change", () => {
-    curriculumFilterForm?.submit();
+  curriculumFilterForm?.addEventListener("submit", () => {
+    const pageInput = curriculumFilterForm?.querySelector("input[name='page']");
+    if (pageInput) {
+      pageInput.value = "1";
+    }
   });
 
 

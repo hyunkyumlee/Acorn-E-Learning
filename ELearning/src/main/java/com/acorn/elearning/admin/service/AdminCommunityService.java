@@ -28,6 +28,28 @@ public class AdminCommunityService {
             String status,
             String keyword
     ) {
+        return findPage(
+                postPage,
+                commentPage,
+                size,
+                boardType,
+                status,
+                keyword,
+                status,
+                keyword
+        );
+    }
+
+    public AdminCommunityPageResponse findPage(
+            int postPage,
+            int commentPage,
+            int size,
+            String postBoardType,
+            String postStatus,
+            String postKeyword,
+            String commentStatus,
+            String commentKeyword
+    ) {
         int pageSize = Math.max(size, 1);
         int currentPostPage = Math.max(postPage, 1);
         int currentCommentPage = Math.max(commentPage, 1);
@@ -37,19 +59,19 @@ public class AdminCommunityService {
         List<AdminCommunityPageResponse.PostItem> posts = cm.findPostPage(
                 pageSize,
                 postOffset,
-                boardType,
-                status,
-                keyword
+                postBoardType,
+                postStatus,
+                postKeyword
         );
-        long postTotalCount = cm.countPosts(boardType, status, keyword);
+        long postTotalCount = cm.countPosts(postBoardType, postStatus, postKeyword);
 
         List<AdminCommunityPageResponse.CommentItem> comments = cm.findCommentPage(
                 pageSize,
                 commentOffset,
-                status,
-                keyword
+                commentStatus,
+                commentKeyword
         );
-        long commentTotalCount = cm.countComments(status, keyword);
+        long commentTotalCount = cm.countComments(commentStatus, commentKeyword);
 
         return new AdminCommunityPageResponse(
                 new AdminPageResponse<>(posts, currentPostPage, pageSize, postTotalCount),

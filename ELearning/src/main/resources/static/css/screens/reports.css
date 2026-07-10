@@ -13,7 +13,7 @@
 
 .admin-report-toolbar {
     display: grid;
-    grid-template-columns: 220px 220px 220px;
+    grid-template-columns: 220px 220px 220px 80px;
     gap: 12px;
     align-items: center;
     justify-content: start;
@@ -23,7 +23,8 @@
 }
 
 .admin-report-toolbar select,
-.admin-report-toolbar input {
+.admin-report-toolbar input,
+.admin-report-filter-button {
   width: 100%;
   min-height: 42px;
   border: 1px solid #d9dee8;
@@ -93,6 +94,19 @@
   min-width: 920px;
   border-collapse: collapse;
   font-size: 14px;
+}
+
+.admin-report-filter-button {
+  border-color: #111827;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-report-filter-button:hover {
+  background: #374151;
 }
 
 .admin-report-table th {

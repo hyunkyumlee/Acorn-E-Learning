@@ -147,7 +147,7 @@
 }
 
 .admin-stats-chart-card {
-    min-height: 230px;
+    min-height: 270px;
     padding: 14px 16px 16px;
 }
 
@@ -162,9 +162,9 @@
     align-items: end;
     justify-content: center;
     gap: 16px;
-    height: 174px;
+    height: 210px;
     margin-top: 12px;
-    padding: 28px 18px 24px;
+    padding: 40px 18px 26px;
     border-radius: 7px;
     background: #d8d8d8;
 }
@@ -172,7 +172,7 @@
 .admin-stats-chart::after {
     position: absolute;
     right: 18px;
-    bottom: 43px;
+    bottom: 45px;
     left: 18px;
     height: 1px;
     background: rgba(255, 255, 255, 0.55);
@@ -206,7 +206,8 @@
     display: block;
     width: 34px;
     height: var(--bar-height);
-    min-height: 34px;
+    min-height: 0;
+    flex: 0 0 var(--bar-height);
     border-radius: 5px 5px 2px 2px;
     background: #cfd5df;
 }
