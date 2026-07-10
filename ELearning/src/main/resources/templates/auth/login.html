@@ -33,6 +33,15 @@
     </svg>
   </span>
 </button>
+<!-- [추가] 테스트 계정 박스 토글 버튼 (다크모드 버튼 아래) -->
+<button class="header-icon test-accounts-toggle" type="button" data-test-accounts-toggle
+        aria-controls="testAccounts" aria-expanded="false" aria-label="테스트 계정 보기">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <title>테스트 계정</title>
+    <circle cx="12" cy="8" r="4"></circle>
+    <path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"></path>
+  </svg>
+</button>
 <main class="page-shell auth-screen login-screen">
   <section class="auth-grid">
     <div class="form-panel">
@@ -63,15 +72,20 @@
       </form>
 
       <div class="social-login-row" aria-label="소셜 로그인">
-        <a class="button social-login google" th:href="@{/oauth/google}">Google로 계속</a>
-        <a class="button social-login github" th:href="@{/oauth/github}">GitHub로 계속</a>
+        <!-- [수정] 텍스트 버튼 → 로고만 보이는 원형 버튼. 로고는 assets/images/icons/social 에 저장 -->
+        <a class="social-login-icon google" th:href="@{/oauth/google}" aria-label="Google로 계속" title="Google로 계속">
+          <img th:src="@{/assets/images/icons/social/google.svg}" alt="Google" width="26" height="26">
+        </a>
+        <a class="social-login-icon github" th:href="@{/oauth/github}" aria-label="GitHub로 계속" title="GitHub로 계속">
+          <img th:src="@{/assets/images/icons/social/github.svg}" alt="GitHub" width="26" height="26">
+        </a>
       </div>
 
       <p class="form-foot">계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
     </div>
 
     <!-- 로컬/데모용 테스트 계정: 칩을 클릭하면 클립보드로 복사됨 (sample data 기준) -->
-    <aside class="login-test-accounts" aria-label="로컬 테스트 계정">
+    <aside id="testAccounts" class="login-test-accounts" aria-label="로컬 테스트 계정" hidden>
       <div class="test-accounts-head">
         <strong>테스트 계정</strong>
         <span>로컬/데모용 · 클릭하면 복사돼요</span>
@@ -112,6 +126,22 @@
       });
     });
   });
+</script>
+
+<!-- [추가] 테스트 계정 박스 토글 (아이콘 버튼 클릭 시 표시/숨김) -->
+<script th:inline="none">
+  (function () {
+    var btn = document.querySelector('[data-test-accounts-toggle]');
+    var box = document.getElementById('testAccounts');
+    if (!btn || !box) return;
+    btn.addEventListener('click', function () {
+      var willShow = box.hasAttribute('hidden');
+      if (willShow) box.removeAttribute('hidden');
+      else box.setAttribute('hidden', '');
+      btn.setAttribute('aria-expanded', String(willShow));
+      btn.classList.toggle('is-active', willShow);
+    });
+  })();
 </script>
 </body>
 </html>
