@@ -59,4 +59,48 @@
         updated_at = NOW()
         WHERE ranking_id = #{rankingId}
     </update>
+
+    <select id="findWeeklyGlobalRanking" resultType="map">
+        SELECT
+        se.user_id AS userId,
+        u.nickname AS nickname,
+        SUM(se.score_delta) AS score
+        FROM score_events se
+        INNER JOIN users u ON u.user_id = se.user_id
+        WHERE se.created_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        AND se.reason_code NOT LIKE 'ATTENDANCE%'
+        GROUP BY se.user_id, u.nickname
+        ORDER BY score DESC, se.user_id ASC
+    </select>
+
+    <select id="findWeeklySubjectRanking" parameterType="long" resultType="map">
+        SELECT
+        se.user_id AS userId,
+        u.nickname AS nickname,
+        SUM(se.score_delta) AS score
+        FROM score_events se
+        INNER JOIN users u ON u.user_id = se.user_id
+        WHERE se.subject_id = #{subjectId}
+        AND se.created_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        AND se.reason_code NOT LIKE 'ATTENDANCE%'
+        GROUP BY se.user_id, u.nickname
+        ORDER BY score DESC, se.user_id ASC
+    </select>
+
+    <select id="findWeeklyUserScore" parameterType="long" resultType="int">
+        SELECT COALESCE(SUM(se.score_delta), 0)
+        FROM score_events se
+        WHERE se.user_id = #{userId}
+        AND se.created_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        AND se.reason_code NOT LIKE 'ATTENDANCE%'
+    </select>
+
+    <select id="findWeeklyUserSubjectScore" resultType="int">
+        SELECT COALESCE(SUM(se.score_delta), 0)
+        FROM score_events se
+        WHERE se.user_id = #{userId}
+        AND se.subject_id = #{subjectId}
+        AND se.created_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        AND se.reason_code NOT LIKE 'ATTENDANCE%'
+    </select>
 </mapper>
