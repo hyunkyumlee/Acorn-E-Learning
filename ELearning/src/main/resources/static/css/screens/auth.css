@@ -47,8 +47,9 @@ body.auth-bg {
 .auth-screen .form-panel h3,
 .auth-screen .panel h2 {
   margin: 0;
+  padding: 0 0 20px 0;
   color: var(--text);
-  font-size: 18px;
+  font-size: 28px;
   font-weight: 850;
 }
 
@@ -140,21 +141,46 @@ body.auth-bg {
   font-weight: 750;
 }
 
+/* [수정] grid(폭 채움) → flex 가로 중앙 정렬. 페이지 폭이 바뀌어도 항상 가로 유지 */
 .auth-screen .social-login-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-4, 18px);
+  flex-wrap: nowrap;
 }
 
-.auth-screen .button.social-login {
-  width: 100%;
-  min-height: 44px;
-}
-
-.auth-screen .button.social-login.google {
-  border-color: rgba(6, 19, 31, 0.12);
+/* [추가] 로고만 보이는 원형 버튼 — 폭 변화와 무관하게 크기 고정(flex:0 0 auto) */
+.auth-screen .social-login-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line);
   background: #ffffff;
-  color: #1f2937;
+  box-shadow: 0 1px 3px rgba(6, 19, 31, 0.12);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.auth-screen .social-login-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(6, 19, 31, 0.18);
+}
+
+.auth-screen .social-login-icon:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.auth-screen .social-login-icon img {
+  width: 26px;
+  height: 26px;
+  display: block;
+  pointer-events: none;
 }
 
 .auth-screen .form-info {
@@ -167,12 +193,6 @@ body.auth-bg {
   font-size: 14px;
   line-height: 1.55;
   word-break: keep-all;
-}
-
-.auth-screen .button.social-login.github {
-  border-color: #24292f;
-  background: #24292f;
-  color: #ffffff;
 }
 
 .auth-screen .timeline {
@@ -233,12 +253,6 @@ body.auth-bg {
   word-break: keep-all;
 }
 
-:root[data-theme="knowva-ion-dark"] .auth-screen .button.social-login.google {
-  border-color: var(--line);
-  background: #ffffff;
-  color: #1f2937;
-}
-
 :root[data-theme="knowva-ion-dark"] .auth-screen .form-info {
   margin: 0;
   padding: var(--space-3);
@@ -251,19 +265,9 @@ body.auth-bg {
   word-break: keep-all;
 }
 
-.auth-screen .button.social-login.github {
-  border-color: #24292f;
-  background: #24292f;
-  color: #ffffff;
-}
-
 @media (max-width: 880px) {
   .auth-screen .auth-grid,
   .auth-screen .auth-two-col {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-screen .social-login-row {
     grid-template-columns: 1fr;
   }
 }
@@ -296,14 +300,51 @@ body.auth-bg {
   gap: var(--space-5);
 }
 
-/* --- 로컬 테스트 계정 복붙 영역 --- */
+/* [추가] 로그인 버튼 위아래 여백 확대 (폼 gap 위에 추가) */
+.auth-screen.login-screen form button[type="submit"] {
+  margin-block: var(--space-5);
+}
+
+/* [추가] 소셜 로그인 버튼 위·아래 여백 확대 */
+.auth-screen.login-screen .social-login-row {
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+/* --- 로컬 테스트 계정: 토글 버튼 근처 말풍선(팝오버) --- */
+/* [수정] 그리드 흐름 배치 → position:fixed 팝오버. 로그인 폼 레이아웃에 영향 없음 */
 .login-test-accounts {
+  position: fixed;
+  top: 122px;                                /* 토글 버튼(top 70 + 높이 44) 살짝 아래 */
+  right: 16px;
+  z-index: 950;
+  width: min(320px, calc(100vw - 32px));
   display: grid;
   gap: var(--space-3);
   border: 1px dashed var(--line);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   padding: var(--space-4);
+  box-shadow: var(--shadow-soft);
+}
+
+/* [추가] 말풍선 꼬리 — 위(버튼)를 가리킴 */
+.login-test-accounts::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 31px;                               /* 토글 버튼 중앙 아래를 가리키도록 */
+  width: 14px;
+  height: 14px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border-top: 1px dashed var(--line);
+  border-left: 1px dashed var(--line);
+  transform: rotate(45deg);
+}
+
+/* [추가] 기본 숨김: hidden 속성이 위 display:grid에 덮이지 않도록 오버라이드 */
+.login-test-accounts[hidden] {
+  display: none;
 }
 
 .login-test-accounts .test-accounts-head {
@@ -388,8 +429,10 @@ body.auth-bg {
   color: var(--success);
 }
 
+/* [삭제] 좁은 화면에서 min-height:0로 로그인 박스가 위로 튀던 규칙 제거 → 폭이 변해도 세로 위치 유지
 @media (max-width: 880px) {
   .auth-screen.login-screen {
     min-height: 0;
   }
 }
+*/

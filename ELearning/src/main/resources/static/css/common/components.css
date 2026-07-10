@@ -293,6 +293,16 @@
   box-shadow: var(--shadow-soft);
 }
 
+/* [추가] 다크모드 토글 바로 아래 고정 — 테스트 계정 박스 토글 버튼 */
+.test-accounts-toggle {
+  position: fixed;
+  top: 70px;   /* 다크모드 버튼(top 16px + 높이 44px) 아래 */
+  right: 16px;
+  z-index: 900;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--shadow-soft);
+}
+
 /* 물 속 기름처럼 떠다니는 배경 blob (웰컴/로그인/회원가입) — 뷰포트 전체 고정 */
 .bg-fx {
   position: fixed;
