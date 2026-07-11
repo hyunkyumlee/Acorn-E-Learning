@@ -22,4 +22,5 @@ public interface CommunityPostMapper {
     int decrementScrapCount(@Param("postId") Long postId);
     int incrementCommentCount(@Param("postId") Long postId);
     int decrementCommentCount(@Param("postId") Long postId);
+    int incrementViewCount(@Param("postId") Long postId);
 }

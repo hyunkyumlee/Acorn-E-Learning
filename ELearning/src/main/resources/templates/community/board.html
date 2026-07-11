@@ -44,15 +44,23 @@
           <a class="button primary community-write-button" th:href="@{/community/write}">글쓰기</a>
         </div>
 
-        <div class="community-board-tabs" aria-label="게시판 필터">
-          <a th:classappend="${activeBoardType == ''} ? ' is-active'"
-             th:href="@{/community/board(subjectId=${condition.subjectId})}">전체</a>
-          <a th:classappend="${activeBoardType == 'FREE'} ? ' is-active'"
-             th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE')}">자유</a>
-          <a th:classappend="${activeBoardType == 'QUESTION'} ? ' is-active'"
-             th:href="@{/community/board(subjectId=${condition.subjectId},boardType='QUESTION')}">질문</a>
-          <a th:classappend="${activeBoardType == 'STUDY_LOG'} ? ' is-active'"
-             th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG')}">공부 일지</a>
+        <div class="community-board-filter-row">
+          <div class="community-board-tabs" aria-label="게시판 필터">
+            <a th:classappend="${activeBoardType == ''} ? ' is-active'"
+               th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort=${condition.sort})}">전체</a>
+            <a th:classappend="${activeBoardType == 'FREE'} ? ' is-active'"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE',keyword=${condition.keyword},sort=${condition.sort})}">자유</a>
+            <a th:classappend="${activeBoardType == 'QUESTION'} ? ' is-active'"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='QUESTION',keyword=${condition.keyword},sort=${condition.sort})}">질문</a>
+            <a th:classappend="${activeBoardType == 'STUDY_LOG'} ? ' is-active'"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG',keyword=${condition.keyword},sort=${condition.sort})}">공부 일지</a>
+          </div>
+          <div class="community-sort-tabs" aria-label="게시글 정렬">
+            <a th:classappend="${condition.sort == 'likes'} ? ' is-active'"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='likes')}">공감순</a>
+            <a th:classappend="${condition.sort == 'views'} ? ' is-active'"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='views')}">조회수 순</a>
+          </div>
         </div>
 
         <section class="community-feed-card">
@@ -74,11 +82,11 @@
               </div>
               <span>
                 작성자: <b th:text="${writerNicknames.get(post.writerId)}">nova_learner</b>
+                · 조회수 <b th:text="${post.viewCount}">0</b>
                 · 댓글 <b th:text="${post.commentCount}">0</b>
                 · 좋아요 <b th:text="${post.likeCount}">0</b>
               </span>
             </li>
-            <li th:if="${#lists.isEmpty(view.posts)}" class="community-empty">게시글이 없어.</li>
           </ul>
         </section>
       </section>
@@ -99,24 +107,32 @@
           <a class="button" th:href="@{/community/profile}">내 커뮤니티 프로필</a>
         </section>
 
-        <aside class="panel community-panel community-hot-panel" aria-label="HOT 게시물">
+        <aside class="panel community-panel community-hot-panel" aria-label="인기 게시글">
           <div class="community-hot-heading">
             <span class="community-hot-tag">
               <span class="community-hot-flame" aria-hidden="true">🔥</span>
-              <span class="community-hot-word" aria-label="HOT">
-                <span>H</span>
-                <span>O</span>
-                <span>T</span>
-              </span>
+              <span class="community-hot-word">인기 게시글</span>
               <span class="community-hot-flame" aria-hidden="true">🔥</span>
             </span>
           </div>
-          <ol class="community-hot-list">
-            <li th:each="post : ${hotView.posts}">
-              <a class="community-hot-title" th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
-            </li>
-            <li th:if="${#lists.isEmpty(hotView.posts)}" class="community-empty">HOT 게시물이 없어.</li>
-          </ol>
+          <div class="community-hot-period-grid">
+            <section class="community-hot-period" aria-label="주간 인기 게시글">
+              <h3>주간</h3>
+              <ol class="community-hot-list">
+                <li th:each="post : ${weeklyHotView.posts}">
+                  <a class="community-hot-title" th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+                </li>
+              </ol>
+            </section>
+            <section class="community-hot-period" aria-label="월간 인기 게시글">
+              <h3>월간</h3>
+              <ol class="community-hot-list">
+                <li th:each="post : ${monthlyHotView.posts}">
+                  <a class="community-hot-title" th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+                </li>
+              </ol>
+            </section>
+          </div>
         </aside>
 
         <a class="community-content-recommend-link" th:href="@{/content/recommendations}" th:remove="all">
