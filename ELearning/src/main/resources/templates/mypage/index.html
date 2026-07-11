@@ -24,7 +24,7 @@
         </div>
         <div class="mypage-profile-copy">
           <h2 th:text="${view.user().nickname() == null || #strings.isEmpty(view.user().nickname()) ? view.user().email() : view.user().nickname()}">이름</h2>
-          <p th:text="${view.learning().learningGoal() == null || #strings.isEmpty(view.learning().learningGoal()) ? '꾸준히 성장하는 개발자가 되고 싶어요!' : view.learning().learningGoal()}">꾸준히 성장하는 개발자가 되고 싶어요!</p>
+          <p th:text="${view.learning().learningGoal() == null || #strings.isEmpty(view.learning().learningGoal()) ? '소개글을 작성해보세요' : view.learning().learningGoal()}">소개글을 작성해보세요</p>
           <button class="mini-button" type="button" data-profile-modal-open>프로필 편집</button>
         </div>
         <div class="mypage-profile-divider"></div>

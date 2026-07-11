@@ -23,13 +23,15 @@
 
       <nav class="learning-filter-tabs" aria-label="학습 과목 필터">
         <a th:each="filter : ${view.filters()}"
-           th:href="@{/mypage/learning(subject=${filter.subject()}, page=0)}"
+           th:href="@{/mypage/learning(subject=${filter.subject()})}"
            th:classappend="${filter.active()} ? 'is-active' : ''"
            th:text="${filter.label()}">전체</a>
       </nav>
 
       <section class="learning-full-list" aria-label="최근 학습 현황 목록">
-        <article class="learning-full-row" th:each="item : ${view.items()}">
+        <article class="learning-full-row"
+                 th:each="item : ${view.items()}"
+                 th:classappend="${item.locked()} ? ' is-locked' : ''">
           <span th:class="|language-thumb ${item.thumbClass()}|">
             <img th:if="${item.thumbIconPath() != null}" th:src="${item.thumbIconPath()}" th:alt="${item.subjectName()}">
             <span th:if="${item.thumbIconPath() == null}" th:text="${item.thumbLabel()}">J</span>
@@ -37,8 +39,12 @@
           <div class="learning-full-main">
             <strong th:text="${item.subjectName()}">Java</strong>
             <dl>
-              <dt>현재 레벨</dt>
+              <dt th:text="${view.levelDetail()} ? '단계' : '현재 레벨'">현재 레벨</dt>
               <dd th:text="${item.currentLevelLabel()}">BRONZE</dd>
+              <span class="learning-level-badge"
+                    th:if="${item.levelStatusLabel() != null}"
+                    th:classappend="${item.locked()} ? ' is-locked' : ' is-current'"
+                    th:text="${item.levelStatusLabel()}">진행 중</span>
             </dl>
           </div>
           <div class="learning-full-progress">
@@ -50,7 +56,12 @@
               <i th:style="|width:${item.progressRate()}%|"></i>
             </div>
           </div>
-          <a class="mini-button primary learning-continue-button" th:href="${item.continueUrl()}">학습 계속하기</a>
+          <a class="mini-button primary learning-continue-button"
+             th:if="${item.locked() == false}"
+             th:href="${item.continueUrl()}">학습 계속하기</a>
+          <span class="mini-button learning-continue-button is-disabled"
+                th:if="${item.locked()}"
+                aria-disabled="true">잠김</span>
         </article>
 
         <article class="learning-empty" th:if="${view.empty()}">
@@ -58,17 +69,6 @@
           <p>학습을 시작하면 과목별 진행률이 여기에 표시됩니다.</p>
         </article>
       </section>
-
-      <nav class="learning-pagination" aria-label="최근 학습 현황 페이지">
-        <a th:classappend="${view.first()} ? 'is-disabled' : ''"
-           th:href="@{/mypage/learning(subject=${view.selectedSubject()}, page=${view.previousPage()})}">이전</a>
-        <a th:each="pageNumber : ${view.pageNumbers()}"
-           th:href="@{/mypage/learning(subject=${view.selectedSubject()}, page=${pageNumber})}"
-           th:classappend="${pageNumber == view.page()} ? 'is-active' : ''"
-           th:text="${pageNumber + 1}">1</a>
-        <a th:classappend="${view.last()} ? 'is-disabled' : ''"
-           th:href="@{/mypage/learning(subject=${view.selectedSubject()}, page=${view.nextPage()})}">다음</a>
-      </nav>
     </section>
   </main>
 </body>
