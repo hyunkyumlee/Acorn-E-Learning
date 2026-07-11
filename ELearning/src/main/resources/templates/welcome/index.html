@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!-- [수정] 웰컴은 항상 어두운 배경 고정 (다크 테마 하드코딩) -->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" data-theme="knowva-ion-dark" style="color-scheme: dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,30 +12,26 @@
     <link rel="stylesheet" th:href="@{/css/common/components.css}">
     <link rel="stylesheet" th:href="@{/css/common/themes.css}">
     <link rel="stylesheet" th:href="@{/css/screens/welcome.css}">
+    <!-- [삭제] 다크 고정이라 테마 토글 스크립트 제거 (theme.js가 저장값으로 테마를 덮어쓰지 않도록)
     <script defer th:src="@{/js/common/theme.js}"></script>
+    -->
     <!-- [추가] 웰컴↔튜토리얼 화면 전환 + 슬라이더 -->
     <script defer th:src="@{/js/screens/welcome-tutorial.js}"></script>
 </head>
 <body class="welcome-bg">
 <div class="bg-fx" aria-hidden="true">
-  <span class="blob blob-1"></span>
-  <span class="blob blob-2"></span>
-  <span class="blob blob-3"></span>
+  <!-- [삭제] 오로라(SVG 워프 필터)는 렉 주범이라 제거. 밤하늘 별 + 별똥별만 유지 -->
+  <!-- 밤하늘 별(반짝임) + 별똥별(오른쪽 대각선 아래로) -->
+  <div class="starfield"></div>
+  <div class="shooting-stars">
+    <span class="shoot"></span>
+    <span class="shoot"></span>
+    <span class="shoot"></span>
+    <span class="shoot"></span>
+    <span class="shoot"></span>
+  </div>
 </div>
-<button class="header-icon theme-toggle theme-toggle-floating" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
-  <span class="theme-symbol" aria-hidden="true">
-    <svg class="theme-symbol-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-      <title>다크모드</title>
-      <path d="M20.4 14.7A7.7 7.7 0 0 1 9.3 3.6 8.7 8.7 0 1 0 20.4 14.7Z"></path>
-      <path d="M16.7 3.8h.01M19.4 6.7h.01"></path>
-    </svg>
-    <svg class="theme-symbol-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-      <title>라이트모드</title>
-      <circle cx="12" cy="12" r="4.2"></circle>
-      <path d="M12 2.5v2.1M12 19.4v2.1M4.6 4.6l1.5 1.5M17.9 17.9l1.5 1.5M2.5 12h2.1M19.4 12h2.1M4.6 19.4l1.5-1.5M17.9 6.1l1.5-1.5"></path>
-    </svg>
-  </span>
-</button>
+<!-- [삭제] 다크모드 전환 버튼 제거 (웰컴은 다크 고정) -->
 <main class="page-shell welcome-screen">
 
     <!-- ===== 뷰 1: 웰컴 히어로 ===== -->
