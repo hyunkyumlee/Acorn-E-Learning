@@ -1,7 +1,13 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.8 / 레슨 단위 학습 구조
+  Source: Notion DB 명세 v1.9 / 레슨 단위 학습 구조
   Execute after docs/ddl/Knowva_DDL.sql.
+
+  Execution contract
+  - This is sample seed data, not a schema migration.
+  - Run the full Knowva_DDL.sql first when resetting a local development DB.
+  - A schema preflight runs before the first INSERT. If it fails, update the schema first.
+  - All seed INSERT/UPDATE statements run in one transaction to prevent partial application.
 
   Sample login accounts
   - admin@knowva.local / Knowva1234! / ROLE_ADMIN
@@ -19,6 +25,38 @@ SET NAMES utf8mb4;
 SET time_zone = '+09:00';
 
 USE elearning;
+
+DROP PROCEDURE IF EXISTS assert_knowva_seed_schema;
+DELIMITER $$
+CREATE PROCEDURE assert_knowva_seed_schema()
+BEGIN
+  DECLARE required_column_count INT DEFAULT 0;
+
+  SELECT COUNT(*)
+    INTO required_column_count
+  FROM information_schema.columns
+  WHERE table_schema = DATABASE()
+    AND (table_name, column_name) IN (
+      ('community_posts', 'view_count'),
+      ('user_credentials', 'login_email'),
+      ('user_credentials', 'email_verified_at'),
+      ('social_accounts', 'provider_email_verified'),
+      ('lessons', 'node_id'),
+      ('practice_set_attempts', 'lesson_id'),
+      ('practice_set_items', 'set_item_id')
+    );
+
+  IF required_column_count <> 7 THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Knowva sample data requires DB schema v1.9. Run Knowva_DDL.sql first.';
+  END IF;
+END$$
+DELIMITER ;
+
+CALL assert_knowva_seed_schema();
+DROP PROCEDURE assert_knowva_seed_schema;
+
+START TRANSACTION;
 
 SET @sample_password_hash = '$2a$10$rXWwp4H7mIiDJv.c2H9moOtZ3m/8cBMGOsMuaX0G7vW/A1W3tPCxy';
 
@@ -1073,3 +1111,5 @@ ON DUPLICATE KEY UPDATE
   recommendation_slot = VALUES(recommendation_slot),
   is_active = VALUES(is_active),
   updated_at = CURRENT_TIMESTAMP;
+
+COMMIT;
