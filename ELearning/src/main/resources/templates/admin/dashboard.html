@@ -92,15 +92,15 @@
         <table>
           <thead>
           <tr>
-            <th>ID</th>
+            <th>번호</th>
             <th>내용 요약</th>
             <th>처리 상태</th>
             <th>일시</th>
           </tr>
           </thead>
           <tbody>
-          <tr th:each="report : ${recentReports}">
-            <td th:text="${'#R' + report.reportId}">#R001</td>
+          <tr th:each="report, stat : ${recentReports}">
+            <td th:text="${stat.count}">1</td>
             <td th:text="${(report.targetType == 'POST' ? '게시글' : (report.targetType == 'COMMENT' ? '댓글' : report.targetType))
               + ' / ' +
               (report.reasonCode == 'SPAM' ? '스팸' : (report.reasonCode == 'ABUSE' ? '부적절한 내용' : (report.reasonCode == 'AD' ? '광고' : report.reasonCode)))}">
@@ -123,15 +123,15 @@
         <table>
           <thead>
           <tr>
-            <th>ID</th>
+            <th>번호</th>
             <th>제목</th>
             <th>상태</th>
             <th>작성일</th>
           </tr>
           </thead>
           <tbody>
-          <tr th:each="notice : ${recentNotices}">
-            <td th:text="${'#N' + notice.noticeId}">#N001</td>
+          <tr th:each="notice, stat : ${recentNotices}">
+            <td th:text="${stat.count}">1</td>
             <td th:text="${notice.title}">KNOWVA 이용약관 변경 안내</td>
             <td th:text="${notice.status == 'PUBLISHED' ? '공개' : '비공개'}">공개</td>
             <td th:text="${notice.createdAt != null ? #temporals.format(notice.createdAt, 'MM/dd') : '-'}">06/15</td>

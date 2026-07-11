@@ -12,6 +12,7 @@
         <result property="boardType" column="board_type" />
         <result property="title" column="title" />
         <result property="content" column="content" />
+        <result property="viewCount" column="view_count" />
         <result property="likeCount" column="like_count" />
         <result property="commentCount" column="comment_count" />
         <result property="scrapCount" column="scrap_count" />
@@ -22,7 +23,7 @@
     </resultMap>
 
     <sql id="columns">
-        post_id, writer_id, subject_id, board_type, title, content,
+        post_id, writer_id, subject_id, board_type, title, content, view_count,
         like_count, comment_count, scrap_count, status, created_at, updated_at, deleted_at
     </sql>
 
@@ -64,9 +65,21 @@
             AND (title LIKE CONCAT('%', #{condition.keyword}, '%')
                  OR content LIKE CONCAT('%', #{condition.keyword}, '%'))
         </if>
+        <if test="condition.weeklyPeriod()">
+            AND created_at &gt;= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY)
+        </if>
+        <if test="condition.monthlyPeriod()">
+            AND created_at &gt;= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY)
+        </if>
         <choose>
             <when test="condition.hotSort()">
                 ORDER BY like_count DESC, comment_count DESC, scrap_count DESC, post_id DESC
+            </when>
+            <when test="condition.likeSort()">
+                ORDER BY like_count DESC, comment_count DESC, view_count DESC, post_id DESC
+            </when>
+            <when test="condition.viewSort()">
+                ORDER BY view_count DESC, like_count DESC, comment_count DESC, post_id DESC
             </when>
             <otherwise>
                 ORDER BY post_id DESC
@@ -88,6 +101,12 @@
         <if test="condition.keyword != null and condition.keyword != ''">
             AND (title LIKE CONCAT('%', #{condition.keyword}, '%')
                  OR content LIKE CONCAT('%', #{condition.keyword}, '%'))
+        </if>
+        <if test="condition.weeklyPeriod()">
+            AND created_at &gt;= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY)
+        </if>
+        <if test="condition.monthlyPeriod()">
+            AND created_at &gt;= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY)
         </if>
     </select>
 
@@ -154,5 +173,9 @@
 
     <update id="decrementCommentCount">
         UPDATE community_posts SET comment_count = GREATEST(comment_count - 1, 0) WHERE post_id = #{postId}
+    </update>
+
+    <update id="incrementViewCount">
+        UPDATE community_posts SET view_count = view_count + 1 WHERE post_id = #{postId}
     </update>
 </mapper>

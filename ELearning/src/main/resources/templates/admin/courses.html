@@ -54,7 +54,7 @@
         <table class="course-table">
           <thead>
           <tr>
-            <th>과목 ID</th>
+            <th>번호</th>
             <th>과목명</th>
             <th>설명</th>
             <th>사용 여부</th>
@@ -68,7 +68,7 @@
               th:data-subject-name="${subject.subjectName}"
               th:data-is-active="${subject.isActive}">
 
-            <td th:text="${'#' + stat.count}">#001</td>
+            <td th:text="${stat.count}">1</td>
             <td th:text="${subject.subjectName}">Java</td>
             <td th:text="${subject.description ?: '-'}">Java 기초 학습 과목</td>
             <td th:text="${subject.isActive} ? '활성' : '비활성'">활성</td>

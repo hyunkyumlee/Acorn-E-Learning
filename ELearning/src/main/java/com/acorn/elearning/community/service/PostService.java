@@ -64,9 +64,11 @@ public class PostService {
         );
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PostDetailResponse detail(SessionUser sessionUser, Long postId) {
         CommunityPost post = requireActivePost(postId);
+        communityPostMapper.incrementViewCount(postId);
+        post.setViewCount(safeCount(post.getViewCount()) + 1);
         Long userId = sessionUser == null ? null : sessionUser.userId();
         boolean liked = userId != null && postLikeMapper.findByPostIdAndUserId(postId, userId).isPresent();
         boolean scraped = userId != null && postScrapMapper.findByPostIdAndUserId(postId, userId).isPresent();
@@ -173,6 +175,10 @@ public class PostService {
 
     private boolean blank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private int safeCount(Integer count) {
+        return count == null ? 0 : count;
     }
 
     private void requireOwner(CommunityPost post, Long userId) {

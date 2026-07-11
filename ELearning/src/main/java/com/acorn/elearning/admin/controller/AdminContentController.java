@@ -5,6 +5,7 @@ import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.service.AdminContentService;
+import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
@@ -61,12 +62,21 @@ public class AdminContentController {
                              @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                              RedirectAttributes redirectAttributes){
 
-        if (form.getSubjectId() == null) {
-            service.createSubject(form, sessionUser.userId());
-            redirectAttributes.addFlashAttribute("message", "과목이 등록되었습니다.");
-        } else{
-            service.updateSubject(form, sessionUser.userId());
-            redirectAttributes.addFlashAttribute("message", "과목이 수정되었습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
+
+        try {
+            if (form.getSubjectId() == null) {
+                service.createSubject(form, sessionUser.userId());
+                redirectAttributes.addFlashAttribute("message", "과목이 등록되었습니다.");
+            } else {
+                service.updateSubject(form, sessionUser.userId());
+                redirectAttributes.addFlashAttribute("message", "과목이 수정되었습니다.");
+            }
+        } catch (BusinessException e){
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return "redirect:/admin/courses";
@@ -77,14 +87,22 @@ public class AdminContentController {
                                     @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                                     RedirectAttributes redirectAttributes){
 
-        if (form.getNodeId() == null) {
-            service.createCurriculumNode(form, sessionUser.userId());
-            redirectAttributes.addFlashAttribute("message", "커리큘럼이 등록되었습니다.");
-        } else{
-            service.updateCurriculumNode(form, sessionUser.userId());
-            redirectAttributes.addFlashAttribute("message", "커리큘럼이 수정되었습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
         }
 
+        try {
+            if (form.getNodeId() == null) {
+                service.createCurriculumNode(form, sessionUser.userId());
+                redirectAttributes.addFlashAttribute("message", "커리큘럼이 등록되었습니다.");
+            } else {
+                service.updateCurriculumNode(form, sessionUser.userId());
+                redirectAttributes.addFlashAttribute("message", "커리큘럼이 수정되었습니다.");
+            }
+        } catch (BusinessException e){
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/admin/courses?tab=curriculum";
     }
 
@@ -109,6 +127,8 @@ public class AdminContentController {
                 levelCode,
                 isActive
         ));
+
+
         model.addAttribute("subjectList", service.findAllSubject());
         model.addAttribute("curriculumList", service.findAllCurriculumNode());
         model.addAttribute("lessonForm", new LessonForm());
@@ -126,14 +146,22 @@ public class AdminContentController {
                             @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                             RedirectAttributes redirectAttributes){
 
-        if (form.getLessonId() == null) {
-            service.createLesson(form, sessionUser.userId());
-            redirectAttributes.addFlashAttribute("message", "이론 자료가 등록되었습니다.");
-        } else {
-            service.updateLesson(form, sessionUser.userId());
-            redirectAttributes.addFlashAttribute("message", "이론 자료가 수정되었습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
         }
 
+        try {
+            if (form.getLessonId() == null) {
+                service.createLesson(form, sessionUser.userId());
+                redirectAttributes.addFlashAttribute("message", "이론 자료가 등록되었습니다.");
+            } else {
+                service.updateLesson(form, sessionUser.userId());
+                redirectAttributes.addFlashAttribute("message", "이론 자료가 수정되었습니다.");
+            }
+        } catch (BusinessException e){
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/admin/theory";
     }
 
@@ -142,14 +170,24 @@ public class AdminContentController {
                                @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                                RedirectAttributes redirectAttributes) {
 
-        int deleteCount = service.deleteLesson(lessonId, sessionUser.userId());
-
-        if (deleteCount == 1) {
-            redirectAttributes.addFlashAttribute("message", "이론 자료가 삭제되었습니다.");
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "삭제할 이론 자료를 찾을 수 없습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
         }
 
+
+
+        try {
+            int deleteCount = service.deleteLesson(lessonId, sessionUser.userId());
+
+            if (deleteCount == 1) {
+                redirectAttributes.addFlashAttribute("message", "이론 자료가 삭제되었습니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "삭제할 이론 자료를 찾을 수 없습니다.");
+            }
+        } catch (BusinessException e){
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/admin/theory";
     }
 
@@ -189,12 +227,21 @@ public class AdminContentController {
                              @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                              RedirectAttributes redirectAttributes){
 
-        if (form.getProblemId() == null) {
-            service.createProblem(form, sessionUser.userId());
-            redirectAttributes.addFlashAttribute("message", "문제가 등록되었습니다.");
-        } else {
-            service.updateProblem(form, sessionUser.userId());
-            redirectAttributes.addFlashAttribute("message", "문제가 수정되었습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
+
+        try {
+            if (form.getProblemId() == null) {
+                service.createProblem(form, sessionUser.userId());
+                redirectAttributes.addFlashAttribute("message", "문제가 등록되었습니다.");
+            } else {
+                service.updateProblem(form, sessionUser.userId());
+                redirectAttributes.addFlashAttribute("message", "문제가 수정되었습니다.");
+            }
+        } catch (BusinessException e){
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return "redirect:/admin/problems";
@@ -205,12 +252,24 @@ public class AdminContentController {
                                 @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                                 RedirectAttributes redirectAttributes) {
 
-        int deleteCount = service.deleteProblem(problemId, sessionUser.userId());
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
 
-        if (deleteCount == 1) {
-            redirectAttributes.addFlashAttribute("message", "문제가 삭제되었습니다.");
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "삭제할 문제를 찾을 수 없습니다.");
+
+
+        try {
+
+            int deleteCount = service.deleteProblem(problemId, sessionUser.userId());
+
+            if (deleteCount == 1) {
+                redirectAttributes.addFlashAttribute("message", "문제가 삭제되었습니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "삭제할 문제를 찾을 수 없습니다.");
+            }
+        } catch (BusinessException e){
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return "redirect:/admin/problems";

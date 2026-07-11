@@ -51,7 +51,7 @@
       <table class="notice-table">
         <thead>
         <tr>
-          <th>공지 ID</th>
+          <th>번호</th>
           <th>제목</th>
           <th>작성자</th>
           <th>게시일</th>
@@ -62,11 +62,11 @@
         </thead>
 
         <tbody>
-        <tr th:each="notice : ${noticePage.items}" class="notice-row"
+        <tr th:each="notice, stat : ${noticePage.items}" class="notice-row"
             th:data-title="${notice.title}"
             th:data-status="${notice.status}"
             th:data-date="${notice.publishedAt != null ? #temporals.format(notice.publishedAt, 'yyyy-MM-dd') : ''}">
-          <td th:text="${'#' + notice.noticeId}">#N001</td>
+          <td th:text="${((noticePage.currentPage - 1) * noticePage.pageSize) + stat.count}">1</td>
           <td class="notice-title-cell" th:text="${notice.title}">공지 제목</td>
           <td th:text="${notice.writerNickname != null and !#strings.isEmpty(notice.writerNickname) ? notice.writerNickname : '관리자'}">관리자</td>
           <td th:text="${notice.publishedAt != null ? #temporals.format(notice.publishedAt, 'yyyy-MM-dd') : '-'}">2026-06-01</td>

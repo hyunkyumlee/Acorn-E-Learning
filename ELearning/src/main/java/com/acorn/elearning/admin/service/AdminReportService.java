@@ -8,6 +8,8 @@ import com.acorn.elearning.admin.dto.response.ReportPageResponse;
 import com.acorn.elearning.admin.form.ReportHandleForm;
 import com.acorn.elearning.admin.mapper.AdminReportMapper;
 import com.acorn.elearning.admin.model.AdminOperationLog;
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -59,7 +61,7 @@ public class AdminReportService {
 
     private Long requireAdminId(SessionUser sessionUser) {
         if (sessionUser == null || sessionUser.userId() == null) {
-            throw new IllegalStateException("로그인한 관리자 정보가 없습니다.");
+            throw new BusinessException(ErrorCode.AUTH_REQUIRED, "로그인한 관리자 정보가 없습니다.");
         }
         return sessionUser.userId();
     }

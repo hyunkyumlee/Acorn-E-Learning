@@ -38,9 +38,18 @@ public class AdminNoticeController {
                          RedirectAttributes redirectAttributes
     ) {
 
-        service.insert(notice, sessionUser);
-        redirectAttributes.addFlashAttribute("message", "공지사항이 등록되었습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
 
+        int created = service.insert(notice, sessionUser);
+
+        if (created == 1) {
+            redirectAttributes.addFlashAttribute("message", "공지사항이 등록되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "공지사항 등록에 실패했습니다.");
+        }
         return "redirect:/admin/notices";
     }
 
@@ -50,12 +59,19 @@ public class AdminNoticeController {
                          RedirectAttributes redirectAttributes)
     {
 
-
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
         notice.setNoticeId(noticeId);
 
-        service.update(notice, sessionUser);
-        redirectAttributes.addFlashAttribute("message", "공지사항이 수정되었습니다.");
+        int updated = service.update(notice, sessionUser);
 
+        if (updated == 1) {
+            redirectAttributes.addFlashAttribute("message", "공지사항이 수정되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "수정할 공지사항을 찾을 수 없습니다.");
+        }
         return "redirect:/admin/notices";
     }
 
@@ -65,8 +81,19 @@ public class AdminNoticeController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             RedirectAttributes redirectAttributes
     ) {
-        service.delete(noticeId, sessionUser);
-        redirectAttributes.addFlashAttribute("message", "공지사항이 삭제되었습니다.");
+
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
+
+        int deleted = service.delete(noticeId, sessionUser);
+
+        if (deleted == 1) {
+            redirectAttributes.addFlashAttribute("message", "공지사항이 삭제되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "삭제할 공지사항을 찾을 수 없습니다.");
+        }
         return "redirect:/admin/notices";
     }
 }
