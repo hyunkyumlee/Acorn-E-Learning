@@ -56,6 +56,24 @@
     justify-content: flex-end;
 }
 
+.admin-stats-table-filter {
+    display: flex;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.admin-stats-table-filter select {
+    width: 132px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 700;
+}
+
 .admin-stats-scope-filter {
     display: flex;
     gap: 6px;
@@ -193,13 +211,17 @@
 
 .admin-stats-bar strong {
     display: flex;
+    max-width: 64px;
     min-height: 16px;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
     color: #111827;
     font-size: 11px;
     font-weight: 800;
     line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .admin-stats-bar i {
