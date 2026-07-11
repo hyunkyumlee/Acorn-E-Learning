@@ -2,7 +2,7 @@
 
 작성자: 이현겸  
 기준일: 2026-07-09  
-기준 문서: DB 명세 v1.8, `docs/ddl/Knowva_DDL.sql`, `docs/ddl/Knowva_sample_data.sql`
+기준 문서: DB 명세 v1.9, `docs/ddl/Knowva_DDL.sql`, `docs/ddl/Knowva_sample_data.sql`
 
 ## 1. 확정 정책
 
