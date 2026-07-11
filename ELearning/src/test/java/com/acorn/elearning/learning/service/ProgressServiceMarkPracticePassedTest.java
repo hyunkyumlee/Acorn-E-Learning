@@ -33,7 +33,7 @@ class ProgressServiceMarkPracticePassedTest {
     @Test
     void insert_when_no_progress_row_yet() {
         RecordingProgressMapper progressMapper = new RecordingProgressMapper(null);
-        ProgressService service = new ProgressService(progressMapper, nodeMapper(SUBJECT_ID));
+        ProgressService service = new ProgressService(progressMapper, nodeMapper(SUBJECT_ID), null);
 
         service.markPracticePassed(USER_ID, SUBJECT_ID, NODE_ID);
 
@@ -52,7 +52,7 @@ class ProgressServiceMarkPracticePassedTest {
     void update_to_full_when_lesson_already_completed() {
         LearningProgress existing = row(true, false, new BigDecimal("50.00"));
         RecordingProgressMapper progressMapper = new RecordingProgressMapper(existing);
-        ProgressService service = new ProgressService(progressMapper, nodeMapper(SUBJECT_ID));
+        ProgressService service = new ProgressService(progressMapper, nodeMapper(SUBJECT_ID), null);
 
         service.markPracticePassed(USER_ID, SUBJECT_ID, NODE_ID);
 
@@ -69,7 +69,7 @@ class ProgressServiceMarkPracticePassedTest {
     void idempotent_noop_when_already_practice_passed() {
         LearningProgress existing = row(true, true, new BigDecimal("100.00"));
         RecordingProgressMapper progressMapper = new RecordingProgressMapper(existing);
-        ProgressService service = new ProgressService(progressMapper, nodeMapper(SUBJECT_ID));
+        ProgressService service = new ProgressService(progressMapper, nodeMapper(SUBJECT_ID), null);
 
         service.markPracticePassed(USER_ID, SUBJECT_ID, NODE_ID);
 
@@ -81,7 +81,7 @@ class ProgressServiceMarkPracticePassedTest {
     @Test
     void throws_not_found_when_node_missing() {
         RecordingProgressMapper progressMapper = new RecordingProgressMapper(null);
-        ProgressService service = new ProgressService(progressMapper, nodeMapper(null));
+        ProgressService service = new ProgressService(progressMapper, nodeMapper(null), null);
 
         BusinessException ex = assertThrows(BusinessException.class,
                 () -> service.markPracticePassed(USER_ID, SUBJECT_ID, NODE_ID));
@@ -95,7 +95,7 @@ class ProgressServiceMarkPracticePassedTest {
     void throws_validation_when_node_subject_mismatch() {
         RecordingProgressMapper progressMapper = new RecordingProgressMapper(null);
         // 넘겨받은 SUBJECT_ID(10)와 다른 과목(999)에 속한 단원.
-        ProgressService service = new ProgressService(progressMapper, nodeMapper(999L));
+        ProgressService service = new ProgressService(progressMapper, nodeMapper(999L), null);
 
         BusinessException ex = assertThrows(BusinessException.class,
                 () -> service.markPracticePassed(USER_ID, SUBJECT_ID, NODE_ID));
