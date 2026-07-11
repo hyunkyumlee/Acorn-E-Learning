@@ -1,1 +1,31 @@
-<section class="page-error" th:fragment="pageError"><h1 th:text="${errorCode} ?: 'COMMON'">COMMON</h1><p th:text="${message} ?: '요청을 처리할 수 없습니다.'">요청을 처리할 수 없습니다.</p></section>
+<main class="error-screen" th:fragment="pageError(status, eyebrow, title, message)"
+      th:classappend="${' error-status-' + status}">
+  <section class="error-copy" aria-labelledby="error-title">
+    <p class="error-eyebrow" th:text="${eyebrow}">페이지 상태</p>
+    <p class="error-code" th:text="${status}">404</p>
+    <h1 id="error-title" th:text="${title}">찾을 수 없어요.</h1>
+    <p class="error-message" th:text="${message}">요청한 페이지를 찾을 수 없습니다.</p>
+    <div class="error-actions">
+      <a class="button primary error-home" th:href="@{/learning}">
+        <span>학습 홈으로</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"></path>
+          <path d="m13 6 6 6-6 6"></path>
+        </svg>
+      </a>
+      <button class="button error-back" type="button" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.assign('/learning'); }">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"></path>
+          <path d="m11 18-6-6 6-6"></path>
+        </svg>
+        <span>이전 페이지</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="error-visual" aria-hidden="true">
+    <div class="error-orbit error-orbit-outer"></div>
+    <div class="error-orbit error-orbit-inner"></div>
+    <img th:src="@{/assets/images/planets/00_Fruition_Planet.svg}" alt="">
+  </div>
+</main>

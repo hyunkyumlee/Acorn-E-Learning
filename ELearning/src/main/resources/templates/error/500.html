@@ -2,13 +2,13 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>찾을 수 없음 | Knowva</title>
+  <title>일시적 오류 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/error.css(v='20260711-5')}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body class="error-page">
   <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <div th:replace="~{fragments/page-error :: pageError(404, 'PAGE NOT FOUND', '여기엔 아직 행성이 없어요.', '주소가 바뀌었거나 존재하지 않는 페이지예요. 학습 홈에서 다음 목적지를 찾아볼까요?')}"></div>
+  <div th:replace="~{fragments/page-error :: pageError(500, 'SERVICE INTERRUPTION', '잠깐 연결이 흐트러졌어요.', 'Knowva가 요청을 처리하는 동안 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.')}"></div>
 </body>
 </html>
