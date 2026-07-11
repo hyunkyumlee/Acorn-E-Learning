@@ -22,7 +22,7 @@
     </section>
 
     <section class="community-content-layout" aria-label="게시글 상세">
-      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></div>
+      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, false)}"></div>
 
       <section class="panel community-panel" th:if="${view != null}">
         <div class="community-panel-header">

@@ -17,10 +17,19 @@
   <div th:replace="~{fragments/topbar :: topbar}"></div>
 
   <main class="content-recommend-screen">
-    <section class="content-recommend-layout" aria-label="콘텐츠 추천">
-      <aside class="content-subject-sidebar" aria-label="과목 선택">
-        <nav class="content-subject-nav">
-          <h2>게시판</h2>
+    <div class="content-recommend-shell">
+      <a class="button content-back-button" th:href="@{/community(subjectId=${activeSubjectId})}" aria-label="커뮤니티로 돌아가기" title="커뮤니티로 돌아가기">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12 19-7-7 7-7"></path>
+          <path d="M19 12H5"></path>
+        </svg>
+        <span>커뮤니티로 돌아가기</span>
+      </a>
+
+      <section class="content-recommend-layout" aria-label="콘텐츠 추천">
+        <aside class="content-subject-sidebar" aria-label="과목 선택">
+          <nav class="content-subject-nav">
+            <h2>과목 선택</h2>
 
           <a class="content-subject-card"
              th:classappend="${activeSubjectId == 1} ? ' is-active'"
@@ -69,59 +78,57 @@
               <span>영상 · 문서 · 학습 루틴</span>
             </span>
           </a>
-        </nav>
-      </aside>
+          </nav>
+        </aside>
 
-      <section class="content-main-panel">
-        <header class="content-page-heading">
-          <div>
-            <span class="eyebrow">Content</span>
-            <h1 th:text="|${subjectLabel} 추천 콘텐츠|">Java 추천 콘텐츠</h1>
-          </div>
-          <button class="button content-back-button" type="button" aria-label="뒤로 가기" title="뒤로 가기"
-                  onclick="window.history.length > 1 ? window.history.back() : window.location.assign('/community/board')">
-            &lt;
-          </button>
-        </header>
+        <section class="content-main-panel">
+          <header class="content-page-heading">
+            <div>
+              <span class="eyebrow">Content</span>
+              <h1 th:text="|${subjectLabel} 추천 콘텐츠|">Java 추천 콘텐츠</h1>
+            </div>
+          </header>
 
-        <section class="content-card-grid" aria-label="추천 콘텐츠 목록">
-          <article class="content-recommend-card content-video-card">
-            <h2>영상 추천</h2>
-            <ul>
-              <li th:each="item : ${videoView.recommendations}">
-                <a class="content-video-link" th:href="${item.url}" target="_blank" rel="noopener">
-                  <span class="content-video-thumbnail">
-                    <img th:if="${item.youtubeThumbnailUrl() != null}"
-                         th:src="${item.youtubeThumbnailUrl()}"
-                         th:alt="${item.title}"
-                         loading="lazy">
-                    <span class="content-video-placeholder" th:unless="${item.youtubeThumbnailUrl() != null}"></span>
-                    <span class="content-video-play" aria-hidden="true"></span>
-                  </span>
-                  <span class="content-video-copy">
-                    <strong th:text="${item.title}">자바지향 기초</strong>
-                    <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 영상'}">추천 영상</small>
-                  </span>
-                </a>
-              </li>
-            </ul>
-          </article>
+          <section class="content-card-grid" aria-label="추천 콘텐츠 목록">
+            <article class="content-recommend-card content-video-card">
+              <h2>영상 추천</h2>
+              <ul>
+                <li th:each="item : ${videoView.recommendations}">
+                  <a class="content-video-link" th:href="${item.url}" target="_blank" rel="noopener">
+                    <span class="content-video-thumbnail">
+                      <img th:if="${item.youtubeThumbnailUrl() != null}"
+                           th:src="${item.youtubeThumbnailUrl()}"
+                           alt=""
+                           th:alt="${item.title}"
+                           loading="lazy">
+                      <span class="content-video-placeholder" th:unless="${item.youtubeThumbnailUrl() != null}"></span>
+                      <span class="content-video-play" aria-hidden="true"></span>
+                    </span>
+                    <span class="content-video-copy">
+                      <strong th:text="${item.title}">자바지향 기초</strong>
+                      <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 영상'}">추천 영상</small>
+                    </span>
+                  </a>
+                </li>
+              </ul>
+            </article>
 
-          <article class="content-recommend-card content-practice-card">
-            <h2>실습 자료</h2>
-            <ul>
-              <li th:each="item : ${articleView.recommendations}">
-                <a th:href="${item.url}" target="_blank" rel="noopener">
-                  <i></i>
-                  <strong th:text="${item.title}">수업 실습 자료</strong>
-                  <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '실습 자료'}">실습 자료</small>
-                </a>
-              </li>
-            </ul>
-          </article>
+            <article class="content-recommend-card content-practice-card">
+              <h2>실습 자료</h2>
+              <ul>
+                <li th:each="item : ${articleView.recommendations}">
+                  <a th:href="${item.url}" target="_blank" rel="noopener">
+                    <i></i>
+                    <strong th:text="${item.title}">수업 실습 자료</strong>
+                    <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '실습 자료'}">실습 자료</small>
+                  </a>
+                </li>
+              </ul>
+            </article>
+          </section>
         </section>
       </section>
-    </section>
+    </div>
   </main>
 </body>
 </html>
