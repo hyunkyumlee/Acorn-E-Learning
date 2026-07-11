@@ -313,3 +313,129 @@ body.welcome-bg {
 @media (prefers-reduced-motion: reduce) {
   .tut-view, .tut-slide { animation: none; }
 }
+
+/* ===== [추가] 밤하늘 별(반짝임) + 별똥별 배경 ===== */
+/* 별 색: 라이트=은은한 남색, 다크=밝은 흰색 (bg-fx는 welcome-screen 밖이라 body에 변수 정의) */
+body.welcome-bg {
+  --star-color: rgba(38, 58, 120, 0.55);
+  --shoot-color: rgba(70, 90, 165, 0.9);
+}
+:root[data-theme="knowva-ion-dark"] body.welcome-bg {
+  --star-color: rgba(255, 255, 255, 0.6);   /* [수정] 별 밝기 낮춤 (0.92 → 0.6) */
+  --shoot-color: rgba(255, 255, 255, 0.95);
+}
+
+/* 별밭: (1) 항상 켜진 밝은 베이스 + (2)(3) 서로 다른 위치·위상으로 '부분만' 깜빡이는 레이어 */
+.welcome-bg .starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 25px 35px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 80px 120px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 140px 60px, var(--star-color), transparent),
+    radial-gradient(2.6px 2.6px at 190px 150px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 60px 180px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 110px 90px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 170px 20px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 30px 140px, var(--star-color), transparent);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  /* [수정] 성능: 매 프레임 재계산되던 blur+drop-shadow 필터 제거 (렉 주범).
+     별 글로우는 아래 그라디언트 자체를 살짝 크고 부드럽게 그려서 대체 */
+  /* 베이스 층은 애니메이션 없이 항상 켜둠 → 하늘 전체가 밝게 유지 */
+}
+/* 깜빡이는 두 층: 서로 다른 별 위치·주기·위상 → 여기저기 부분부분 사라졌다 나타남 */
+.welcome-bg .starfield::before,
+.welcome-bg .starfield::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+}
+.welcome-bg .starfield::before {
+  background-image:
+    radial-gradient(2px 2px at 45px 25px, var(--star-color), transparent),
+    radial-gradient(2.6px 2.6px at 120px 70px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 205px 110px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 75px 205px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 155px 175px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 15px 95px, var(--star-color), transparent);
+  background-size: 240px 240px;
+  animation: welcome-twinkle 4.5s ease-in-out infinite;
+}
+.welcome-bg .starfield::after {
+  background-image:
+    radial-gradient(2px 2px at 50px 90px, var(--star-color), transparent),
+    radial-gradient(2.6px 2.6px at 160px 40px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 100px 160px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 20px 60px, var(--star-color), transparent),
+    radial-gradient(3.2px 3.2px at 130px 120px, var(--star-color), transparent),
+    radial-gradient(2px 2px at 190px 190px, var(--star-color), transparent);
+  background-size: 300px 300px;
+  animation: welcome-twinkle 7s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+/* 깜빡이는 층만 깊게 사라졌다 나타남 (베이스가 켜져 있어 하늘은 계속 밝음) */
+@keyframes welcome-twinkle {
+  0%, 100% { opacity: 0.1; }
+  50%      { opacity: 1; }
+}
+
+/* 별똥별: 오른쪽 대각선 아래(↘)로 하나씩 흘러감 */
+.welcome-bg .shooting-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.welcome-bg .shoot {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--shoot-color);
+  box-shadow: 0 0 8px 2px var(--shoot-color);
+  opacity: 0;
+  transform: rotate(45deg) translateX(0);
+  animation: welcome-shoot 9s linear infinite;
+}
+.welcome-bg .shoot::before {                 /* 꼬리: 진행 반대(↖) 방향으로 페이드 */
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 150px;
+  height: 2px;
+  transform: translate(-100%, -50%);
+  background: linear-gradient(to left, var(--shoot-color), transparent);
+  border-radius: 2px;
+}
+
+/* 시작 위치·타이밍을 별마다 다르게 → 중간중간 하나씩 떨어지는 느낌 */
+.welcome-bg .shoot:nth-child(1) { top: 6%;  left: 12%; animation-delay: 0s;  animation-duration: 8s;   }
+.welcome-bg .shoot:nth-child(2) { top: -2%; left: 44%; animation-delay: 3s;  animation-duration: 11s;  }
+.welcome-bg .shoot:nth-child(3) { top: 9%;  left: 68%; animation-delay: 6s;  animation-duration: 9.5s; }
+.welcome-bg .shoot:nth-child(4) { top: 1%;  left: 28%; animation-delay: 9.5s;animation-duration: 10s;  }
+.welcome-bg .shoot:nth-child(5) { top: 13%; left: 82%; animation-delay: 13s; animation-duration: 12s;  }
+
+@keyframes welcome-shoot {
+  0%   { opacity: 0; transform: rotate(45deg) translateX(0); }
+  2%   { opacity: 1; }
+  12%  { opacity: 1; }
+  16%  { opacity: 0; transform: rotate(45deg) translateX(130vw); }
+  100% { opacity: 0; transform: rotate(45deg) translateX(130vw); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-bg .starfield::before,
+  .welcome-bg .starfield::after,
+  .welcome-bg .shoot { animation: none; }
+  .welcome-bg .starfield::before,
+  .welcome-bg .starfield::after { opacity: 1; }
+  .welcome-bg .shoot { opacity: 0; }
+}
+
+/* [삭제] 오로라(SVG 워프 필터 + mix-blend-mode)는 렉 주범이라 완전히 제거함.
+   배경은 다크 하늘 + 별 + 별똥별만 유지 (전부 필터 없이 GPU 저비용). */
