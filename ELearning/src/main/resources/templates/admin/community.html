@@ -70,7 +70,7 @@
       <table class="admin-community-table">
         <thead>
         <tr>
-          <th>게시글 ID</th>
+          <th>번호</th>
           <th>작성자</th>
           <th>제목</th>
           <th>게시판</th>
@@ -83,12 +83,12 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="post : ${communityPage.posts.items}"
+        <tr th:each="post, stat : ${communityPage.posts.items}"
             class="admin-community-post-row"
             th:data-board="${post.boardType}"
             th:data-status="${post.status}"
             th:data-keyword="${post.title + ' ' + post.writerNickname}">
-          <td th:text="${'#' + post.postId}">#001</td>
+          <td th:text="${((communityPage.posts.currentPage - 1) * communityPage.posts.pageSize) + stat.count}">1</td>
           <td th:text="${post.writerNickname}">닉네임</td>
           <td th:text="${post.title}">게시글 제목</td>
           <td th:text="${post.boardTypeLabel()}">자유</td>
@@ -162,8 +162,8 @@
       <table class="admin-community-table">
         <thead>
         <tr>
-          <th>댓글 ID</th>
-          <th>게시글 ID</th>
+          <th>번호</th>
+          <th>게시글 번호</th>
           <th>작성자</th>
           <th>댓글 내용 요약</th>
           <th>신고 수</th>
@@ -173,12 +173,12 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="comment : ${communityPage.comments.items}"
+        <tr th:each="comment, stat : ${communityPage.comments.items}"
             class="admin-community-comment-row"
             th:data-status="${comment.status}"
             th:data-keyword="${comment.content + ' ' + comment.writerNickname}">
-          <td th:text="${'#' + comment.commentId}">#C001</td>
-          <td th:text="${'#' + comment.postId}">#001</td>
+          <td th:text="${((communityPage.comments.currentPage - 1) * communityPage.comments.pageSize) + stat.count}">1</td>
+          <td th:text="${comment.postId}">1</td>
           <td th:text="${comment.writerNickname}">닉네임</td>
           <td th:text="${comment.contentSummary()}">댓글 내용</td>
           <td th:text="${comment.reportCount}">0</td>

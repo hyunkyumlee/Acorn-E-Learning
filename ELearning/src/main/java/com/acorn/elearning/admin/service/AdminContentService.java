@@ -16,6 +16,8 @@ import com.acorn.elearning.admin.mapper.AdminCurriculumNodeMapper;
 import com.acorn.elearning.admin.mapper.AdminLessonMapper;
 import com.acorn.elearning.admin.mapper.AdminProblemMapper;
 import com.acorn.elearning.admin.model.AdminOperationLog;
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
 import com.acorn.elearning.learning.mapper.LessonMapper;
 import com.acorn.elearning.learning.mapper.SubjectMapper;
@@ -103,7 +105,10 @@ public class AdminContentService {
 
     public int updateSubject(SubjectForm form, Long adminId){
         Subject s = sm.findById(form.getSubjectId())
-                        .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "수정할 과목을 찾을 수 없습니다."
+                ));
 
         s.setSubjectName(form.getSubjectName());
         s.setIsActive(form.getIsActive());
@@ -156,7 +161,10 @@ public class AdminContentService {
 
     public int updateCurriculumNode(CurriculumNodeForm form, Long adminId){
         CurriculumNode c = cm.findById(form.getNodeId())
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "수정할 커리큘럼을 찾을 수 없습니다."
+                ));
 
         c.setSubjectId(form.getSubjectId());
         c.setLevelCode(form.getLevelCode());
@@ -267,7 +275,10 @@ public class AdminContentService {
 
     public int updateLesson(LessonForm form, Long adminId){
         Lesson lesson = lm.findById(form.getLessonId())
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "수정할 이론 자료를 찾을 수 없습니다."
+                ));
 
         lesson.setNodeId(form.getNodeId());
         lesson.setTitle(form.getTitle());
@@ -347,10 +358,16 @@ public class AdminContentService {
         PracticeProblem problem = new PracticeProblem();
 
         Lesson lesson = lm.findById(form.getLessonId())
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "문제에 연결할 이론 자료를 찾을 수 없습니다."
+                ));
 
         CurriculumNode node = cm.findById(lesson.getNodeId())
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "문제에 연결할 커리큘럼을 찾을 수 없습니다."
+                ));
 
         problem.setSubjectId(node.getSubjectId());
         problem.setNodeId(lesson.getNodeId());
@@ -376,14 +393,23 @@ public class AdminContentService {
 
     public int updateProblem(ProblemForm form, Long adminId){
         PracticeProblem problem = ppm.findById(form.getProblemId())
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "수정할 문제를 찾을 수 없습니다."
+                ));
 
 
         Lesson lesson = lm.findById(form.getLessonId())
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "문제에 연결할 이론 자료를 찾을 수 없습니다."
+                ));
 
         CurriculumNode node = cm.findById(lesson.getNodeId())
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "문제에 연결할 커리큘럼을 찾을 수 없습니다."
+                ));
 
         problem.setSubjectId(node.getSubjectId());
         problem.setNodeId(lesson.getNodeId());
@@ -411,7 +437,10 @@ public class AdminContentService {
         }
 
         PracticeProblem problem = ppm.findById(problemId)
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "상태를 변경할 문제를 찾을 수 없습니다."
+                ));
 
         problem.setIsActive(isActive);
 
@@ -477,7 +506,11 @@ public class AdminContentService {
     }
 
     public int updateSubjectStatus(Long subjectId, Boolean isActive, Long adminId){
-        Subject s = sm.findById(subjectId).orElseThrow();
+        Subject s = sm.findById(subjectId)
+                .orElseThrow(() -> new BusinessException(
+                ErrorCode.COMMON_NOT_FOUND,
+                "상태를 변경할 과목을 찾을 수 없습니다."
+        ));
 
         s.setIsActive(isActive);
 
@@ -514,7 +547,11 @@ public class AdminContentService {
     }
 
     public int updateCurriculumNodeStatus(Long nodeId, Boolean isActive, Long adminId){
-        CurriculumNode c = cm.findById(nodeId).orElseThrow();
+        CurriculumNode c = cm.findById(nodeId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "상태를 변경할 커리큘럼을 찾을 수 없습니다."
+                ));
 
         c.setIsActive(isActive);
 
@@ -534,7 +571,10 @@ public class AdminContentService {
             return 0;
         }
 
-        Lesson l = lm.findById(lessonId).orElseThrow();
+        Lesson l = lm.findById(lessonId).orElseThrow(() -> new BusinessException(
+                ErrorCode.COMMON_NOT_FOUND,
+                "상태를 변경할 이론 자료를 찾을 수 없습니다."
+        ));
 
         l.setIsActive(isActive);
 

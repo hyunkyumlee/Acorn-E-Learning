@@ -69,8 +69,18 @@ public class AdminCommunityController {
             RedirectAttributes redirectAttributes
     ) {
 
-        service.updatePostStatus(postId, form, sessionUser);
-        redirectAttributes.addFlashAttribute("message", "게시글 상태가 변경되었습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
+
+        int updated = service.updatePostStatus(postId, form, sessionUser);
+
+        if (updated == 1) {
+            redirectAttributes.addFlashAttribute("message", "게시글 상태가 변경되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "상태를 변경할 게시글을 찾을 수 없습니다.");
+        }
 
         return "redirect:/admin/community";
     }
@@ -83,8 +93,19 @@ public class AdminCommunityController {
             RedirectAttributes redirectAttributes
     ) {
 
-        service.updateCommentStatus(commentId, form, sessionUser);
-        redirectAttributes.addFlashAttribute("message", "댓글 상태가 변경되었습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
+
+        int updated = service.updateCommentStatus(commentId, form, sessionUser);
+
+        if (updated == 1) {
+            redirectAttributes.addFlashAttribute("message", "댓글 상태가 변경되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "상태를 변경할 댓글을 찾을 수 없습니다.");
+        }
+
 
         return "redirect:/admin/community";
     }

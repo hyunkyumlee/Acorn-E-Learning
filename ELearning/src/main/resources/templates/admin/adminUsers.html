@@ -76,7 +76,7 @@
       <table class="admin-user-table">
         <thead>
         <tr>
-          <th>사용자 ID</th>
+          <th>번호</th>
           <th>이메일</th>
           <th>닉네임</th>
           <th>관심 과목</th>
@@ -90,7 +90,7 @@
         </thead>
 
         <tbody>
-        <tr th:each="user : ${userPage.items}" class="admin-user-row"
+        <tr th:each="user, stat : ${userPage.items}" class="admin-user-row"
             th:data-user-id="${user.userId}"
             th:data-email="${user.email}"
             th:data-nickname="${user.nickname}"
@@ -103,7 +103,7 @@
             th:data-progress-count="${user.progressCount}"
             th:data-completed-count="${user.completedCount}"
             th:data-average-progress-rate="${user.averageProgressRate}">
-          <td th:text="${'#' + user.userId}">#001</td>
+          <td th:text="${((userPage.currentPage - 1) * userPage.pageSize) + stat.count}">1</td>
           <td th:text="${user.email}">user01@email.com</td>
           <td th:text="${user.nickname}">닉네임1</td>
           <td th:text="${user.subjectName ?: '-'}">Java</td>
