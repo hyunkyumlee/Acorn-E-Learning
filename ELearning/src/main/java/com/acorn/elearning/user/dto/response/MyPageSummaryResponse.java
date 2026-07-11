@@ -426,6 +426,9 @@ public record MyPageSummaryResponse(
             if ("BANK_TRANSFER".equals(paymentMethod)) {
                 return "무통장 입금";
             }
+            if ("KAKAO_PAY".equals(paymentMethod)) {
+                return "카카오페이";
+            }
             return hasText(paymentMethod) ? paymentMethod : "-";
         }
 

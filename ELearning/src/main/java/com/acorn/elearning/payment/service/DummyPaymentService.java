@@ -22,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class DummyPaymentService {
     private static final String DEFAULT_PRODUCT_CODE = "PREMIUM_LIFETIME";
     private static final String STATUS_PAID = "PAID";
+    public static final String METHOD_CARD = "CARD";
+    public static final String METHOD_BANK_TRANSFER = "BANK_TRANSFER";
+    public static final String METHOD_KAKAO_PAY = "KAKAO_PAY";
 
     private final DummyPaymentMapper dummyPaymentMapper;
     private final PaymentProductMapper paymentProductMapper;
@@ -141,7 +144,11 @@ public class DummyPaymentService {
         return hasText(form.getProductCode()) ? form.getProductCode() : DEFAULT_PRODUCT_CODE;
     }
 
-    private String buildOrderNo(Long userId, String idempotencyToken) {
+    public String buildOrderNo(Long userId, String idempotencyToken) {
+        requireUserId(userId);
+        if (!hasText(idempotencyToken)) {
+            throw new BusinessException(ErrorCode.COMMON_IDEMPOTENCY_KEY_REQUIRED);
+        }
         String source = userId + ":" + idempotencyToken;
         return "KNV-" + UUID.nameUUIDFromBytes(source.getBytes(StandardCharsets.UTF_8));
     }
@@ -169,8 +176,10 @@ public class DummyPaymentService {
         if (!hasText(form.getPaymentMethod())) {
             throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "결제 방식이 필요합니다.");
         }
-        if (!"CARD".equals(form.getPaymentMethod()) && !"BANK_TRANSFER".equals(form.getPaymentMethod())) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "결제 방식은 CARD 또는 BANK_TRANSFER만 가능합니다.");
+        if (!METHOD_CARD.equals(form.getPaymentMethod())
+                && !METHOD_BANK_TRANSFER.equals(form.getPaymentMethod())
+                && !METHOD_KAKAO_PAY.equals(form.getPaymentMethod())) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "결제 방식은 CARD, BANK_TRANSFER, KAKAO_PAY만 가능합니다.");
         }
     }
 
