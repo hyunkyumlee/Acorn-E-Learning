@@ -6,6 +6,7 @@ import com.acorn.elearning.payment.dto.response.PaymentProductListResponse;
 import com.acorn.elearning.payment.dto.response.PaymentResultResponse;
 import com.acorn.elearning.payment.form.DummyPaymentForm;
 import com.acorn.elearning.payment.service.DummyPaymentService;
+import com.acorn.elearning.payment.service.KakaoPayService;
 import com.acorn.elearning.payment.service.PaymentAccessService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpSession;
@@ -29,15 +30,18 @@ public class PaymentController {
     private static final String FORM_TYPE = "PAYMENT_DUMMY";
 
     private final DummyPaymentService dummyPaymentService;
+    private final KakaoPayService kakaoPayService;
     private final PaymentAccessService paymentAccessService;
     private final IdempotencyTokenService idempotencyTokenService;
 
     public PaymentController(
             DummyPaymentService dummyPaymentService,
+            KakaoPayService kakaoPayService,
             PaymentAccessService paymentAccessService,
             IdempotencyTokenService idempotencyTokenService
     ) {
         this.dummyPaymentService = dummyPaymentService;
+        this.kakaoPayService = kakaoPayService;
         this.paymentAccessService = paymentAccessService;
         this.idempotencyTokenService = idempotencyTokenService;
     }
@@ -64,7 +68,12 @@ public class PaymentController {
     }
 
     @GetMapping("/payments/bank")
-    public String bankForm(
+    public String bankForm() {
+        return "redirect:/payments/kakao-pay";
+    }
+
+    @GetMapping("/payments/kakao-pay")
+    public String kakaoPayForm(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             HttpSession httpSession,
             Model model
@@ -73,8 +82,8 @@ public class PaymentController {
         if (currentUser == null) {
             return "redirect:/login";
         }
-        preparePaymentForm(model, httpSession, currentUser, "BANK_TRANSFER");
-        return "payment/bank";
+        preparePaymentForm(model, httpSession, currentUser, DummyPaymentService.METHOD_KAKAO_PAY);
+        return "payment/kakao";
     }
 
     @PostMapping("/payments/dummy")
@@ -99,6 +108,66 @@ public class PaymentController {
         PaymentResultResponse result = dummyPaymentService.pay(currentUser, form);
         redirectAttributes.addAttribute("paymentId", result.paymentId());
         return "redirect:/payments/complete";
+    }
+
+    @PostMapping("/payments/kakao-pay/ready")
+    public String kakaoPayReady(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid DummyPaymentForm form,
+            BindingResult bindingResult,
+            HttpSession httpSession,
+            Model model
+    ) {
+        SessionUser currentUser = currentUser(sessionUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("screen", "payment/kakao");
+            addProductModel(model);
+            model.addAttribute("idempotencyToken", form.getIdempotencyToken());
+            return "payment/kakao";
+        }
+
+        String redirectUrl = kakaoPayService.ready(currentUser, form, httpSession);
+        return "redirect:" + redirectUrl;
+    }
+
+    @GetMapping("/payments/kakao-pay/success")
+    public String kakaoPaySuccess(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam(name = "pg_token", required = false) String pgToken,
+            HttpSession httpSession,
+            RedirectAttributes redirectAttributes
+    ) {
+        SessionUser currentUser = currentUser(sessionUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        PaymentResultResponse result = kakaoPayService.approve(currentUser, pgToken, httpSession);
+        redirectAttributes.addAttribute("paymentId", result.paymentId());
+        return "redirect:/payments/complete";
+    }
+
+    @GetMapping("/payments/kakao-pay/cancel")
+    public String kakaoPayCancel(
+            HttpSession httpSession,
+            RedirectAttributes redirectAttributes
+    ) {
+        kakaoPayService.clear(httpSession);
+        redirectAttributes.addFlashAttribute("paymentError", "카카오페이 결제가 취소되었습니다.");
+        return "redirect:/payments";
+    }
+
+    @GetMapping("/payments/kakao-pay/fail")
+    public String kakaoPayFail(
+            HttpSession httpSession,
+            RedirectAttributes redirectAttributes
+    ) {
+        kakaoPayService.clear(httpSession);
+        redirectAttributes.addFlashAttribute("paymentError", "카카오페이 결제에 실패했습니다. 다시 시도해주세요.");
+        return "redirect:/payments";
     }
 
     @GetMapping("/payments/complete")
@@ -140,8 +209,8 @@ public class PaymentController {
     }
 
     private String paymentFormView(String paymentMethod) {
-        if ("BANK_TRANSFER".equals(paymentMethod)) {
-            return "payment/bank";
+        if (DummyPaymentService.METHOD_KAKAO_PAY.equals(paymentMethod)) {
+            return "payment/kakao";
         }
         return "payment/card";
     }

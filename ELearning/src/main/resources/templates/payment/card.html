@@ -30,7 +30,7 @@
           <input type="hidden" name="idempotencyToken" th:value="${idempotencyToken}" value="">
           <div class="figma-method-row">
             <a class="figma-button primary" th:href="@{/payments/card}" href="/payments/card">VISA</a>
-            <a class="figma-button" th:href="@{/payments/bank}" href="/payments/bank">무통장 입금</a>
+            <a class="figma-button kakao-pay-button" th:href="@{/payments/kakao-pay}" href="/payments/kakao-pay">카카오페이</a>
           </div>
           <div class="figma-form-grid">
             <label for="cardLastName">성<input id="cardLastName" class="field" name="lastName" value="Lee" autocomplete="family-name"></label>

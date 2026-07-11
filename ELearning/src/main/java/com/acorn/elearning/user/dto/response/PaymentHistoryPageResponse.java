@@ -104,6 +104,9 @@ public record PaymentHistoryPageResponse(
             if ("BANK_TRANSFER".equals(paymentMethod)) {
                 return "무통장 입금";
             }
+            if ("KAKAO_PAY".equals(paymentMethod)) {
+                return "카카오페이";
+            }
             return hasText(paymentMethod) ? paymentMethod : "-";
         }
 
@@ -113,6 +116,9 @@ public record PaymentHistoryPageResponse(
             }
             if ("BANK_TRANSFER".equals(paymentMethod)) {
                 return "무통장 입금 더미 승인";
+            }
+            if ("KAKAO_PAY".equals(paymentMethod)) {
+                return "카카오페이 승인";
             }
             return paymentMethodLabel();
         }

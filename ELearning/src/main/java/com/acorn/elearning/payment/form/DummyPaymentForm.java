@@ -13,7 +13,7 @@ public class DummyPaymentForm {
     private String productCode = "PREMIUM_LIFETIME";
 
     @NotBlank
-    @Pattern(regexp = "CARD|BANK_TRANSFER", message = "결제 방식은 CARD 또는 BANK_TRANSFER만 가능합니다.")
+    @Pattern(regexp = "CARD|BANK_TRANSFER|KAKAO_PAY", message = "결제 방식은 CARD, BANK_TRANSFER, KAKAO_PAY만 가능합니다.")
     private String paymentMethod;
 
     @Size(max = 4)
