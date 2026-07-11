@@ -46,7 +46,7 @@
       <table class="admin-report-table">
         <thead>
         <tr>
-          <th>신고 ID</th>
+          <th>번호</th>
           <th>신고자</th>
           <th>신고 대상 유형</th>
           <th>신고 대상</th>
@@ -57,7 +57,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="report : ${reportPage.items}"
+        <tr th:each="report, stat : ${reportPage.items}"
             class="admin-report-row"
             th:data-report-id="${report.reportId}"
             th:data-reporter="${report.reporterNickname}"
@@ -70,7 +70,7 @@
             th:data-target="${report.targetSummary}"
             th:data-reason="${report.reasonLabel()}"
             th:data-content="${report.targetSummary}">
-          <td th:text="${'#' + report.reportId}">#001</td>
+          <td th:text="${((reportPage.currentPage - 1) * reportPage.pageSize) + stat.count}">1</td>
           <td th:text="${report.reporterNickname}">닉네임1</td>
           <td th:text="${report.targetTypeLabel()}">게시글</td>
           <td th:text="${report.targetSummary}">신고 대상</td>

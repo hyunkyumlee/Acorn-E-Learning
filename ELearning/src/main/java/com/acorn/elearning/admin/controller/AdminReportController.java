@@ -41,8 +41,18 @@ public class AdminReportController {
             RedirectAttributes redirectAttributes
     ) {
 
-        service.handle(reportId, form, sessionUser);
-        redirectAttributes.addFlashAttribute("message", "신고 처리 상태가 변경되었습니다.");
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
+
+        int updated = service.handle(reportId, form, sessionUser);
+
+        if (updated == 1) {
+            redirectAttributes.addFlashAttribute("message", "신고 처리 상태가 변경되었습니다.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "처리할 신고를 찾을 수 없습니다.");
+        }
         return "redirect:/admin/reports";
     }
 }
