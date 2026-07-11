@@ -17,6 +17,7 @@ import com.acorn.elearning.learning.model.AttendanceRecord;
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
 import com.acorn.elearning.learning.model.LevelTestAttempt;
+import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.payment.dto.response.PremiumAccessResponse;
 import com.acorn.elearning.payment.mapper.DummyPaymentMapper;
 import com.acorn.elearning.payment.model.DummyPayment;
@@ -32,14 +33,13 @@ import com.acorn.elearning.user.mapper.UserLearningProfileMapper;
 import com.acorn.elearning.user.mapper.UserMapper;
 import com.acorn.elearning.user.model.User;
 import com.acorn.elearning.user.model.UserLearningProfile;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +64,7 @@ public class UserActivityService {
     private final LevelTestAttemptMapper levelTestAttemptMapper;
     private final ExamSessionMapper examSessionMapper;
     private final UserLearningProfileMapper userLearningProfileMapper;
+    private final CurriculumService curriculumService;
 
     public UserActivityService(
             DummyPaymentMapper dummyPaymentMapper,
@@ -78,7 +79,8 @@ public class UserActivityService {
             LearningProgressMapper learningProgressMapper,
             LevelTestAttemptMapper levelTestAttemptMapper,
             ExamSessionMapper examSessionMapper,
-            UserLearningProfileMapper userLearningProfileMapper
+            UserLearningProfileMapper userLearningProfileMapper,
+            CurriculumService curriculumService
     ) {
         this.dummyPaymentMapper = dummyPaymentMapper;
         this.paymentAccessService = paymentAccessService;
@@ -93,6 +95,7 @@ public class UserActivityService {
         this.levelTestAttemptMapper = levelTestAttemptMapper;
         this.examSessionMapper = examSessionMapper;
         this.userLearningProfileMapper = userLearningProfileMapper;
+        this.curriculumService = curriculumService;
     }
 
     @Transactional(readOnly = true)
@@ -108,13 +111,13 @@ public class UserActivityService {
         List<LearningProgress> progressItems = learningProgressMapper.findAll().stream()
                 .filter(progress -> userId.equals(progress.getUserId()))
                 .toList();
-        Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel =
-                progressBySubjectLevel(progressItems);
+        Map<Long, List<LearningStatusPageResponse.SubjectLevelProgress>> progressBySubjectLevel =
+                progressBySubjectLevel(userId);
         List<ExamSession> examSessions = examSessionMapper.findByUserId(userId);
         List<LevelTestAttempt> levelTestAttempts = levelTestAttemptMapper.findAll().stream()
                 .filter(attempt -> userId.equals(attempt.getUserId()))
                 .toList();
-        List<UserLearningProfile> allLearningProfiles = userLearningProfileMapper.findAll();
+        List<Map<String, Object>> rankingScoreRows = userLearningProfileMapper.findScoreEventTotals();
         int likedPostCount = postLikeMapper.findPostsByUserId(userId).size();
         int scrapedPostCount = postScrapMapper.findPostsByUserId(userId).size();
         int writtenPostCount = communityPostMapper.findByWriterId(userId).size();
@@ -131,7 +134,7 @@ public class UserActivityService {
                 progressBySubjectLevel,
                 examSessions,
                 levelTestAttempts,
-                allLearningProfiles,
+                rankingScoreRows,
                 likedPostCount,
                 scrapedPostCount,
                 writtenPostCount,
@@ -153,7 +156,7 @@ public class UserActivityService {
                 .toList();
         return LearningStatusPageResponse.of(
                 progressItems,
-                progressBySubjectLevel(progressItems),
+                progressBySubjectLevel(userId),
                 subject,
                 safePage,
                 DEFAULT_SIZE
@@ -237,16 +240,7 @@ public class UserActivityService {
         return offset > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) offset;
     }
 
-    private Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel(
-            List<LearningProgress> progressItems
-    ) {
-        Map<Long, LearningProgress> progressByNodeId = new HashMap<>();
-        if (progressItems != null) {
-            progressItems.stream()
-                    .filter(progress -> progress.getNodeId() != null)
-                    .forEach(progress -> progressByNodeId.put(progress.getNodeId(), progress));
-        }
-
+    private Map<Long, List<LearningStatusPageResponse.SubjectLevelProgress>> progressBySubjectLevel(Long userId) {
         Map<Long, Map<String, List<CurriculumNode>>> planetsBySubjectLevel = new HashMap<>();
         curriculumNodeMapper.findAll().stream()
                 .filter(node -> node.getSubjectId() != null)
@@ -258,43 +252,47 @@ public class UserActivityService {
                         .computeIfAbsent(normalizeLevelCode(node.getLevelCode()), ignored -> new ArrayList<>())
                         .add(node));
 
-        Map<Long, LearningStatusPageResponse.SubjectLevelProgress> result = new HashMap<>();
+        Map<Long, List<LearningStatusPageResponse.SubjectLevelProgress>> result = new HashMap<>();
         planetsBySubjectLevel.forEach((subjectId, planetsByLevel) -> {
-            LearningStatusPageResponse.SubjectLevelProgress selected = null;
+            Set<String> unlockedLevels = curriculumService.getUnlockedLevelCodes(userId, subjectId).stream()
+                    .map(UserActivityService::normalizeLevelCode)
+                    .collect(java.util.stream.Collectors.toSet());
+            List<LearningStatusPageResponse.SubjectLevelProgress> levels = new ArrayList<>();
             for (String levelCode : List.of("BRONZE", "SILVER", "GOLD")) {
                 List<CurriculumNode> levelPlanets = planetsByLevel.getOrDefault(levelCode, List.of());
                 if (levelPlanets.isEmpty()) {
                     continue;
                 }
 
-                int progressRate = levelProgressRate(levelPlanets, progressByNodeId);
-                selected = new LearningStatusPageResponse.SubjectLevelProgress(levelCode, progressRate);
-                if (progressRate < 100 || "GOLD".equals(levelCode)) {
-                    break;
-                }
+                int progressRate = levelProgressRate(userId, levelPlanets);
+                levels.add(new LearningStatusPageResponse.SubjectLevelProgress(
+                        levelCode,
+                        progressRate,
+                        "BRONZE".equals(levelCode) || unlockedLevels.contains(levelCode)
+                ));
             }
-            if (selected != null) {
-                result.put(subjectId, selected);
+            if (!levels.isEmpty()) {
+                result.put(subjectId, List.copyOf(levels));
             }
         });
         return result;
     }
 
     private int levelProgressRate(
-            List<CurriculumNode> planets,
-            Map<Long, LearningProgress> progressByNodeId
+            Long userId,
+            List<CurriculumNode> planets
     ) {
-        if (planets == null || planets.isEmpty()) {
+        if (userId == null || planets == null || planets.isEmpty()) {
             return 0;
         }
-        BigDecimal total = BigDecimal.ZERO;
+        double rateSum = 0d;
         for (CurriculumNode planet : planets) {
-            LearningProgress progress = progressByNodeId.get(planet.getNodeId());
-            if (progress != null && progress.getProgressRate() != null) {
-                total = total.add(progress.getProgressRate());
-            }
+            Long nodeId = planet.getNodeId();
+            int required = curriculumService.countRequiredLessons(nodeId);
+            int completed = curriculumService.countCompletedRequiredLessons(userId, nodeId);
+            rateSum += (required > 0) ? (completed * 100.0 / required) : 0d;
         }
-        return total.divide(BigDecimal.valueOf(planets.size()), 0, RoundingMode.HALF_UP).intValue();
+        return (int) Math.round(rateSum / planets.size());
     }
 
     private static String normalizeLevelCode(String levelCode) {

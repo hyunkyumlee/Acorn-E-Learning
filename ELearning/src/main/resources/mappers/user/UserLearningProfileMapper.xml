@@ -46,6 +46,18 @@
         ORDER BY profile_id DESC
     </select>
 
+    <select id="findScoreEventTotals" resultType="map">
+        SELECT
+            ulp.user_id AS userId,
+            COALESCE(SUM(se.score_delta), 0) AS totalScore
+        FROM user_learning_profiles ulp
+        LEFT JOIN score_events se
+          ON se.user_id = ulp.user_id
+         AND se.reason_code NOT LIKE 'ATTENDANCE%'
+        GROUP BY ulp.user_id
+        ORDER BY totalScore DESC, ulp.user_id ASC
+    </select>
+
     <insert id="insert" parameterType="com.acorn.elearning.user.model.UserLearningProfile" useGeneratedKeys="true" keyProperty="profileId">
         INSERT INTO user_learning_profiles (
             user_id,

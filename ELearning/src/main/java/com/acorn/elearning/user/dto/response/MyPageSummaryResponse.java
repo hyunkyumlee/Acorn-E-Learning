@@ -38,10 +38,10 @@ public record MyPageSummaryResponse(
             AttendanceRecord latestAttendance,
             List<AttendanceRecord> attendanceRecords,
             List<LearningProgress> progressItems,
-            Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel,
+            Map<Long, List<LearningStatusPageResponse.SubjectLevelProgress>> progressBySubjectLevel,
             List<ExamSession> examSessions,
             List<LevelTestAttempt> levelTestAttempts,
-            List<UserLearningProfile> allLearningProfiles,
+            List<Map<String, Object>> rankingScoreRows,
             int likedPostCount,
             int scrapedPostCount,
             int writtenPostCount,
@@ -63,7 +63,7 @@ public record MyPageSummaryResponse(
                         learningProfile == null ? null : learningProfile.getCurrentLevelCode()
                 ),
                 CommunitySummary.from(likedPostCount, scrapedPostCount, writtenPostCount),
-                RankingSummary.from(learningProfile, allLearningProfiles),
+                RankingSummary.from(sessionUser, rankingScoreRows),
                 PaymentSummary.from(latestPayment)
         );
     }
@@ -163,7 +163,7 @@ public record MyPageSummaryResponse(
                 AttendanceRecord latestAttendance,
                 List<AttendanceRecord> attendanceRecords,
                 List<LearningProgress> progressItems,
-                Map<Long, LearningStatusPageResponse.SubjectLevelProgress> progressBySubjectLevel
+                Map<Long, List<LearningStatusPageResponse.SubjectLevelProgress>> progressBySubjectLevel
         ) {
             List<LearningProgress> safeProgressItems = progressItems == null ? List.of() : progressItems;
             List<String> safeAttendanceDates = attendanceDates(attendanceRecords);
@@ -481,11 +481,12 @@ public record MyPageSummaryResponse(
             String scoreLabel
     ) {
         public static RankingSummary from(
-                UserLearningProfile learningProfile,
-                List<UserLearningProfile> allLearningProfiles
+                SessionUser sessionUser,
+                List<Map<String, Object>> rankingScoreRows
         ) {
-            int totalScore = scoreOf(learningProfile);
-            Integer rankNo = rankNo(learningProfile, allLearningProfiles);
+            Long userId = sessionUser == null ? null : sessionUser.userId();
+            int totalScore = scoreOf(rankingScoreRows, userId);
+            Integer rankNo = rankNo(userId, rankingScoreRows);
             return new RankingSummary(
                     rankNo,
                     totalScore,
@@ -495,31 +496,60 @@ public record MyPageSummaryResponse(
         }
 
         private static Integer rankNo(
-                UserLearningProfile learningProfile,
-                List<UserLearningProfile> allLearningProfiles
+                Long userId,
+                List<Map<String, Object>> rankingScoreRows
         ) {
-            if (learningProfile == null || learningProfile.getUserId() == null || allLearningProfiles == null) {
+            if (userId == null || rankingScoreRows == null) {
                 return null;
             }
-            boolean profileExists = allLearningProfiles.stream()
-                    .anyMatch(profile -> profile != null
-                            && learningProfile.getUserId().equals(profile.getUserId()));
-            if (!profileExists) {
+            Integer myScore = null;
+            for (Map<String, Object> row : rankingScoreRows) {
+                if (userId.equals(userIdOf(row))) {
+                    myScore = scoreOf(row);
+                    break;
+                }
+            }
+            if (myScore == null) {
                 return null;
             }
-            int myScore = scoreOf(learningProfile);
-            long higherScoreCount = allLearningProfiles.stream()
-                    .filter(profile -> profile != null)
-                    .filter(profile -> scoreOf(profile) > myScore)
+            int score = myScore;
+            long higherScoreCount = rankingScoreRows.stream()
+                    .filter(row -> scoreOf(row) > score)
                     .count();
             return Math.toIntExact(higherScoreCount + 1);
         }
 
-        private static int scoreOf(UserLearningProfile profile) {
-            if (profile == null || profile.getTotalScore() == null) {
+        private static int scoreOf(List<Map<String, Object>> rankingScoreRows, Long userId) {
+            if (userId == null || rankingScoreRows == null) {
                 return 0;
             }
-            return Math.max(profile.getTotalScore(), 0);
+            return rankingScoreRows.stream()
+                    .filter(row -> userId.equals(userIdOf(row)))
+                    .findFirst()
+                    .map(RankingSummary::scoreOf)
+                    .orElse(0);
+        }
+
+        private static Long userIdOf(Map<String, Object> row) {
+            if (row == null) {
+                return null;
+            }
+            Object value = row.get("userId");
+            if (value == null) {
+                value = row.get("USERID");
+            }
+            return value instanceof Number number ? number.longValue() : null;
+        }
+
+        private static int scoreOf(Map<String, Object> row) {
+            if (row == null) {
+                return 0;
+            }
+            Object value = row.get("totalScore");
+            if (value == null) {
+                value = row.get("TOTALSCORE");
+            }
+            return value instanceof Number number ? Math.max(number.intValue(), 0) : 0;
         }
     }
 

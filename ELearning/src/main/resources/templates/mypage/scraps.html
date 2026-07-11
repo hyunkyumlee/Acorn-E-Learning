@@ -188,17 +188,14 @@
           }
           settlePending();
           updateButton(button, false);
-          row.classList.add("is-removing");
+          row.hidden = true;
+          updateEmptyState();
           var nextPending = {
             row: row,
             button: button,
             undoRequested: false,
             failed: false,
-            hideTimer: window.setTimeout(function () {
-              row.hidden = true;
-              row.classList.remove("is-removing");
-              updateEmptyState();
-            }, 180)
+            hideTimer: null
           };
           nextPending.removePromise = requestReaction(row, "DELETE").catch(function (error) {
             nextPending.failed = true;

@@ -12,6 +12,7 @@ public record LearningStatusPageResponse(
         List<SubjectFilter> filters,
         List<LearningStatusItem> items,
         String selectedSubject,
+        boolean levelDetail,
         int page,
         int size,
         long totalElements,
@@ -39,43 +40,47 @@ public record LearningStatusPageResponse(
 
     public static LearningStatusPageResponse of(
             List<LearningProgress> progressItems,
-            Map<Long, SubjectLevelProgress> progressBySubjectLevel,
+            Map<Long, List<SubjectLevelProgress>> progressBySubjectLevel,
             String subject,
             int page,
             int size
     ) {
-        int safePage = Math.max(page, 0);
-        int safeSize = Math.max(size, 1);
         String selectedSubject = normalizeSubject(subject);
         Map<Long, List<LearningProgress>> progressBySubject = progressBySubject(progressItems);
         List<SubjectMeta> subjects = subjects(progressBySubject);
         List<SubjectFilter> filters = filters(subjects, selectedSubject);
-        List<LearningStatusItem> allItems = subjects.stream()
-                .filter(meta -> ALL_SUBJECTS.equals(selectedSubject) || meta.code().equals(selectedSubject))
-                .map(meta -> LearningStatusItem.from(
-                        meta,
-                        progressBySubject.getOrDefault(meta.subjectId(), List.of()),
-                        progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId())
-                ))
-                .toList();
+        boolean levelDetail = !ALL_SUBJECTS.equals(selectedSubject);
+        List<LearningStatusItem> allItems = levelDetail
+                ? subjects.stream()
+                        .filter(meta -> meta.code().equals(selectedSubject))
+                        .flatMap(meta -> levelItems(
+                                meta,
+                                progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId())
+                        ).stream())
+                        .toList()
+                : subjects.stream()
+                        .map(meta -> LearningStatusItem.from(
+                                meta,
+                                progressBySubject.getOrDefault(meta.subjectId(), List.of()),
+                                currentLevelProgress(progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId()))
+                        ))
+                        .toList();
 
         int totalElements = allItems.size();
-        int totalPages = totalElements == 0 ? 0 : (int) Math.ceil((double) totalElements / safeSize);
-        int fromIndex = Math.min(safePage * safeSize, totalElements);
-        int toIndex = Math.min(fromIndex + safeSize, totalElements);
-        List<LearningStatusItem> pageItems = fromIndex >= toIndex ? List.of() : allItems.subList(fromIndex, toIndex);
+        int totalPages = totalElements == 0 ? 0 : 1;
 
         return new LearningStatusPageResponse(
                 filters,
-                pageItems,
+                allItems,
                 selectedSubject,
-                safePage,
-                safeSize,
+                levelDetail,
+                0,
+                Math.max(totalElements, 1),
                 totalElements,
                 totalPages,
-                safePage == 0,
-                totalPages == 0 || safePage >= totalPages - 1,
-                pageItems.isEmpty()
+                true,
+                true,
+                allItems.isEmpty()
         );
     }
 
@@ -85,7 +90,7 @@ public record LearningStatusPageResponse(
 
     public static List<LearningStatusItem> recentItems(
             List<LearningProgress> progressItems,
-            Map<Long, SubjectLevelProgress> progressBySubjectLevel,
+            Map<Long, List<SubjectLevelProgress>> progressBySubjectLevel,
             int limit
     ) {
         int safeLimit = Math.max(limit, 0);
@@ -110,9 +115,72 @@ public record LearningStatusPageResponse(
                 .map(meta -> LearningStatusItem.from(
                         meta,
                         progressBySubject.getOrDefault(meta.subjectId(), List.of()),
-                        progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId())
+                        currentLevelProgress(progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId()))
                 ))
                 .toList();
+    }
+
+    private static List<LearningStatusItem> levelItems(
+            SubjectMeta subject,
+            List<SubjectLevelProgress> levelProgressItems
+    ) {
+        List<SubjectLevelProgress> levels = normalizedLevelProgresses(levelProgressItems);
+        SubjectLevelProgress currentLevel = currentLevelProgress(levels);
+        return levels.stream()
+                .map(levelProgress -> LearningStatusItem.from(
+                        subject,
+                        List.of(),
+                        levelProgress,
+                        sameLevel(levelProgress, currentLevel)
+                ))
+                .toList();
+    }
+
+    private static SubjectLevelProgress currentLevelProgress(List<SubjectLevelProgress> levelProgressItems) {
+        List<SubjectLevelProgress> levels = normalizedLevelProgresses(levelProgressItems);
+        SubjectLevelProgress selected = levels.stream()
+                .filter(SubjectLevelProgress::unlocked)
+                .findFirst()
+                .orElse(levels.get(0));
+        for (SubjectLevelProgress level : levels) {
+            if (!level.unlocked()) {
+                continue;
+            }
+            selected = level;
+            if (level.progressRate() < 100) {
+                break;
+            }
+        }
+        return selected;
+    }
+
+    private static List<SubjectLevelProgress> normalizedLevelProgresses(List<SubjectLevelProgress> levelProgressItems) {
+        Map<String, SubjectLevelProgress> progressByLevel = new LinkedHashMap<>();
+        if (levelProgressItems != null) {
+            levelProgressItems.forEach(levelProgress -> {
+                String levelCode = normalizeLevelCode(levelProgress == null ? null : levelProgress.levelCode());
+                if (!levelCode.isBlank()) {
+                    progressByLevel.put(levelCode, new SubjectLevelProgress(
+                            levelCode,
+                            progressRate(levelProgress == null ? 0 : levelProgress.progressRate()),
+                            levelProgress != null && levelProgress.unlocked()
+                    ));
+                }
+            });
+        }
+        return List.of("BRONZE", "SILVER", "GOLD").stream()
+                .map(levelCode -> progressByLevel.getOrDefault(
+                        levelCode,
+                        new SubjectLevelProgress(levelCode, 0, false)
+                ))
+                .toList();
+    }
+
+    private static boolean sameLevel(SubjectLevelProgress first, SubjectLevelProgress second) {
+        if (first == null || second == null) {
+            return false;
+        }
+        return normalizeLevelCode(first.levelCode()).equals(normalizeLevelCode(second.levelCode()));
     }
 
     private static Map<Long, List<LearningProgress>> progressBySubject(List<LearningProgress> progressItems) {
@@ -169,6 +237,14 @@ public record LearningStatusPageResponse(
         return ALL_SUBJECTS;
     }
 
+    private static String normalizeLevelCode(String levelCode) {
+        return levelCode == null ? "" : levelCode.trim().toUpperCase();
+    }
+
+    private static int progressRate(int progressRate) {
+        return Math.max(0, Math.min(100, progressRate));
+    }
+
     private static LocalDateTime latestActivityAt(List<LearningProgress> progressItems) {
         if (progressItems == null || progressItems.isEmpty()) {
             return null;
@@ -193,24 +269,6 @@ public record LearningStatusPageResponse(
         return progress.getCreatedAt();
     }
 
-    public int previousPage() {
-        return Math.max(page - 1, 0);
-    }
-
-    public int nextPage() {
-        if (totalPages == 0) {
-            return 0;
-        }
-        return Math.min(page + 1, totalPages - 1);
-    }
-
-    public List<Integer> pageNumbers() {
-        int visiblePages = Math.max(totalPages, 1);
-        return java.util.stream.IntStream.range(0, visiblePages)
-                .boxed()
-                .toList();
-    }
-
     public record SubjectFilter(
             String subject,
             String label,
@@ -219,7 +277,8 @@ public record LearningStatusPageResponse(
 
     public record SubjectLevelProgress(
             String levelCode,
-            int progressRate
+            int progressRate,
+            boolean unlocked
     ) {}
 
     public record LearningStatusItem(
@@ -232,6 +291,9 @@ public record LearningStatusPageResponse(
             String currentLevelLabel,
             int progressRate,
             String progressRateLabel,
+            boolean locked,
+            boolean currentLevel,
+            String levelStatusLabel,
             String continueUrl
     ) {
         public static LearningStatusItem from(SubjectMeta subject, List<LearningProgress> progressItems) {
@@ -243,7 +305,17 @@ public record LearningStatusPageResponse(
                 List<LearningProgress> progressItems,
                 SubjectLevelProgress levelProgress
         ) {
-            int progressRate = progressRate(levelProgress);
+            return from(subject, progressItems, levelProgress, false);
+        }
+
+        public static LearningStatusItem from(
+                SubjectMeta subject,
+                List<LearningProgress> progressItems,
+                SubjectLevelProgress levelProgress,
+                boolean currentLevel
+        ) {
+            boolean locked = levelProgress != null && !levelProgress.unlocked();
+            int progressRate = locked ? 0 : progressRate(levelProgress);
             return new LearningStatusItem(
                     subject.subjectId(),
                     subject.code(),
@@ -254,7 +326,10 @@ public record LearningStatusPageResponse(
                     levelLabel(levelProgress),
                     progressRate,
                     progressRate + "%",
-                    "/learning?subjectId=" + subject.subjectId()
+                    locked,
+                    currentLevel,
+                    statusLabel(locked, currentLevel),
+                    continueUrl(subject, levelProgress)
             );
         }
 
@@ -275,6 +350,25 @@ public record LearningStatusPageResponse(
                 case "BRONZE", "SILVER", "GOLD" -> normalized;
                 default -> normalized;
             };
+        }
+
+        private static String statusLabel(boolean locked, boolean currentLevel) {
+            if (locked) {
+                return "잠김";
+            }
+            if (currentLevel) {
+                return "진행 중";
+            }
+            return null;
+        }
+
+        private static String continueUrl(SubjectMeta subject, SubjectLevelProgress levelProgress) {
+            String levelCode = normalizeLevelCode(levelProgress == null ? null : levelProgress.levelCode());
+            String url = "/learning?subjectId=" + subject.subjectId();
+            if (!levelCode.isBlank()) {
+                url += "&levelCode=" + levelCode;
+            }
+            return url;
         }
 
     }

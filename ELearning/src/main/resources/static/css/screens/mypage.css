@@ -807,6 +807,10 @@ textarea.mypage-field {
   padding: 18px;
 }
 
+.learning-full-row.is-locked {
+  background: color-mix(in srgb, var(--mypage-card) 74%, var(--mypage-card-strong));
+}
+
 .learning-full-row .language-thumb {
   width: 58px;
   height: 58px;
@@ -849,6 +853,28 @@ textarea.mypage-field {
   font-weight: 950;
 }
 
+.learning-level-badge {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.learning-level-badge.is-current {
+  border: 1px solid color-mix(in srgb, var(--primary) 46%, var(--accent));
+  background: var(--mypage-primary-soft);
+  color: color-mix(in srgb, var(--primary) 72%, var(--text));
+}
+
+.learning-level-badge.is-locked {
+  border: 1px solid var(--mypage-line);
+  background: var(--mypage-card-strong);
+  color: var(--muted);
+}
+
 .learning-full-progress {
   display: grid;
   gap: 10px;
@@ -873,6 +899,19 @@ textarea.mypage-field {
   min-width: 118px;
   background: var(--text);
   color: var(--surface);
+}
+
+.learning-continue-button.is-disabled {
+  border-color: var(--mypage-line);
+  background: var(--mypage-card-strong);
+  color: var(--muted);
+  cursor: default;
+}
+
+.learning-continue-button.is-disabled:hover {
+  border-color: var(--mypage-line);
+  background: var(--mypage-card-strong);
+  transform: none;
 }
 
 .learning-empty {
@@ -1418,6 +1457,10 @@ textarea.mypage-field {
   background: var(--mypage-card);
   padding: 18px 20px;
   transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+.community-post-card[hidden] {
+  display: none;
 }
 
 .community-post-card.is-removing {
