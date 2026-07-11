@@ -58,8 +58,6 @@ public class PracticeController {
             subjectId = 1L;
         }
 
-        System.out.println("[PRACTICE] subjectId=" + subjectId + ", nodeId=" + nodeId + ", lessonId=" + lessonId);
-
         PracticeSetResponse completeResult =
                 (PracticeSetResponse) session.getAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY);
 
@@ -257,8 +255,6 @@ public class PracticeController {
 
         practiceService.submitAnswers(sessionUser, completeForm);
         PracticeSetResponse completeResult = practiceService.completeSet(sessionUser, setAttemptId);
-        System.out.println("completeSet called: " + setAttemptId);
-        System.out.println("completeResult = " + completeResult);
 
         session.removeAttribute(PRACTICE_VIEW_SESSION_KEY);
         session.removeAttribute(PRACTICE_ANSWERS_SESSION_KEY);

@@ -1,5 +1,6 @@
 package com.acorn.elearning.learning.controller;
 
+import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.learning.dto.response.LessonBookmarkPageResponse;
 import com.acorn.elearning.learning.dto.response.LessonBookmarkResponse;
 import com.acorn.elearning.learning.service.CurriculumService;
@@ -61,10 +62,15 @@ public class CurriculumController {
             RedirectAttributes redirectAttributes) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
 
-        LessonProgressView result = lessonService.completeLesson(user, lessonId);
-        redirectAttributes.addFlashAttribute("message",
-                "이론 학습을 완료했어요! (진행률 " + result.progressRate() + "%)");
-        redirectAttributes.addFlashAttribute("nextAction", result.nextAction());
+        // 화면 폼 제출이므로 실패 시에도 JSON(전역 핸들러) 대신 같은 상세로 안내 메시지와 함께 redirect.
+        try {
+            LessonProgressView result = lessonService.completeLesson(user, lessonId);
+            redirectAttributes.addFlashAttribute("message",
+                    "이론 학습을 완료했어요! (진행률 " + result.progressRate() + "%)");
+            redirectAttributes.addFlashAttribute("nextAction", result.nextAction());
+        } catch (BusinessException e) {
+            redirectAttributes.addFlashAttribute("message", e.getMessage());
+        }
         return "redirect:/learning/lessons/" + lessonId;
     }
 

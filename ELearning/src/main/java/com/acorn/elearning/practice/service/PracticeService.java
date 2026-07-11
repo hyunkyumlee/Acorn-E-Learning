@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.learning.mapper.LessonMapper;
 import com.acorn.elearning.learning.mapper.UserLessonProgressMapper;
 import com.acorn.elearning.learning.service.CurriculumService;
@@ -78,13 +80,19 @@ public class PracticeService {
 
         // 1. 문제 조회
         if (form.getLessonId() == null) {
-            throw new IllegalArgumentException("lessonId가 없습니다.");
+            throw new BusinessException(
+                    ErrorCode.COMMON_VALIDATION_FAILED,
+                    "lessonId가 없습니다."
+            );
         }
 
         List<PracticeProblem> problems = problemService.getProblemsByLessonId(form.getLessonId());
 
         if (problems == null || problems.isEmpty()) {
-            throw new IllegalStateException("해당 lesson의 문제가 없습니다. lessonId=" + form.getLessonId());
+            throw new BusinessException(
+                    ErrorCode.COMMON_NOT_FOUND,
+                    "해당 lesson에 문제가 없습니다."
+            );
         }
 
 
@@ -134,14 +142,20 @@ public class PracticeService {
             Long setAttemptId = completeForm.getSetAttemptId();
             List<PracticeAnswerForm.SingleAnswer> answerList = completeForm.getAnswers();
 
-            //문제 10개 방어용
+            // 문제 10개 방어용
             if (answerList == null || answerList.size() != 10) {
-                throw new IllegalArgumentException("제출 문항 수가 올바르지 않습니다.");
+                throw new BusinessException(
+                        ErrorCode.COMMON_VALIDATION_FAILED,
+                        "제출 문항 수가 올바르지 않습니다."
+                );
             }
 
             // 1. 세트 이력 조회
             PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
-                    .orElseThrow(() -> new RuntimeException("존재하지 않는 세트입니다."));
+                    .orElseThrow(() -> new BusinessException(
+                            ErrorCode.COMMON_NOT_FOUND,
+                            "존재하지 않는 세트입니다."
+                    ));
 
             int correctCount = 0;
 
@@ -152,15 +166,17 @@ public class PracticeService {
                 boolean isCorrect = normalizeAnswer(problem.getAnswerText())
                         .equals(normalizeAnswer(answerForm.getSubmittedAnswer()));
 
-                //저장된 문제순서 불러오기
+                // 저장된 문제순서 불러오기
                 PracticeSetItem setItem = practiceSetItemMapper.findBySetAttemptIdAndProblemId(
                         setAttemptId,
                         answerForm.getProblemId()
                 );
 
                 if (setItem == null) {
-                    throw new RuntimeException("set item을 찾을 수 없습니다. setAttemptId="
-                            + setAttemptId + ", problemId=" + answerForm.getProblemId());
+                    throw new BusinessException(
+                            ErrorCode.COMMON_NOT_FOUND,
+                            "문제 제출 대상을 찾을 수 없습니다."
+                    );
                 }
 
                 PracticeSubmission submission = new PracticeSubmission();
@@ -206,22 +222,36 @@ public class PracticeService {
 
             int updatedRows = practiceSetAttemptMapper.updateAttempt(attempt);
             if (updatedRows == 0) {
-                throw new RuntimeException("세트 기록 업데이트 실패: " + setAttemptId);
+                throw new BusinessException(
+                        ErrorCode.COMMON_INTERNAL_ERROR,
+                        "세트 기록 업데이트에 실패했습니다."
+                );
             }
 
             return PracticeAnswerResultResponse.from(correctCount, answerList.size());
         }
 
         //다음단원이동여부 및 경로
+
         @Transactional
         public PracticeSetResponse completeSet(SessionUser user, Long setAttemptId) {
             PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
-                    .orElseThrow(() -> new RuntimeException("세트를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new BusinessException(
+                            ErrorCode.COMMON_NOT_FOUND,
+                            "세트를 찾을 수 없습니다."
+                    ));
 
             // 1. 상태 처리
             if (!"COMPLETED".equals(attempt.getStatus())) {
                 attempt.setStatus("COMPLETED");
-                practiceSetAttemptMapper.updateAttempt(attempt);
+
+                int updatedRows = practiceSetAttemptMapper.updateAttempt(attempt);
+                if (updatedRows == 0) {
+                    throw new BusinessException(
+                            ErrorCode.COMMON_INTERNAL_ERROR,
+                            "세트 상태 업데이트에 실패했습니다."
+                    );
+                }
             }
 
             // 통과 시 학습 진행/출석/점수 반영
@@ -252,7 +282,8 @@ public class PracticeService {
                         "PRACTICE_SET_PASS:" + attempt.getSetAttemptId()
                 );
             }
-            //다음단원이동 경로
+
+            // 다음단원 이동 경로
             boolean isTestStep = false;
             String nextPath = "/learning";
 
@@ -262,8 +293,7 @@ public class PracticeService {
             String secondaryLabel;
 
             if (!Boolean.TRUE.equals(attempt.getPassed())) {
-
-                //실패시 nextstep 분기
+                // 실패 시 next step 분기
                 primaryPath = "/learning/practice?nodeId=" + attempt.getNodeId()
                         + "&lessonId=" + attempt.getLessonId();
                 primaryLabel = "문제 다시풀기";
@@ -272,9 +302,8 @@ public class PracticeService {
                 secondaryLabel = "레슨 목록으로";
 
                 nextPath = primaryPath;
-            }
-            //성공시 nextstep 분기
-            else {
+            } else {
+                // 성공 시 next step 분기
                 List<com.acorn.elearning.learning.model.Lesson> lessonsInNode = lessonMapper.findAll().stream()
                         .filter(lesson -> Boolean.TRUE.equals(lesson.getIsActive()))
                         .filter(lesson -> attempt.getNodeId().equals(lesson.getNodeId()))
