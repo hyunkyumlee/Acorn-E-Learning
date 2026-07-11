@@ -10,6 +10,7 @@ public class PostSearchCondition {
     private String boardType;
     private String keyword;
     private String sort = "latest";
+    private String period;
     private int page = 1;
     private int size = 20;
 
@@ -42,5 +43,21 @@ public class PostSearchCondition {
 
     public boolean hotSort() {
         return "hot".equalsIgnoreCase(sort);
+    }
+
+    public boolean likeSort() {
+        return "likes".equalsIgnoreCase(sort);
+    }
+
+    public boolean viewSort() {
+        return "views".equalsIgnoreCase(sort);
+    }
+
+    public boolean weeklyPeriod() {
+        return "week".equalsIgnoreCase(period);
+    }
+
+    public boolean monthlyPeriod() {
+        return "month".equalsIgnoreCase(period);
     }
 }

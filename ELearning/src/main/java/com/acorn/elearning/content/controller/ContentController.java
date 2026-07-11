@@ -26,8 +26,6 @@ public class ContentController {
         model.addAttribute("subjectLabel", subjectLabel(activeSubjectId));
         model.addAttribute("videoView", contentRecommendationService.recommendations(activeSubjectId, "VIDEO", slot));
         model.addAttribute("articleView", contentRecommendationService.recommendations(activeSubjectId, "ARTICLE", slot));
-        model.addAttribute("docsView", contentRecommendationService.recommendations(activeSubjectId, "DOCS", slot));
-        model.addAttribute("courseView", contentRecommendationService.recommendations(activeSubjectId, "COURSE", slot));
         return "content/recommendations";
     }
 

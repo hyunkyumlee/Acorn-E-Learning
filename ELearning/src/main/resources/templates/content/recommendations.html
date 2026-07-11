@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>과목 콘텐츠 추천 | Knowva</title>
+  <title>콘텐츠 추천 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
   <link rel="stylesheet" th:href="@{/css/common/reset.css}">
@@ -17,68 +17,109 @@
   <div th:replace="~{fragments/topbar :: topbar}"></div>
 
   <main class="content-recommend-screen">
-    <aside class="content-subject-sidebar" aria-label="과목 선택">
-      <a th:classappend="${activeSubjectId == 1} ? ' is-active'" th:href="@{/content/recommendations(subjectId=1)}">JAVA</a>
-      <a th:classappend="${activeSubjectId == 4} ? ' is-active'" th:href="@{/content/recommendations(subjectId=4)}">SQL</a>
-      <a th:classappend="${activeSubjectId == 2} ? ' is-active'" th:href="@{/content/recommendations(subjectId=2)}">Python</a>
-      <a th:classappend="${activeSubjectId == 3} ? ' is-active'" th:href="@{/content/recommendations(subjectId=3)}">HTML CSS</a>
-    </aside>
+    <section class="content-recommend-layout" aria-label="콘텐츠 추천">
+      <aside class="content-subject-sidebar" aria-label="과목 선택">
+        <nav class="content-subject-nav">
+          <h2>게시판</h2>
 
-    <section class="content-main">
-      <header class="content-hero">
-        <span>Knowva</span>
-        <h1>과목 콘텐츠 추천</h1>
-      </header>
+          <a class="content-subject-card"
+             th:classappend="${activeSubjectId == 1} ? ' is-active'"
+             th:href="@{/content/recommendations(subjectId=1)}">
+            <span class="content-subject-card-visual">
+              <img th:src="@{/assets/images/icons/subject/java.png}" alt="" loading="lazy">
+            </span>
+            <span class="content-subject-card-copy">
+              <strong>Java</strong>
+              <span>영상 · 문서 · 학습 루틴</span>
+            </span>
+          </a>
 
-      <section class="content-card-grid" aria-label="추천 콘텐츠 목록">
-        <article class="content-recommend-card">
-          <h2 th:text="|${subjectLabel} 영상 추천|">JAVA 영상 추천</h2>
-          <ul>
-            <li th:each="item : ${videoView.recommendations}">
-              <a th:href="${item.url}" target="_blank" rel="noopener">
-                <i></i>
-                <strong th:text="${item.title}">자바지향 기초</strong>
-                <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 영상'}">추천 영상</small>
-              </a>
-            </li>
-            <li class="content-empty" th:if="${#lists.isEmpty(videoView.recommendations)}">추천 영상이 없어.</li>
-          </ul>
-        </article>
+          <a class="content-subject-card"
+             th:classappend="${activeSubjectId == 4} ? ' is-active'"
+             th:href="@{/content/recommendations(subjectId=4)}">
+            <span class="content-subject-card-visual">
+              <img th:src="@{/assets/images/icons/subject/sql.png}" alt="" loading="lazy">
+            </span>
+            <span class="content-subject-card-copy">
+              <strong>SQL</strong>
+              <span>영상 · 문서 · 학습 루틴</span>
+            </span>
+          </a>
 
-        <article class="content-recommend-card">
-          <h2>기사 추천</h2>
-          <ul>
-            <li th:each="item : ${articleView.recommendations}">
-              <a th:href="${item.url}" target="_blank" rel="noopener">
-                <i></i>
-                <strong th:text="${item.title}">개발자 학습 루틴</strong>
-                <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 기사'}">추천 기사</small>
-              </a>
-            </li>
-            <li class="content-empty" th:if="${#lists.isEmpty(articleView.recommendations)}">추천 기사가 없어.</li>
-          </ul>
-        </article>
+          <a class="content-subject-card"
+             th:classappend="${activeSubjectId == 3} ? ' is-active'"
+             th:href="@{/content/recommendations(subjectId=3)}">
+            <span class="content-subject-card-visual">
+              <img th:src="@{/assets/images/icons/subject/web.png}" alt="" loading="lazy">
+            </span>
+            <span class="content-subject-card-copy">
+              <strong>HTML/CSS/JS</strong>
+              <span>영상 · 문서 · 학습 루틴</span>
+            </span>
+          </a>
 
-        <article class="content-recommend-card">
-          <h2>개발 콘텐츠 추천</h2>
-          <ul>
-            <li th:each="item : ${docsView.recommendations}">
-              <a th:href="${item.url}" target="_blank" rel="noopener">
-                <i></i>
-                <strong th:text="${item.title}">공식 문서 읽기</strong>
-                <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 콘텐츠'}">추천 콘텐츠</small>
-              </a>
-            </li>
-            <li th:each="item : ${courseView.recommendations}">
-              <a th:href="${item.url}" target="_blank" rel="noopener">
-                <i></i>
-                <strong th:text="${item.title}">미니 프로젝트</strong>
-                <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 콘텐츠'}">추천 콘텐츠</small>
-              </a>
-            </li>
-            <li class="content-empty" th:if="${#lists.isEmpty(docsView.recommendations) and #lists.isEmpty(courseView.recommendations)}">추천 콘텐츠가 없어.</li>
-          </ul>
-        </article>
+          <a class="content-subject-card"
+             th:classappend="${activeSubjectId == 2} ? ' is-active'"
+             th:href="@{/content/recommendations(subjectId=2)}">
+            <span class="content-subject-card-visual">
+              <img th:src="@{/assets/images/icons/subject/python.png}" alt="" loading="lazy">
+            </span>
+            <span class="content-subject-card-copy">
+              <strong>Python</strong>
+              <span>영상 · 문서 · 학습 루틴</span>
+            </span>
+          </a>
+        </nav>
+      </aside>
+
+      <section class="content-main-panel">
+        <header class="content-page-heading">
+          <div>
+            <span class="eyebrow">Content</span>
+            <h1 th:text="|${subjectLabel} 추천 콘텐츠|">Java 추천 콘텐츠</h1>
+          </div>
+          <button class="button content-back-button" type="button" aria-label="뒤로 가기" title="뒤로 가기"
+                  onclick="window.history.length > 1 ? window.history.back() : window.location.assign('/community/board')">
+            &lt;
+          </button>
+        </header>
+
+        <section class="content-card-grid" aria-label="추천 콘텐츠 목록">
+          <article class="content-recommend-card content-video-card">
+            <h2>영상 추천</h2>
+            <ul>
+              <li th:each="item : ${videoView.recommendations}">
+                <a class="content-video-link" th:href="${item.url}" target="_blank" rel="noopener">
+                  <span class="content-video-thumbnail">
+                    <img th:if="${item.youtubeThumbnailUrl() != null}"
+                         th:src="${item.youtubeThumbnailUrl()}"
+                         th:alt="${item.title}"
+                         loading="lazy">
+                    <span class="content-video-placeholder" th:unless="${item.youtubeThumbnailUrl() != null}"></span>
+                    <span class="content-video-play" aria-hidden="true"></span>
+                  </span>
+                  <span class="content-video-copy">
+                    <strong th:text="${item.title}">자바지향 기초</strong>
+                    <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 영상'}">추천 영상</small>
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </article>
+
+          <article class="content-recommend-card content-practice-card">
+            <h2>실습 자료</h2>
+            <ul>
+              <li th:each="item : ${articleView.recommendations}">
+                <a th:href="${item.url}" target="_blank" rel="noopener">
+                  <i></i>
+                  <strong th:text="${item.title}">수업 실습 자료</strong>
+                  <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '실습 자료'}">실습 자료</small>
+                </a>
+              </li>
+            </ul>
+          </article>
+        </section>
       </section>
     </section>
   </main>

@@ -19,7 +19,6 @@
     <section class="page-heading">
       <span class="eyebrow">Community</span>
       <h1>게시글 수정</h1>
-      <p>작성한 게시글의 내용과 첨부 파일을 수정할 수 있어.</p>
     </section>
 
     <div class="community-content-layout">
@@ -29,7 +28,6 @@
         <div class="community-panel-header">
           <div>
             <h2>글 수정</h2>
-            <p>필요한 항목만 바꾼 뒤 저장해.</p>
           </div>
           <a class="button" th:href="@{/community/posts/{id}(id=${view.post.postId})}">상세</a>
         </div>
@@ -71,7 +69,6 @@
           <h3>현재 첨부 파일</h3>
           <ul class="community-list compact">
             <li th:each="file : ${view.attachments}" th:text="${file.originalName}">file.txt</li>
-            <li th:if="${#lists.isEmpty(view.attachments)}" class="community-empty">첨부 파일이 없어.</li>
           </ul>
         </div>
       </section>

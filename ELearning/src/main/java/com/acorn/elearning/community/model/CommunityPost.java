@@ -13,6 +13,7 @@ private Long subjectId;
 private String boardType;
 private String title;
 private String content;
+private Integer viewCount;
 private Integer likeCount;
 private Integer commentCount;
 private Integer scrapCount;
