@@ -22,7 +22,7 @@
     </section>
 
     <section class="community-content-layout" aria-label="커뮤니티 프로필">
-      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></div>
+      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, false)}"></div>
 
       <section class="panel community-panel community-profile-panel" th:if="${view != null}">
         <div class="community-profile-hero">
@@ -187,7 +187,9 @@
       const toggles = document.querySelectorAll("[data-community-note-toggle]");
       const panels = document.querySelectorAll("[data-community-note-panel]");
       const closeAll = () => {
-        panels.forEach((panel) => panel.setAttribute("hidden", ""));
+        panels.forEach((panel) => {
+          panel.setAttribute("hidden", "");
+        });
         toggles.forEach((toggle) => {
           toggle.textContent = "더보기";
           toggle.setAttribute("aria-expanded", "false");

@@ -4,14 +4,21 @@ body {
 
 .content-recommend-screen {
   min-height: calc(100vh - 72px);
-  background: #08131a;
+  background: var(--bg);
   color: var(--text);
   padding: 52px 24px 80px;
 }
 
-.content-recommend-layout {
+.content-recommend-shell {
   display: grid;
   width: min(100%, 1440px);
+  gap: var(--space-4);
+  margin: 0 auto;
+}
+
+.content-recommend-layout {
+  display: grid;
+  width: 100%;
   grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
   gap: 28px;
   margin: 0 auto;
@@ -138,17 +145,23 @@ body {
 }
 
 .content-back-button {
-  min-width: 44px;
-  padding-inline: 14px;
-  font-size: 22px;
-  font-weight: 950;
-  line-height: 1;
-  text-shadow: 0.6px 0 currentColor, -0.6px 0 currentColor;
+  width: fit-content;
+  min-height: 42px;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.content-back-button svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
 }
 
 .content-card-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
   gap: 18px;
   width: 100%;
 }
@@ -159,14 +172,6 @@ body {
   gap: 18px;
   min-height: 320px;
   padding: 22px;
-}
-
-.content-video-card {
-  grid-column: 1 / -1;
-}
-
-.content-practice-card {
-  grid-column: 1 / -1;
 }
 
 .content-recommend-card h2 {
@@ -203,8 +208,8 @@ body {
 }
 
 .content-video-link {
-  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: 1fr;
+  align-content: start;
   min-height: 156px;
   padding: 14px;
 }

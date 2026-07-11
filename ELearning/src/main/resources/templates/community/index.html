@@ -15,48 +15,94 @@
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell community-screen">
+  <main class="page-shell community-screen community-home-screen">
     <section class="page-heading">
       <span class="eyebrow">Community</span>
       <h1>커뮤니티</h1>
     </section>
 
     <section class="community-home-layout" aria-label="커뮤니티 홈">
-      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></div>
-
-      <section class="panel community-panel community-feed-panel">
-        <div class="community-panel-header">
-          <div>
-            <h2>최근 커뮤니티 글</h2>
-          </div>
-          <a class="button primary" th:href="@{/community/board}">전체 보기</a>
-        </div>
-        <ul class="community-list">
-          <li th:each="post : ${view.posts}">
-            <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글</a>
-            <span class="community-badge" th:text="${post.boardType == 'FREE' ? '자유' : (post.boardType == 'QUESTION' ? '질문' : (post.boardType == 'STUDY_LOG' ? '공부 일지' : post.boardType))}">자유</span>
-          </li>
-        </ul>
-      </section>
-
-      <aside class="panel community-panel community-hot-panel" aria-label="HOT 게시물">
-        <div class="community-panel-header">
-          <div>
-            <span class="community-hot-tag">HOT</span>
-            <h2>공감 많은 게시물</h2>
-          </div>
-        </div>
-        <ol class="community-hot-list">
-          <li th:each="post, stat : ${hotView.posts}">
-            <span class="community-rank" th:text="${stat.count}">1</span>
-            <a class="community-hot-title" th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
-            <span class="community-hot-meta">
-              공감 <strong th:text="${post.likeCount}">0</strong>
-              댓글 <strong th:text="${post.commentCount}">0</strong>
+      <aside class="community-home-left-rail">
+        <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, true)}"></div>
+        <a class="community-content-recommend-link" th:href="@{/content/recommendations(subjectId=${activeSubjectId})}">
+          <span class="community-content-recommend-copy">
+            <strong class="community-content-recommend-title"><span th:text="${selectedSubjectName}">Java</span> 과목 콘텐츠 추천</strong>
+            <span class="community-video-icon" aria-hidden="true">
+              <span class="community-video-body"><span class="community-video-play"></span></span>
             </span>
-          </li>
-        </ol>
+            <span class="community-video-caption"><i aria-hidden="true"></i> 동영상 재생</span>
+          </span>
+        </a>
       </aside>
+
+      <div class="community-home-main">
+        <div class="community-home-main-actions">
+          <a class="button primary community-home-write-button" th:href="@{/community/write}">글쓰기</a>
+        </div>
+
+        <section class="panel community-feed-card community-home-feed-card">
+          <div class="community-feed-heading">
+            <div>
+              <h2><span th:text="${selectedSubjectName}">Java</span> 게시글 목록</h2>
+            </div>
+            <a class="community-more-link" th:href="@{/community/board(subjectId=${activeSubjectId})}">더보기</a>
+          </div>
+
+          <ul class="community-post-list">
+            <li th:each="post : ${view.posts}">
+              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+              <span>
+                <b th:text="${post.boardType == 'FREE' ? '자유' : (post.boardType == 'QUESTION' ? '질문' : (post.boardType == 'STUDY_LOG' ? '공부 일지' : post.boardType))}">자유</b>
+                · 조회수 <b th:text="${post.viewCount}">0</b>
+                · 댓글 <b th:text="${post.commentCount}">0</b>
+                · 좋아요 <b th:text="${post.likeCount}">0</b>
+              </span>
+            </li>
+            <li class="community-empty" th:if="${#lists.isEmpty(view.posts)}">아직 등록된 게시글이 없어.</li>
+          </ul>
+        </section>
+
+        <section class="panel community-hot-panel-main" aria-label="인기 게시글">
+          <div class="community-hot-heading">
+            <h2><span th:text="${selectedSubjectName}">Java</span> 인기 게시글</h2>
+            <svg class="community-hot-like-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 10v10"></path>
+              <path d="M3 10h4v10H3z"></path>
+              <path d="M7 20h9.3a2 2 0 0 0 1.94-1.5l1.2-4.8A2 2 0 0 0 17.5 11H14l.58-2.9A3.1 3.1 0 0 0 11.54 4L7 10Z"></path>
+            </svg>
+          </div>
+
+          <div class="community-hot-period-grid">
+            <section class="community-hot-period" aria-label="주간 인기 게시글">
+              <div class="community-hot-period-heading">
+                <h3>주간</h3>
+                <span>공감순</span>
+              </div>
+              <ul class="community-post-list">
+                <li th:each="post : ${weeklyHotView.posts}">
+                  <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+                  <span>조회수 <b th:text="${post.viewCount}">0</b> · 댓글 <b th:text="${post.commentCount}">0</b> · 좋아요 <b th:text="${post.likeCount}">0</b></span>
+                </li>
+                <li class="community-empty" th:if="${#lists.isEmpty(weeklyHotView.posts)}">이번 주 인기글이 아직 없어.</li>
+              </ul>
+            </section>
+
+            <section class="community-hot-period" aria-label="월간 인기 게시글">
+              <div class="community-hot-period-heading">
+                <h3>월간</h3>
+                <span>공감순</span>
+              </div>
+              <ul class="community-post-list">
+                <li th:each="post : ${monthlyHotView.posts}">
+                  <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+                  <span>조회수 <b th:text="${post.viewCount}">0</b> · 댓글 <b th:text="${post.commentCount}">0</b> · 좋아요 <b th:text="${post.likeCount}">0</b></span>
+                </li>
+                <li class="community-empty" th:if="${#lists.isEmpty(monthlyHotView.posts)}">이번 달 인기글이 아직 없어.</li>
+              </ul>
+            </section>
+          </div>
+        </section>
+      </div>
     </section>
   </main>
 </body>

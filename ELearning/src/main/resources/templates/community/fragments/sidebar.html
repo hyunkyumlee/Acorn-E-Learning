@@ -1,5 +1,5 @@
 <aside class="panel community-panel community-sidebar"
-       th:fragment="sidebar(activeSubjectId, activeBoardType, profileName, profileEmail, profileSummary)"
+       th:fragment="sidebar(activeSubjectId, activeBoardType, profileName, profileEmail, profileSummary, communityHome)"
        xmlns:th="http://www.thymeleaf.org"
        aria-label="커뮤니티 사이드바">
   <nav class="community-board-nav" aria-label="언어별 게시판">
@@ -7,46 +7,46 @@
 
     <a class="community-board-card"
        th:classappend="${activeSubjectId == '1'} ? ' is-active'"
-       th:href="@{/community/board(subjectId=1)}">
+       th:attr="aria-current=${activeSubjectId == '1'} ? 'page' : null"
+       th:href="${communityHome} ? @{/community(subjectId=1)} : @{/community/board(subjectId=1)}">
       <span class="community-board-card-visual">
         <img th:src="@{/assets/images/icons/subject/java.png}" alt="" loading="lazy">
       </span>
       <span class="community-board-card-copy">
         <strong>Java</strong>
-        <span class="community-board-card-meta">자유 · 질문 · 공부 일지</span>
       </span>
     </a>
     <a class="community-board-card"
        th:classappend="${activeSubjectId == '4'} ? ' is-active'"
-       th:href="@{/community/board(subjectId=4)}">
+       th:attr="aria-current=${activeSubjectId == '4'} ? 'page' : null"
+       th:href="${communityHome} ? @{/community(subjectId=4)} : @{/community/board(subjectId=4)}">
       <span class="community-board-card-visual">
         <img th:src="@{/assets/images/icons/subject/sql.png}" alt="" loading="lazy">
       </span>
       <span class="community-board-card-copy">
         <strong>SQL</strong>
-        <span class="community-board-card-meta">자유 · 질문 · 공부 일지</span>
       </span>
     </a>
     <a class="community-board-card"
        th:classappend="${activeSubjectId == '3'} ? ' is-active'"
-       th:href="@{/community/board(subjectId=3)}">
+       th:attr="aria-current=${activeSubjectId == '3'} ? 'page' : null"
+       th:href="${communityHome} ? @{/community(subjectId=3)} : @{/community/board(subjectId=3)}">
       <span class="community-board-card-visual">
         <img th:src="@{/assets/images/icons/subject/web.png}" alt="" loading="lazy">
       </span>
       <span class="community-board-card-copy">
         <strong>HTML/CSS/JS</strong>
-        <span class="community-board-card-meta">자유 · 질문 · 공부 일지</span>
       </span>
     </a>
     <a class="community-board-card"
        th:classappend="${activeSubjectId == '2'} ? ' is-active'"
-       th:href="@{/community/board(subjectId=2)}">
+       th:attr="aria-current=${activeSubjectId == '2'} ? 'page' : null"
+       th:href="${communityHome} ? @{/community(subjectId=2)} : @{/community/board(subjectId=2)}">
       <span class="community-board-card-visual">
         <img th:src="@{/assets/images/icons/subject/python.png}" alt="" loading="lazy">
       </span>
       <span class="community-board-card-copy">
         <strong>Python</strong>
-        <span class="community-board-card-meta">자유 · 질문 · 공부 일지</span>
       </span>
     </a>
   </nav>

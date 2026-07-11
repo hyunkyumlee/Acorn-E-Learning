@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>커뮤니티 게시판 | Knowva</title>
+  <title>게시글 목록 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
   <link rel="stylesheet" th:href="@{/css/common/reset.css}">
@@ -15,25 +15,49 @@
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell community-screen community-board-screen">
-    <section class="community-board-layout" aria-label="커뮤니티 게시판">
-      <div class="community-left-rail">
-        <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary})}"></div>
-        <a class="community-content-recommend-link" th:href="@{/content/recommendations}">
+  <main class="page-shell community-screen community-listing-screen">
+    <section class="community-listing-layout" aria-label="게시글 목록">
+      <aside class="community-listing-left-rail">
+        <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, false)}"></div>
+        <a class="community-content-recommend-link" th:href="@{/content/recommendations(subjectId=${activeSubjectId})}">
           <span class="community-content-recommend-copy">
             <strong class="community-content-recommend-title">Knowva의 과목 콘텐츠 추천</strong>
             <span class="community-video-icon" aria-hidden="true">
-              <span class="community-video-body">
-                <span class="community-video-play"></span>
-              </span>
+              <span class="community-video-body"><span class="community-video-play"></span></span>
             </span>
             <span class="community-video-caption"><i aria-hidden="true"></i> 동영상 재생</span>
           </span>
         </a>
-      </div>
+      </aside>
 
-      <section class="panel community-panel community-board-main">
-        <div class="community-board-toolbar">
+      <section class="community-listing-main">
+        <div class="community-listing-filter-row">
+          <nav class="community-listing-tabs" aria-label="게시판 탭">
+            <a th:classappend="${activeBoardType == '' and condition.sort != 'hot'} ? ' is-active'"
+               th:attr="aria-current=${activeBoardType == '' and condition.sort != 'hot'} ? 'page' : null"
+               th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='latest')}">전체</a>
+            <a th:classappend="${activeBoardType == '' and condition.sort == 'hot'} ? ' is-active'"
+               th:attr="aria-current=${activeBoardType == '' and condition.sort == 'hot'} ? 'page' : null"
+               th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='hot')}">인기글</a>
+            <a th:classappend="${activeBoardType == 'FREE'} ? ' is-active'"
+               th:attr="aria-current=${activeBoardType == 'FREE'} ? 'page' : null"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE',keyword=${condition.keyword},sort=${condition.sort})}">자유</a>
+            <a th:classappend="${activeBoardType == 'QUESTION'} ? ' is-active'"
+               th:attr="aria-current=${activeBoardType == 'QUESTION'} ? 'page' : null"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='QUESTION',keyword=${condition.keyword},sort=${condition.sort})}">질문</a>
+            <a th:classappend="${activeBoardType == 'STUDY_LOG'} ? ' is-active'"
+               th:attr="aria-current=${activeBoardType == 'STUDY_LOG'} ? 'page' : null"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG',keyword=${condition.keyword},sort=${condition.sort})}">공부 일지</a>
+          </nav>
+          <a class="button primary community-write-button" th:href="@{/community/write}">글쓰기</a>
+        </div>
+
+        <section class="panel community-listing-panel">
+          <div class="community-listing-heading">
+            <h1>게시글 목록</h1>
+            <span th:text="${view.total + '개'}">0개</span>
+          </div>
+
           <form method="get" th:action="@{/community/board}" class="community-search-form">
             <input type="hidden" name="subjectId" th:value="${condition.subjectId}">
             <input type="hidden" name="boardType" th:value="${condition.boardType}">
@@ -41,167 +65,49 @@
             <input name="keyword" th:value="${condition.keyword}" placeholder="검색어를 입력하세요" aria-label="게시글 검색">
             <button class="button" type="submit">검색</button>
           </form>
-          <a class="button primary community-write-button" th:href="@{/community/write}">글쓰기</a>
-        </div>
 
-        <div class="community-board-filter-row">
-          <div class="community-board-tabs" aria-label="게시판 필터">
-            <a th:classappend="${activeBoardType == ''} ? ' is-active'"
-               th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort=${condition.sort})}">전체</a>
-            <a th:classappend="${activeBoardType == 'FREE'} ? ' is-active'"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE',keyword=${condition.keyword},sort=${condition.sort})}">자유</a>
-            <a th:classappend="${activeBoardType == 'QUESTION'} ? ' is-active'"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='QUESTION',keyword=${condition.keyword},sort=${condition.sort})}">질문</a>
-            <a th:classappend="${activeBoardType == 'STUDY_LOG'} ? ' is-active'"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG',keyword=${condition.keyword},sort=${condition.sort})}">공부 일지</a>
-          </div>
-          <div class="community-sort-tabs" aria-label="게시글 정렬">
+          <nav class="community-sort-tabs" aria-label="게시글 정렬">
+            <a th:classappend="${condition.sort == 'latest'} ? ' is-active'"
+               th:attr="aria-current=${condition.sort == 'latest'} ? 'page' : null"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='latest')}">최신순</a>
             <a th:classappend="${condition.sort == 'likes'} ? ' is-active'"
+               th:attr="aria-current=${condition.sort == 'likes'} ? 'page' : null"
                th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='likes')}">공감순</a>
             <a th:classappend="${condition.sort == 'views'} ? ' is-active'"
+               th:attr="aria-current=${condition.sort == 'views'} ? 'page' : null"
                th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='views')}">조회수 순</a>
-          </div>
-        </div>
+          </nav>
 
-        <section class="community-feed-card">
-          <div class="community-feed-heading">
-            <h2>게시글 목록</h2>
-          </div>
-
-          <ul class="community-post-list">
+          <ul class="community-post-list community-listing-post-list">
             <li th:each="post : ${view.posts}">
-              <div class="community-post-title-row">
-                <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
-                <span class="community-post-hot-ribbon"
-                      th:if="${hotPostIds != null and hotPostIds.contains(post.postId)}"
-                      aria-label="HOT 게시글">
-                  <span>H</span>
-                  <span>O</span>
-                  <span>T</span>
-                </span>
-              </div>
+              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
               <span>
                 작성자: <b th:text="${writerNicknames.get(post.writerId)}">nova_learner</b>
+                · <b th:text="${post.boardType == 'FREE' ? '자유' : (post.boardType == 'QUESTION' ? '질문' : (post.boardType == 'STUDY_LOG' ? '공부 일지' : post.boardType))}">자유</b>
                 · 조회수 <b th:text="${post.viewCount}">0</b>
                 · 댓글 <b th:text="${post.commentCount}">0</b>
                 · 좋아요 <b th:text="${post.likeCount}">0</b>
               </span>
             </li>
+            <li class="community-empty" th:if="${#lists.isEmpty(view.posts)}">조건에 맞는 게시글이 없어.</li>
           </ul>
+
+          <nav class="community-pagination" aria-label="게시글 페이지" th:if="${view.totalPages > 1}">
+            <a th:if="${view.page > 1}"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},page=${view.page - 1})}">이전</a>
+            <span th:if="${view.page <= 1}" aria-hidden="true">이전</span>
+            <a th:each="pageNumber : ${#numbers.sequence(pageStart, pageEnd)}"
+               th:classappend="${pageNumber == view.page} ? ' is-active'"
+               th:attr="aria-current=${pageNumber == view.page} ? 'page' : null"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},page=${pageNumber})}"
+               th:text="${pageNumber}">1</a>
+            <a th:if="${view.page < view.totalPages}"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},page=${view.page + 1})}">다음</a>
+            <span th:if="${view.page >= view.totalPages}" aria-hidden="true">다음</span>
+          </nav>
         </section>
       </section>
-
-      <div class="community-side-rail">
-        <section class="community-profile-mini community-profile-rail-card" aria-label="커뮤니티 프로필 요약">
-          <div class="community-profile-line">
-            <span class="community-avatar" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
-            <div>
-              <strong th:text="${profileName}">nova_learner</strong>
-              <small class="community-profile-rail-stats">
-                <span>작성 글 <b th:text="${profileSummary != null ? profileSummary.postCount() : 0}">0</b></span>
-                <span>스크랩 <b th:text="${profileSummary != null ? profileSummary.scrapCount() : 0}">0</b></span>
-                <span>좋아요 <b th:text="${profileSummary != null ? profileSummary.receivedLikeCount() : 0}">0</b></span>
-              </small>
-            </div>
-          </div>
-          <a class="button" th:href="@{/community/profile}">내 커뮤니티 프로필</a>
-        </section>
-
-        <aside class="panel community-panel community-hot-panel" aria-label="인기 게시글">
-          <div class="community-hot-heading">
-            <span class="community-hot-tag">
-              <span class="community-hot-flame" aria-hidden="true">🔥</span>
-              <span class="community-hot-word">인기 게시글</span>
-              <span class="community-hot-flame" aria-hidden="true">🔥</span>
-            </span>
-          </div>
-          <div class="community-hot-period-grid">
-            <section class="community-hot-period" aria-label="주간 인기 게시글">
-              <h3>주간</h3>
-              <ol class="community-hot-list">
-                <li th:each="post : ${weeklyHotView.posts}">
-                  <a class="community-hot-title" th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
-                </li>
-              </ol>
-            </section>
-            <section class="community-hot-period" aria-label="월간 인기 게시글">
-              <h3>월간</h3>
-              <ol class="community-hot-list">
-                <li th:each="post : ${monthlyHotView.posts}">
-                  <a class="community-hot-title" th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
-                </li>
-              </ol>
-            </section>
-          </div>
-        </aside>
-
-        <a class="community-content-recommend-link" th:href="@{/content/recommendations}" th:remove="all">
-          <span class="community-content-recommend-copy">
-            <strong>Knowva의 과목 콘텐츠 추천</strong>
-            <span class="community-video-icon" aria-hidden="true">
-              <span class="community-video-body">
-                <span class="community-video-play"></span>
-              </span>
-            </span>
-            <span class="community-video-caption"><i aria-hidden="true"></i> 동영상 재생</span>
-          </span>
-        </a>
-      </div>
     </section>
   </main>
-  <script>
-    (() => {
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-      const screen = document.querySelector('.community-board-screen');
-      const boards = () => Array.from(document.querySelectorAll('.community-board-screen .community-left-rail, .community-board-screen .community-side-rail'));
-      let current = 0;
-      let target = 0;
-      let frame = 0;
-      let revealTimer = 0;
-
-      const apply = (value) => {
-        boards().forEach((board) => board.style.setProperty('--community-follow-y', `${value.toFixed(2)}px`));
-      };
-
-      const tick = () => {
-        current += (target - current) * 0.055;
-        if (Math.abs(target - current) < 0.05) {
-          current = target;
-          frame = 0;
-          apply(current);
-          return;
-        }
-        apply(current);
-        frame = window.requestAnimationFrame(tick);
-      };
-
-      const update = () => {
-        const disabled = reduceMotion.matches || window.innerWidth <= 1020;
-        if (screen) {
-          window.clearTimeout(revealTimer);
-          if (disabled) {
-            screen.classList.remove('is-community-follow-away');
-          } else {
-            screen.classList.add('is-community-follow-away');
-            revealTimer = window.setTimeout(() => {
-              screen.classList.remove('is-community-follow-away');
-            }, 420);
-          }
-        }
-
-        target = disabled
-          ? 0
-          : Math.min(36, window.scrollY * 0.055);
-        if (!frame) {
-          frame = window.requestAnimationFrame(tick);
-        }
-      };
-
-      window.addEventListener('scroll', update, { passive: true });
-      window.addEventListener('resize', update);
-      reduceMotion.addEventListener?.('change', update);
-      update();
-    })();
-  </script>
 </body>
 </html>
