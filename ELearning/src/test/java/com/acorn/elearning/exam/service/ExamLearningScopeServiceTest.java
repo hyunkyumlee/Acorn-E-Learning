@@ -38,25 +38,48 @@ class ExamLearningScopeServiceTest {
     }
 
     @Test
-    void eligibility_allows_exam_when_user_has_available_scope() {
+    void eligibility_allows_exam_when_required_lessons_are_complete() {
         ExamLearningScopeService service = new ExamLearningScopeService(new FakeExamLearningScopeMapper(
                 List.of(item("LESSON", "Java 변수 행성", "변수", "int 변수를 배웁니다.", "int score = 10;", 10)),
-                List.of()));
+                List.of(),
+                1,
+                0));
 
-        ExamLearningScopeService.ExamLearningEligibility eligibility = service.eligibility(2L);
+        ExamLearningScopeService.ExamLearningEligibility eligibility = service.eligibility(2L, 1L, "BRONZE");
 
         assertTrue(eligibility.eligible());
-        assertEquals(1, eligibility.availableScopeCount());
+        assertEquals(0, eligibility.incompleteRequiredLessonCount());
+        assertEquals("AI 코딩테스트를 시작할 수 있습니다.", eligibility.message());
     }
 
     @Test
-    void eligibility_blocks_exam_when_user_has_no_available_scope() {
-        ExamLearningScopeService service = new ExamLearningScopeService(new FakeExamLearningScopeMapper(List.of(), List.of()));
+    void eligibility_blocks_exam_when_required_lessons_are_missing() {
+        ExamLearningScopeService service = new ExamLearningScopeService(new FakeExamLearningScopeMapper(
+                List.of(),
+                List.of(),
+                0,
+                0));
 
-        ExamLearningScopeService.ExamLearningEligibility eligibility = service.eligibility(2L);
+        ExamLearningScopeService.ExamLearningEligibility eligibility = service.eligibility(2L, 1L, "BRONZE");
 
         assertEquals(false, eligibility.eligible());
-        assertEquals(0, eligibility.availableScopeCount());
+        assertEquals(0, eligibility.incompleteRequiredLessonCount());
+        assertEquals("응시 가능한 필수 레슨이 없습니다.", eligibility.message());
+    }
+
+    @Test
+    void eligibility_blocks_exam_when_required_lessons_are_incomplete() {
+        ExamLearningScopeService service = new ExamLearningScopeService(new FakeExamLearningScopeMapper(
+                List.of(item("LESSON", "Java 변수 행성", "변수", "int 변수를 배웁니다.", "int score = 10;", 10)),
+                List.of(),
+                1,
+                1));
+
+        ExamLearningScopeService.ExamLearningEligibility eligibility = service.eligibility(2L, 1L, "BRONZE");
+
+        assertEquals(false, eligibility.eligible());
+        assertEquals(1, eligibility.incompleteRequiredLessonCount());
+        assertEquals("필수 레슨의 이론 학습과 문제풀이를 모두 완료해야 AI 코딩테스트를 시작할 수 있습니다.", eligibility.message());
     }
 
     private static ExamLearningScopeItem item(
@@ -79,8 +102,14 @@ class ExamLearningScopeServiceTest {
 
     private record FakeExamLearningScopeMapper(
             List<ExamLearningScopeItem> lessons,
-            List<ExamLearningScopeItem> practices
+            List<ExamLearningScopeItem> practices,
+            int requiredLessonCount,
+            int incompleteRequiredLessonCount
     ) implements ExamLearningScopeMapper {
+        private FakeExamLearningScopeMapper(List<ExamLearningScopeItem> lessons, List<ExamLearningScopeItem> practices) {
+            this(lessons, practices, 0, 0);
+        }
+
         @Override
         public List<ExamLearningScopeItem> findCompletedLessonScope(Long userId, Long subjectId, String levelCode) {
             return lessons;
@@ -92,8 +121,13 @@ class ExamLearningScopeServiceTest {
         }
 
         @Override
-        public int countAvailableScopeItems(Long userId, Long subjectId, String levelCode) {
-            return lessons.size() + practices.size();
+        public int countRequiredLessons(Long subjectId, String levelCode) {
+            return requiredLessonCount;
+        }
+
+        @Override
+        public int countIncompleteRequiredLessons(Long userId, Long subjectId, String levelCode) {
+            return incompleteRequiredLessonCount;
         }
     }
 }

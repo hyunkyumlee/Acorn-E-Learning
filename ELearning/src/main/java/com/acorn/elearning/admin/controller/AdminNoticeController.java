@@ -6,10 +6,7 @@ import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -20,10 +17,17 @@ public class AdminNoticeController {
 
 
     @GetMapping("/admin/notices")
-    public String notices(Model model) {
+    public String notices(Model model,
+                          @RequestParam(defaultValue = "1") int page,
+                          @RequestParam(defaultValue = "10") int size,
+                          @RequestParam(required = false) String keyword,
+                          @RequestParam(required = false) String period,
+                          @RequestParam(required = false) String status) {
 
-       model.addAttribute("noticeList", service.findAll());
-
+        model.addAttribute("noticePage", service.findPage(page, size, keyword, period, status));
+        model.addAttribute("selectedKeyword", keyword);
+        model.addAttribute("selectedPeriod", period);
+        model.addAttribute("selectedStatus", status);
         model.addAttribute("screen", "admin/notices");
         return "admin/notices";
     }

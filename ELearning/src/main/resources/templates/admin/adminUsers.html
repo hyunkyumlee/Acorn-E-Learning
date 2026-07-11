@@ -23,32 +23,48 @@
   </section>
 
   <section class="admin-user-toolbar">
-    <div class="admin-user-filter">
-      <input type="search" id="searchUser" placeholder="이메일 / 닉네임 검색">
-      <select id="userSubjectFilter">
+    <form method="get" action="/admin/users" class="admin-user-filter" id="userFilterForm">
+      <input type="hidden" name="page" value="1">
+      <input type="hidden" name="size" th:value="${userPage.pageSize}">
+
+      <input type="search"
+             name="keyword"
+             id="searchUser"
+             placeholder="이메일 / 닉네임 검색"
+             th:value="${selectedKeyword}">
+
+      <select name="subjectName" id="userSubjectFilter">
         <option value="">관심 과목</option>
         <option th:each="subject : ${subjectList}"
                 th:value="${subject.subjectName}"
-                th:text="${subject.subjectName}">Java</option>
+                th:text="${subject.subjectName}"
+                th:selected="${selectedSubjectName != null and selectedSubjectName == subject.subjectName}">
+          Java
+        </option>
       </select>
-      <select id="userGradeFilter">
+
+      <select name="gradeCode" id="userGradeFilter">
         <option value="">등급</option>
-        <option value="BEGINNER">BEGINNER</option>
-        <option value="INTERMEDIATE">INTERMEDIATE</option>
-        <option value="ADVANCED">ADVANCED</option>
+        <option value="BEGINNER" th:selected="${selectedGradeCode == 'BEGINNER'}">BEGINNER</option>
+        <option value="INTERMEDIATE" th:selected="${selectedGradeCode == 'INTERMEDIATE'}">INTERMEDIATE</option>
+        <option value="ADVANCED" th:selected="${selectedGradeCode == 'ADVANCED'}">ADVANCED</option>
       </select>
-      <select id="userRoleFilter">
+
+      <select name="role" id="userRoleFilter">
         <option value="">권한</option>
-        <option value="ROLE_USER">ROLE_USER</option>
-        <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+        <option value="ROLE_USER" th:selected="${selectedRole == 'ROLE_USER'}">ROLE_USER</option>
+        <option value="ROLE_ADMIN" th:selected="${selectedRole == 'ROLE_ADMIN'}">ROLE_ADMIN</option>
       </select>
-      <select id="userStatusFilter">
+
+      <select name="status" id="userStatusFilter">
         <option value="">상태</option>
-        <option value="ACTIVE">정상</option>
-        <option value="SUSPENDED">정지</option>
-        <option value="WITHDRAWN">탈퇴</option>
+        <option value="ACTIVE" th:selected="${selectedStatus == 'ACTIVE'}">정상</option>
+        <option value="SUSPENDED" th:selected="${selectedStatus == 'SUSPENDED'}">정지</option>
+        <option value="WITHDRAWN" th:selected="${selectedStatus == 'WITHDRAWN'}">탈퇴</option>
       </select>
-    </div>
+
+      <button type="submit" class="admin-user-filter-button">검색</button>
+    </form>
   </section>
 
   <section class="admin-user-section">
@@ -74,7 +90,7 @@
         </thead>
 
         <tbody>
-        <tr th:each="user, stat : ${userList}" class="admin-user-row"
+        <tr th:each="user : ${userPage.items}" class="admin-user-row"
             th:data-user-id="${user.userId}"
             th:data-email="${user.email}"
             th:data-nickname="${user.nickname}"
@@ -86,9 +102,8 @@
             th:data-status="${user.status}"
             th:data-progress-count="${user.progressCount}"
             th:data-completed-count="${user.completedCount}"
-            th:data-average-progress-rate="${user.averageProgressRate}"
-        >
-          <td th:text="${'#' + stat.count}">#001</td>
+            th:data-average-progress-rate="${user.averageProgressRate}">
+          <td th:text="${'#' + user.userId}">#001</td>
           <td th:text="${user.email}">user01@email.com</td>
           <td th:text="${user.nickname}">닉네임1</td>
           <td th:text="${user.subjectName ?: '-'}">Java</td>
@@ -113,19 +128,71 @@
                       th:data-status="${user.status}"
                       th:data-progress-count="${user.progressCount}"
                       th:data-completed-count="${user.completedCount}"
-                      th:data-average-progress-rate="${user.averageProgressRate}"
-                  >
+                      th:data-average-progress-rate="${user.averageProgressRate}">
                 상세보기
               </button>
             </div>
           </td>
         </tr>
-        <tr th:if="${#lists.isEmpty(userList)}">
+        <tr th:if="${#lists.isEmpty(userPage.items)}">
           <td colspan="10" class="admin-user-empty">등록된 사용자가 없습니다.</td>
         </tr>
         </tbody>
       </table>
     </div>
+
+    <nav class="admin-pagination" th:if="${userPage.totalPages >= 1}" aria-label="사용자 관리 페이지">
+      <a class="admin-page-link"
+         th:if="${userPage.hasPrevious}"
+         th:href="@{/admin/users(
+                    page=${userPage.currentPage - 1},
+                    size=${userPage.pageSize},
+                    keyword=${selectedKeyword},
+                    subjectName=${selectedSubjectName},
+                    gradeCode=${selectedGradeCode},
+                    role=${selectedRole},
+                    status=${selectedStatus}
+                  )}">
+        &lt;
+      </a>
+
+      <span th:each="pageNumber : ${#numbers.sequence(userPage.startPage, userPage.endPage)}">
+        <a class="admin-page-link"
+           th:if="${pageNumber != userPage.currentPage}"
+           th:href="@{/admin/users(
+                      page=${pageNumber},
+                      size=${userPage.pageSize},
+                      keyword=${selectedKeyword},
+                      subjectName=${selectedSubjectName},
+                      gradeCode=${selectedGradeCode},
+                      role=${selectedRole},
+                      status=${selectedStatus}
+                    )}"
+           th:text="${pageNumber}">
+          1
+        </a>
+
+        <strong class="admin-page-link admin-page-current"
+                th:if="${pageNumber == userPage.currentPage}"
+                th:text="${pageNumber}">
+          1
+        </strong>
+      </span>
+
+      <a class="admin-page-link"
+         th:if="${userPage.hasNext}"
+         th:href="@{/admin/users(
+                    page=${userPage.currentPage + 1},
+                    size=${userPage.pageSize},
+                    keyword=${selectedKeyword},
+                    subjectName=${selectedSubjectName},
+                    gradeCode=${selectedGradeCode},
+                    role=${selectedRole},
+                    status=${selectedStatus}
+                  )}">
+        &gt;
+      </a>
+    </nav>
   </section>
 
   <section class="admin-user-detail-panel">
@@ -155,45 +222,17 @@
 </main>
 
 <script>
-  function applyUserFilters() {
-    const keyword = document.querySelector("#searchUser").value.trim().toLowerCase();
-    const subjectName = document.querySelector("#userSubjectFilter").value;
-    const gradeCode = document.querySelector("#userGradeFilter").value;
-    const role = document.querySelector("#userRoleFilter").value;
-    const status = document.querySelector("#userStatusFilter").value;
+  const userFilterForm = document.querySelector("#userFilterForm");
 
-    document.querySelectorAll(".admin-user-row").forEach((row) => {
-      const email = (row.dataset.email || "").toLowerCase();
-      const nickname = (row.dataset.nickname || "").toLowerCase();
-      const rowSubjectName = row.dataset.subjectName || "";
-      const rowGradeCode = row.dataset.gradeCode || "";
-      const rowRole = row.dataset.role || "";
-      const rowStatus = row.dataset.status || "";
-
-      const matchesKeyword = email.includes(keyword) || nickname.includes(keyword);
-      const matchesSubject = subjectName === "" || rowSubjectName === subjectName;
-      const matchesGrade = gradeCode === "" || rowGradeCode === gradeCode;
-      const matchesRole = role === "" || rowRole === role;
-      const matchesStatus = status === "" || rowStatus === status;
-
-
-
-      row.style.display = matchesKeyword && matchesSubject && matchesGrade && matchesRole && matchesStatus ? "" : "none";
-    });
-  }
-
-  document.querySelector("#searchUser")?.addEventListener("input", applyUserFilters);
-  document.querySelector("#userSubjectFilter")?.addEventListener("change", applyUserFilters);
-  document.querySelector("#userGradeFilter")?.addEventListener("change", applyUserFilters);
-  document.querySelector("#userRoleFilter")?.addEventListener("change", applyUserFilters);
-  document.querySelector("#userStatusFilter")?.addEventListener("change", applyUserFilters);
+  userFilterForm?.addEventListener("submit", () => {
+    const pageInput = userFilterForm.querySelector("input[name='page']");
+    if (pageInput) {
+      pageInput.value = "1";
+    }
+  });
 
   document.querySelectorAll(".admin-user-detail-button").forEach((button) => {
     button.addEventListener("click", () => {
-      const statusLabel = button.dataset.status === "SUSPENDED"
-          ? "정지"
-          : button.dataset.status === "WITHDRAWN" ? "탈퇴" : "정상";
-
       const progressCount = button.dataset.progressCount || "0";
       const completedCount = button.dataset.completedCount || "0";
       const averageProgressRate = Math.round(Number(button.dataset.averageProgressRate || 0));
@@ -213,10 +252,8 @@
       const userId = button.dataset.userId;
       const currentStatus = button.dataset.status;
 
-
       statusForm.action = `/admin/users/${userId}/status`;
       statusButton.disabled = false;
-
 
       if (currentStatus === "SUSPENDED") {
         statusValue.value = "ACTIVE";
@@ -232,7 +269,6 @@
         statusButton.textContent = "계정 정지";
         statusForm.onsubmit = () => confirm("계정을 정지하시겠습니까?");
       }
-
 
       const roleForm = document.querySelector("#userRoleForm");
       const roleValue = document.querySelector("#userRoleValue");

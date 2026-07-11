@@ -24,11 +24,11 @@
         #{userId}, #{subjectId}, #{sourceType}, #{sourceId}, #{scoreDelta}, #{reasonCode}, #{idempotencyKey}, NOW()
         )
     </insert>
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.practice.model.ScoreEvent">
-          UPDATE score_events
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
+
+    <select id="countByIdempotencyKey" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM score_events
+        WHERE idempotency_key = #{idempotencyKey}
+    </select>
+
 </mapper>

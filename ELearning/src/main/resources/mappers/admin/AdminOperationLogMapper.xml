@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.acorn.elearning.admin.mapper.AdminOperationLogMapper">
-    <!-- TODO resultMap 구현 예시입니다.
-      <resultMap id="AdminOperationLogResultMap" type="com.acorn.elearning.admin.model.AdminOperationLog">
-          <id property="id" column="id" />
-          <result property="..." column="..." />
-      </resultMap>
-    -->
 
     <resultMap id="AdminOperationLogResultMap" type="com.acorn.elearning.admin.model.AdminOperationLog">
         <id property= "logId" column="log_id" />
@@ -19,14 +13,6 @@
         <result property="createdAt" column="created_at" />
     </resultMap>
 
-    <!-- TODO findById 구현 예시입니다.
-      <select id="findById" parameterType="long" resultMap="AdminOperationLogResultMap">
-          SELECT /* DDL column list */
-          FROM admin_operation_logs
-          WHERE id = #{id}
-      </select>
-    -->
-
     <select id="findById" parameterType="long" resultMap="AdminOperationLogResultMap">
         SELECT log_id, admin_id, action_type, target_type, target_id, result_status, created_at
         FROM admin_operation_logs
@@ -34,26 +20,11 @@
     </select>
 
 
-    <!-- TODO findAll 구현 예시입니다.
-      <select id="findAll" resultMap="AdminOperationLogResultMap">
-          SELECT /* DDL column list */
-          FROM admin_operation_logs
-          ORDER BY id DESC
-      </select>
-    -->
-
     <select id="findAll" resultMap="AdminOperationLogResultMap">
         SELECT log_id, admin_id, action_type, target_type, target_id, result_status, created_at
         FROM admin_operation_logs
         ORDER BY log_id DESC
     </select>
-
-    <!-- TODO insert 구현 예시입니다.
-      <insert id="insert" parameterType="com.acorn.elearning.admin.model.AdminOperationLog" useGeneratedKeys="true" keyProperty="id">
-          INSERT INTO admin_operation_logs (/* writable columns */)
-          VALUES (/* #{property} values */)
-      </insert>
-    -->
 
     <insert id="insert" parameterType="com.acorn.elearning.admin.model.AdminOperationLog" useGeneratedKeys="true" keyProperty="logId">
         INSERT INTO admin_operation_logs (
@@ -68,14 +39,6 @@
             #{createdAt}
         )
     </insert>
-
-    <!-- TODO update 구현 예시입니다.
-      <update id="update" parameterType="com.acorn.elearning.admin.model.AdminOperationLog">
-          UPDATE admin_operation_logs
-          SET /* changed columns = #{property} */
-          WHERE id = #{id}
-      </update>
-    -->
 
     <update id="update" parameterType="com.acorn.elearning.admin.model.AdminOperationLog">
         UPDATE admin_operation_logs

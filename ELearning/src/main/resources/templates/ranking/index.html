@@ -1,76 +1,91 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>랭킹 | Knowva</title>
+
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/ranking.css}">
+
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body>
-  <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell learning-screen">
-    <section class="page-heading">
-      <span class="eyebrow">Ranking</span>
-      <h1>랭킹</h1>
-    </section>
+<div th:replace="~{fragments/topbar :: topbar}"></div>
 
-    <section class="panel">
-      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;">
-        <a th:each="tab : ${view.attributes()['subjectTabs']}"
-           th:href="${tab['subjectId'] == ''} ? @{/ranking} : @{/ranking(subjectId=${tab['subjectId']})}"
-           th:text="${tab['label']}"
-           style="padding:10px 20px; border-radius:12px; background:#a8a8a8; color:#fff; text-decoration:none;">
-        </a>
-      </div>
+<main class="page-shell learning-screen ranking-screen">
+  <section class="page-heading ranking-heading">
+    <span class="eyebrow">Ranking</span>
+    <h1>랭킹</h1>
+  </section>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
-        <article style="padding:24px; background:#d9d9d9; border-radius:16px;">
-          <h2 style="margin-bottom:20px;">내정보</h2>
-          <p th:text="|현재순위 : ${view.attributes()['mySummary']['rankNo']}위|"></p>
-          <p th:text="|현재 점수 : ${view.attributes()['mySummary']['score']}점|"></p>
-          <p th:text="|선순위와 차이 : ${view.attributes()['mySummary']['gapToPrev']}점|"></p>
-        </article>
+  <section class="panel ranking-panel">
+    <div class="ranking-tabs">
+      <a th:each="tab : ${view.attributes()['subjectTabs']}"
+         th:href="${tab['subjectId'] == ''} ? @{/ranking} : @{/ranking(subjectId=${tab['subjectId']})}"
+         th:text="${tab['label']}"
+         class="ranking-tab"
+         th:classappend="${
+              (view.attributes()['selectedSubjectId'] == null and tab['subjectId'] == '')
+              or
+              (view.attributes()['selectedSubjectId'] != null and view.attributes()['selectedSubjectId'] == tab['subjectId'])
+           } ? ' is-active' : ''">
+      </a>
+    </div>
 
-        <article style="padding:24px; background:#d9d9d9; border-radius:16px;">
-          <h2 style="margin-bottom:20px;">TOP3</h2>
-          <div th:each="item : ${view.attributes()['top3']}" style="margin-bottom:16px;">
-            <p>
-              <strong th:text="|${item['rankNo']}위 ${item['nickname']}|"></strong>
-            </p>
-            <p th:text="|${item['score']}점|"></p>
-          </div>
-        </article>
-      </div>
-
-      <article style="margin-bottom:24px;">
-        <table style="width:100%; border-collapse:collapse;">
-          <thead>
-          <tr style="background:#d9d9d9;">
-            <th style="padding:14px;">순위</th>
-            <th style="padding:14px;">이름</th>
-            <th style="padding:14px;">점수</th>
-            <th style="padding:14px;">변화</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr th:each="item : ${view.attributes()['rankingList']}">
-            <td style="padding:14px; text-align:center;" th:text="${item['rankNo']}"></td>
-            <td style="padding:14px; text-align:center;" th:text="${item['nickname']}"></td>
-            <td style="padding:14px; text-align:center;" th:text="|${item['score']}점|"></td>
-            <td style="padding:14px; text-align:center;" th:text="${item['change']}"></td>
-          </tr>
-          </tbody>
-        </table>
+    <div class="ranking-overview-grid">
+      <article class="ranking-card ranking-card--summary">
+        <h2 class="ranking-card__title">내정보</h2>
+        <p th:text="|현재순위 : ${view.attributes()['mySummary']['rankNo']}위|"></p>
+        <p th:text="|현재 점수 : ${view.attributes()['mySummary']['score']}점|"></p>
+        <p th:text="|선순위와 차이 : ${view.attributes()['mySummary']['gapToPrev']}점|"></p>
       </article>
 
-      <article style="padding:24px; background:#d9d9d9; border-radius:16px;">
-        <h2 style="margin-bottom:20px;">점수구성</h2>
-        <p th:text="|문제풀이 ${view.attributes()['scoreBreakdown']['practiceScore']}점|"></p>
-        <p th:text="|시험점수 ${view.attributes()['scoreBreakdown']['examScore']}점|"></p>
-        <p th:text="|일일학습 ${view.attributes()['scoreBreakdown']['dailyScore']}점|"></p>
+      <article class="ranking-card ranking-card--top3">
+        <h2 class="ranking-card__title">TOP3</h2>
+        <div th:each="item : ${view.attributes()['top3']}" class="ranking-top3-item">
+          <p>
+            <strong th:text="|${item['rankNo']}위 ${item['nickname']}|"></strong>
+          </p>
+          <p th:text="|${item['score']}점|"></p>
+        </div>
       </article>
-    </section>
-  </main>
+    </div>
+
+    <article class="ranking-table-wrap">
+      <table class="ranking-table">
+        <thead>
+        <tr>
+          <th>순위</th>
+          <th>이름</th>
+          <th>점수</th>
+          <th>변화</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${view.attributes()['rankingList']}">
+          <td th:text="${item['rankNo']}"></td>
+          <td th:text="${item['nickname']}"></td>
+          <td th:text="|${item['score']}점|"></td>
+          <td th:text="${item['change']}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="ranking-card ranking-card--breakdown">
+      <h2 class="ranking-card__title">점수구성</h2>
+      <p th:text="|문제풀이 ${view.attributes()['scoreBreakdown']['practiceScore']}점|"></p>
+      <p th:text="|시험점수 ${view.attributes()['scoreBreakdown']['examScore']}점|"></p>
+      <p th:text="|일일학습 ${view.attributes()['scoreBreakdown']['dailyScore']}점|"></p>
+    </article>
+  </section>
+</main>
 </body>
 </html>

@@ -27,6 +27,7 @@
             useGeneratedKeys="true" keyProperty="submissionId">
         INSERT INTO practice_submissions (
         set_attempt_id,
+        set_item_id,
         user_id,
         problem_id,
         submission_context,
@@ -37,6 +38,7 @@
         created_at
         ) VALUES (
         #{setAttemptId},
+        #{setItemId},
         #{userId},
         #{problemId},
         #{submissionContext},

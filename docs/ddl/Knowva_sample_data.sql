@@ -1,12 +1,14 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.7 / 레슨 단위 학습 구조
+  Source: Notion DB 명세 v1.8 / 레슨 단위 학습 구조
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Sample login accounts
   - admin@knowva.local / Knowva1234! / ROLE_ADMIN
   - learner@knowva.local / Knowva1234! / ROLE_USER
   - premium@knowva.local / Knowva1234! / ROLE_USER + ACTIVE premium_grant
+  - google OAuth sample: learner@knowva.local provider email, separate user_id, no password credential
+  - github OAuth sample: learner@knowva.local provider email, separate user_id, no password credential
 
   Password hash
   - BCrypt(10), generated with Spring Security Crypto 7.0.5.
@@ -53,7 +55,9 @@ INSERT INTO users (
 VALUES
   (1, 'admin@knowva.local', '관리자', 'ROLE_ADMIN', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (2, 'learner@knowva.local', '누비학습자', 'ROLE_USER', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, 'premium@knowva.local', '프리미엄학습자', 'ROLE_USER', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (3, 'premium@knowva.local', '프리미엄학습자', 'ROLE_USER', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (4, 'learner@knowva.local', '구글학습자', 'ROLE_USER', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (5, 'learner@knowva.local', '깃허브학습자', 'ROLE_USER', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   email = VALUES(email),
   nickname = VALUES(nickname),
@@ -65,30 +69,34 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO user_credentials (
-  credential_id, user_id, password_hash, password_updated_at, failed_login_count, locked_until, created_at, updated_at
+  credential_id, user_id, login_email, password_hash, email_verified_at, password_updated_at, failed_login_count, locked_until, created_at, updated_at
 )
 VALUES
-  (1, 1, @sample_password_hash, CURRENT_TIMESTAMP, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (2, 2, @sample_password_hash, CURRENT_TIMESTAMP, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, 3, @sample_password_hash, CURRENT_TIMESTAMP, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (1, 1, 'admin@knowva.local', @sample_password_hash, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (2, 2, 'learner@knowva.local', @sample_password_hash, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (3, 3, 'premium@knowva.local', @sample_password_hash, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
+  login_email = VALUES(login_email),
   password_hash = VALUES(password_hash),
+  email_verified_at = VALUES(email_verified_at),
   password_updated_at = VALUES(password_updated_at),
   failed_login_count = VALUES(failed_login_count),
   locked_until = VALUES(locked_until),
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO social_accounts (
-  social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+  social_account_id, user_id, provider, provider_user_id, provider_email, provider_email_verified, is_active, connected_at, disconnected_at
 )
 VALUES
-  (1, 3, 'GOOGLE', 'sample-google-premium-001', 'premium@knowva.local', 1, CURRENT_TIMESTAMP, NULL)
+  (1, 4, 'google', 'sample-google-learner-001', 'learner@knowva.local', 1, 1, CURRENT_TIMESTAMP, NULL),
+  (2, 5, 'github', 'sample-github-learner-001', 'learner@knowva.local', 1, 1, CURRENT_TIMESTAMP, NULL)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   provider = VALUES(provider),
   provider_user_id = VALUES(provider_user_id),
   provider_email = VALUES(provider_email),
+  provider_email_verified = VALUES(provider_email_verified),
   is_active = VALUES(is_active),
   connected_at = VALUES(connected_at),
   disconnected_at = VALUES(disconnected_at);
@@ -99,7 +107,9 @@ INSERT INTO user_settings (
 VALUES
   (1, 1, 'SYSTEM', 1, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (2, 2, 'LIGHT', 1, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, 3, 'DARK', 1, 'HIGH_CONTRAST', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (3, 3, 'DARK', 1, 'HIGH_CONTRAST', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (4, 4, 'SYSTEM', 1, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (5, 5, 'SYSTEM', 1, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   theme = VALUES(theme),
@@ -114,7 +124,9 @@ INSERT INTO user_learning_profiles (
 VALUES
   (1, 1, @java_subject_id, '관리자 검수용 계정입니다.', 'GOLD', 0, 'ADVANCED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (2, 2, @java_subject_id, 'Java 기초 문법을 꾸준히 학습합니다.', 'BRONZE', 230, 'BEGINNER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (3, 3, @java_subject_id, 'AI 코딩테스트와 Premium 분석을 확인합니다.', 'GOLD', 1870, 'ADVANCED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (3, 3, @java_subject_id, 'AI 코딩테스트와 Premium 분석을 확인합니다.', 'GOLD', 1870, 'ADVANCED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (4, 4, @java_subject_id, 'Google OAuth 가입 계정입니다. 이메일 계정과 같은 이메일이어도 별도 계정입니다.', 'BRONZE', 0, 'BEGINNER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (5, 5, @java_subject_id, 'GitHub OAuth 가입 계정입니다. 이메일 계정과 같은 이메일이어도 별도 계정입니다.', 'BRONZE', 0, 'BEGINNER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
   primary_subject_id = VALUES(primary_subject_id),

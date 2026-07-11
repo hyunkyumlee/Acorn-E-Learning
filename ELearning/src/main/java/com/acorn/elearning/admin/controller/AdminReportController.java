@@ -6,10 +6,7 @@ import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -20,9 +17,17 @@ public class AdminReportController {
 
 
     @GetMapping("/admin/reports")
-    public String reports(Model model) {
+    public String reports(Model model,
+                          @RequestParam(defaultValue = "1") int page,
+                          @RequestParam(defaultValue = "10") int size,
+                          @RequestParam(required = false) String targetType,
+                          @RequestParam(required = false) String status,
+                          @RequestParam(required = false) String reportDate) {
 
-        model.addAttribute("reportPage", service.findPage());
+        model.addAttribute("reportPage", service.findPage(page, size, targetType, status, reportDate));
+        model.addAttribute("selectedTargetType", targetType);
+        model.addAttribute("selectedReportStatus", status);
+        model.addAttribute("selectedReportDate", reportDate);
 
         model.addAttribute("screen", "admin/reports");
         return "admin/reports";

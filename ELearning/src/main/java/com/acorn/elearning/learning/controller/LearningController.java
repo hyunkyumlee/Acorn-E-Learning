@@ -6,10 +6,15 @@ import com.acorn.elearning.learning.service.AttendanceService;
 import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.ProgressService;
+import com.acorn.elearning.learning.support.PlanetCatalog;
+import com.acorn.elearning.learning.support.PlanetCatalog.PlanetView;
 import com.acorn.elearning.learning.view.LearningDashboardView;
 import com.acorn.elearning.learning.view.RoadmapLevelTab;
+import com.acorn.elearning.ranking.service.RankingService;
 import com.acorn.elearning.security.SessionUser;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,15 +47,18 @@ public class LearningController {
     private final CurriculumService curriculumService;
     private final ProgressService progressService;
     private final AttendanceService attendanceService;
+    private final RankingService rankingService;
 
     public LearningController(LearningService learningService,
                               CurriculumService curriculumService,
                               ProgressService progressService,
-                              AttendanceService attendanceService) {
+                              AttendanceService attendanceService,
+                              RankingService rankingService) {
         this.learningService = learningService;
         this.curriculumService = curriculumService;
         this.progressService = progressService;
         this.attendanceService = attendanceService;
+        this.rankingService = rankingService;
     }
 
     @GetMapping("/learning")
@@ -76,8 +84,9 @@ public class LearningController {
         // 로드맵 대상 과목: 과목칩 선택(subjectId) 우선 → 프로필 주 과목 → JAVA fallback.
         Long roadmapSubjectId = (subjectId != null) ? subjectId
                 : (dashboard.primarySubjectId() != null ? dashboard.primarySubjectId() : DEFAULT_SUBJECT_ID);
+        String roadmapSubjectCode = subjectCodeOf(subjects, roadmapSubjectId);
         model.addAttribute("roadmapSubjectId", roadmapSubjectId);
-        model.addAttribute("roadmapSubjectCode", subjectCodeOf(subjects, roadmapSubjectId));
+        model.addAttribute("roadmapSubjectCode", roadmapSubjectCode);
 
         ////subjectid session정보저장
         session.setAttribute(SESSION_LEARNING_SUBJECT_ID, roadmapSubjectId);
@@ -101,6 +110,17 @@ public class LearningController {
         // 로드맵은 선택 레벨의 노드(한 판)만 표시 — 레벨이 섞여 planet_no가 충돌하지 않게 레벨로 스코핑.
         List<CurriculumNode> roadmap = curriculumService.getRoadmap(roadmapSubjectId, selectedLevel);
         model.addAttribute("roadmap", roadmap);
+
+        // 노드별 행성 표시 메타(아트 파일 · 이름 · 테마 스토리) = PlanetCatalog 단일 소스.
+        // (레벨, planet_no)로 15종 중 하나. GATE 노드는 행성 아트가 아니므로 제외.
+        Map<Long, PlanetView> nodePlanets = new LinkedHashMap<>();
+        for (CurriculumNode node : roadmap) {
+            if (!"GATE".equals(node.getNodeType())) {
+                nodePlanets.put(node.getNodeId(), PlanetCatalog.resolve(
+                        node.getLevelCode(), node.getPlanetNo(), node.getTitle(), roadmapSubjectCode));
+            }
+        }
+        model.addAttribute("nodePlanets", nodePlanets);
 
         // hover 카드 "N개 레슨" 메타: 노드별 활성 레슨 수(nodeId → count)
         model.addAttribute("nodeLessonCounts", curriculumService.getLessonCountsByNodes(roadmap));
@@ -128,6 +148,21 @@ public class LearningController {
                 .findFirst()
                 .orElse(null);
         model.addAttribute("currentNode", currentNode);
+
+        // 현재 행성을 시작했는지(이론 또는 문제 중 하나라도 손댄 레슨이 있으면 시작) → 라벨 '학습 중'(시작함) vs '학습 전'(미시작).
+        // 한 번도 안 한 과목은 1행성이 current지만 진행 전무 → '학습 전'으로 표시.
+        boolean currentPlanetStarted = currentNode != null
+                && curriculumService.getLessonProgressMap(user.userId(), currentNode.getNodeId())
+                        .values().stream()
+                        .anyMatch(pr -> pr != null
+                                && (Boolean.TRUE.equals(pr.getTheoryCompleted())
+                                    || Boolean.TRUE.equals(pr.getPracticePassed())));
+        model.addAttribute("currentPlanetStarted", currentPlanetStarted);
+
+        // 내 랭킹(주간 통합 기준) = ranking 도메인 read. 출석/streak 점수는 랭킹에서 제외됨.
+        Map<String, Object> myRanking =
+                (Map<String, Object>) rankingService.myRanking(user, null).data().get("mySummary");
+        model.addAttribute("myRanking", myRanking);
 
         model.addAttribute("screen", "learning/main");
         return "learning/main";

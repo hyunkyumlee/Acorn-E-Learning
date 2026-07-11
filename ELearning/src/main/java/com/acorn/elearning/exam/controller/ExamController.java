@@ -288,7 +288,10 @@ public class ExamController {
         boolean hasGateContext = form.getSubjectId() != null && form.getLevelCode() != null && !form.getLevelCode().isBlank();
         model.addAttribute("screen", "exam/coding-test");
         model.addAttribute("form", form);
-        model.addAttribute("eligibility", aiExamService.eligibility(sessionUser));
+        model.addAttribute("eligibility",
+                                        hasGateContext
+                                                ? aiExamService.eligibility(sessionUser, form.getSubjectId(), form.getLevelCode())
+                                                : null);
         model.addAttribute("hasGateContext", hasGateContext);
         model.addAttribute("manualSelectionMode", manualSelectionMode);
         model.addAttribute("subjectOptions", activeSubjects());

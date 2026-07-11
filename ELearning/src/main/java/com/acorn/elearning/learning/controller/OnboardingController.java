@@ -6,6 +6,7 @@ import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.view.OnboardingProfileView;
 import com.acorn.elearning.learning.view.OnboardingResultView;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.mapper.UserLearningProfileMapper;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,11 +35,14 @@ public class OnboardingController {
 
     private final LearningService learningService;
     private final LearningProfileWriteMapper profileWriteMapper;
+    private final UserLearningProfileMapper userLearningProfileMapper;
 
     public OnboardingController(LearningService learningService,
-                               LearningProfileWriteMapper profileWriteMapper) {
+                               LearningProfileWriteMapper profileWriteMapper,
+                               UserLearningProfileMapper userLearningProfileMapper) {
         this.learningService = learningService;
         this.profileWriteMapper = profileWriteMapper;
+        this.userLearningProfileMapper = userLearningProfileMapper;
     }
 
     @GetMapping("/learning/onboarding")
@@ -72,13 +76,14 @@ public class OnboardingController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             HttpSession session, Model model) {
         Long subjectId = (Long) session.getAttribute(SESSION_SUBJECT_ID);
+        String learningGoal = (String) session.getAttribute(SESSION_GOAL);
+        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        // 온보딩에서 고른 과목/목표를 프로필에 확정(BASIC·SCAN 공통).
+        userLearningProfileMapper.updateOnboarding(user.userId(), subjectId, learningGoal);
         if ("SCAN".equals(startMode)) {
             return "redirect:/learning/level-test?subjectId=" + subjectId;
         }
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
         profileWriteMapper.updateLevel(user.userId(), DEFAULT_LEVEL_CODE);
-        // primary_subject_id/learning_goal 갱신은 user.mapper.UserLearningProfileMapper.updateOnboarding 추가 후 연결:
-        // userLearningProfileMapper.updateOnboarding(user.userId(), subjectId, (String) session.getAttribute(SESSION_GOAL));
         model.addAttribute("step", "result");
         model.addAttribute("result", new OnboardingResultView(DEFAULT_LEVEL_CODE, 0, 0, false, 1));
         model.addAttribute("profile", buildProfile(session, sessionUser, learningService));

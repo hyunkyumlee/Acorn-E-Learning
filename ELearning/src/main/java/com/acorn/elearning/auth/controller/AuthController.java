@@ -5,6 +5,9 @@ import com.acorn.elearning.auth.form.SignupForm;
 import com.acorn.elearning.auth.service.AuthService;
 import com.acorn.elearning.auth.service.OAuthService;
 import com.acorn.elearning.auth.service.SessionService;
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.learning.mapper.SubjectMapper;
+import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.security.RememberMeCookie;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +19,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 public class AuthController {
 
@@ -23,50 +28,29 @@ public class AuthController {
     private final SessionService sessionService;
     private final OAuthService oAuthService;
     private final RememberMeCookie rememberMeCookie;
+    private final SubjectMapper subjectMapper;
 
-    public AuthController(AuthService authService, SessionService sessionService, OAuthService oAuthService, RememberMeCookie rememberMeCookie) {
+    public AuthController(AuthService authService, SessionService sessionService, OAuthService oAuthService, RememberMeCookie rememberMeCookie, SubjectMapper subjectMapper) {   // [수정] subjectMapper 주입
         this.authService = authService;
         this.sessionService = sessionService;
         this.oAuthService = oAuthService;
         this.rememberMeCookie = rememberMeCookie;
+        this.subjectMapper = subjectMapper;
     }
 
-    //testhtml 용
-    @GetMapping("/auth/testlogin")
-    public String testLoginForm(HttpSession session, Model model) {
-        model.addAttribute("loginForm", new LoginForm());
-        model.addAttribute("sessionUser", currentUser(session));
-        return "auth/testlogin";
-    }
-    @GetMapping("/auth/testsignup")
-    public String testSignupForm(HttpSession session, Model model) {
-        model.addAttribute("signupForm", new SignupForm());
-        model.addAttribute("sessionUser", currentUser(session));
-        return "auth/testsignup";
-    }
-    //------------
 
     @GetMapping("/login")
     public String loginForm(
             HttpSession session,
             @RequestParam(required = false) String redirect,
-            @RequestParam(required = false) String linkPending,
-            @RequestParam(required = false) String email,
             Model model) {
         SessionUser sessionUser = currentUser(session);
         if (sessionUser != null) {
             return "redirect:" + safeRedirect(redirect, sessionUser.defaultRedirectPath());
         }
 
-        LoginForm form = new LoginForm();
-        if (email != null && !email.isBlank()) {
-            form.setEmail(email);
-        }
-
-        model.addAttribute("loginForm", form);  // ★ new LoginForm() → form
+        model.addAttribute("loginForm", new LoginForm());
         model.addAttribute("redirect", redirect);
-        model.addAttribute("linkPendingProvider", linkPending);
-        model.addAttribute("linkPendingProviderLabel", providerLabel(linkPending));  // ★ 추가
         model.addAttribute("screen", "auth/login");
         return "auth/login";
     }
@@ -76,32 +60,25 @@ public class AuthController {
                         @Valid @ModelAttribute("loginForm") LoginForm loginForm,
                         BindingResult bindingResult,
                         @RequestParam(required = false) String redirect,
-                        HttpServletResponse response,           // [추가]
+                        HttpServletResponse response,
                         RedirectAttributes redirectAttributes,
                         Model model) {
         if (bindingResult.hasErrors()) { model.addAttribute("redirect", redirect); return "auth/login"; }
         try {
             authService.login(session, loginForm);
             sessionService.getUser(session).ifPresent(u -> {
-                oAuthService.consumePendingLink(session, u);
-                if (loginForm.isRememberMe()) {                 // [추가] 체크 시에만 영속 쿠키
-                    rememberMeCookie.issue(response, u.userId());
+                if (loginForm.isRememberMe()) {                 // 체크 시에만 영속 쿠키
+                    // 발급 시점의 계정 버전을 함께 심는다(비번 변경시 자동 무효화)
+                    rememberMeCookie.issue(response, u.userId(), authService.currentTokenVersion(u.userId()));
                 }
             });
-        } catch (RuntimeException ex) { /* 기존과 동일 */ }
-        return "redirect:" + safeRedirect(redirect, sessionUserRedirect(session));
-    }
-
-    /** [추가] linkPending 쿼리값(google/github) → 화면 표시명 */
-    private static String providerLabel(String provider) {
-        if (provider == null || provider.isBlank()) {
-            return null;
+        } catch (BusinessException ex) {                         // 빈 catch(RuntimeException) → 실패를 화면에 표시
+            model.addAttribute("redirect", redirect);
+            model.addAttribute("screen", "auth/login");
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "auth/login";
         }
-        return switch (provider.toLowerCase()) {
-            case "google" -> "Google";
-            case "github" -> "GitHub";
-            default -> provider;
-        };
+        return "redirect:" + safeRedirect(redirect, sessionUserRedirect(session));
     }
 
     @GetMapping("/signup")
@@ -111,6 +88,7 @@ public class AuthController {
         }
         model.addAttribute("signupForm", new SignupForm());
         model.addAttribute("screen", "auth/signup");
+        addSubjectOptions(model);   // [추가] 관심 과목을 name으로 보여주기 위한 목록
         return "auth/signup";
     }
 
@@ -123,6 +101,7 @@ public class AuthController {
             RedirectAttributes redirectAttributes,
             Model model) {
         if (bindingResult.hasErrors()) {
+            addSubjectOptions(model);   // [추가] 검증 실패로 폼을 다시 그릴 때도 과목 목록 유지
             return "auth/signup";
         }
         try {
@@ -137,11 +116,19 @@ public class AuthController {
 
     // 로그아웃: HttpServletResponse 추가, 쿠키도 삭제
     @PostMapping("/logout")
-    public String logout(HttpSession session, HttpServletResponse response,   // [추가]
+    public String logout(HttpSession session, HttpServletResponse response,
                          @RequestParam(required = false) String redirect) {
         authService.logout(session);
-        rememberMeCookie.clear(response);   // [추가]
+        rememberMeCookie.clear(response);
         return "redirect:" + safeRedirect(redirect, "/login");
+    }
+
+    // [추가] 회원가입 화면의 "관심 과목" 을 ID 입력이 아니라 name dropdown 으로 보여주기 위한 활성 과목 목록
+    private void addSubjectOptions(Model model) {
+        List<Subject> subjects = subjectMapper.findAll().stream()
+                .filter(s -> Boolean.TRUE.equals(s.getIsActive()))   // 활성 과목만 노출
+                .toList();
+        model.addAttribute("subjects", subjects);
     }
 
     private SessionUser currentUser(HttpSession session) {

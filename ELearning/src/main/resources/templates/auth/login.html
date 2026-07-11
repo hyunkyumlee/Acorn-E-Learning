@@ -13,16 +13,39 @@
   <link rel="stylesheet" th:href="@{/css/screens/auth.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
-<body>
-<div th:replace="~{fragments/guest-header :: guestHeader}"></div>
+<body class="auth-bg">
+<div class="bg-fx" aria-hidden="true">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <span class="blob blob-3"></span>
+</div>
+<button class="header-icon theme-toggle theme-toggle-floating" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
+  <span class="theme-symbol" aria-hidden="true">
+    <svg class="theme-symbol-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <title>다크모드</title>
+      <path d="M20.4 14.7A7.7 7.7 0 0 1 9.3 3.6 8.7 8.7 0 1 0 20.4 14.7Z"></path>
+      <path d="M16.7 3.8h.01M19.4 6.7h.01"></path>
+    </svg>
+    <svg class="theme-symbol-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <title>라이트모드</title>
+      <circle cx="12" cy="12" r="4.2"></circle>
+      <path d="M12 2.5v2.1M12 19.4v2.1M4.6 4.6l1.5 1.5M17.9 17.9l1.5 1.5M2.5 12h2.1M19.4 12h2.1M4.6 19.4l1.5-1.5M17.9 6.1l1.5-1.5"></path>
+    </svg>
+  </span>
+</button>
+<!-- [추가] 테스트 계정 박스 토글 버튼 (다크모드 버튼 아래) -->
+<button class="header-icon test-accounts-toggle" type="button" data-test-accounts-toggle
+        aria-controls="testAccounts" aria-expanded="false" aria-label="테스트 계정 보기">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <title>테스트 계정</title>
+    <circle cx="12" cy="8" r="4"></circle>
+    <path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"></path>
+  </svg>
+</button>
 <main class="page-shell auth-screen login-screen">
   <section class="auth-grid">
     <div class="form-panel">
       <h3>로그인</h3>
-
-      <!-- 소셜 로그인 시도 → 연동할 계정으로 로그인/회원가입 유도 배너 -->
-      <p class="form-info" th:if="${linkPendingProviderLabel}"
-         th:text="|${linkPendingProviderLabel} 계정을 연동하려면 연동할 계정으로 로그인하세요. 계정이 없으면 아래 회원가입 후 로그인하면 자동으로 연동됩니다.|">연동 안내</p>
 
       <p class="form-success" th:if="${successMessage}" th:text="${successMessage}">가입 완료 메시지</p>
       <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
@@ -49,15 +72,20 @@
       </form>
 
       <div class="social-login-row" aria-label="소셜 로그인">
-        <a class="button social-login google" th:href="@{/oauth/google}">Google로 계속</a>
-        <a class="button social-login github" th:href="@{/oauth/github}">GitHub로 계속</a>
+        <!-- [수정] 텍스트 버튼 → 로고만 보이는 원형 버튼. 로고는 assets/images/icons/social 에 저장 -->
+        <a class="social-login-icon google" th:href="@{/oauth/google}" aria-label="Google로 계속" title="Google로 계속">
+          <img th:src="@{/assets/images/icons/social/google.svg}" alt="Google" width="26" height="26">
+        </a>
+        <a class="social-login-icon github" th:href="@{/oauth/github}" aria-label="GitHub로 계속" title="GitHub로 계속">
+          <img th:src="@{/assets/images/icons/social/github.svg}" alt="GitHub" width="26" height="26">
+        </a>
       </div>
 
       <p class="form-foot">계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
     </div>
 
     <!-- 로컬/데모용 테스트 계정: 칩을 클릭하면 클립보드로 복사됨 (sample data 기준) -->
-    <aside class="login-test-accounts" aria-label="로컬 테스트 계정">
+    <aside id="testAccounts" class="login-test-accounts" aria-label="로컬 테스트 계정" hidden>
       <div class="test-accounts-head">
         <strong>테스트 계정</strong>
         <span>로컬/데모용 · 클릭하면 복사돼요</span>
@@ -98,6 +126,22 @@
       });
     });
   });
+</script>
+
+<!-- [추가] 테스트 계정 박스 토글 (아이콘 버튼 클릭 시 표시/숨김) -->
+<script th:inline="none">
+  (function () {
+    var btn = document.querySelector('[data-test-accounts-toggle]');
+    var box = document.getElementById('testAccounts');
+    if (!btn || !box) return;
+    btn.addEventListener('click', function () {
+      var willShow = box.hasAttribute('hidden');
+      if (willShow) box.removeAttribute('hidden');
+      else box.setAttribute('hidden', '');
+      btn.setAttribute('aria-expanded', String(willShow));
+      btn.classList.toggle('is-active', willShow);
+    });
+  })();
 </script>
 </body>
 </html>

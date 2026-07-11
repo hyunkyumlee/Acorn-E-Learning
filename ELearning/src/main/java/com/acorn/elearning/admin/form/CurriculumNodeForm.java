@@ -17,8 +17,4 @@ public class CurriculumNodeForm {
     private Boolean isActive;
     private String description;
 
-    @NotBlank
-    private String skeletonValue = "TODO";
-    private String idempotencyToken;
-    private Long id;
 }

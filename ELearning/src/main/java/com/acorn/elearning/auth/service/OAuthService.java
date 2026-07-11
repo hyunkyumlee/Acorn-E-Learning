@@ -1,6 +1,5 @@
 package com.acorn.elearning.auth.service;
 
-import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -12,6 +11,7 @@ import java.util.Map;
 import com.acorn.elearning.auth.dto.response.SocialAccountListResponse;
 import com.acorn.elearning.auth.dto.response.SocialAccountResponse;
 import com.acorn.elearning.auth.mapper.SocialAccountMapper;
+import com.acorn.elearning.auth.mapper.UserCredentialMapper;
 import com.acorn.elearning.auth.model.SocialAccount;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
@@ -36,7 +36,6 @@ public class OAuthService {
 
     private static final String OAUTH_STATE_KEY = "OAUTH_STATE";
     private static final String STATUS_ACTIVE = "ACTIVE";
-    private static final String PENDING_SOCIAL_KEY = "PENDING_SOCIAL_LINK";
     private static final String GITHUB_EMAILS_URI = "https://api.github.com/user/emails";   // [추가] GitHub 이메일 2차 조회
 
     private final SocialAccountMapper socialAccountMapper;
@@ -45,6 +44,7 @@ public class OAuthService {
     private final UserLearningProfileMapper userLearningProfileMapper;
     private final SessionService sessionService;
     private final OAuthProperties oAuthProperties;
+    private final UserCredentialMapper userCredentialMapper; //최소 인증수단 유지 룰 검증용
     private final SecureRandom secureRandom = new SecureRandom();
     private final RestClient restClient = RestClient.create();
 
@@ -53,13 +53,14 @@ public class OAuthService {
                         UserSettingMapper userSettingMapper,
                         UserLearningProfileMapper userLearningProfileMapper,
                         SessionService sessionService,
-                        OAuthProperties oAuthProperties) {
+                        OAuthProperties oAuthProperties, UserCredentialMapper userCredentialMapper) {
         this.socialAccountMapper = socialAccountMapper;
         this.userMapper = userMapper;
         this.userSettingMapper = userSettingMapper;
         this.userLearningProfileMapper = userLearningProfileMapper;
         this.sessionService = sessionService;
         this.oAuthProperties = oAuthProperties;
+        this.userCredentialMapper = userCredentialMapper;
     }
 
     // ================= AUTH-005: 로그인 provider redirect =================
@@ -81,7 +82,12 @@ public class OAuthService {
         // (1) 식별 앵커 = provider + providerUserId. 이미 연동돼 있으면 그 회원으로 로그인
         SocialAccount linked = socialAccountMapper
                 .findByProviderAndProviderUserId(provider, info.providerUserId()).orElse(null);
-        if (linked != null && Boolean.TRUE.equals(linked.getIsActive())) {
+
+        if (linked != null) {
+            if(!Boolean.TRUE.equals(linked.getIsActive())) {
+                reactivateSocialAccount(linked, info); //비활성(soft-deleted)일 때만 재활성화 -> uk_social_provider_user 충돌 회피
+            }
+
             User user = userMapper.findById(linked.getUserId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.AUTH_USER_NOT_FOUND));
             SessionUser sessionUser = toSessionUser(user);
@@ -89,38 +95,17 @@ public class OAuthService {
             return sessionUser.defaultRedirectPath();
         }
 
-        // (2) 미연동 → 자동 가입/자동 로그인하지 않는다.
-        //     연동할 계정으로 "로그인" 또는 "회원가입 후 로그인" 하도록 로그인 화면으로 유도하고,
-        //     로그인 성공 시(AuthController → consumePendingLink) 방금 시도한 소셜을 그 계정에 자동 연동한다.
-        session.setAttribute(PENDING_SOCIAL_KEY,
-                new PendingSocialLink(provider, info.providerUserId(), info.email()));
-        String redirectUrl = "/login?linkPending=" + enc(provider);
-        if (info.email() != null && !info.email().isBlank()) {
-            redirectUrl += "&email=" + enc(info.email());   // 소셜 이메일 prefill (있을 때만)
-        }
-        return redirectUrl;
+        // (2) 미연동 -> 새 계정을 즉시 생성하고 바로 로그인시킨다.
+        //     users.email 중복 여부는 검사하지 않는다 (정책상 허용).
+        //     registerSocialUser 안에서 UserSetting/UserLearningProfile까지 이미 생성하므로 여기서는 호출만 한다.
+        User user = registerSocialUser(provider, info);
+        insertSocialAccount(user.getUserId(), provider, info);
+
+        SessionUser sessionUser = toSessionUser(user);
+        sessionService.saveUser(session, sessionUser);
+        return sessionUser.defaultRedirectPath();
     }
 
-    // [Part C] 비밀번호 로그인 성공 직후 호출 — 대기 중(pending) 소셜 연동이 있으면 자동 연동
-    @Transactional
-    public void consumePendingLink(HttpSession session, SessionUser sessionUser) {
-        Object v = session.getAttribute(PENDING_SOCIAL_KEY);
-        if (!(v instanceof PendingSocialLink pending)) {
-            return;
-        }
-        session.removeAttribute(PENDING_SOCIAL_KEY);
-
-        boolean already = socialAccountMapper
-                .findByProviderAndProviderUserId(pending.provider(), pending.providerUserId())
-                .filter(a -> Boolean.TRUE.equals(a.getIsActive()))
-                .isPresent();
-        if (already) {
-            return;
-        }
-        // pending은 검증된 이메일일 때만 저장되므로 emailVerified=true로 취급
-        OAuthUserInfo info = new OAuthUserInfo(pending.providerUserId(), pending.providerEmail(), null, true);
-        insertSocialAccount(sessionUser.userId(), pending.provider(), info);
-    }
 
     // ================= AUTH-009: 설정 화면 소셜 연결 redirect =================
     public String startConnectRedirect(String provider, SessionUser sessionUser, HttpSession session) {
@@ -139,9 +124,21 @@ public class OAuthService {
         session.removeAttribute(OAUTH_STATE_KEY);
 
         OAuthUserInfo info = fetchUserInfo(provider, cfg, code);
-        socialAccountMapper.findByProviderAndProviderUserId(provider, info.providerUserId())
-                .filter(a -> Boolean.TRUE.equals(a.getIsActive()))
-                .ifPresent(a -> { throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "이미 연결된 소셜 계정입니다."); });
+        // 기존 행(활성/비활성) 존재 여부로 묻기
+        SocialAccount existing = socialAccountMapper.findByProviderAndProviderUserId(provider, info.providerUserId()).orElse(null);
+
+        if (existing != null) {
+            if(Boolean.TRUE.equals(existing.getIsActive())) {
+                throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "이미 연결된 소셜 계정입니다.");
+            }
+
+            //soft-deleted 행 : 다른 계정 소유면 거부, 같은 계정이면 재활성화
+            if (!existing.getUserId().equals(sessionUser.userId())) {
+                throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "이미 다른 계정에 연결된 소셜 계정입니다.");
+            }
+            reactivateSocialAccount(existing, info); // insert 대신 재활성화 -> uk_social_user_provider 충돌 회피
+            return "/settings/social";
+        }
         insertSocialAccount(sessionUser.userId(), provider, info);
         return "/settings/social";
     }
@@ -157,10 +154,23 @@ public class OAuthService {
     @Transactional
     public SocialAccountResponse deleteSocialAccount(SessionUser sessionUser, String provider) {
         requireLogin(sessionUser);
-        SocialAccount account = socialAccountMapper.findByUserId(sessionUser.userId()).stream()
+        List<SocialAccount> accounts = socialAccountMapper.findByUserId(sessionUser.userId());
+
+        SocialAccount account = accounts.stream()
                 .filter(a -> provider.equals(a.getProvider()) && Boolean.TRUE.equals(a.getIsActive()))
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "연결된 소셜 계정이 없습니다."));
+
+        long activeSocialCount = accounts.stream().filter(a -> Boolean.TRUE.equals(a.getIsActive())).count();
+        boolean hasPassword = userCredentialMapper.findByUserId(sessionUser.userId())
+                        .map(c->c.getPasswordHash() != null && !c.getPasswordHash().isBlank())
+                                .orElse(false);
+
+        if (activeSocialCount <= 1 && !hasPassword) {
+            throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "이 소셜 계정은 유일한 로그인 수단이라 해제할 수 없습니다. 먼저 비밀번호를 설정하거나 다른 소셜 계정을 연결하세요.");
+        }
+
+
         account.setIsActive(false);
         account.setDisconnectedAt(LocalDateTime.now());
         socialAccountMapper.update(account);
@@ -170,7 +180,7 @@ public class OAuthService {
     // ------------------------- 내부 helper -------------------------
 
     // 소셜 전용 신규 회원 생성 (비밀번호 credential 없음)
-    // [수정] provider 인자 추가 + email null 대비(대체 이메일 생성) — users.email NOT NULL 대응
+    //provider 인자 추가 + email null 대비(대체 이메일 생성) — users.email NOT NULL 대응
     private User registerSocialUser(String provider, OAuthUserInfo info) {
         String email = (info.email() != null && !info.email().isBlank())
                 ? info.email()
@@ -202,15 +212,16 @@ public class OAuthService {
     private void insertSocialAccount(Long userId, String provider, OAuthUserInfo info) {
         SocialAccount account = new SocialAccount();
         account.setUserId(userId);
-        account.setProvider(provider);
+        account.setProvider(provider.toLowerCase(java.util.Locale.ROOT));
         account.setProviderUserId(info.providerUserId());
         account.setProviderEmail(info.email());
+        account.setProviderEmailVerified(info.emailVerified());
         account.setIsActive(true);
         socialAccountMapper.insert(account);
     }
 
     // provider에서 token 교환 후 userinfo 조회 (google/github 분기)
-    // [수정] github 분기 추가 + Accept 헤더
+    // github 분기 추가 + Accept 헤더
     private OAuthUserInfo fetchUserInfo(String provider, OAuthProperties.Provider cfg, String code) {
         String accessToken = exchangeToken(cfg, code);
         @SuppressWarnings("unchecked")
@@ -227,7 +238,7 @@ public class OAuthService {
     }
 
     // authorization code → access token (form-urlencoded POST)
-    // [수정] Accept: application/json 헤더 추가 — GitHub는 없으면 form 응답이라 JSON 파싱 실패
+    // Accept: application/json 헤더 추가 — GitHub는 없으면 form 응답이라 JSON 파싱 실패
     private String exchangeToken(OAuthProperties.Provider cfg, String code) {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "authorization_code");
@@ -250,14 +261,14 @@ public class OAuthService {
     }
 
     // Google userinfo: { sub, email, email_verified, name }
-    // [수정] email_verified 반영
+    // email_verified 반영
     private OAuthUserInfo parseGoogle(Map<String, Object> body) {
         boolean verified = Boolean.parseBoolean(String.valueOf(body.get("email_verified")));
         return new OAuthUserInfo(String.valueOf(body.get("sub")),
                 (String) body.get("email"), (String) body.get("name"), verified);
     }
 
-    // [추가] GitHub: /user( id, login, name, email ) + /user/emails( primary, verified )
+    // GitHub: /user( id, login, name, email ) + /user/emails( primary, verified )
     // GitHub는 공개 이메일만 /user에 담기므로, 검증여부·비공개 대비 /user/emails를 2차 호출해 primary 선택
     @SuppressWarnings("unchecked")
     private OAuthUserInfo parseGithub(Map<String, Object> user, String accessToken) {
@@ -286,16 +297,7 @@ public class OAuthService {
         return new OAuthUserInfo(id, email, displayName, verified);
     }
 
-    // [삭제] parseKakao 제거 (구글/깃허브로 전환). 원본 주석 보존:
-    //    // Kakao userinfo: { id, kakao_account: { email, profile: { nickname } } }
-    //    @SuppressWarnings("unchecked")
-    //    private OAuthUserInfo parseKakao(Map<String, Object> body) {
-    //        String providerUserId = String.valueOf(body.get("id"));
-    //        Map<String, Object> account = (Map<String, Object>) body.getOrDefault("kakao_account", Map.of());
-    //        Map<String, Object> profile = (Map<String, Object>) account.getOrDefault("profile", Map.of());
-    //        return new OAuthUserInfo(providerUserId, (String) account.get("email"), (String) profile.get("nickname"));
-    //    }
-    // [삭제] 위 parseKakao 삭제
+
 
     // provider 인가 URL 조립 (state 포함)
     private String buildAuthorizationUrl(OAuthProperties.Provider cfg, String state) {
@@ -308,7 +310,7 @@ public class OAuthService {
     }
 
     // 닉네임 미제공 provider 대비 fallback
-    // [수정] provider 인자 추가 (fallback 이름 provider_id)
+    // provider 인자 추가 (fallback 이름 provider_id)
     private String resolveNickname(String provider, OAuthUserInfo info) {
         if (info.name() != null && !info.name().isBlank()) return info.name();
         return provider + "_" + info.providerUserId();
@@ -344,10 +346,16 @@ public class OAuthService {
     }
 
     // provider 사용자 식별 정보 (내부 전용 record)
-    // [수정] emailVerified 추가 — 검증된 이메일만 기존 계정 연동에 사용
-    private record OAuthUserInfo(String providerUserId, String email, String name, boolean emailVerified) {}
+    // emailVerified 추가 — 검증된 이메일만 기존 계정 연동에 사용
+    private record OAuthUserInfo(String providerUserId, String email, String name, boolean emailVerified) {
+    }
 
-    // 세션에 임시 저장되는 연동 대기 정보 (세션 직렬화 대상 → Serializable)
-    public record PendingSocialLink(String provider, String providerUserId, String providerEmail)
-            implements Serializable {}
+    private void reactivateSocialAccount(SocialAccount row, OAuthUserInfo info) {
+        row.setIsActive(true);
+        row.setDisconnectedAt(null);
+        row.setProviderEmail(info.email());
+        row.setProviderEmailVerified(info.emailVerified());
+        //update가 is_active/disconnected_at/provider_email(_verified) 갱신
+        socialAccountMapper.update(row);
+    }
 }

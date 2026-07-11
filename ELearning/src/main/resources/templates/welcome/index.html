@@ -1,48 +1,118 @@
 <!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>웰컴 | Knowva</title>
-  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
-  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
-  <link rel="stylesheet" th:href="@{/css/common/base.css}">
-  <link rel="stylesheet" th:href="@{/css/common/components.css}">
-  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
-  <link rel="stylesheet" th:href="@{/css/screens/welcome.css}">
-  <script defer th:src="@{/js/common/theme.js}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>웰컴 | Knowva</title>
+    <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+    <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+    <link rel="stylesheet" th:href="@{/css/common/base.css}">
+    <link rel="stylesheet" th:href="@{/css/common/components.css}">
+    <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+    <link rel="stylesheet" th:href="@{/css/screens/welcome.css}">
+    <script defer th:src="@{/js/common/theme.js}"></script>
+    <!-- [추가] 웰컴↔튜토리얼 화면 전환 + 슬라이더 -->
+    <script defer th:src="@{/js/screens/welcome-tutorial.js}"></script>
 </head>
-<body>
-  <div th:replace="~{fragments/guest-header :: guestHeader}"></div>
-  <main class="page-shell welcome-screen">
-    <section class="welcome-launch" aria-label="Knowva 소개">
-      <div class="welcome-copy">
-        <h1>코딩 여정을<br>푸른 이온 궤도로.</h1>
-        <p>지식을 얻으며 빛나는 학습자. 짧은 이론과 문제풀이로 실력을 쌓고, 나만의 학습 기록을 이어가 보세요.</p>
-        <div class="button-row">
-          <button class="button primary" type="button" disabled aria-disabled="true" title="튜토리얼 준비 중">튜토리얼 시작</button>
-          <a class="button" th:href="@{/login}">바로 로그인하기</a>
-        </div>
-      </div>
+<body class="welcome-bg">
+<div class="bg-fx" aria-hidden="true">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <span class="blob blob-3"></span>
+</div>
+<button class="header-icon theme-toggle theme-toggle-floating" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
+  <span class="theme-symbol" aria-hidden="true">
+    <svg class="theme-symbol-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <title>다크모드</title>
+      <path d="M20.4 14.7A7.7 7.7 0 0 1 9.3 3.6 8.7 8.7 0 1 0 20.4 14.7Z"></path>
+      <path d="M16.7 3.8h.01M19.4 6.7h.01"></path>
+    </svg>
+    <svg class="theme-symbol-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <title>라이트모드</title>
+      <circle cx="12" cy="12" r="4.2"></circle>
+      <path d="M12 2.5v2.1M12 19.4v2.1M4.6 4.6l1.5 1.5M17.9 17.9l1.5 1.5M2.5 12h2.1M19.4 12h2.1M4.6 19.4l1.5-1.5M17.9 6.1l1.5-1.5"></path>
+    </svg>
+  </span>
+</button>
+<main class="page-shell welcome-screen">
 
-      <div class="welcome-visual" aria-label="Knowva ion launch visual">
-        <div class="welcome-orbit">
-          <div class="welcome-comet" aria-hidden="true"></div>
-          <div class="welcome-orbit-center" aria-hidden="true">
-            <div class="big-planet"></div>
-            <div class="orbit"></div>
-            <div class="orbit orbit-alt"></div>
-          </div>
+    <!-- ===== 뷰 1: 웰컴 히어로 ===== -->
+    <section class="welcome-launch" data-welcome-view aria-label="Knowva 소개">
+        <div class="welcome-copy">
+            <h1>코딩 여정을<br>푸른 이온 궤도로.</h1>
+            <p>지식을 얻으며 빛나는 학습자. 짧은 이론과 문제풀이로 실력을 쌓고, 나만의 학습 기록을 이어가 보세요.</p>
+            <div class="button-row">
+                <!-- [수정] 페이지 이동/스크롤 아님 → 같은 화면에서 튜토리얼 뷰로 '전환'하는 버튼 -->
+                <button type="button" class="button primary" data-tutorial-open aria-controls="tutorialView">튜토리얼 시작</button>
+                <a class="button" th:href="@{/login}">바로 로그인하기</a>
+            </div>
         </div>
-        <div class="welcome-moon one" aria-hidden="true"></div>
-        <div class="welcome-moon two" aria-hidden="true"></div>
-        <aside class="welcome-guide">
-          <strong>Nova Guide</strong>
-          <span>Knowva에 오신 것을 환영해요. 과목별 로드맵을 따라 학습하고, 오답 복습과 시험으로 실력을 확인할 수 있어요. 학습 기록을 저장하려면 로그인해 주세요.</span>
-        </aside>
-      </div>
+
+        <div class="welcome-visual" aria-label="Knowva ion launch visual">
+            <div class="welcome-orbit">
+                <div class="welcome-comet" aria-hidden="true"></div>
+                <div class="welcome-orbit-center" aria-hidden="true">
+                    <div class="big-planet"></div>
+                    <div class="orbit"></div>
+                    <div class="orbit orbit-alt"></div>
+                </div>
+            </div>
+            <div class="welcome-moon one" aria-hidden="true"></div>
+            <div class="welcome-moon two" aria-hidden="true"></div>
+            <aside class="welcome-guide">
+                <strong>Nova Guide</strong>
+                <span>Knowva에 오신 것을 환영해요. 과목별 로드맵을 따라 학습하고, 오답 복습과 시험으로 실력을 확인할 수 있어요. 학습 기록을 저장하려면 로그인해 주세요.</span>
+            </aside>
+        </div>
     </section>
-  </main>
+
+    <!-- ===== 뷰 2: 튜토리얼 (같은 index.html 안) ===== -->
+    <section id="tutorialView" class="tut-view" data-tutorial-view hidden aria-label="Knowva 튜토리얼">
+        <div class="tut-card" data-tut-root tabindex="-1">
+            <div class="tut-stage">
+                <div class="tut-media">
+                    <img data-tut-img alt="" hidden>
+                    <span class="tut-media-label" data-tut-media-label>서비스 이미지</span>
+                </div>
+
+                <div class="tut-body">
+                    <p class="tut-live" data-tut-live aria-live="polite"></p>
+                    <!-- [수정] 총 개수 하드코딩(/ 5) → 서버가 준 단계 수 -->
+                    <p class="tut-step-badge"><span data-tut-index>1</span> / <span th:text="${#lists.size(tutorialSteps)}">5</span></p>
+
+                    <!-- [수정] 슬라이드 5장 하드코딩 → tutorialSteps 반복 렌더 -->
+                    <article class="tut-slide" th:each="s, it : ${tutorialSteps}"
+                             th:classappend="${it.first} ? ' is-active' : ''"
+                             th:attr="data-step=${s.step}, data-img=${s.imageUrl}"
+                             th:hidden="${!it.first}">
+                        <h2 class="tut-title" th:text="${s.title}">로드맵 기반 학습</h2>
+                        <p class="tut-desc" th:text="${s.description}">학습 순서를 따라가며 목표를 하나씩 달성하고 실력을 쌓아보세요</p>
+                    </article>
+                </div>
+            </div>
+
+            <div class="tut-footer">
+                <button type="button" class="button tut-btn tut-prev" data-tut-prev disabled aria-disabled="true">이전</button>
+
+                <!-- [수정] 점(dot) 5개 하드코딩 → tutorialSteps 반복 렌더 -->
+                <div class="tut-dots" role="tablist" aria-label="튜토리얼 단계" data-tut-dots>
+                    <button type="button" class="tut-dot" role="tab" th:each="s, it : ${tutorialSteps}"
+                            th:classappend="${it.first} ? ' is-active' : ''"
+                            th:attr="aria-selected=${it.first} ? 'true' : 'false',
+                                     data-tut-goto=${s.step},
+                                     aria-label=${s.step} + '단계'"></button>
+                </div>
+
+                <button type="button" class="button primary tut-btn tut-next" data-tut-next th:data-signup-href="@{/signup}">다음</button>
+            </div>
+
+            <p class="tut-skip">
+                <!-- [추가] 페이지 이동이 아니라 뷰를 웰컴으로 되돌리는 버튼 -->
+                <button type="button" class="tut-back" data-tutorial-close>웰컴으로 돌아가기</button>
+            </p>
+        </div>
+    </section>
+</main>
 </body>
 </html>

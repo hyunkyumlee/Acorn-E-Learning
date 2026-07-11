@@ -23,20 +23,22 @@
   </section>
 
   <section class="notice-toolbar">
-    <div class="notice-filter">
-      <input type="search" id="searchNotice" placeholder="제목 검색">
-      <select id="noticePeriodFilter">
+    <form method="get" action="/admin/notices" class="notice-filter">
+      <input type="hidden" name="size" th:value="${noticePage.pageSize}">
+      <input type="search" id="searchNotice" name="keyword" th:value="${selectedKeyword}" placeholder="제목 검색">
+      <select id="noticePeriodFilter" name="period">
         <option value="">기간</option>
-        <option value="today">오늘</option>
-        <option value="week">최근 7일</option>
-        <option value="month">최근 30일</option>
+        <option value="today" th:selected="${selectedPeriod == 'today'}">오늘</option>
+        <option value="week" th:selected="${selectedPeriod == 'week'}">최근 7일</option>
+        <option value="month" th:selected="${selectedPeriod == 'month'}">최근 30일</option>
       </select>
-      <select id="noticeStatusFilter">
+      <select id="noticeStatusFilter" name="status">
         <option value="">공개 상태</option>
-        <option value="PUBLISHED">공개</option>
-        <option value="DRAFT">비공개</option>
+        <option value="PUBLISHED" th:selected="${selectedStatus == 'PUBLISHED'}">공개</option>
+        <option value="DRAFT" th:selected="${selectedStatus == 'DRAFT'}">비공개</option>
       </select>
-    </div>
+      <button type="submit" class="notice-filter-button">검색</button>
+    </form>
     <button type="button" id="noticeCreateButton" class="notice-primary-button">+ 공지사항 작성</button>
   </section>
 
@@ -60,7 +62,7 @@
         </thead>
 
         <tbody>
-        <tr th:each="notice : ${noticeList}" class="notice-row"
+        <tr th:each="notice : ${noticePage.items}" class="notice-row"
             th:data-title="${notice.title}"
             th:data-status="${notice.status}"
             th:data-date="${notice.publishedAt != null ? #temporals.format(notice.publishedAt, 'yyyy-MM-dd') : ''}">
@@ -84,12 +86,41 @@
             </div>
           </td>
         </tr>
-        <tr th:if="${#lists.isEmpty(noticeList)}">
+        <tr th:if="${#lists.isEmpty(noticePage.items)}">
           <td colspan="7" class="notice-empty">등록된 공지사항이 없습니다.</td>
         </tr>
         </tbody>
       </table>
     </div>
+
+    <nav class="admin-pagination" th:if="${noticePage.totalPages >= 1}" aria-label="공지사항 페이지">
+      <a class="admin-page-link"
+         th:if="${noticePage.hasPrevious}"
+         th:href="@{/admin/notices(page=${noticePage.currentPage - 1}, size=${noticePage.pageSize}, keyword=${selectedKeyword}, period=${selectedPeriod}, status=${selectedStatus})}">
+        &lt;
+      </a>
+
+      <span th:each="pageNumber : ${#numbers.sequence(noticePage.startPage, noticePage.endPage)}">
+        <a class="admin-page-link"
+           th:if="${pageNumber != noticePage.currentPage}"
+           th:href="@{/admin/notices(page=${pageNumber}, size=${noticePage.pageSize}, keyword=${selectedKeyword}, period=${selectedPeriod}, status=${selectedStatus})}"
+           th:text="${pageNumber}">
+          1
+        </a>
+
+        <strong class="admin-page-link admin-page-current"
+                th:if="${pageNumber == noticePage.currentPage}"
+                th:text="${pageNumber}">
+          1
+        </strong>
+      </span>
+
+      <a class="admin-page-link"
+         th:if="${noticePage.hasNext}"
+         th:href="@{/admin/notices(page=${noticePage.currentPage + 1}, size=${noticePage.pageSize}, keyword=${selectedKeyword}, period=${selectedPeriod}, status=${selectedStatus})}">
+        &gt;
+      </a>
+    </nav>
   </section>
 
   <section class="notice-form-panel">
@@ -124,47 +155,6 @@
 
 </main>
 <script>
-  function applyNoticeFilters() {
-    const keyword = document.querySelector("#searchNotice").value.trim().toLowerCase();
-    const status = document.querySelector("#noticeStatusFilter").value;
-    const period = document.querySelector("#noticePeriodFilter").value;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    document.querySelectorAll(".notice-row").forEach((row) => {
-      const rowTitle = (row.dataset.title || "").toLowerCase();
-      const rowStatus = row.dataset.status || "";
-      const rowDate = row.dataset.date ? new Date(row.dataset.date) : null;
-
-      const matchesKeyword = rowTitle.includes(keyword);
-      const matchesStatus = status === "" || rowStatus === status;
-      let matchesPeriod = true;
-
-      if (period !== "") {
-        if (!rowDate) {
-          matchesPeriod = false;
-        } else {
-          rowDate.setHours(0, 0, 0, 0);
-          const diffDays = Math.floor((today - rowDate) / 86400000);
-
-          if (period === "today") {
-            matchesPeriod = diffDays === 0;
-          } else if (period === "week") {
-            matchesPeriod = diffDays >= 0 && diffDays <= 7;
-          } else if (period === "month") {
-            matchesPeriod = diffDays >= 0 && diffDays <= 30;
-          }
-        }
-      }
-
-      row.style.display = matchesKeyword && matchesStatus && matchesPeriod ? "" : "none";
-    });
-  }
-
-  document.querySelector("#searchNotice")?.addEventListener("input", applyNoticeFilters);
-  document.querySelector("#noticePeriodFilter")?.addEventListener("change", applyNoticeFilters);
-  document.querySelector("#noticeStatusFilter")?.addEventListener("change", applyNoticeFilters);
-
   const noticeForm = document.querySelector("#noticeForm");
   const noticeTitle = document.querySelector("#noticeTitle");
   const noticeStatus = document.querySelector("#noticeStatus");

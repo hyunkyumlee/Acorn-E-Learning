@@ -223,3 +223,19 @@
         width: 100%;
     }
 }
+/* review 답안 스페이스 */
+.review-retry-form label {
+    display: block;
+}
+
+.review-retry-form input[type="text"] {
+    margin-top: 12px;
+}
+
+.review-retry-form button {
+    margin-top: 12px;
+}
+
+.practice-footer-a{
+    margin-top: 12px;
+}

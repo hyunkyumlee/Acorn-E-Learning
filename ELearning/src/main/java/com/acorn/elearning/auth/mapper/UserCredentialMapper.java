@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface UserCredentialMapper {
     Optional<UserCredential> findById(Long credentialId);
     Optional<UserCredential> findByUserId(Long userId);
-    Optional<LoginUserRow> findByEmail(String email);
+    Optional<LoginUserRow> findByLoginEmail(String email);
 
     List<UserCredential> findAll();
     int insert(UserCredential model);

@@ -17,33 +17,54 @@
 <body>
 <div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
 
-<main class="page-shell admin-screen admin-community-screen">
+<main class="page-shell admin-screen admin-community-screen" th:data-selected-tab="${selectedTab}">
   <section class="admin-community-header">
     <h1>커뮤니티 관리</h1>
   </section>
 
   <section class="admin-community-tabs" aria-label="커뮤니티 관리 탭">
-    <button type="button" class="admin-community-tab is-active" data-tab="posts">게시글 관리</button>
-    <button type="button" class="admin-community-tab" data-tab="comments">댓글 관리</button>
+    <button type="button"
+            class="admin-community-tab"
+            th:classappend="${selectedTab == 'posts'} ? ' is-active' : ''"
+            data-tab="posts">게시글 관리</button>
+    <button type="button"
+            class="admin-community-tab"
+            th:classappend="${selectedTab == 'comments'} ? ' is-active' : ''"
+            data-tab="comments">댓글 관리</button>
   </section>
 
-  <section class="admin-community-toolbar" aria-label="게시글 검색 조건">
-    <select id="communityBoardFilter" class="community-board-filter" aria-label="게시판 유형">
+  <form method="get" action="/admin/community" class="admin-community-toolbar" aria-label="커뮤니티 검색 조건">
+    <input type="hidden" name="size" th:value="${communityPage.posts.pageSize}">
+    <input type="hidden" name="tab" id="communitySelectedTab" th:value="${selectedTab}">
+
+    <select id="communityBoardFilter" name="boardType" class="community-board-filter" aria-label="게시판 유형">
       <option value="">게시판 유형</option>
-      <option value="자유">자유</option>
-      <option value="질문">질문</option>
-      <option value="공부 일지">공부 일지</option>
+      <option value="FREE" th:selected="${selectedBoardType == 'FREE'}">자유</option>
+      <option value="QUESTION" th:selected="${selectedBoardType == 'QUESTION'}">질문</option>
+      <option value="STUDY_LOG" th:selected="${selectedBoardType == 'STUDY_LOG'}">공부 일지</option>
     </select>
-    <select id="communityStatusFilter" aria-label="공개 상태">
-      <option value="">공개 상태</option>
-      <option value="공개">공개</option>
-      <option value="숨김">숨김</option>
-      <option value="삭제">삭제</option>
-    </select>
-    <input type="search" id="communityKeywordFilter" placeholder="키워드 검색" aria-label="키워드 검색">
-  </section>
 
-  <section class="admin-community-panel" data-panel="posts" aria-label="게시글 목록">
+    <select id="communityStatusFilter" name="status" aria-label="공개 상태">
+      <option value="">공개 상태</option>
+      <option value="ACTIVE" th:selected="${selectedStatus == 'ACTIVE'}">공개</option>
+      <option value="HIDDEN" th:selected="${selectedStatus == 'HIDDEN'}">숨김</option>
+      <option value="DELETED" th:selected="${selectedStatus == 'DELETED'}">삭제</option>
+    </select>
+
+    <input type="search"
+           id="communityKeywordFilter"
+           name="keyword"
+           th:value="${selectedKeyword}"
+           placeholder="키워드 검색"
+           aria-label="키워드 검색">
+
+    <button type="submit" class="admin-community-filter-button">검색</button>
+  </form>
+
+  <section class="admin-community-panel"
+           th:classappend="${selectedTab == 'posts'} ? '' : ' is-hidden'"
+           data-panel="posts"
+           aria-label="게시글 목록">
     <h2>게시글 목록</h2>
     <div class="admin-community-table-wrap">
       <table class="admin-community-table">
@@ -62,17 +83,17 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="post : ${communityPage.posts}"
+        <tr th:each="post : ${communityPage.posts.items}"
             class="admin-community-post-row"
-            th:data-board="${post.boardTypeLabel()}"
-            th:data-status="${post.statusLabel()}"
+            th:data-board="${post.boardType}"
+            th:data-status="${post.status}"
             th:data-keyword="${post.title + ' ' + post.writerNickname}">
           <td th:text="${'#' + post.postId}">#001</td>
-          <td th:text="${post.writerNickname}">닉네임1</td>
-          <td th:text="${post.title}">Java 변수 공부 방법 공유합니다</td>
-          <td th:text="${post.boardTypeLabel()}">정보</td>
-          <td th:text="${post.likeCount}">24</td>
-          <td th:text="${post.commentCount}">5</td>
+          <td th:text="${post.writerNickname}">닉네임</td>
+          <td th:text="${post.title}">게시글 제목</td>
+          <td th:text="${post.boardTypeLabel()}">자유</td>
+          <td th:text="${post.likeCount}">0</td>
+          <td th:text="${post.commentCount}">0</td>
           <td th:text="${post.reportCount}">0</td>
           <td th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd') : '-'}">2026-06-01</td>
           <td>
@@ -103,18 +124,39 @@
             </div>
           </td>
         </tr>
-        <tr th:if="${#lists.isEmpty(communityPage.posts)}">
-          <td colspan="10" class="admin-community-empty">게시글이 없습니다.</td>
-        </tr>
-        <tr class="admin-community-post-empty is-hidden">
+        <tr class="admin-community-post-empty"
+            th:classappend="${#lists.isEmpty(communityPage.posts.items)} ? '' : ' is-hidden'">
           <td colspan="10" class="admin-community-empty">조건에 맞는 게시글이 없습니다.</td>
         </tr>
         </tbody>
       </table>
     </div>
+
+    <nav class="admin-pagination" th:if="${communityPage.posts.totalPages >= 1}" aria-label="게시글 페이지">
+      <a class="admin-page-link"
+         th:if="${communityPage.posts.hasPrevious}"
+         th:href="@{/admin/community(tab='posts', postPage=${communityPage.posts.currentPage - 1}, commentPage=${communityPage.comments.currentPage}, size=${communityPage.posts.pageSize}, boardType=${selectedPostBoardType}, status=${selectedPostStatus}, keyword=${selectedPostKeyword})}">&lt;</a>
+
+      <span th:each="pageNumber : ${#numbers.sequence(communityPage.posts.startPage, communityPage.posts.endPage)}">
+        <a class="admin-page-link"
+           th:if="${pageNumber != communityPage.posts.currentPage}"
+           th:href="@{/admin/community(tab='posts', postPage=${pageNumber}, commentPage=${communityPage.comments.currentPage}, size=${communityPage.posts.pageSize}, boardType=${selectedPostBoardType}, status=${selectedPostStatus}, keyword=${selectedPostKeyword})}"
+           th:text="${pageNumber}">1</a>
+        <strong class="admin-page-link admin-page-current"
+                th:if="${pageNumber == communityPage.posts.currentPage}"
+                th:text="${pageNumber}">1</strong>
+      </span>
+
+      <a class="admin-page-link"
+         th:if="${communityPage.posts.hasNext}"
+         th:href="@{/admin/community(tab='posts', postPage=${communityPage.posts.currentPage + 1}, commentPage=${communityPage.comments.currentPage}, size=${communityPage.posts.pageSize}, boardType=${selectedPostBoardType}, status=${selectedPostStatus}, keyword=${selectedPostKeyword})}">&gt;</a>
+    </nav>
   </section>
 
-  <section class="admin-community-panel" data-panel="comments" aria-label="댓글 목록">
+  <section class="admin-community-panel"
+           th:classappend="${selectedTab == 'comments'} ? '' : ' is-hidden'"
+           data-panel="comments"
+           aria-label="댓글 목록">
     <h2>댓글 목록</h2>
     <div class="admin-community-table-wrap">
       <table class="admin-community-table">
@@ -131,14 +173,14 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="comment : ${communityPage.comments}"
+        <tr th:each="comment : ${communityPage.comments.items}"
             class="admin-community-comment-row"
-            th:data-status="${comment.statusLabel()}"
+            th:data-status="${comment.status}"
             th:data-keyword="${comment.content + ' ' + comment.writerNickname}">
           <td th:text="${'#' + comment.commentId}">#C001</td>
           <td th:text="${'#' + comment.postId}">#001</td>
-          <td th:text="${comment.writerNickname}">닉네임2</td>
-          <td th:text="${comment.contentSummary()}">저도 같은 방식으로 공부했어요.</td>
+          <td th:text="${comment.writerNickname}">닉네임</td>
+          <td th:text="${comment.contentSummary()}">댓글 내용</td>
           <td th:text="${comment.reportCount}">0</td>
           <td th:text="${comment.createdAt != null ? #temporals.format(comment.createdAt, 'yyyy-MM-dd') : '-'}">2026-06-01</td>
           <td>
@@ -169,75 +211,105 @@
             </div>
           </td>
         </tr>
-        <tr th:if="${#lists.isEmpty(communityPage.comments)}">
-          <td colspan="8" class="admin-community-empty">댓글이 없습니다.</td>
-        </tr>
-        <tr class="admin-community-comment-empty is-hidden">
+        <tr class="admin-community-comment-empty"
+            th:classappend="${#lists.isEmpty(communityPage.comments.items)} ? '' : ' is-hidden'">
           <td colspan="8" class="admin-community-empty">조건에 맞는 댓글이 없습니다.</td>
         </tr>
         </tbody>
       </table>
     </div>
+
+    <nav class="admin-pagination" th:if="${communityPage.comments.totalPages >= 1}" aria-label="댓글 페이지">
+      <a class="admin-page-link"
+         th:if="${communityPage.comments.hasPrevious}"
+         th:href="@{/admin/community(tab='comments', postPage=${communityPage.posts.currentPage}, commentPage=${communityPage.comments.currentPage - 1}, size=${communityPage.comments.pageSize}, status=${selectedCommentStatus}, keyword=${selectedCommentKeyword})}">&lt;</a>
+
+      <span th:each="pageNumber : ${#numbers.sequence(communityPage.comments.startPage, communityPage.comments.endPage)}">
+        <a class="admin-page-link"
+           th:if="${pageNumber != communityPage.comments.currentPage}"
+           th:href="@{/admin/community(tab='comments', postPage=${communityPage.posts.currentPage}, commentPage=${pageNumber}, size=${communityPage.comments.pageSize}, status=${selectedCommentStatus}, keyword=${selectedCommentKeyword})}"
+           th:text="${pageNumber}">1</a>
+        <strong class="admin-page-link admin-page-current"
+                th:if="${pageNumber == communityPage.comments.currentPage}"
+                th:text="${pageNumber}">1</strong>
+      </span>
+
+      <a class="admin-page-link"
+         th:if="${communityPage.comments.hasNext}"
+         th:href="@{/admin/community(tab='comments', postPage=${communityPage.posts.currentPage}, commentPage=${communityPage.comments.currentPage + 1}, size=${communityPage.comments.pageSize}, status=${selectedCommentStatus}, keyword=${selectedCommentKeyword})}">&gt;</a>
+    </nav>
   </section>
 </main>
 
 <script>
+  const main = document.querySelector(".admin-community-screen");
   const tabs = document.querySelectorAll(".admin-community-tab");
   const panels = document.querySelectorAll(".admin-community-panel");
+  const selectedTabInput = document.querySelector("#communitySelectedTab");
   const boardFilter = document.querySelector("#communityBoardFilter");
   const statusFilter = document.querySelector("#communityStatusFilter");
   const keywordFilter = document.querySelector("#communityKeywordFilter");
-  let activeTab = "posts";
+  let activeTab = main?.dataset.selectedTab || "posts";
+  const filterState = {
+    posts: {
+      board: boardFilter?.value || "",
+      status: activeTab === "posts" ? statusFilter?.value || "" : "",
+      keyword: activeTab === "posts" ? keywordFilter?.value || "" : ""
+    },
+    comments: {
+      board: "",
+      status: activeTab === "comments" ? statusFilter?.value || "" : "",
+      keyword: activeTab === "comments" ? keywordFilter?.value || "" : ""
+    }
+  };
+
+  const saveActiveFilterState = () => {
+    filterState[activeTab] = {
+      board: activeTab === "posts" ? boardFilter.value : "",
+      status: statusFilter.value,
+      keyword: keywordFilter.value
+    };
+  };
+
+  const restoreActiveFilterState = () => {
+    const state = filterState[activeTab];
+
+    boardFilter.value = activeTab === "posts" ? state.board : "";
+    statusFilter.value = state.status;
+    keywordFilter.value = state.keyword;
+  };
 
   const syncCommunityFilterVisibility = () => {
     const postTab = activeTab === "posts";
     boardFilter.hidden = !postTab;
-
-    if (!postTab) {
-      boardFilter.value = "";
-    }
-  };
-
-  const applyCommunityFilter = () => {
-    const selectedBoard = boardFilter.value;
-    const selectedStatus = statusFilter.value;
-    const keyword = keywordFilter.value.trim().toLowerCase();
-    const rowSelector = activeTab === "posts" ? ".admin-community-post-row" : ".admin-community-comment-row";
-    const emptyRow = document.querySelector(activeTab === "posts" ? ".admin-community-post-empty" : ".admin-community-comment-empty");
-    let visibleCount = 0;
-
-    document.querySelectorAll(rowSelector).forEach((row) => {
-      const matchesBoard = activeTab !== "posts" || selectedBoard === "" || row.dataset.board === selectedBoard;
-      const matchesStatus = selectedStatus === "" || row.dataset.status === selectedStatus;
-      const matchesKeyword = keyword === "" || (row.dataset.keyword || "").toLowerCase().includes(keyword);
-      const visible = matchesBoard && matchesStatus && matchesKeyword;
-
-      row.hidden = !visible;
-      if (visible) {
-        visibleCount += 1;
-      }
-    });
-
-    emptyRow?.classList.toggle("is-hidden", visibleCount > 0);
+    boardFilter.disabled = !postTab;
   };
 
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
+      saveActiveFilterState();
       activeTab = tab.dataset.tab;
+      selectedTabInput.value = activeTab;
+      restoreActiveFilterState();
       tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
       panels.forEach((panel) => panel.classList.toggle("is-hidden", panel.dataset.panel !== activeTab));
       syncCommunityFilterVisibility();
-      applyCommunityFilter();
     });
   });
 
-  boardFilter?.addEventListener("change", applyCommunityFilter);
-  statusFilter?.addEventListener("change", applyCommunityFilter);
-  keywordFilter?.addEventListener("input", applyCommunityFilter);
+  boardFilter?.addEventListener("change", () => {
+    saveActiveFilterState();
+  });
+  statusFilter?.addEventListener("change", () => {
+    saveActiveFilterState();
+  });
+  keywordFilter?.addEventListener("input", () => {
+    saveActiveFilterState();
+  });
 
   panels.forEach((panel) => panel.classList.toggle("is-hidden", panel.dataset.panel !== activeTab));
+  tabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.tab === activeTab));
   syncCommunityFilterVisibility();
-  applyCommunityFilter();
 </script>
 </body>
 </html>

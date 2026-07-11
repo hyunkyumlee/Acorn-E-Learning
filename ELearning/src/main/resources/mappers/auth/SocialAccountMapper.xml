@@ -9,6 +9,7 @@
         <result property="provider" column="provider"></result>
         <result property="providerUserId" column="provider_user_id"></result>
         <result property="providerEmail" column="provider_email"></result>
+        <result property="providerEmailVerified" column="provider_email_verified"></result>
         <result property="isActive" column="is_active"></result>
         <result property="connectedAt" column="connected_at"></result>
         <result property="disconnectedAt" column="disconnected_at"></result>
@@ -16,38 +17,45 @@
 
     <!--  pk로 연동 row 1건 조회  -->
     <select id="findById" parameterType="long" resultMap="SocialAccountResultMap">
-        select social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+        select social_account_id, user_id, provider, provider_user_id, provider_email, provider_email_verified, is_active, connected_at, disconnected_at
         from social_accounts
         where social_account_id = #{socialAccountId}
     </select>
 
     <select id="findByProviderAndProviderUserId" resultMap="SocialAccountResultMap">
-        select social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+        select social_account_id, user_id, provider, provider_user_id, provider_email, provider_email_verified, is_active, connected_at, disconnected_at
         from social_accounts
         where provider = #{provider} and provider_user_id = #{providerUserId}
     </select>
 
     <select id="findByUserId" parameterType="long" resultMap="SocialAccountResultMap">
-        select social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+        select social_account_id, user_id, provider, provider_user_id, provider_email, provider_email_verified, is_active, connected_at, disconnected_at
         from social_accounts
         where user_id = #{userId} order by social_account_id desc
     </select>
 
     <select id="findAll" resultMap="SocialAccountResultMap">
-        select social_account_id, user_id, provider, provider_user_id, provider_email, is_active, connected_at, disconnected_at
+        select social_account_id, user_id, provider, provider_user_id, provider_email, provider_email_verified, is_active, connected_at, disconnected_at
         from social_accounts
         order by social_account_id desc
     </select>
 
     <insert id="insert" parameterType="com.acorn.elearning.auth.model.SocialAccount"
             useGeneratedKeys="true" keyProperty="socialAccountId" keyColumn="social_account_id">
-        insert into social_accounts (user_id, provider, provider_user_id, provider_email, is_active, connected_at)
-        values (#{userId}, #{provider}, #{providerUserId}, #{providerEmail}, #{isActive}, NOW())
+        insert into social_accounts (
+          user_id, provider, provider_user_id, provider_email, provider_email_verified, is_active, connected_at
+        )
+        values (
+          #{userId}, #{provider}, #{providerUserId}, #{providerEmail}, #{providerEmailVerified}, #{isActive}, NOW()
+        )
     </insert>
 
     <update id="update" parameterType="com.acorn.elearning.auth.model.SocialAccount">
         update social_accounts
-        set provider_email = #{providerEmail}, is_active = #{isActive}, disconnected_at = #{disconnectedAt}
+        set provider_email = #{providerEmail},
+            provider_email_verified = #{providerEmailVerified},
+            is_active = #{isActive},
+            disconnected_at = #{disconnectedAt}
         where social_account_id = #{socialAccountId}
     </update>
 

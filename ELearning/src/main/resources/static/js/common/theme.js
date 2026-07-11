@@ -28,6 +28,9 @@
       button.setAttribute("aria-pressed", String(isDark));
       button.setAttribute("aria-label", isDark ? "라이트모드로 전환" : "다크모드로 전환");
     });
+    document.querySelectorAll("[data-system-theme-toggle]").forEach(function (toggle) {
+      toggle.checked = isDark;
+    });
   }
 
   function persistTheme(mode) {

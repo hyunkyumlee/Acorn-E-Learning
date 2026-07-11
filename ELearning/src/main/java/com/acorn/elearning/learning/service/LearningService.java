@@ -37,6 +37,11 @@ public class LearningService {
                 .toList();
     }
 
+    /** 비활성 포함 전체 과목(sort_order 순). REST /api/subjects?activeOnly=false 용. */
+    public List<Subject> getAllSubjects() {
+        return subjectMapper.findAll();
+    }
+
     /**
      * 학습 메인 대시보드의 사용자 프로필/출석 정보를 조립한다.
      * - user_learning_profiles: 주 과목 / 현재 레벨 / 등급 / 누적 점수

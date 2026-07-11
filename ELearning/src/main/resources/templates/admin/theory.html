@@ -23,28 +23,36 @@
   </section>
 
   <section class="theory-toolbar">
-    <div class="theory-filter">
-      <input type="search" id="searchTheory" placeholder="제목 검색">
-      <select id="theorySubjectFilter">
+    <form method="get" action="/admin/theory" class="theory-filter">
+      <input type="hidden" name="size" th:value="${theoryPage.pageSize}">
+      <input type="search" id="searchTheory" name="keyword" th:value="${selectedKeyword}" placeholder="제목 검색">
+      <select id="theorySubjectFilter" name="subjectName">
         <option value="">과목</option>
-        <option th:each="subject : ${subjectList}" th:value="${subject.subjectName}" th:text="${subject.subjectName}">Java</option>
+        <option th:each="subject : ${subjectList}"
+                th:value="${subject.subjectName}"
+                th:text="${subject.subjectName}"
+                th:selected="${selectedSubjectName == subject.subjectName}">Java</option>
       </select>
-      <select id="theoryCurriculumFilter">
+      <select id="theoryCurriculumFilter" name="curriculumTitle">
         <option value="">커리큘럼</option>
-        <option th:each="node : ${curriculumList}" th:value="${node.title}" th:text="${node.title}">Java 기초</option>
+        <option th:each="node : ${curriculumList}"
+                th:value="${node.title}"
+                th:text="${node.title}"
+                th:selected="${selectedCurriculumTitle == node.title}">Java 기초</option>
       </select>
-      <select id="theoryLevelFilter">
+      <select id="theoryLevelFilter" name="levelCode">
         <option value="">레벨</option>
-        <option value="BRONZE">BRONZE</option>
-        <option value="SILVER">SILVER</option>
-        <option value="GOLD">GOLD</option>
+        <option value="BRONZE" th:selected="${selectedLevelCode == 'BRONZE'}">BRONZE</option>
+        <option value="SILVER" th:selected="${selectedLevelCode == 'SILVER'}">SILVER</option>
+        <option value="GOLD" th:selected="${selectedLevelCode == 'GOLD'}">GOLD</option>
       </select>
-      <select id="theoryActiveFilter">
+      <select id="theoryActiveFilter" name="isActive">
         <option value="">활성화 상태</option>
-        <option value="true">활성</option>
-        <option value="false">비활성</option>
+        <option value="true" th:selected="${selectedIsActive != null and selectedIsActive}">활성</option>
+        <option value="false" th:selected="${selectedIsActive != null and !selectedIsActive}">비활성</option>
       </select>
-    </div>
+      <button type="submit" class="theory-filter-button">검색</button>
+    </form>
     <button type="button" class="theory-primary-button">+ 자료 등록</button>
   </section>
 
@@ -57,11 +65,12 @@
       <table class="theory-table">
         <thead>
         <tr>
-          <th>자료 ID</th>
+          <th>번호</th>
           <th>과목</th>
           <th>커리큘럼</th>
           <th>제목</th>
           <th>레벨</th>
+          <th>문제 수</th>
           <th>등록일</th>
           <th>활성화</th>
           <th>관리</th>
@@ -69,17 +78,21 @@
         </thead>
 
         <tbody>
-        <tr th:each="lesson : ${theoryList}" class="theory-row"
+        <tr th:each="lesson, stat : ${theoryPage.items}" class="theory-row"
             th:data-subject-name="${lesson.subjectName}"
             th:data-curriculum-title="${lesson.curriculumTitle}"
             th:data-title="${lesson.lessonTitle}"
             th:data-level-code="${lesson.levelCode}"
             th:data-is-active="${lesson.isActive}">
-          <td th:text="${'#' + lesson.lessonId}">#001</td>
+          <td th:text="${((theoryPage.currentPage - 1) * theoryPage.pageSize) + stat.count}">1</td>
           <td th:text="${lesson.subjectName}">Java</td>
           <td th:text="${lesson.curriculumTitle}">변수와 자료형</td>
           <td th:text="${lesson.lessonTitle}">Java 변수 이해하기</td>
           <td th:text="${lesson.levelCode}">Lv.1</td>
+          <td>
+            <span th:text="${(lesson.problemCount ?: 0) + '/10'}">0/10</span>
+            <span th:text="${lesson.problemCount == 10 ? '정상' : '부족'}">부족</span>
+          </td>
           <td th:text="${#temporals.format(lesson.createdAt, 'yyyy-MM-dd')}">2026-06-01</td>
           <td th:text="${lesson.isActive} ? '활성' : '비활성'">활성</td>
           <td>
@@ -91,6 +104,7 @@
                       th:data-title="${lesson.lessonTitle}"
                       th:data-content="${lesson.content}"
                       th:data-sort-order="${lesson.sortOrder}"
+                      th:data-required-for-completion="${lesson.requiredForCompletion}"
                       th:data-is-active="${lesson.isActive}">
                 수정
               </button>
@@ -102,12 +116,41 @@
             </div>
           </td>
         </tr>
-        <tr th:if="${#lists.isEmpty(theoryList)}">
-          <td colspan="8" class="theory-empty">등록된 이론 자료가 없습니다.</td>
+        <tr th:if="${#lists.isEmpty(theoryPage.items)}">
+          <td colspan="9" class="theory-empty">등록된 이론 자료가 없습니다.</td>
         </tr>
         </tbody>
       </table>
     </div>
+
+    <nav class="admin-pagination" th:if="${theoryPage.totalPages >= 1}" aria-label="이론 자료 관리 페이지">
+      <a class="admin-page-link"
+         th:if="${theoryPage.hasPrevious}"
+         th:href="@{/admin/theory(page=${theoryPage.currentPage - 1}, size=${theoryPage.pageSize}, keyword=${selectedKeyword}, subjectName=${selectedSubjectName}, curriculumTitle=${selectedCurriculumTitle}, levelCode=${selectedLevelCode}, isActive=${selectedIsActive})}">
+        &lt;
+      </a>
+
+      <span th:each="pageNumber : ${#numbers.sequence(theoryPage.startPage, theoryPage.endPage)}">
+        <a class="admin-page-link"
+           th:if="${pageNumber != theoryPage.currentPage}"
+           th:href="@{/admin/theory(page=${pageNumber}, size=${theoryPage.pageSize}, keyword=${selectedKeyword}, subjectName=${selectedSubjectName}, curriculumTitle=${selectedCurriculumTitle}, levelCode=${selectedLevelCode}, isActive=${selectedIsActive})}"
+           th:text="${pageNumber}">
+          1
+        </a>
+
+        <strong class="admin-page-link admin-page-current"
+                th:if="${pageNumber == theoryPage.currentPage}"
+                th:text="${pageNumber}">
+          1
+        </strong>
+      </span>
+
+      <a class="admin-page-link"
+         th:if="${theoryPage.hasNext}"
+         th:href="@{/admin/theory(page=${theoryPage.currentPage + 1}, size=${theoryPage.pageSize}, keyword=${selectedKeyword}, subjectName=${selectedSubjectName}, curriculumTitle=${selectedCurriculumTitle}, levelCode=${selectedLevelCode}, isActive=${selectedIsActive})}">
+        &gt;
+      </a>
+    </nav>
   </section>
 
   <section class="theory-form-panel">
@@ -136,6 +179,11 @@
 
           <div class="theory-form-row">
             <input type="number" name="sortOrder" id="lessonSortOrder" min="0" placeholder="순서">
+            <select name="requiredForCompletion" id="lessonRequiredForCompletion">
+              <option value="">필수 여부 선택</option>
+              <option value="true">필수</option>
+              <option value="false">선택</option>
+            </select>
             <select name="isActive" id="lessonIsActive">
               <option value="">활성화 토글</option>
               <option value="true">활성</option>
@@ -155,36 +203,6 @@
   </section>
 </main>
 <script>
-  function applyTheoryFilters() {
-    const keyword = document.querySelector("#searchTheory").value.trim().toLowerCase();
-    const subjectName = document.querySelector("#theorySubjectFilter").value;
-    const curriculumTitle = document.querySelector("#theoryCurriculumFilter").value;
-    const levelCode = document.querySelector("#theoryLevelFilter").value;
-    const isActive = document.querySelector("#theoryActiveFilter").value;
-
-    document.querySelectorAll(".theory-row").forEach((row) => {
-      const rowTitle = (row.dataset.title || "").toLowerCase();
-      const rowSubjectName = row.dataset.subjectName || "";
-      const rowCurriculumTitle = row.dataset.curriculumTitle || "";
-      const rowLevelCode = row.dataset.levelCode || "";
-      const rowIsActive = row.dataset.isActive || "";
-
-      const matchesTitle = rowTitle.includes(keyword);
-      const matchesSubject = subjectName === "" || rowSubjectName === subjectName;
-      const matchesCurriculum = curriculumTitle === "" || rowCurriculumTitle === curriculumTitle;
-      const matchesLevel = levelCode === "" || rowLevelCode === levelCode;
-      const matchesActive = isActive === "" || rowIsActive === isActive;
-
-      row.style.display = matchesTitle && matchesSubject && matchesCurriculum && matchesLevel && matchesActive ? "" : "none";
-    });
-  }
-
-  document.querySelector("#searchTheory")?.addEventListener("input", applyTheoryFilters);
-  document.querySelector("#theorySubjectFilter")?.addEventListener("change", applyTheoryFilters);
-  document.querySelector("#theoryCurriculumFilter")?.addEventListener("change", applyTheoryFilters);
-  document.querySelector("#theoryLevelFilter")?.addEventListener("change", applyTheoryFilters);
-  document.querySelector("#theoryActiveFilter")?.addEventListener("change", applyTheoryFilters);
-
   document.querySelector("#lessonNodeId")?.addEventListener("change", (event) => {
     const selectedOption = event.target.selectedOptions[0];
     document.querySelector("#lessonSubjectId").value = selectedOption?.dataset.subjectId || "";
@@ -213,6 +231,7 @@
     document.querySelector("#lessonNodeId").value = "";
     syncLessonCurriculumOptions();
     document.querySelector("#lessonSortOrder").value = "";
+    document.querySelector("#lessonRequiredForCompletion").value = "";
     document.querySelector("#lessonIsActive").value = "";
     document.querySelector("#lessonContent").value = "";
 
@@ -228,6 +247,7 @@
       document.querySelector("#lessonSubjectId").value = document.querySelector("#lessonNodeId").selectedOptions[0]?.dataset.subjectId || "";
       syncLessonCurriculumOptions();
       document.querySelector("#lessonSortOrder").value = button.dataset.sortOrder;
+      document.querySelector("#lessonRequiredForCompletion").value = button.dataset.requiredForCompletion || "";
       document.querySelector("#lessonIsActive").value = button.dataset.isActive;
       document.querySelector("#lessonContent").value = button.dataset.content || "";
 

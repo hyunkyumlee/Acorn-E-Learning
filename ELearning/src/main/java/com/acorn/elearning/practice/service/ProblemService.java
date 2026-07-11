@@ -20,14 +20,22 @@ public class ProblemService {
         */
         private final PracticeProblemMapper practiceProblemMapper;
 
-
-    // 생성자 주입
         public ProblemService(PracticeProblemMapper practiceProblemMapper) {
         this.practiceProblemMapper = practiceProblemMapper;
 
     }
+      //lesson id에 맞는 문제 추출
+      public List<PracticeProblem> getProblemsByLessonId(Long lessonId) {
+            List<PracticeProblem> problems = practiceProblemMapper.findPracticeProblemsByLessonId(lessonId);
 
-      // 1. 학습을 위한 문제 10개를 조회합니다.
+            if (problems.isEmpty()) {
+                throw new IllegalArgumentException("해당 lesson에 맞는 문제가 없습니다.");
+            }
+
+            return problems;
+    }
+
+      // 문제조회
       public List<PracticeProblem> getProblems(Long subjectId, Long nodeId, String difficultyCode) {
           List<PracticeProblem> problems =
                   practiceProblemMapper.findPracticeProblems(subjectId, nodeId, difficultyCode);
@@ -39,7 +47,7 @@ public class ProblemService {
           return problems;
       }
 
-        //2.특정 문제의 상세 정보를 조회합니다. (채점 로직 등에서 정답 확인용으로 사용)
+        //문제의 상세 정보 조회 (채점 로직 등에서 정답 확인용으로 사용)
         public PracticeProblem getProblem(Long problemId) {
             return practiceProblemMapper.findById(problemId)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 문제 ID입니다: " + problemId));

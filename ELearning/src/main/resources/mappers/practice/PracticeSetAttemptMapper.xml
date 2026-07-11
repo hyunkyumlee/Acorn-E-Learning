@@ -6,6 +6,7 @@
        <result property="userId" column="user_id" />
        <result property="subjectId" column="subject_id" />
        <result property="nodeId" column="node_id" />
+       <result property="lessonId" column="lesson_id" />
        <result property="totalCount" column="total_count" />
        <result property="correctCount" column="correct_count" />
        <result property="status" column="status" />
@@ -25,6 +26,7 @@
         user_id,
         subject_id,
         node_id,
+        lesson_id,
         total_count,
         correct_count,
         status,
@@ -34,6 +36,7 @@
         #{userId},
         #{subjectId},
         #{nodeId},
+        #{lessonId},
         #{totalCount},
         #{correctCount},
         #{status},

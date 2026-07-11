@@ -77,4 +77,14 @@
             updated_at = CURRENT_TIMESTAMP
         WHERE profile_id = #{profileId}
     </update>
+
+    <!-- 온보딩 진입: 과목/목표만 갱신, 레벨/점수/grade는 미변경 -->
+    <update id="updateOnboarding">
+        UPDATE user_learning_profiles
+        SET
+            primary_subject_id = #{subjectId},
+            learning_goal = #{learningGoal},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+    </update>
 </mapper>

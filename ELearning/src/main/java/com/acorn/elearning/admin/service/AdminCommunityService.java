@@ -1,7 +1,9 @@
 package com.acorn.elearning.admin.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import com.acorn.elearning.admin.dto.response.AdminPageResponse;
 import com.acorn.elearning.admin.dto.response.AdminCommunityPageResponse;
 import com.acorn.elearning.admin.form.CommunityStatusForm;
 import com.acorn.elearning.admin.mapper.AdminCommunityMapper;
@@ -18,24 +20,83 @@ public class AdminCommunityService {
 
     private final AdminLogService adminLogService;
 
-    public AdminCommunityPageResponse findPage() {
-        return new AdminCommunityPageResponse(cm.findPosts(), cm.findComments());
+    public AdminCommunityPageResponse findPage(
+            int postPage,
+            int commentPage,
+            int size,
+            String boardType,
+            String status,
+            String keyword
+    ) {
+        return findPage(
+                postPage,
+                commentPage,
+                size,
+                boardType,
+                status,
+                keyword,
+                status,
+                keyword
+        );
     }
 
-    public void updatePostStatus(Long postId, CommunityStatusForm form, SessionUser sessionUser) {
+    public AdminCommunityPageResponse findPage(
+            int postPage,
+            int commentPage,
+            int size,
+            String postBoardType,
+            String postStatus,
+            String postKeyword,
+            String commentStatus,
+            String commentKeyword
+    ) {
+        int pageSize = Math.max(size, 1);
+        int currentPostPage = Math.max(postPage, 1);
+        int currentCommentPage = Math.max(commentPage, 1);
+        int postOffset = (currentPostPage - 1) * pageSize;
+        int commentOffset = (currentCommentPage - 1) * pageSize;
+
+        List<AdminCommunityPageResponse.PostItem> posts = cm.findPostPage(
+                pageSize,
+                postOffset,
+                postBoardType,
+                postStatus,
+                postKeyword
+        );
+        long postTotalCount = cm.countPosts(postBoardType, postStatus, postKeyword);
+
+        List<AdminCommunityPageResponse.CommentItem> comments = cm.findCommentPage(
+                pageSize,
+                commentOffset,
+                commentStatus,
+                commentKeyword
+        );
+        long commentTotalCount = cm.countComments(commentStatus, commentKeyword);
+
+        return new AdminCommunityPageResponse(
+                new AdminPageResponse<>(posts, currentPostPage, pageSize, postTotalCount),
+                new AdminPageResponse<>(comments, currentCommentPage, pageSize, commentTotalCount)
+        );
+    }
+
+    public int updatePostStatus(Long postId, CommunityStatusForm form, SessionUser sessionUser) {
         int updated = cm.updatePostStatus(postId, form.getStatus());
 
         if (updated == 1) {
             adminLogService.insert(operationLog(sessionUser, "COMMUNITY_POST_STATUS_UPDATE", "POST", postId));
         }
+
+        return updated;
     }
 
-    public void updateCommentStatus(Long commentId, CommunityStatusForm form, SessionUser sessionUser) {
+    public int updateCommentStatus(Long commentId, CommunityStatusForm form, SessionUser sessionUser) {
         int updated = cm.updateCommentStatus(commentId, form.getStatus());
 
         if (updated == 1) {
             adminLogService.insert(operationLog(sessionUser, "COMMUNITY_COMMENT_STATUS_UPDATE", "COMMENT", commentId));
         }
+
+        return updated;
     }
 
     private AdminOperationLog operationLog(SessionUser sessionUser, String actionType, String targetType, Long targetId) {

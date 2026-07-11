@@ -10,9 +10,11 @@
         private Long problemId;
         private Long subjectId;
         private Long nodeId;
+        private Long lessonId;
         private String problemType;
         private String question;
         private String answerText;
+        private String explanation;
         private String difficultyCode;
         private Long createdBy;
         private Boolean isActive;

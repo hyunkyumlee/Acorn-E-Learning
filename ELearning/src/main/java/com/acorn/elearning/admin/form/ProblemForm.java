@@ -8,6 +8,7 @@ import lombok.Setter;
 public class ProblemForm {
     private Long problemId;
     private Long subjectId;
+    private Long lessonId;
     private Long nodeId;
     private String problemType;
     private String question;

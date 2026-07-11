@@ -42,6 +42,7 @@ public class PracticeController {
     public String index(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(required = false) Long nodeId,
+            @RequestParam(required = false) Long lessonId,
             @RequestParam(defaultValue = "BRONZE") String difficultyCode,
             HttpSession session,
             Model model) {
@@ -51,18 +52,20 @@ public class PracticeController {
         }
 
         // subjectId는 learning 화면의 현재 선택 과목을 세션에서 사용.
-        // 세션값이 없으면 개발용 fallback으로 JAVA(subjectId=1) 사용.
-        Long subjectId = (Long) session.getAttribute(LearningController.SESSION_LEARNING_SUBJECT_ID);
+       Long subjectId = (Long) session.getAttribute(LearningController.SESSION_LEARNING_SUBJECT_ID);
 
         if (subjectId == null) {
             subjectId = 1L;
         }
-        
+
+        System.out.println("[PRACTICE] subjectId=" + subjectId + ", nodeId=" + nodeId + ", lessonId=" + lessonId);
+
         PracticeSetResponse completeResult =
                 (PracticeSetResponse) session.getAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY);
 
         model.addAttribute("subjectId", subjectId);
         model.addAttribute("nodeId", nodeId);
+        model.addAttribute("lessonId", lessonId);
         model.addAttribute("difficultyCode", difficultyCode);
 
         if (completeResult != null) {

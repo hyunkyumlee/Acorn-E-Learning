@@ -12,6 +12,9 @@ public record WrongAnswerDetailView(String title, String status, Map<String, Obj
             Long problemId,
             String question,
             String answerText,
+            String explanation,
+            Long lessonId,
+            Long nodeId,
             Integer wrongCount,
             String reviewStatus,
             Boolean retryBonusAwarded
@@ -24,6 +27,9 @@ public record WrongAnswerDetailView(String title, String status, Map<String, Obj
                         "problemId", problemId,
                         "question", question,
                         "answerText", answerText,
+                        "explanation", explanation,
+                        "lessonId", lessonId,
+                        "nodeId", nodeId,
                         "wrongCount", wrongCount,
                         "reviewStatus", reviewStatus,
                         "retryBonusAwarded", retryBonusAwarded

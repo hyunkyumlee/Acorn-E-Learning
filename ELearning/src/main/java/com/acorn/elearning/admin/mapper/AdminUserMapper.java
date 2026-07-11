@@ -10,6 +10,20 @@ public interface AdminUserMapper {
 
     //목록 조회
     List<AdminUserManageRowResponse> findAll();
+
+    List<AdminUserManageRowResponse> findPage(@Param("limit") int limit,
+                                              @Param("offset") int offset,
+                                              @Param("keyword") String keyword,
+                                              @Param("subjectName") String subjectName,
+                                              @Param("gradeCode") String gradeCode,
+                                              @Param("role") String role,
+                                              @Param("status") String status);
+
+    long countAll(@Param("keyword") String keyword,
+                  @Param("subjectName") String subjectName,
+                  @Param("gradeCode") String gradeCode,
+                  @Param("role") String role,
+                  @Param("status") String status);
     //단건 상세조회
     Optional<AdminUserManageRowResponse> findById(@Param("userId") Long userId);
 

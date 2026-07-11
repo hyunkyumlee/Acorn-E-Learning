@@ -12,6 +12,7 @@ import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.form.SubjectForm;
+import com.acorn.elearning.admin.mapper.AdminCurriculumNodeMapper;
 import com.acorn.elearning.admin.mapper.AdminLessonMapper;
 import com.acorn.elearning.admin.mapper.AdminProblemMapper;
 import com.acorn.elearning.admin.model.AdminOperationLog;
@@ -37,6 +38,7 @@ public class AdminContentService {
     private final PracticeProblemMapper ppm;
     private final AdminLessonMapper alm;
     private final AdminProblemMapper apm;
+    private final AdminCurriculumNodeMapper acm;
 
     private final AdminLogService adminLogService;
 
@@ -176,6 +178,17 @@ public class AdminContentService {
         return updated;
     }
 
+    public AdminPageResponse<CurriculumNode> findCurriculumPage(int page, int size, String keyword, Long subjectId, String levelCode){
+
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<CurriculumNode> items = acm.findPage(pageSize, offset, keyword, subjectId, levelCode);
+        long totalCount = acm.countAll(keyword, subjectId, levelCode);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
+    }
 
     //이론 자료 조회
     public List<Lesson> findAllLesson(){
@@ -185,6 +198,33 @@ public class AdminContentService {
     //관리자 화면 이론 조회
     public List<AdminLessonManageRowResponse> findAllAdminLesson(){
         return alm.findAll();
+    }
+
+    public AdminPageResponse<AdminLessonManageRowResponse> findLessonPage(
+            int page,
+            int size,
+            String keyword,
+            String subjectName,
+            String curriculumTitle,
+            String levelCode,
+            Boolean isActive
+    ) {
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<AdminLessonManageRowResponse> items = alm.findPage(
+                pageSize,
+                offset,
+                keyword,
+                subjectName,
+                curriculumTitle,
+                levelCode,
+                isActive
+        );
+        long totalCount = alm.countAll(keyword, subjectName, curriculumTitle, levelCode, isActive);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }
 
     //이론 자료 단건 조회
@@ -207,6 +247,9 @@ public class AdminContentService {
         lesson.setNodeId(form.getNodeId());
         lesson.setTitle(form.getTitle());
         lesson.setContent(form.getContent());
+        lesson.setRequiredForCompletion(
+                form.getRequiredForCompletion() == null ? Boolean.TRUE : form.getRequiredForCompletion()
+        );
         lesson.setSortOrder(form.getSortOrder() == null ? 0 : form.getSortOrder());
         lesson.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
@@ -229,6 +272,11 @@ public class AdminContentService {
         lesson.setNodeId(form.getNodeId());
         lesson.setTitle(form.getTitle());
         lesson.setContent(form.getContent());
+        lesson.setRequiredForCompletion(
+                form.getRequiredForCompletion() == null
+                        ? lesson.getRequiredForCompletion()
+                        : form.getRequiredForCompletion()
+        );
         lesson.setSortOrder(form.getSortOrder() == null ? lesson.getSortOrder() : form.getSortOrder());
         lesson.setIsActive(form.getIsActive() == null ? lesson.getIsActive() : form.getIsActive());
 
@@ -297,17 +345,22 @@ public class AdminContentService {
 
     public int createProblem(ProblemForm form, Long adminId){
         PracticeProblem problem = new PracticeProblem();
-        problem.setSubjectId(form.getSubjectId());
-        problem.setNodeId(form.getNodeId());
+
+        Lesson lesson = lm.findById(form.getLessonId())
+                .orElseThrow();
+
+        CurriculumNode node = cm.findById(lesson.getNodeId())
+                .orElseThrow();
+
+        problem.setSubjectId(node.getSubjectId());
+        problem.setNodeId(lesson.getNodeId());
         problem.setProblemType(toProblemTypeCode(form.getProblemType()));
         problem.setQuestion(form.getQuestion());
         problem.setAnswerText(form.getAnswerText());
-
-        /*
-            practice PracticeProblem에 explanation 필드 추가 후 연결
-            problem.setExplanation(form.getExplanation());
-        */
+        problem.setLessonId(lesson.getLessonId());
+        problem.setExplanation(form.getExplanation());
         problem.setDifficultyCode(form.getDifficultyCode());
+        problem.setCreatedBy(adminId);
         problem.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
         int inserted = ppm.insert(problem);
@@ -325,11 +378,20 @@ public class AdminContentService {
         PracticeProblem problem = ppm.findById(form.getProblemId())
                 .orElseThrow();
 
-        problem.setSubjectId(form.getSubjectId());
-        problem.setNodeId(form.getNodeId());
+
+        Lesson lesson = lm.findById(form.getLessonId())
+                .orElseThrow();
+
+        CurriculumNode node = cm.findById(lesson.getNodeId())
+                .orElseThrow();
+
+        problem.setSubjectId(node.getSubjectId());
+        problem.setNodeId(lesson.getNodeId());
         problem.setProblemType(toProblemTypeCode(form.getProblemType()));
         problem.setQuestion(form.getQuestion());
         problem.setAnswerText(form.getAnswerText());
+        problem.setLessonId(lesson.getLessonId());
+        problem.setExplanation(form.getExplanation());
         problem.setDifficultyCode(form.getDifficultyCode());
         problem.setIsActive(form.getIsActive() == null ? problem.getIsActive() : form.getIsActive());
 
@@ -340,6 +402,27 @@ public class AdminContentService {
                     operationLog(adminId, "PROBLEM_UPDATE", "PROBLEM", problem.getProblemId())
             );
         }
+        return updated;
+    }
+
+    public int updateProblemStatus(Long problemId, Boolean isActive, Long adminId) {
+        if (isActive == null) {
+            return 0;
+        }
+
+        PracticeProblem problem = ppm.findById(problemId)
+                .orElseThrow();
+
+        problem.setIsActive(isActive);
+
+        int updated = ppm.update(problem);
+
+        if (updated == 1) {
+            adminLogService.insert(
+                    operationLog(adminId, "PROBLEM_STATUS_UPDATE", "PROBLEM", problemId)
+            );
+        }
+
         return updated;
     }
 
@@ -354,6 +437,29 @@ public class AdminContentService {
             case "간단 코드 입력", "SHORT_CODE" -> "CODE_SHORT";
             default -> value;
         };
+    }
+
+    public AdminPageResponse<AdminProblemManageRowResponse> findProblemPage(
+            int page,
+            int size,
+            String keyword,
+            Long subjectId,
+            Long nodeId,
+            String problemType,
+            String difficultyCode,
+            Boolean isActive
+    ) {
+        int currentPage = Math.max(page, 1);
+        int pageSize = Math.max(size, 1);
+        int offset = (currentPage - 1) * pageSize;
+
+        List<AdminProblemManageRowResponse> items =
+                apm.findPage(pageSize, offset, keyword, subjectId, nodeId, problemType, difficultyCode, isActive);
+
+        long totalCount =
+                apm.countAll(keyword, subjectId, nodeId, problemType, difficultyCode, isActive);
+
+        return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
     }
 
 
@@ -417,6 +523,26 @@ public class AdminContentService {
         if(updated == 1){
             adminLogService.insert(
                     operationLog(adminId, "CURRICULUM_NODE_STATUS_UPDATE", "CURRICULUM_NODE", nodeId)
+            );
+        }
+        return updated;
+    }
+
+    public int updateLessonStatus(Long lessonId, Boolean isActive, Long adminId){
+
+        if(isActive == null){
+            return 0;
+        }
+
+        Lesson l = lm.findById(lessonId).orElseThrow();
+
+        l.setIsActive(isActive);
+
+        int updated = lm.update(l);
+
+        if(updated == 1){
+            adminLogService.insert(
+                    operationLog(adminId, "LESSON_STATUS_UPDATE", "LESSON", lessonId)
             );
         }
         return updated;

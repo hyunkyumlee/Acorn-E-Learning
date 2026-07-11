@@ -24,6 +24,7 @@ import com.acorn.elearning.learning.view.LearningDashboardView;
 import com.acorn.elearning.learning.view.LessonProgressView;
 import com.acorn.elearning.learning.view.LevelTestResultView;
 import com.acorn.elearning.practice.service.WrongAnswerService;
+import com.acorn.elearning.ranking.service.RankingService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -53,6 +54,7 @@ public class LearningApiController {
     private final AttendanceService attendanceService;
     private final LevelTestService levelTestService;
     private final WrongAnswerService wrongAnswerService;
+    private final RankingService rankingService;
 
     public LearningApiController(LearningService learningService,
                                  CurriculumService curriculumService,
@@ -60,7 +62,8 @@ public class LearningApiController {
                                  ProgressService progressService,
                                  AttendanceService attendanceService,
                                  LevelTestService levelTestService,
-                                 WrongAnswerService wrongAnswerService) {
+                                 WrongAnswerService wrongAnswerService,
+                                 RankingService rankingService) {
         this.learningService = learningService;
         this.curriculumService = curriculumService;
         this.lessonService = lessonService;
@@ -68,12 +71,16 @@ public class LearningApiController {
         this.attendanceService = attendanceService;
         this.levelTestService = levelTestService;
         this.wrongAnswerService = wrongAnswerService;
+        this.rankingService = rankingService;
     }
 
     @GetMapping("/api/subjects")
     public ApiResponse<SubjectListResponse> subjects(
             @RequestParam(name = "activeOnly", defaultValue = "true") boolean activeOnly) {
-        List<SubjectListResponse.Item> items = learningService.getActiveSubjects().stream()
+        List<Subject> source = activeOnly
+                ? learningService.getActiveSubjects()
+                : learningService.getAllSubjects();
+        List<SubjectListResponse.Item> items = source.stream()
                 .map(this::toSubjectItem)
                 .toList();
         return ApiResponse.success(new SubjectListResponse(items));
@@ -104,7 +111,7 @@ public class LearningApiController {
                         progress.planetCount(), progress.completedPlanets()),
                 new LearningDashboardResponse.ProgressSummary(progress.progressPercent()),
                 new LearningDashboardResponse.Attendance(home.streakCount(), home.attendedToday(), weekly),
-                null,                                   // rankingSummary: 별도 도메인 read 미구현
+                rankingService.myRanking(user, null).data().get("mySummary"), // rankingSummary: 주간 통합 내 랭킹
                 wrongAnswerService.summary(user));      // wrongAnswerSummary: 별도 도메인 read 호출
         return ApiResponse.success(response);
     }

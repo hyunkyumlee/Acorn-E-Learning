@@ -11,6 +11,7 @@ public class SocialAccount {
     private String provider;
     private String providerUserId;
     private String providerEmail;
+    private Boolean providerEmailVerified;
     private Boolean isActive;
     private LocalDateTime connectedAt;
     private LocalDateTime disconnectedAt;

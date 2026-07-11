@@ -25,35 +25,59 @@
   <p class="problem-note">* 일반 문제는 AI 채점 미사용 - 등록된 정답/해설 기준으로 채점</p>
 
   <section class="problem-toolbar">
-    <div class="problem-filter">
-      <input type="search" id="searchProblem" placeholder="문제 내용 검색">
-      <select id="problemSubjectFilter">
+    <form method="get" action="/admin/problems" class="problem-filter" id="problemFilterForm">
+      <input type="hidden" name="page" value="1">
+      <input type="hidden" name="size" th:value="${problemPage.pageSize}">
+
+      <input type="search"
+             name="keyword"
+             id="searchProblem"
+             placeholder="문제 내용 검색"
+             th:value="${selectedKeyword}">
+
+      <select name="subjectId" id="problemSubjectFilter">
         <option value="">과목</option>
-        <option th:each="subject : ${subjectList}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
+        <option th:each="subject : ${subjectList}"
+                th:value="${subject.subjectId}"
+                th:text="${subject.subjectName}"
+                th:selected="${selectedSubjectId != null and selectedSubjectId == subject.subjectId}">
+          Java
+        </option>
       </select>
-      <select id="problemCurriculumFilter">
+
+      <select name="nodeId" id="problemCurriculumFilter">
         <option value="">커리큘럼</option>
-        <option th:each="node : ${curriculumList}" th:value="${node.nodeId}" th:text="${node.title}">Java 기초</option>
+        <option th:each="node : ${curriculumList}"
+                th:value="${node.nodeId}"
+                th:text="${node.title}"
+                th:selected="${selectedNodeId != null and selectedNodeId == node.nodeId}">
+          Java 기초
+        </option>
       </select>
-      <select id="problemTypeFilter">
+
+      <select name="problemType" id="problemTypeFilter">
         <option value="">문제 유형</option>
-        <option value="MULTIPLE_CHOICE">객관식</option>
-        <option value="FILL_BLANK">빈칸</option>
-        <option value="CODE_OUTPUT">코드 결과 예측</option>
-        <option value="CODE_SHORT">간단 코드 입력</option>
+        <option value="MULTIPLE_CHOICE" th:selected="${selectedProblemType == 'MULTIPLE_CHOICE'}">객관식</option>
+        <option value="FILL_BLANK" th:selected="${selectedProblemType == 'FILL_BLANK'}">빈칸</option>
+        <option value="CODE_OUTPUT" th:selected="${selectedProblemType == 'CODE_OUTPUT'}">코드 결과 예측</option>
+        <option value="CODE_SHORT" th:selected="${selectedProblemType == 'CODE_SHORT'}">간단 코드 입력</option>
       </select>
-      <select id="problemDifficultyFilter">
+
+      <select name="difficultyCode" id="problemDifficultyFilter">
         <option value="">난이도</option>
-        <option value="BRONZE">BRONZE</option>
-        <option value="SILVER">SILVER</option>
-        <option value="GOLD">GOLD</option>
+        <option value="BRONZE" th:selected="${selectedDifficultyCode == 'BRONZE'}">BRONZE</option>
+        <option value="SILVER" th:selected="${selectedDifficultyCode == 'SILVER'}">SILVER</option>
+        <option value="GOLD" th:selected="${selectedDifficultyCode == 'GOLD'}">GOLD</option>
       </select>
-      <select id="problemActiveFilter">
+
+      <select name="isActive" id="problemActiveFilter">
         <option value="">활성화 상태</option>
-        <option value="true">활성</option>
-        <option value="false">비활성</option>
+        <option value="true" th:selected="${selectedIsActive != null and selectedIsActive == true}">활성</option>
+        <option value="false" th:selected="${selectedIsActive != null and selectedIsActive == false}">비활성</option>
       </select>
-    </div>
+
+      <button type="submit" class="problem-filter-button">검색</button>
+    </form>
     <button type="button" class="problem-primary-button">+ 문제 등록</button>
   </section>
 
@@ -66,7 +90,7 @@
       <table class="problem-table">
         <thead>
         <tr>
-          <th>문제 ID</th>
+          <th>번호</th>
           <th>과목</th>
           <th>커리큘럼</th>
           <th>유형</th>
@@ -78,14 +102,15 @@
         </thead>
 
         <tbody>
-        <tr th:each="problem : ${problemList}" class="problem-row"
+        <tr th:each="problem, stat : ${problemPage.items}" class="problem-row"
             th:data-subject-id="${problem.subjectId}"
             th:data-node-id="${problem.nodeId}"
+            th:data-lesson-id="${problem.lessonId}"
             th:data-problem-type="${problem.problemType}"
             th:data-question="${problem.question}"
             th:data-difficulty-code="${problem.difficultyCode}"
             th:data-is-active="${problem.isActive}">
-          <td th:text="${'#' + problem.problemId}">#001</td>
+          <td th:text="${((problemPage.currentPage - 1) * problemPage.pageSize) + stat.count}">1</td>
           <td th:text="${problem.subjectName}">Java</td>
           <td th:text="${problem.curriculumTitle}">변수와 자료형</td>
           <td th:switch="${problem.problemType}">
@@ -97,12 +122,7 @@
             <span th:case="*" th:text="${problem.problemType}">객관식</span>
           </td>
           <td class="problem-question" th:text="${problem.question}">Java에서 정수형 변수를 선언하는 키워드는?</td>
-          <td th:switch="${problem.difficultyCode}">
-            <span th:case="'BRONZE'">BRONZE</span>
-            <span th:case="'SILVER'">SILVER</span>
-            <span th:case="'GOLD'">GOLD</span>
-            <span th:case="*" th:text="${problem.difficultyCode}">하</span>
-          </td>
+          <td th:text="${problem.difficultyCode}">BRONZE</td>
           <td th:text="${problem.isActive} ? '활성' : '비활성'">활성</td>
           <td>
             <div class="problem-table-actions">
@@ -111,6 +131,7 @@
                       th:data-problem-id="${problem.problemId}"
                       th:data-subject-id="${problem.subjectId}"
                       th:data-node-id="${problem.nodeId}"
+                      th:data-lesson-id="${problem.lessonId}"
                       th:data-problem-type="${problem.problemType}"
                       th:data-question="${problem.question}"
                       th:data-answer-text="${problem.answerText}"
@@ -127,12 +148,68 @@
             </div>
           </td>
         </tr>
-        <tr th:if="${#lists.isEmpty(problemList)}">
+        <tr th:if="${#lists.isEmpty(problemPage.items)}">
           <td colspan="8" class="problem-empty">등록된 문제가 없습니다.</td>
         </tr>
         </tbody>
       </table>
     </div>
+
+    <nav class="admin-pagination" th:if="${problemPage.totalPages >= 1}" aria-label="일반 문제 관리 페이지">
+      <a class="admin-page-link"
+         th:if="${problemPage.hasPrevious}"
+         th:href="@{/admin/problems(
+                    page=${problemPage.currentPage - 1},
+                    size=${problemPage.pageSize},
+                    keyword=${selectedKeyword},
+                    subjectId=${selectedSubjectId},
+                    nodeId=${selectedNodeId},
+                    problemType=${selectedProblemType},
+                    difficultyCode=${selectedDifficultyCode},
+                    isActive=${selectedIsActive}
+                  )}">
+        &lt;
+      </a>
+
+      <span th:each="pageNumber : ${#numbers.sequence(problemPage.startPage, problemPage.endPage)}">
+        <a class="admin-page-link"
+           th:if="${pageNumber != problemPage.currentPage}"
+           th:href="@{/admin/problems(
+                      page=${pageNumber},
+                      size=${problemPage.pageSize},
+                      keyword=${selectedKeyword},
+                      subjectId=${selectedSubjectId},
+                      nodeId=${selectedNodeId},
+                      problemType=${selectedProblemType},
+                      difficultyCode=${selectedDifficultyCode},
+                      isActive=${selectedIsActive}
+                    )}"
+           th:text="${pageNumber}">
+          1
+        </a>
+
+        <strong class="admin-page-link admin-page-current"
+                th:if="${pageNumber == problemPage.currentPage}"
+                th:text="${pageNumber}">
+          1
+        </strong>
+      </span>
+
+      <a class="admin-page-link"
+         th:if="${problemPage.hasNext}"
+         th:href="@{/admin/problems(
+                    page=${problemPage.currentPage + 1},
+                    size=${problemPage.pageSize},
+                    keyword=${selectedKeyword},
+                    subjectId=${selectedSubjectId},
+                    nodeId=${selectedNodeId},
+                    problemType=${selectedProblemType},
+                    difficultyCode=${selectedDifficultyCode},
+                    isActive=${selectedIsActive}
+                  )}">
+        &gt;
+      </a>
+    </nav>
   </section>
 
   <section class="problem-form-panel">
@@ -177,6 +254,15 @@
                       th:text="${node.title}"
                       th:data-subject-id="${node.subjectId}">Java 기초</option>
             </select>
+            <select name="lessonId" id="problemLessonId">
+              <option value="">레슨 선택</option>
+              <option th:each="lesson : ${lessonList}"
+                      th:value="${lesson.lessonId}"
+                      th:text="${lesson.lessonTitle}"
+                      th:data-node-id="${lesson.nodeId}">
+                레슨
+              </option>
+            </select>
           </div>
 
           <div class="problem-form-row">
@@ -198,6 +284,7 @@
     </form>
   </section>
 </main>
+
 <script>
   const problemTypeCodeMap = {
     "객관식": "MULTIPLE_CHOICE",
@@ -208,43 +295,20 @@
     "CODE_SHORT": "CODE_SHORT"
   };
 
-  function applyProblemFilters() {
-    const keyword = document.querySelector("#searchProblem").value.trim().toLowerCase();
-    const subjectId = document.querySelector("#problemSubjectFilter").value;
-    const nodeId = document.querySelector("#problemCurriculumFilter").value;
-    const problemType = document.querySelector("#problemTypeFilter").value;
-    const difficultyCode = document.querySelector("#problemDifficultyFilter").value;
-    const isActive = document.querySelector("#problemActiveFilter").value;
+  const problemFilterForm = document.querySelector("#problemFilterForm");
 
-    document.querySelectorAll(".problem-row").forEach((row) => {
-      const rowQuestion = (row.dataset.question || "").toLowerCase();
-      const rowSubjectId = row.dataset.subjectId || "";
-      const rowNodeId = row.dataset.nodeId || "";
-      const rowProblemType = problemTypeCodeMap[row.dataset.problemType] || row.dataset.problemType || "";
-      const rowDifficultyCode = row.dataset.difficultyCode || "";
-      const rowIsActive = row.dataset.isActive || "";
-
-      const matchesQuestion = rowQuestion.includes(keyword);
-      const matchesSubject = subjectId === "" || rowSubjectId === subjectId;
-      const matchesCurriculum = nodeId === "" || rowNodeId === nodeId;
-      const matchesType = problemType === "" || rowProblemType === problemType;
-      const matchesDifficulty = difficultyCode === "" || rowDifficultyCode === difficultyCode;
-      const matchesActive = isActive === "" || rowIsActive === isActive;
-
-      row.style.display = matchesQuestion && matchesSubject && matchesCurriculum && matchesType && matchesDifficulty && matchesActive ? "" : "none";
-    });
-  }
-
-  document.querySelector("#searchProblem")?.addEventListener("input", applyProblemFilters);
-  document.querySelector("#problemSubjectFilter")?.addEventListener("change", applyProblemFilters);
-  document.querySelector("#problemCurriculumFilter")?.addEventListener("change", applyProblemFilters);
-  document.querySelector("#problemTypeFilter")?.addEventListener("change", applyProblemFilters);
-  document.querySelector("#problemDifficultyFilter")?.addEventListener("change", applyProblemFilters);
-  document.querySelector("#problemActiveFilter")?.addEventListener("change", applyProblemFilters);
+  problemFilterForm?.addEventListener("submit", () => {
+    const pageInput = problemFilterForm.querySelector("input[name='page']");
+    if (pageInput) {
+      pageInput.value = "1";
+    }
+  });
 
   document.querySelector("#problemNodeId")?.addEventListener("change", (event) => {
     const selectedOption = event.target.selectedOptions[0];
     document.querySelector("#problemSubjectId").value = selectedOption?.dataset.subjectId || "";
+    syncProblemCurriculumOptions();
+    syncProblemLessonOptions();
   });
 
   function syncProblemCurriculumOptions() {
@@ -261,13 +325,32 @@
     }
   }
 
-  document.querySelector("#problemSubjectId")?.addEventListener("change", syncProblemCurriculumOptions);
+  function syncProblemLessonOptions() {
+    const selectedNodeId = document.querySelector("#problemNodeId").value;
+    const problemLessonSelect = document.querySelector("#problemLessonId");
+
+    problemLessonSelect.querySelectorAll("option").forEach((option) => {
+      option.hidden = selectedNodeId !== "" && option.value !== "" && option.dataset.nodeId !== selectedNodeId;
+    });
+
+    const selectedLesson = problemLessonSelect.selectedOptions[0];
+    if (selectedLesson?.hidden) {
+      problemLessonSelect.value = "";
+    }
+  }
+
+  document.querySelector("#problemSubjectId")?.addEventListener("change", () => {
+    syncProblemCurriculumOptions();
+    syncProblemLessonOptions();
+  });
 
   document.querySelector(".problem-primary-button")?.addEventListener("click", () => {
     document.querySelector("#problemId").value = "";
     document.querySelector("#problemSubjectId").value = "";
     document.querySelector("#problemNodeId").value = "";
     syncProblemCurriculumOptions();
+    syncProblemLessonOptions();
+    document.querySelector("#problemLessonId").value = "";
     document.querySelector("#problemType").value = "";
     document.querySelector("#problemQuestion").value = "";
     document.querySelector("#problemAnswerText").value = "";
@@ -285,6 +368,8 @@
       document.querySelector("#problemSubjectId").value = button.dataset.subjectId;
       document.querySelector("#problemNodeId").value = button.dataset.nodeId;
       syncProblemCurriculumOptions();
+      syncProblemLessonOptions();
+      document.querySelector("#problemLessonId").value = button.dataset.lessonId || "";
       document.querySelector("#problemType").value = problemTypeCodeMap[button.dataset.problemType] || button.dataset.problemType;
       document.querySelector("#problemQuestion").value = button.dataset.question || "";
       document.querySelector("#problemAnswerText").value = button.dataset.answerText || "";
