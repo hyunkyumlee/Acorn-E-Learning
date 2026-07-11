@@ -13,6 +13,8 @@
   <link rel="stylesheet" th:href="@{/css/common/themes.css}">
   <link rel="stylesheet" th:href="@{/css/screens/learning.css}">
 
+  <script defer th:src="@{/js/common/theme.js}"></script>
+
   <!-- 추가: review 전용 css -->
   <link rel="stylesheet" th:href="@{/css/screens/review.css}">
 </head>
@@ -22,6 +24,7 @@
 
 <main class="page-shell learning-screen">
   <section class="practice-header">
+    <p class="practice-eyebrow">Review</p>
     <h1 th:text="${view.title()}">오답 복습</h1>
   </section>
 
@@ -29,12 +32,6 @@
 
     <div class="practice-footer">
       <a th:href="@{/learning}">학습 메인으로</a>
-
-      <p th:if="${view.attributes()['wrongAnswerId'] != null}"
-         th:text="|wrongAnswerId=${view.attributes()['wrongAnswerId']}, lessonId=${view.attributes()['lessonId']}, nodeId=${view.attributes()['nodeId']}|">
-        debug
-      </p>
-
       <a th:if="${view.attributes()['wrongAnswerId'] != null}"
          th:href="@{/learning/review/list(lessonId=${view.attributes()['lessonId']})}">
         오답 목록으로
@@ -42,7 +39,7 @@
     </div>
 
     <!-- 요약 화면 -->
-    <div th:if="${view.attributes()['totalWrongCount'] != null}">
+    <div th:if="${view.attributes()['totalWrongCount'] != null}" class="review-summary-card">
       <h2>오답 복습 요약</h2>
 
       <p>
@@ -68,7 +65,7 @@
 
     <!-- 상세 화면 -->
     <div th:if="${view.attributes()['wrongAnswerId'] != null}">
-      <article>
+      <article class="review-detail-card">
         <h2 th:text="${view.attributes()['question']}">문제 내용</h2>
 
         <p>
@@ -112,7 +109,7 @@
         </form>
       </section>
 
-      <section th:if="${retryResultMessage != null}">
+      <section th:if="${retryResultMessage != null}" class="review-answer-section">
         <h3 th:text="${retryResultMessage}">정답입니다.</h3>
 
         <p>
@@ -133,7 +130,7 @@
 <!-- -->
       <hr>
 
-      <section>
+      <section class="review-complete-section">
         <h3>검토 완료</h3>
 
         <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/reviewed|}" method="post">

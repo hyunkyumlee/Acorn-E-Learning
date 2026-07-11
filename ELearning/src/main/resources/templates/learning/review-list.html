@@ -13,6 +13,8 @@
   <link rel="stylesheet" th:href="@{/css/common/themes.css}">
   <link rel="stylesheet" th:href="@{/css/screens/learning.css}">
 
+  <script defer th:src="@{/js/common/theme.js}"></script>
+
   <!-- 추가: review 전용 css -->
   <link rel="stylesheet" th:href="@{/css/screens/review.css}">
 </head>
@@ -21,13 +23,9 @@
 <div th:replace="~{fragments/topbar :: topbar}"></div>
 
 <main class="page-shell learning-screen">
-  <!--
+
   <section class="practice-header">
-    <h1 th:text="${view.title()}">오답 목록</h1>
-    <p>틀린 문제를 확인하고 다시 학습해보세요.</p>
-  </section>
--->
-  <section class="practice-header">
+    <p class="practice-eyebrow">Review</p>
     <h1 th:text="${view.title()}">오답 목록</h1>
     <p>틀린 문제를 확인하고 다시 학습해보세요.</p>
     <!-- 오답표시 기준-->

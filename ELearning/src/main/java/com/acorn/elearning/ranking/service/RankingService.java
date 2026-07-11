@@ -66,14 +66,12 @@ public class RankingService {
         }
 
     private Map<String, Object> buildRankingData(SessionUser sessionUser, Long subjectId) {
-        System.out.println("[RANKING] subjectId=" + subjectId);
+
             List<Map<String, Object>> filteredScores =
                 subjectId == null
                         ? rankingScoreMapper.findWeeklyGlobalRanking()
                         : rankingScoreMapper.findWeeklySubjectRanking(subjectId);
 
-        System.out.println("[RANKING] filteredScores size=" + filteredScores.size());
-        System.out.println("[RANKING] firstRow=" + (filteredScores.isEmpty() ? "empty" : filteredScores.get(0)));
 
         List<Map<String, Object>> top3 = new ArrayList<>();
         for (int i = 0; i < Math.min(3, filteredScores.size()); i++) {

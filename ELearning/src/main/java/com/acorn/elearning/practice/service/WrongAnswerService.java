@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.practice.form.WrongAnswerRetryForm;
 import com.acorn.elearning.practice.mapper.PracticeProblemMapper;
 import com.acorn.elearning.practice.mapper.PracticeSubmissionMapper;
@@ -64,7 +66,10 @@ public class WrongAnswerService {
 
             int updatedRows = wrongAnswerMapper.updateWrongAnswerOnNewMistake(wrongAnswer);
             if (updatedRows == 0) {
-                throw new RuntimeException("오답노트 갱신 실패: userId=" + userId + ", problemId=" + problemId);
+                throw new BusinessException(
+                        ErrorCode.COMMON_INTERNAL_ERROR,
+                        "오답노트 갱신에 실패했습니다."
+                );
             }
             return;
         }
@@ -105,28 +110,7 @@ public class WrongAnswerService {
 
     //시그니처에 nodeId 추가
     public WrongAnswerPageView list(SessionUser sessionUser, Long nodeId, Long lessonId) {
-        /*
-        List<WrongAnswer> wrongAnswers =
-                wrongAnswerMapper.findAllWrongAnswersByUserId(sessionUser.userId());
 
-        List<Map<String, Object>> items = wrongAnswers.stream()
-                .map(w -> {
-                    PracticeProblem problem = practiceProblemMapper.findById(w.getProblemId())
-                            .orElseThrow(() -> new RuntimeException("문제를 찾을 수 없습니다."));
-
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("wrongAnswerId", w.getWrongAnswerId());
-                    item.put("problemId", w.getProblemId());
-                    item.put("question", problem.getQuestion());
-                    item.put("wrongCount", w.getWrongCount());
-                    item.put("reviewStatus", w.getReviewStatus());
-                    return item;
-                })
-                .toList();
-
-        return WrongAnswerPageView.from(items);
-    }
-    */
         //nodeid용 분기 추가
             List<WrongAnswer> wrongAnswers;
         if (lessonId != null) {
@@ -146,7 +130,9 @@ public class WrongAnswerService {
             List<Map<String, Object>> items = wrongAnswers.stream()
                     .map(w -> {
                         PracticeProblem problem = practiceProblemMapper.findById(w.getProblemId())
-                                .orElseThrow(() -> new RuntimeException("문제를 찾을 수 없습니다."));
+                                .orElseThrow(() -> new BusinessException(
+                                        ErrorCode.COMMON_NOT_FOUND,
+                                        "문제를 찾을 수 없습니다."));
 
                         Map<String, Object> item = new HashMap<>();
                         item.put("wrongAnswerId", w.getWrongAnswerId());
@@ -166,7 +152,9 @@ public class WrongAnswerService {
         WrongAnswer wrongAnswer = getOwnedWrongAnswer(sessionUser, wrongAnswerId);
 
         PracticeProblem problem = practiceProblemMapper.findById(wrongAnswer.getProblemId())
-                .orElseThrow(() -> new RuntimeException("문제를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "문제를 찾을 수 없습니다."));
 
         return WrongAnswerDetailView.from(
                 wrongAnswer.getWrongAnswerId(),
@@ -184,13 +172,16 @@ public class WrongAnswerService {
 
     @Transactional
     public boolean retry(SessionUser sessionUser,
-                      WrongAnswerRetryForm form,
-                      Long wrongAnswerId) {
+                         WrongAnswerRetryForm form,
+                         Long wrongAnswerId) {
 
         WrongAnswer wrongAnswer = getOwnedWrongAnswer(sessionUser, wrongAnswerId);
 
         PracticeProblem problem = practiceProblemMapper.findById(wrongAnswer.getProblemId())
-                .orElseThrow(() -> new RuntimeException("문제를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "문제를 찾을 수 없습니다."
+                ));
 
         boolean isCorrect = normalizeAnswer(problem.getAnswerText())
                 .equals(normalizeAnswer(form.getSubmittedAnswer()));
@@ -212,7 +203,10 @@ public class WrongAnswerService {
 
             int updatedRows = practiceSubmissionMapper.updateSubmission(submission);
             if (updatedRows == 0) {
-                throw new RuntimeException("다시 제출 수정에 실패했습니다.");
+                throw new BusinessException(
+                        ErrorCode.COMMON_INTERNAL_ERROR,
+                        "다시 제출 수정에 실패했습니다."
+                );
             }
 
             latestSubmissionId = submission.getSubmissionId();
@@ -230,7 +224,7 @@ public class WrongAnswerService {
             latestSubmissionId = submission.getSubmissionId();
         }
 
-        //오답재정답시 +5
+        // 오답 재정답 시 +5
         if (isCorrect) {
             String retryIdempotencyKey = "WRONG_ANSWER_RETRY:" + wrongAnswer.getWrongAnswerId();
 
@@ -240,7 +234,10 @@ public class WrongAnswerService {
 
             int updatedRows = wrongAnswerMapper.updateWrongAnswerOnNewMistake(wrongAnswer);
             if (updatedRows == 0) {
-                throw new RuntimeException("오답 보너스 상태 업데이트 실패");
+                throw new BusinessException(
+                        ErrorCode.COMMON_INTERNAL_ERROR,
+                        "오답 보너스 상태 업데이트에 실패했습니다."
+                );
             }
 
             int existingScoreEventCount = scoreEventMapper.countByIdempotencyKey(retryIdempotencyKey);
@@ -269,10 +266,16 @@ public class WrongAnswerService {
 
     private WrongAnswer getOwnedWrongAnswer(SessionUser sessionUser, Long wrongAnswerId) {
         WrongAnswer wrongAnswer = wrongAnswerMapper.findByIdWrongAnswer(wrongAnswerId)
-                .orElseThrow(() -> new RuntimeException("오답 기록을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "오답 기록을 찾을 수 없습니다."
+                ));
 
         if (!wrongAnswer.getUserId().equals(sessionUser.userId())) {
-            throw new RuntimeException("본인의 오답 기록만 조회할 수 있습니다.");
+            throw new BusinessException(
+                    ErrorCode.AUTH_FORBIDDEN,
+                    "본인의 오답 기록만 조회할 수 있습니다."
+            );
         }
 
         return wrongAnswer;
