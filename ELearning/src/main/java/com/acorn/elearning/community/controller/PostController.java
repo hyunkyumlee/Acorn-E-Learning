@@ -31,6 +31,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PostController {
+    private static final int HOT_MIN_SCORE = 12;
+    private static final int HOT_MIN_INTERACTION_COUNT = 4;
+
     private final PostService postService;
 
     public PostController(PostService postService) {
@@ -46,11 +49,24 @@ public class PostController {
         PostSearchCondition hotCondition = new PostSearchCondition();
         hotCondition.setSort("hot");
         hotCondition.setSize(8);
+        PostSearchCondition weeklyHotCondition = new PostSearchCondition();
+        weeklyHotCondition.setSort("hot");
+        weeklyHotCondition.setPeriod("week");
+        weeklyHotCondition.setSize(6);
+        PostSearchCondition monthlyHotCondition = new PostSearchCondition();
+        monthlyHotCondition.setSort("hot");
+        monthlyHotCondition.setPeriod("month");
+        monthlyHotCondition.setSize(6);
         PostPageResponse view = postService.page(condition);
         var hotView = postService.page(hotCondition);
+        hotView = qualifiedHotView(hotView);
+        var weeklyHotView = qualifiedHotView(postService.page(weeklyHotCondition));
+        var monthlyHotView = qualifiedHotView(postService.page(monthlyHotCondition));
         Set<Long> hotPostIds = hotView.posts().stream()
                 .map(CommunityPost::getPostId)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+        weeklyHotView.posts().stream().map(CommunityPost::getPostId).forEach(hotPostIds::add);
+        monthlyHotView.posts().stream().map(CommunityPost::getPostId).forEach(hotPostIds::add);
         hotPostIds.addAll(subjectHotPostIds(view.posts()));
         view = blendHotPosts(view, hotPostIds, condition);
 
@@ -58,8 +74,10 @@ public class PostController {
         model.addAttribute("condition", condition);
         model.addAttribute("view", view);
         model.addAttribute("hotView", hotView);
+        model.addAttribute("weeklyHotView", weeklyHotView);
+        model.addAttribute("monthlyHotView", monthlyHotView);
         model.addAttribute("hotPostIds", hotPostIds);
-        model.addAttribute("writerNicknames", writerNicknames(view, hotView));
+        model.addAttribute("writerNicknames", writerNicknames(view, hotView, weeklyHotView, monthlyHotView));
         addCommunityShell(model, sessionUser, condition);
         return "community/board";
     }
@@ -207,7 +225,8 @@ public class PostController {
     }
 
     private PostPageResponse blendHotPosts(PostPageResponse view, Set<Long> hotPostIds, PostSearchCondition condition) {
-        if (view == null || hotPostIds == null || condition == null || condition.hotSort()) {
+        if (view == null || hotPostIds == null || condition == null
+                || condition.hotSort() || condition.likeSort() || condition.viewSort()) {
             return view;
         }
         List<CommunityPost> hotPosts = new ArrayList<>();
@@ -258,6 +277,20 @@ public class PostController {
         );
     }
 
+    private PostPageResponse qualifiedHotView(PostPageResponse view) {
+        List<CommunityPost> hotPosts = view.posts().stream()
+                .filter(this::qualifiedHotPost)
+                .toList();
+        return new PostPageResponse(
+                hotPosts,
+                hotPosts.size(),
+                view.page(),
+                view.size(),
+                view.totalPages(),
+                view.sort()
+        );
+    }
+
     private Set<Long> subjectHotPostIds(List<CommunityPost> posts) {
         Map<Long, List<CommunityPost>> postsBySubject = new LinkedHashMap<>();
         for (CommunityPost post : posts) {
@@ -267,6 +300,7 @@ public class PostController {
         Set<Long> ids = new LinkedHashSet<>();
         for (List<CommunityPost> subjectPosts : postsBySubject.values()) {
             subjectPosts.stream()
+                    .filter(this::qualifiedHotPost)
                     .sorted(Comparator
                             .comparingInt(this::hotScore)
                             .thenComparing(CommunityPost::getPostId, Comparator.nullsLast(Comparator.naturalOrder()))
@@ -278,9 +312,19 @@ public class PostController {
         return ids;
     }
 
+    private boolean qualifiedHotPost(CommunityPost post) {
+        return hotScore(post) >= HOT_MIN_SCORE && interactionCount(post) >= HOT_MIN_INTERACTION_COUNT;
+    }
+
     private int hotScore(CommunityPost post) {
         return safeCount(post.getLikeCount()) * 3
                 + safeCount(post.getCommentCount()) * 2
+                + safeCount(post.getScrapCount());
+    }
+
+    private int interactionCount(CommunityPost post) {
+        return safeCount(post.getLikeCount())
+                + safeCount(post.getCommentCount())
                 + safeCount(post.getScrapCount());
     }
 

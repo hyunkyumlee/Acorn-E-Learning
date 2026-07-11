@@ -898,18 +898,19 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO community_posts (
-  post_id, writer_id, subject_id, board_type, title, content, like_count, comment_count, scrap_count, status, created_at, updated_at, deleted_at
+  post_id, writer_id, subject_id, board_type, title, content, view_count, like_count, comment_count, scrap_count, status, created_at, updated_at, deleted_at
 )
 VALUES
-  (1, 2, @java_subject_id, 'QUESTION', '조건문에서 else if를 언제 쓰나요?', '점수 구간별로 다른 메시지를 보여주고 싶습니다.', 1, 2, 1, 'ACTIVE', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP, NULL),
-  (2, 3, @java_subject_id, 'STUDY_LOG', 'Bronze 5개 행성 완료 기록', '오늘 Java Bronze 행성을 모두 완료하고 AI 시험까지 통과했습니다.', 1, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (3, 1, @java_subject_id, 'FREE', '샘플 데이터 안내', '로컬 개발용 샘플 게시글입니다. 관리자 화면 검수에 사용합니다.', 0, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
+  (1, 2, @java_subject_id, 'QUESTION', '조건문에서 else if를 언제 쓰나요?', '점수 구간별로 다른 메시지를 보여주고 싶습니다.', 28, 1, 2, 1, 'ACTIVE', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP, NULL),
+  (2, 3, @java_subject_id, 'STUDY_LOG', 'Bronze 5개 행성 완료 기록', '오늘 Java Bronze 행성을 모두 완료하고 AI 시험까지 통과했습니다.', 21, 1, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (3, 1, @java_subject_id, 'FREE', '샘플 데이터 안내', '로컬 개발용 샘플 게시글입니다. 관리자 화면 검수에 사용합니다.', 12, 0, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
 ON DUPLICATE KEY UPDATE
   writer_id = VALUES(writer_id),
   subject_id = VALUES(subject_id),
   board_type = VALUES(board_type),
   title = VALUES(title),
   content = VALUES(content),
+  view_count = VALUES(view_count),
   like_count = VALUES(like_count),
   comment_count = VALUES(comment_count),
   scrap_count = VALUES(scrap_count),
@@ -1039,7 +1040,19 @@ VALUES
   (1, @java_subject_id, 'Java 공식 튜토리얼', 'https://dev.java/learn/', 'ARTICLE', 'BEGINNER', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (2, @python_subject_id, 'Python 공식 튜토리얼', 'https://docs.python.org/3/tutorial/', 'ARTICLE', 'BEGINNER', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
   (3, @web_subject_id, 'MDN JavaScript Guide', 'https://developer.mozilla.org/docs/Web/JavaScript/Guide', 'ARTICLE', 'BEGINNER', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (4, @sql_subject_id, 'MySQL 8 Reference Manual', 'https://dev.mysql.com/doc/refman/8.0/en/', 'DOCS', 'REFERENCE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (4, @sql_subject_id, 'MySQL 8 Reference Manual', 'https://dev.mysql.com/doc/refman/8.0/en/', 'DOCS', 'REFERENCE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (5, @java_subject_id, 'Java 입문 풀코스', 'https://www.youtube.com/watch?v=eIrMbAQSU34', 'VIDEO', 'BEGINNER', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (6, @java_subject_id, 'Spring Boot 기초 흐름', 'https://www.youtube.com/watch?v=vtPkZShrvXQ', 'VIDEO', 'BEGINNER', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (7, @java_subject_id, 'Java 객체지향 복습', 'https://www.youtube.com/watch?v=grEKMHGYyns', 'VIDEO', 'REFERENCE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (8, @python_subject_id, 'Python 입문 풀코스', 'https://www.youtube.com/watch?v=rfscVS0vtbw', 'VIDEO', 'BEGINNER', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (9, @python_subject_id, 'Python 데이터 처리 기초', 'https://www.youtube.com/watch?v=LHBE6Q9XlzI', 'VIDEO', 'REFERENCE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (10, @python_subject_id, 'Python 프로젝트 연습', 'https://www.youtube.com/watch?v=8ext9G7xspg', 'VIDEO', 'TRENDING', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (11, @web_subject_id, 'HTML CSS 입문 풀코스', 'https://www.youtube.com/watch?v=mU6anWqZJcc', 'VIDEO', 'BEGINNER', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (12, @web_subject_id, 'JavaScript 입문 풀코스', 'https://www.youtube.com/watch?v=PkZNo7MFNFg', 'VIDEO', 'REFERENCE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (13, @web_subject_id, '반응형 웹 레이아웃 연습', 'https://www.youtube.com/watch?v=srvUrASNj0s', 'VIDEO', 'TRENDING', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (14, @sql_subject_id, 'SQL 입문 풀코스', 'https://www.youtube.com/watch?v=HXV3zeQKqGY', 'VIDEO', 'BEGINNER', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (15, @sql_subject_id, 'MySQL 기초 정리', 'https://www.youtube.com/watch?v=7S_tz1z_5bA', 'VIDEO', 'REFERENCE', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (16, @sql_subject_id, 'SQL JOIN 복습', 'https://www.youtube.com/watch?v=9yeOJ0ZMUYw', 'VIDEO', 'TRENDING', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   subject_id = VALUES(subject_id),
   title = VALUES(title),
