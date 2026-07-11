@@ -127,11 +127,11 @@
 <body>
   <section class="page">
     <h1>Knowva ERD</h1>
-    <p class="source">Source: Notion DB 명세 v1.8 Mermaid ERD. 인증 수단별 독립 계정 정책과 DDL을 반영한 HTML 원본.</p>
+    <p class="source">Source: Notion DB 명세 v1.9 Mermaid ERD. 커뮤니티 조회수와 seed 실행 안전성, 인증 수단별 독립 계정 정책을 반영한 HTML 원본.</p>
     <div class="summary">
-      <div class="summary-card"><strong>Version</strong><span>v1.8</span></div>
-      <div class="summary-card"><strong>Tables</strong><span>40</span></div>
-      <div class="summary-card"><strong>Foreign Keys</strong><span>71</span></div>
+      <div class="summary-card"><strong>Version</strong><span>v1.9</span></div>
+      <div class="summary-card"><strong>Tables</strong><span>42</span></div>
+      <div class="summary-card"><strong>Foreign Keys</strong><span>78</span></div>
       <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
     </div>
     <table class="inventory compact">
@@ -146,16 +146,18 @@
 <tr><td>user_learning_profiles</td><td>BIGINT profile_id PK</td><td>2</td></tr>
 <tr><td>lessons</td><td>BIGINT lesson_id PK</td><td>2</td></tr>
 <tr><td>lesson_bookmarks</td><td>BIGINT bookmark_id PK</td><td>2</td></tr>
+<tr><td>user_lesson_progress</td><td>BIGINT lesson_progress_id PK</td><td>2</td></tr>
 <tr><td>level_test_questions</td><td>BIGINT question_id PK</td><td>1</td></tr>
 <tr><td>level_test_choices</td><td>BIGINT choice_id PK</td><td>1</td></tr>
 <tr><td>level_test_attempts</td><td>BIGINT attempt_id PK</td><td>2</td></tr>
 <tr><td>level_test_answers</td><td>BIGINT answer_id PK</td><td>3</td></tr>
 <tr><td>learning_progress</td><td>BIGINT progress_id PK</td><td>3</td></tr>
-<tr><td>practice_set_attempts</td><td>BIGINT set_attempt_id PK</td><td>3</td></tr>
+<tr><td>practice_set_attempts</td><td>BIGINT set_attempt_id PK</td><td>4</td></tr>
 <tr><td>attendance_records</td><td>BIGINT attendance_id PK</td><td>2</td></tr>
-<tr><td>practice_problems</td><td>BIGINT problem_id PK</td><td>3</td></tr>
+<tr><td>practice_problems</td><td>BIGINT problem_id PK</td><td>4</td></tr>
 <tr><td>problem_choices</td><td>BIGINT choice_id PK</td><td>1</td></tr>
-<tr><td>practice_submissions</td><td>BIGINT submission_id PK</td><td>3</td></tr>
+<tr><td>practice_set_items</td><td>BIGINT set_item_id PK</td><td>2</td></tr>
+<tr><td>practice_submissions</td><td>BIGINT submission_id PK</td><td>4</td></tr>
 <tr><td>wrong_answers</td><td>BIGINT wrong_answer_id PK</td><td>4</td></tr>
 <tr><td>score_events</td><td>BIGINT score_event_id PK</td><td>2</td></tr>
 <tr><td>ranking_scores</td><td>BIGINT ranking_id PK</td><td>2</td></tr>
@@ -284,6 +286,17 @@
         BIGINT lesson_id FK
         DATETIME created_at
     }
+    user_lesson_progress {
+        BIGINT lesson_progress_id PK
+        BIGINT user_id FK
+        BIGINT lesson_id FK
+        BOOLEAN theory_completed
+        BOOLEAN practice_passed
+        DECIMAL progress_rate
+        DATETIME completed_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
     level_test_questions {
         BIGINT question_id PK
         BIGINT subject_id FK
@@ -339,6 +352,7 @@
         BIGINT user_id FK
         BIGINT subject_id FK
         BIGINT node_id FK
+        BIGINT lesson_id FK
         TINYINT total_count
         TINYINT correct_count
         VARCHAR status
@@ -359,6 +373,7 @@
         BIGINT problem_id PK
         BIGINT subject_id FK
         BIGINT node_id FK
+        BIGINT lesson_id FK
         BIGINT created_by FK
         VARCHAR problem_type
         TEXT question
@@ -375,9 +390,17 @@
         BOOLEAN is_correct
         INT sort_order
     }
+    practice_set_items {
+        BIGINT set_item_id PK
+        BIGINT set_attempt_id FK
+        BIGINT problem_id FK
+        TINYINT sort_order UK
+        DATETIME created_at
+    }
     practice_submissions {
         BIGINT submission_id PK
         BIGINT set_attempt_id FK
+        BIGINT set_item_id FK
         BIGINT user_id FK
         BIGINT problem_id FK
         VARCHAR submission_context UK
@@ -493,6 +516,7 @@
         VARCHAR board_type
         VARCHAR title
         MEDIUMTEXT content
+        INT view_count
         INT like_count
         INT comment_count
         INT scrap_count
@@ -604,6 +628,8 @@
     users ||--o{ lessons : created_by
     users ||--o{ lesson_bookmarks : user
     lessons ||--o{ lesson_bookmarks : lesson
+    users ||--o{ user_lesson_progress : user
+    lessons ||--o{ user_lesson_progress : lesson
     subjects ||--o{ level_test_questions : subject
     level_test_questions ||--o{ level_test_choices : question
     users ||--o{ level_test_attempts : user
@@ -617,13 +643,18 @@
     users ||--o{ practice_set_attempts : user
     subjects ||--o{ practice_set_attempts : subject
     curriculum_nodes ||--o{ practice_set_attempts : node
+    lessons ||--o{ practice_set_attempts : lesson
     users ||--o{ attendance_records : user
     practice_set_attempts ||--o{ attendance_records : qualified_set_attempt
     subjects ||--o{ practice_problems : subject
     curriculum_nodes ||--o{ practice_problems : node
+    lessons ||--o{ practice_problems : lesson
     users ||--o{ practice_problems : created_by
     practice_problems ||--o{ problem_choices : problem
+    practice_set_attempts ||--o{ practice_set_items : set_attempt
+    practice_problems ||--o{ practice_set_items : problem
     practice_set_attempts ||--o{ practice_submissions : set_attempt
+    practice_set_items ||--o{ practice_submissions : set_item
     users ||--o{ practice_submissions : user
     practice_problems ||--o{ practice_submissions : problem
     users ||--o{ wrong_answers : user
@@ -769,7 +800,7 @@
 <tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
                   </table>
                 </section>
-                
+
                 <section class="table-card">
                   <h3>user_credentials</h3>
                   <table class="small-table">
@@ -786,7 +817,7 @@
 <tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
                   </table>
                 </section>
-                
+
                 <section class="table-card">
                   <h3>social_accounts</h3>
                   <table class="small-table">
@@ -1118,6 +1149,14 @@
         VARCHAR description
         INT sort_order
     }
+    lessons {
+        BIGINT lesson_id PK
+        BIGINT node_id FK
+        BIGINT created_by FK
+        VARCHAR title
+        INT sort_order
+        BOOLEAN is_active
+    }
     user_level_unlocks {
         BIGINT unlock_id PK
         BIGINT user_id FK
@@ -1140,6 +1179,17 @@
         DATETIME created_at
         DATETIME updated_at
     }
+    user_lesson_progress {
+        BIGINT lesson_progress_id PK
+        BIGINT user_id FK
+        BIGINT lesson_id FK
+        BOOLEAN theory_completed
+        BOOLEAN practice_passed
+        DECIMAL progress_rate
+        DATETIME completed_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
     attendance_records {
         BIGINT attendance_id PK
         BIGINT user_id FK
@@ -1154,6 +1204,7 @@
         BIGINT user_id FK
         BIGINT subject_id FK
         BIGINT node_id FK
+        BIGINT lesson_id FK
         TINYINT total_count
         TINYINT correct_count
         VARCHAR status
@@ -1165,6 +1216,7 @@
         BIGINT problem_id PK
         BIGINT subject_id FK
         BIGINT node_id FK
+        BIGINT lesson_id FK
         BIGINT created_by FK
         VARCHAR problem_type
         TEXT question
@@ -1181,9 +1233,17 @@
         BOOLEAN is_correct
         INT sort_order
     }
+    practice_set_items {
+        BIGINT set_item_id PK
+        BIGINT set_attempt_id FK
+        BIGINT problem_id FK
+        TINYINT sort_order UK
+        DATETIME created_at
+    }
     practice_submissions {
         BIGINT submission_id PK
         BIGINT set_attempt_id FK
+        BIGINT set_item_id FK
         BIGINT user_id FK
         BIGINT problem_id FK
         VARCHAR submission_context UK
@@ -1231,21 +1291,29 @@
     }
     subjects ||--o{ curriculum_nodes : subject
     curriculum_nodes ||--o{ curriculum_nodes : parent_node
+    curriculum_nodes ||--o{ lessons : node
     users ||--o{ user_level_unlocks : user
     subjects ||--o{ user_level_unlocks : subject
     users ||--o{ learning_progress : user
     subjects ||--o{ learning_progress : subject
     curriculum_nodes ||--o{ learning_progress : node
+    users ||--o{ user_lesson_progress : user
+    lessons ||--o{ user_lesson_progress : lesson
     users ||--o{ attendance_records : user
     practice_set_attempts ||--o{ attendance_records : qualified_set_attempt
     users ||--o{ practice_set_attempts : user
     subjects ||--o{ practice_set_attempts : subject
     curriculum_nodes ||--o{ practice_set_attempts : node
+    lessons ||--o{ practice_set_attempts : lesson
     subjects ||--o{ practice_problems : subject
     curriculum_nodes ||--o{ practice_problems : node
+    lessons ||--o{ practice_problems : lesson
     users ||--o{ practice_problems : created_by
     practice_problems ||--o{ problem_choices : problem
+    practice_set_attempts ||--o{ practice_set_items : set_attempt
+    practice_problems ||--o{ practice_set_items : problem
     practice_set_attempts ||--o{ practice_submissions : set_attempt
+    practice_set_items ||--o{ practice_submissions : set_item
     users ||--o{ practice_submissions : user
     practice_problems ||--o{ practice_submissions : problem
     users ||--o{ wrong_answers : user
@@ -1268,16 +1336,23 @@
 <tr><td>learning_progress</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>learning_progress</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
 <tr><td>learning_progress</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>user_lesson_progress</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>user_lesson_progress</td><td>lesson_id</td><td>lessons</td><td>lesson_id</td></tr>
 <tr><td>attendance_records</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>attendance_records</td><td>qualified_set_attempt_id</td><td>practice_set_attempts</td><td>set_attempt_id</td></tr>
 <tr><td>practice_set_attempts</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>practice_set_attempts</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
 <tr><td>practice_set_attempts</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>practice_set_attempts</td><td>lesson_id</td><td>lessons</td><td>lesson_id</td></tr>
 <tr><td>practice_problems</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
 <tr><td>practice_problems</td><td>node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>practice_problems</td><td>lesson_id</td><td>lessons</td><td>lesson_id</td></tr>
 <tr><td>practice_problems</td><td>created_by</td><td>users</td><td>user_id</td></tr>
 <tr><td>problem_choices</td><td>problem_id</td><td>practice_problems</td><td>problem_id</td></tr>
+<tr><td>practice_set_items</td><td>set_attempt_id</td><td>practice_set_attempts</td><td>set_attempt_id</td></tr>
+<tr><td>practice_set_items</td><td>problem_id</td><td>practice_problems</td><td>problem_id</td></tr>
 <tr><td>practice_submissions</td><td>set_attempt_id</td><td>practice_set_attempts</td><td>set_attempt_id</td></tr>
+<tr><td>practice_submissions</td><td>set_item_id</td><td>practice_set_items</td><td>set_item_id</td></tr>
 <tr><td>practice_submissions</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>practice_submissions</td><td>problem_id</td><td>practice_problems</td><td>problem_id</td></tr>
 <tr><td>wrong_answers</td><td>user_id</td><td>users</td><td>user_id</td></tr>
@@ -1375,6 +1450,22 @@
                 </section>
                 
                 <section class="table-card">
+                  <h3>user_lesson_progress</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>lesson_progress_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>lesson_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>theory_completed</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>practice_passed</td><td>TINYINT(1) NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
+<tr><td>progress_rate</td><td>DECIMAL(5,2) NOT NULL DEFAULT 0.00</td><td></td><td>NN</td></tr>
+<tr><td>completed_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+
+                <section class="table-card">
                   <h3>attendance_records</h3>
                   <table class="small-table">
                     <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
@@ -1396,6 +1487,7 @@
 <tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>lesson_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
 <tr><td>total_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 10</td><td></td><td>NN</td></tr>
 <tr><td>correct_count</td><td>TINYINT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
 <tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;IN_PROGRESS&#x27;</td><td></td><td>NN</td></tr>
@@ -1413,6 +1505,7 @@
                     <tbody><tr><td>problem_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
 <tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>node_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>lesson_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
 <tr><td>problem_type</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;MULTIPLE_CHOICE&#x27;</td><td></td><td>NN</td></tr>
 <tr><td>question</td><td>TEXT NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>answer_text</td><td>TEXT NULL</td><td></td><td>NULL</td></tr>
@@ -1438,11 +1531,24 @@
                 </section>
                 
                 <section class="table-card">
+                  <h3>practice_set_items</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>set_item_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>set_attempt_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>problem_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>sort_order</td><td>TINYINT UNSIGNED NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+
+                <section class="table-card">
                   <h3>practice_submissions</h3>
                   <table class="small-table">
                     <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
                     <tbody><tr><td>submission_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
 <tr><td>set_attempt_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>set_item_id</td><td>BIGINT UNSIGNED NULL</td><td>FK</td><td>NULL</td></tr>
 <tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>problem_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
 <tr><td>submission_context</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;PRACTICE_SET&#x27;</td><td>UK</td><td>NN</td></tr>
@@ -1825,6 +1931,7 @@
         VARCHAR board_type
         VARCHAR title
         MEDIUMTEXT content
+        INT view_count
         INT like_count
         INT comment_count
         INT scrap_count
@@ -1948,6 +2055,7 @@
 <tr><td>board_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>title</td><td>VARCHAR(200) NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>content</td><td>MEDIUMTEXT NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>view_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
 <tr><td>like_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
 <tr><td>comment_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
 <tr><td>scrap_count</td><td>INT UNSIGNED NOT NULL DEFAULT 0</td><td></td><td>NN</td></tr>
@@ -2336,6 +2444,15 @@
             
 
   <section class="page">
+    <h2>v1.9 변경 요약</h2>
+    <section class="callout">
+      <h2>커뮤니티 조회수 및 seed 실행 안전성</h2>
+      <ul>
+        <li><code>community_posts.view_count</code>: 게시글 상세 조회 시 증가하며 목록의 조회수 정렬과 화면 표시에 사용.</li>
+        <li><code>Knowva_sample_data.sql</code>: DB v1.9 필수 컬럼 preflight와 단일 transaction을 적용해 오래된 schema에서 부분 반영되는 문제를 차단.</li>
+        <li><code>Knowva_DDL.sql</code>: 기존 데이터를 보존하는 migration이 아니라 전체 재생성 script임을 명시.</li>
+      </ul>
+    </section>
     <h2>v1.8 변경 요약</h2>
     <section class="callout">
       <h2>인증 수단별 독립 계정 정책</h2>

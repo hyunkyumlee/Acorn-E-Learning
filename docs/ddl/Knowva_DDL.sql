@@ -1,12 +1,12 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.8
+  Source: Notion DB 명세 v1.9
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
   2. Connection Name: elearning
-  3. Username: knowva
-  4. Password: knowva1234
+  3. Username: local .env의 DB_USERNAME
+  4. Password: local .env의 DB_PASSWORD
   5. Default Schema: 비움
   6. Test Connection 후 OK
 
@@ -18,6 +18,8 @@
   - Workbench connection의 Default Schema는 비워둔다.
   - 이 script는 elearning schema를 생성한 뒤 USE elearning을 수행한다.
   - 전체 실행 시 elearning schema 안의 기존 Knowva table을 모두 DROP TABLE IF EXISTS 후 다시 생성한다.
+  - 기존 table/data를 보존하는 migration script가 아니다. schema 최신화 시 반드시 백업 여부를 먼저 확인한다.
+  - sample data는 이 script가 오류 없이 끝난 뒤 docs/ddl/Knowva_sample_data.sql을 별도로 전체 실행한다.
   - MySQL 8 기준으로 별도 CREATE SEQUENCE 객체는 만들지 않는다.
     각 table의 BIGINT UNSIGNED PK에 AUTO_INCREMENT를 지정해 sequence 역할을 처리한다.
   - FK 기본 정책은 DB 명세 기준 ON DELETE RESTRICT, ON UPDATE CASCADE다.
