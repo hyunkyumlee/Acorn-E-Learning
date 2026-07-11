@@ -847,9 +847,6 @@ a.roadmap-level:hover {
 }
 
 /* ── 레슨 선택 화면(/learning/nodes/{nodeId}/lessons) ── */
-.lesson-list-desc { color: var(--muted, #607181); margin-top: 4px; }
-.lesson-list-progress { margin-top: 8px; font-size: 14px; color: var(--muted, #607181); }
-.lesson-list-progress strong { color: var(--primary, #22b8c8); }
 .lesson-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3, 12px); }
 .lesson-list-item {
   display: flex; align-items: center; gap: var(--space-4, 16px);
@@ -885,7 +882,6 @@ a.roadmap-level:hover {
 .lesson-list-status.is-practice { color: var(--primary, #22b8c8); background: color-mix(in srgb, var(--primary, #22b8c8) 14%, transparent); }
 .lesson-list-status.is-done { color: var(--success, #15803d); background: color-mix(in srgb, var(--success, #15803d) 14%, transparent); }
 .lesson-list-cta { flex: 0 0 auto; }
-.lesson-list-back { margin-top: 18px; }
 .lesson-list-empty { color: var(--muted, #607181); padding: 8px 0; }
 
 /* ── 행성 상세: 되돌아가기 / 스토리 히어로 / 학습내용 소개 / 목록 헤더 ── */
@@ -1362,14 +1358,14 @@ a.roadmap-level:hover {
 .roadmap-card-lessons {
   color: var(--muted);
 }
-/* 스토리 설명: 카드 본문 히어로 텍스트(2~3줄). */
+/* 스토리 설명: 카드 본문 히어로 텍스트(커스텀 2문장 스토리 전체 노출). */
 .roadmap-card-desc {
   font-size: 12.5px;
   line-height: 1.6;
   color: color-mix(in srgb, var(--text) 78%, var(--muted));
   word-break: keep-all;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1594,7 +1590,6 @@ a.roadmap-level:hover {
   gap: var(--space-3);
   flex-wrap: wrap;
 }
-.lesson-title { margin: 0; }
 
 /* 이론 완료됨 상태 칩(제목 옆) */
 .lesson-status-chip {
@@ -1669,14 +1664,6 @@ a.roadmap-level:hover {
 .bookmark-title { font-weight: 700; color: var(--text, #132331); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bookmark-node { font-size: 13px; color: var(--muted, #607181); }
 .bookmark-cta { flex: 0 0 auto; }
-.bookmark-empty {
-  color: var(--muted, #607181);
-  text-align: center;
-  padding: var(--space-10, 40px) var(--space-4, 16px);
-  border: 1px dashed var(--line, #d9e7ee);
-  border-radius: 12px;
-  background: var(--surface-soft, #eef8fb);
-}
 
 /* 북마크 화면 보강: 헤더 서브 · 리본 아이콘 · 카운트 · 빈 상태 일러스트 */
 .page-heading-sub { margin-top: 6px; font-size: 14px; color: var(--muted); }

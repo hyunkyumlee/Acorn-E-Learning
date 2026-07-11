@@ -253,7 +253,7 @@
                              ? (node.description ?: '이 레벨의 행성을 모두 완료하면 열리는 관문이에요.')
                              : (planet != null ? planet.story : (node.description ?: '이 행성의 학습 내용을 확인해 보세요.'))}">행성 스토리</p>
                       <span class="roadmap-card-meta">
-                        <span class="roadmap-card-topic" th:text="${node.title}">단원</span>
+                        <span class="roadmap-card-topic" th:if="${node.nodeType != 'GATE'}" th:text="${node.title}">단원</span>
                         <span class="roadmap-card-lessons"
                               th:if="${node.nodeType != 'GATE' and nodeLessonCounts != null and nodeLessonCounts[node.nodeId] != null and nodeLessonCounts[node.nodeId] > 0}"
                               th:text="${nodeLessonCounts[node.nodeId]} + '개 레슨'">7개 레슨</span>
