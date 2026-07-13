@@ -159,11 +159,12 @@ public class PracticeService {
 
             int correctCount = 0;
 
-            // 2. 답안 채점 및 기록
+            // 2. 답안 채점 및 기록--결과화면 값 추가
             for (PracticeAnswerForm.SingleAnswer answerForm : answerList) {
                 PracticeProblem problem = problemService.getProblem(answerForm.getProblemId());
 
-                boolean isCorrect = normalizeAnswer(problem.getAnswerText())
+                boolean isSkipped = "__SKIPPED__".equals(answerForm.getSubmittedAnswer());
+                boolean isCorrect = !isSkipped && normalizeAnswer(problem.getAnswerText())
                         .equals(normalizeAnswer(answerForm.getSubmittedAnswer()));
 
                 // 저장된 문제순서 불러오기
@@ -185,17 +186,21 @@ public class PracticeService {
                 submission.setUserId(user.userId());
                 submission.setProblemId(answerForm.getProblemId());
                 submission.setSubmissionContext("PRACTICE_SET");
-                submission.setSubmittedAnswer(answerForm.getSubmittedAnswer());
+                submission.setSubmittedAnswer(isSkipped ? null : answerForm.getSubmittedAnswer());
                 submission.setIsCorrect(isCorrect);
-                submission.setIsSkipped(false);
+                submission.setIsSkipped(isSkipped);
 
                 practiceSubmissionMapper.insertSubmission(submission);
                 Long submissionId = submission.getSubmissionId();
 
+                //점수처리&결과계산
+                if (isSkipped) {
+                    continue;
+                }
+
                 if (isCorrect) {
                     correctCount++;
 
-                    // 3. 점수 처리
                     scoreService.giveScore(
                             user.userId(),
                             attempt.getSubjectId(),
@@ -346,17 +351,34 @@ public class PracticeService {
                 }
             }
 
-            Map<String, Object> data = Map.of(
-                    "passed", attempt.getPassed(),
-                    "nextPath", nextPath,
-                    "isTestStep", isTestStep,
-                    "primaryPath", primaryPath,
-                    "primaryLabel", primaryLabel,
-                    "secondaryPath", secondaryPath,
-                    "secondaryLabel", secondaryLabel,
-                    "nodeId", attempt.getNodeId(),
-                    "lessonId", attempt.getLessonId()
-            );
+            List<PracticeSubmission> submissions = practiceSubmissionMapper.findBySetAttemptId(setAttemptId);
+
+            int skippedCount = (int) submissions.stream()
+                    .filter(submission -> Boolean.TRUE.equals(submission.getIsSkipped()))
+                    .count();
+
+            int correctCount = attempt.getCorrectCount() == null ? 0 : attempt.getCorrectCount();
+            int totalCount = attempt.getTotalCount() == null ? 0 : attempt.getTotalCount();
+            int wrongCount = totalCount - correctCount - skippedCount;
+
+            if (wrongCount < 0) {
+                wrongCount = 0;
+            }
+
+            Map<String, Object> data = new java.util.HashMap<>();
+            data.put("passed", attempt.getPassed());
+            data.put("nextPath", nextPath);
+            data.put("isTestStep", isTestStep);
+            data.put("primaryPath", primaryPath);
+            data.put("primaryLabel", primaryLabel);
+            data.put("secondaryPath", secondaryPath);
+            data.put("secondaryLabel", secondaryLabel);
+            data.put("nodeId", attempt.getNodeId());
+            data.put("lessonId", attempt.getLessonId());
+            data.put("correctCount", correctCount);
+            data.put("wrongCount", wrongCount);
+            data.put("skippedCount", skippedCount);
+            data.put("totalCount", totalCount);
 
             return PracticeSetResponse.success(data);
         }

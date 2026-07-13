@@ -20,4 +20,6 @@ public interface PracticeSubmissionMapper {
 
     // 5. 기존 제출 수정
     int updateSubmission(PracticeSubmission submission);
+    // 6. 결과계산
+    List<PracticeSubmission> findBySetAttemptId(Long setAttemptId);
 }

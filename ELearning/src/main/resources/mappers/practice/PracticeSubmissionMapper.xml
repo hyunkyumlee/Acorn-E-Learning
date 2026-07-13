@@ -68,4 +68,21 @@
         solved_at = NOW()
         WHERE submission_id = #{submissionId}
     </update>
+
+    <select id="findBySetAttemptId" resultMap="PracticeSubmissionResultMap">
+        SELECT
+        submission_id,
+        set_attempt_id,
+        set_item_id,
+        user_id,
+        problem_id,
+        submission_context,
+        submitted_answer,
+        is_correct,
+        is_skipped,
+        created_at
+        FROM practice_submissions
+        WHERE set_attempt_id = #{setAttemptId}
+        ORDER BY submission_id ASC
+    </select>
 </mapper>
