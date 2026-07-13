@@ -12,7 +12,7 @@ public enum ErrorCode {
     AUTH_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "AUTH-USER-NOT-FOUND", "사용자를 찾을 수 없습니다."),
     AUTH_EMAIL_DUPLICATED(HttpStatus.CONFLICT, "AUTH-EMAIL-DUPLICATED", "이미 사용 중인 이메일입니다."),
     AUTH_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "AUTH-NICKNAME-DUPLICATED", "이미 사용 중인 닉네임입니다."),
-    //
+    AUTH_SOCIAL_PENDING_EXPIRED(HttpStatus.BAD_REQUEST, "AUTH-SOCIAL-PENDING-EXPIRED", "소셜 가입 정보가 만료되었습니다. 다시 시도해 주세요."), // [추가] 소셜 회원가입 대기정보 만료
 
     COMMON_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION-400", "입력값이 올바르지 않습니다."),
     COMMON_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON-NOT-FOUND", "요청한 대상을 찾을 수 없습니다."),

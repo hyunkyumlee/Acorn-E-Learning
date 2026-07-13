@@ -14,12 +14,12 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
 <body class="auth-bg">
-  <div class="bg-fx" aria-hidden="true">
-    <span class="blob blob-1"></span>
-    <span class="blob blob-2"></span>
-    <span class="blob blob-3"></span>
-  </div>
-  <button class="header-icon theme-toggle theme-toggle-floating" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
+<div class="bg-fx" aria-hidden="true">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <span class="blob blob-3"></span>
+</div>
+<button class="header-icon theme-toggle theme-toggle-floating" type="button" data-theme-toggle aria-pressed="false" aria-label="다크모드로 전환">
     <span class="theme-symbol" aria-hidden="true">
       <svg class="theme-symbol-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
         <title>다크모드</title>
@@ -32,60 +32,104 @@
         <path d="M12 2.5v2.1M12 19.4v2.1M4.6 4.6l1.5 1.5M17.9 17.9l1.5 1.5M2.5 12h2.1M19.4 12h2.1M4.6 19.4l1.5-1.5M17.9 6.1l1.5-1.5"></path>
       </svg>
     </span>
-  </button>
-  <main class="page-shell auth-screen login-screen">
-    <section class="page-heading">
-      <h1>회원가입</h1>
-    </section>
+</button>
+<main class="page-shell auth-screen login-screen">
+  <section class="page-heading">
+    <h1 th:text="${social} ? '소셜 회원가입' : '회원가입'">회원가입</h1>
+  </section>
 
-    <section class="auth-grid">
-      <div class="form-panel">
-        <h3>이메일 가입</h3>
+  <section class="auth-grid">
 
-        <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
+    <!-- ===== 이메일 회원가입 (기본: social이 아닐 때) ===== -->
+    <div class="form-panel" th:unless="${social}">
+      <h3>이메일 가입</h3>
 
-        <form th:action="@{/signup}" th:object="${signupForm}" method="post">
-          <input type="hidden" name="redirect" value="/login">
+      <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
 
-          <label class="field">
-            <span>이메일</span>
-            <input type="email" th:field="*{email}" placeholder="newuser@example.com" autocomplete="email">
-          </label>
-          <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+      <form th:action="@{/signup}" th:object="${signupForm}" method="post">
+        <input type="hidden" name="redirect" value="/login">
 
-          <label class="field">
-            <span>비밀번호 (8자 이상)</span>
-            <input type="password" th:field="*{password}" placeholder="Knowva1234!" autocomplete="new-password">
-          </label>
-          <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        <label class="field">
+          <span>이메일</span>
+          <input type="email" th:field="*{email}" placeholder="newuser@example.com" autocomplete="email">
+        </label>
+        <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
 
-          <label class="field">
-            <span>닉네임</span>
-            <input type="text" th:field="*{nickname}" placeholder="신규유저" autocomplete="nickname">
-          </label>
-          <p class="field-error" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></p>
+        <label class="field">
+          <span>비밀번호 (8자 이상)</span>
+          <input type="password" th:field="*{password}" placeholder="Knowva1234!" autocomplete="new-password">
+        </label>
+        <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
 
-          <label class="field">
-            <span>관심 과목 (선택)</span>
-            <select th:field="*{primarySubjectId}">
-              <option value="">선택 안 함</option>
-              <option th:each="subject : ${subjects}"
-                      th:value="${subject.subjectId}"
-                      th:text="${subject.subjectName}">과목명</option>
-            </select>
-          </label>
+        <label class="field">
+          <span>닉네임</span>
+          <input type="text" th:field="*{nickname}" placeholder="신규유저" autocomplete="nickname">
+        </label>
+        <p class="field-error" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></p>
 
-          <label class="field">
-            <span>학습 목표 (선택)</span>
-            <textarea th:field="*{learningGoal}" rows="3" placeholder="Java 백엔드 학습"></textarea>
-          </label>
+        <label class="field">
+          <span>관심 과목 (선택)</span>
+          <select th:field="*{primarySubjectId}">
+            <option value="">선택 안 함</option>
+            <option th:each="subject : ${subjects}"
+                    th:value="${subject.subjectId}"
+                    th:text="${subject.subjectName}">과목명</option>
+          </select>
+        </label>
 
-          <button class="button primary" type="submit">가입하기</button>
-        </form>
+        <label class="field">
+          <span>학습 목표 (선택)</span>
+          <textarea th:field="*{learningGoal}" rows="3" placeholder="Java 백엔드 학습"></textarea>
+        </label>
 
-        <p class="form-foot">이미 계정이 있으신가요? <a th:href="@{/login}">로그인</a></p>
-      </div>
-    </section>
-  </main>
+        <button class="button primary" type="submit">가입하기</button>
+      </form>
+
+      <p class="form-foot">이미 계정이 있으신가요? <a th:href="@{/login}">로그인</a></p>
+    </div>
+
+    <!-- ===== 소셜 회원가입 (소셜 콜백 후: social == true) ===== -->
+    <div class="form-panel" th:if="${social}">
+      <h3>추가 정보 입력</h3>
+      <p class="form-desc">소셜 계정 인증이 완료되었습니다. 가입을 마치려면 아래 정보를 입력해 주세요.</p>
+
+      <p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}">오류 메시지</p>
+
+      <!-- 폼 객체 없이 일반 name= 로 전송 (@RequestParam으로 수신) -->
+      <form th:action="@{/oauth/signup}" method="post">
+        <!-- 이메일은 provider 값을 그대로 사용. 표시만 하고 서버로 전송 X(name 없음) -->
+        <label class="field">
+          <span>이메일 (소셜 계정)</span>
+          <input type="email" th:value="${socialEmail}" readonly autocomplete="email">
+        </label>
+
+        <label class="field">
+          <span>닉네임</span>
+          <input type="text" name="nickname" th:value="${suggestedNickname}" placeholder="신규유저" autocomplete="nickname">
+        </label>
+
+        <label class="field">
+          <span>관심 과목 (선택)</span>
+          <select name="primarySubjectId">
+            <option value="">선택 안 함</option>
+            <option th:each="subject : ${subjects}"
+                    th:value="${subject.subjectId}"
+                    th:text="${subject.subjectName}">과목명</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>학습 목표 (선택)</span>
+          <textarea name="learningGoal" rows="3" placeholder="Java 백엔드 학습"></textarea>
+        </label>
+
+        <button class="button primary" type="submit">가입 완료</button>
+      </form>
+
+      <p class="form-foot"><a th:href="@{/login}">취소하고 로그인으로</a></p>
+    </div>
+
+  </section>
+</main>
 </body>
 </html>

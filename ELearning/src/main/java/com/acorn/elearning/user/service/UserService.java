@@ -111,6 +111,8 @@ public class UserService {
 
         user.setStatus("WITHDRAWN");
         user.setWithdrawnAt(LocalDateTime.now());
+        user.setNickname("탈퇴회원_" + userId);                         // 정하 - 추가 : nickname 마스킹 — 비식별화 + 닉네임 점유 해제(userId라 유니크 충돌 없음)
+        user.setEmail("withdrawn_" + userId + "@masked.local");        // 정하 - 추가 : email 마스킹 — NFR-010 식별 정보 마스킹
         userMapper.update(user);
 
         UserLearningProfile learningProfile = userLearningProfileMapper.findByUserId(userId).orElse(null);

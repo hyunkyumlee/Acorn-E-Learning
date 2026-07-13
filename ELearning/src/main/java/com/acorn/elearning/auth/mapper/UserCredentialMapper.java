@@ -13,4 +13,7 @@ public interface UserCredentialMapper {
     List<UserCredential> findAll();
     int insert(UserCredential model);
     int update(UserCredential model);
+    // [추가] 탈퇴 시 credential 비활성 처리 — login_email 마스킹으로 이메일 로그인 차단 + login_email 점유 해제
+    int deactivateByUserId(Long userId);
+
 }
