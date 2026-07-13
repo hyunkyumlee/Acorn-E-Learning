@@ -59,6 +59,19 @@
         ORDER BY P.created_at DESC, p.post_id DESC
     </select>
 
+    <select id="findPostById" resultMap="PostItemResultMap">
+        SELECT
+            P.post_id, U.nickname AS writer_nickname, P.title, P.board_type,
+            P.like_count, P.comment_count, COUNT(R.report_id) AS report_count,
+            P.created_at, P.status
+        FROM community_posts P
+        JOIN users U ON P.writer_id = U.user_id
+        LEFT JOIN reports R ON R.target_type = 'POST' AND R.target_id = P.post_id
+        WHERE P.post_id = #{postId}
+        GROUP BY P.post_id, U.nickname, P.title, P.board_type,
+                 P.like_count, P.comment_count, P.created_at, P.status
+    </select>
+
     <select id="findPostPage" resultMap="PostItemResultMap">
         SELECT
             P.post_id,
@@ -138,6 +151,17 @@
             C.created_at,
             C.status
         ORDER BY C.created_at DESC
+    </select>
+
+    <select id="findCommentById" resultMap="CommentItemResultMap">
+        SELECT
+            C.comment_id, C.post_id, U.nickname AS writer_nickname, C.content,
+            COUNT(R.report_id) AS report_count, C.created_at, C.status
+        FROM comments C
+        JOIN users U ON C.writer_id = U.user_id
+        LEFT JOIN reports R ON R.target_type = 'COMMENT' AND R.target_id = C.comment_id
+        WHERE C.comment_id = #{commentId}
+        GROUP BY C.comment_id, C.post_id, U.nickname, C.content, C.created_at, C.status
     </select>
 
     <select id="findCommentPage" resultMap="CommentItemResultMap">

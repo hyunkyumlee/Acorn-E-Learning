@@ -11,24 +11,44 @@
         <result property="targetId" column="target_id" />
         <result property="resultStatus" column="result_status" />
         <result property="createdAt" column="created_at" />
+        <result property="targetName" column="target_name"/>
+        <result property="changeDetail" column="change_detail"/>
     </resultMap>
 
     <select id="findById" parameterType="long" resultMap="AdminOperationLogResultMap">
-        SELECT log_id, admin_id, action_type, target_type, target_id, result_status, created_at
+        SELECT
+            log_id,
+            admin_id,
+            action_type,
+            target_type,
+            target_id,
+            result_status,
+            created_at,
+            target_name,
+            change_detail
         FROM admin_operation_logs
         WHERE log_id = #{id}
     </select>
 
 
     <select id="findAll" resultMap="AdminOperationLogResultMap">
-        SELECT log_id, admin_id, action_type, target_type, target_id, result_status, created_at
+        SELECT
+            log_id,
+            admin_id,
+            action_type,
+            target_type,
+            target_id,
+            result_status,
+            created_at,
+            target_name,
+            change_detail
         FROM admin_operation_logs
         ORDER BY log_id DESC
     </select>
 
     <insert id="insert" parameterType="com.acorn.elearning.admin.model.AdminOperationLog" useGeneratedKeys="true" keyProperty="logId">
         INSERT INTO admin_operation_logs (
-        admin_id, action_type, target_type, target_id, result_status, created_at
+        admin_id, action_type, target_type, target_id, result_status, created_at, target_name, change_detail
         )
         VALUES (
             #{adminId},
@@ -36,7 +56,9 @@
             #{targetType},
             #{targetId},
             #{resultStatus},
-            #{createdAt}
+            #{createdAt},
+            #{targetName},
+            #{changeDetail}
         )
     </insert>
 
@@ -45,8 +67,55 @@
         SET admin_id = #{adminId},
         action_type = #{actionType},
         target_id = #{targetId},
+        target_name = #{targetName},
+        change_detail = #{changeDetail},
         result_status = #{resultStatus},
+        target_name = #{targetName},
+        change_detail = #{changeDetail},
         target_type = #{targetType}
         WHERE log_id = #{logId}
     </update>
+
+
+    <!-- 운영 로그 필터 공통 조건 -->
+    <sql id="OperationLogFilterWhere">
+        <where>
+            <if test="targetType != null and targetType != ''">
+                AND l.target_type = #{targetType}
+            </if>
+
+            <if test="actionCategory != null and actionCategory != ''">
+                AND l.action_type LIKE CONCAT('%_', #{actionCategory})
+            </if>
+        </where>
+    </sql>
+
+    <!-- 운영 로그 목록 조회 -->
+    <select id="findPage"
+            resultType="com.acorn.elearning.admin.dto.response.AdminOperationLogPageResponse">
+        SELECT
+            l.log_id AS logId,
+            u.email AS adminEmail,
+            u.nickname AS adminNickname,
+            l.target_type AS targetType,
+            l.action_type AS actionType,
+            l.target_id AS targetId,
+            l.result_status AS resultStatus,
+            l.created_at AS createdAt,
+            l.target_name AS targetName,
+            l.change_detail AS changeDetail
+        FROM admin_operation_logs l
+        LEFT JOIN users u
+            ON u.user_id = l.admin_id
+        <include refid="OperationLogFilterWhere" />
+        ORDER BY l.created_at DESC, l.log_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 필터 적용 운영 로그 전체 건수 -->
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM admin_operation_logs l
+        <include refid="OperationLogFilterWhere" />
+    </select>
 </mapper>

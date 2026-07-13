@@ -1,0 +1,212 @@
+.admin-log-screen {
+    min-height: 100vh;
+    padding: 22px 28px 28px;
+    background: #f6f7f9;
+}
+
+.admin-log-header {
+    padding-bottom: 16px;
+}
+
+.admin-log-header h1,
+.admin-log-section-title h2 {
+    margin: 0;
+    color: #111827;
+}
+
+.admin-log-header h1 {
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.admin-log-toolbar {
+    margin-bottom: 16px;
+}
+
+.admin-log-filter {
+    display: flex;
+    gap: 12px;
+}
+
+.admin-log-filter select,
+.admin-log-filter-button {
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+}
+
+.admin-log-filter select {
+    min-width: 160px;
+}
+
+.admin-log-filter-button {
+    min-width: 72px;
+    border-color: #111827;
+    background: #111827;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.admin-log-filter-button:hover {
+    background: #374151;
+}
+
+.admin-log-section-title {
+    padding-bottom: 6px;
+}
+
+.admin-log-section-title h2 {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.admin-log-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.admin-log-table {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: collapse;
+}
+
+.admin-log-table thead {
+    background: #eef0f2;
+}
+
+.admin-log-table th,
+.admin-log-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2937;
+    font-size: 13px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.admin-log-table th {
+    color: #374151;
+    font-weight: 800;
+}
+
+.admin-log-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.admin-log-status-failed {
+    color: #dc2626 !important;
+    font-weight: 800;
+}
+
+.admin-log-empty {
+    height: 76px;
+    color: #6b7280 !important;
+    text-align: center !important;
+}
+
+.admin-log-detail-button {
+    min-width: 64px;
+    height: 28px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #111827;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.admin-log-detail-button:hover {
+    background: #f3f4f6;
+}
+
+.admin-log-detail-panel {
+    margin-top: 28px;
+    padding: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #eeeeef;
+}
+
+.admin-log-detail-panel h2 {
+    margin: 0 0 14px;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.admin-log-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+}
+
+.admin-log-detail-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.admin-log-detail-grid input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+}
+
+.admin-log-detail-grid textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 84px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.admin-log-detail-wide {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+    .admin-log-screen {
+        padding: 18px;
+    }
+
+    .admin-log-filter {
+        flex-direction: column;
+    }
+
+    .admin-log-filter select,
+    .admin-log-filter-button {
+        width: 100%;
+    }
+
+    .admin-log-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-log-detail-wide {
+        grid-column: auto;
+    }
+}

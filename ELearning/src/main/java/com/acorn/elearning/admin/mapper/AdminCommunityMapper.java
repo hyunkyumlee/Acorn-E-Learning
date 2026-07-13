@@ -4,9 +4,16 @@ import com.acorn.elearning.admin.dto.response.AdminCommunityPageResponse;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AdminCommunityMapper {
 
+    Optional<AdminCommunityPageResponse.PostItem> findPostById(
+            @Param("postId") Long postId
+    );
+    Optional<AdminCommunityPageResponse.CommentItem> findCommentById(
+            @Param("commentId") Long commentId
+    );
     List<AdminCommunityPageResponse.PostItem> findPosts();
     List<AdminCommunityPageResponse.CommentItem> findComments();
     List<AdminCommunityPageResponse.PostItem> findPostPage(@Param("limit") int limit,

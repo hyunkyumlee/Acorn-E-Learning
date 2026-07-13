@@ -3,6 +3,7 @@ package com.acorn.elearning.admin.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,7 @@ import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.practice.mapper.PracticeProblemMapper;
 import com.acorn.elearning.practice.model.PracticeProblem;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,13 +48,15 @@ public class AdminContentService {
 
     private final AdminLogService adminLogService;
 
-    private AdminOperationLog operationLog(Long adminId, String actionType, String targetType,Long targetId){
+    private AdminOperationLog operationLog(Long adminId, String actionType, String targetType,Long targetId, String targetName, String changeDetail){
 
         AdminOperationLog log = new AdminOperationLog();
         log.setAdminId(adminId);
         log.setActionType(actionType);
         log.setTargetType(targetType);
         log.setTargetId(targetId);
+        log.setTargetName(targetName);
+        log.setChangeDetail(changeDetail);
         log.setResultStatus("SUCCESS");
         log.setCreatedAt(LocalDateTime.now());
 
@@ -103,6 +107,7 @@ public class AdminContentService {
 
 
 
+    @Transactional
     public int createSubject(SubjectForm form, Long adminId){
 
         Subject s = new Subject();
@@ -117,7 +122,10 @@ public class AdminContentService {
 
         if(inserted == 1){
             adminLogService.insert(
-                    operationLog(adminId, "SUBJECT_CREATE", "SUBJECT", s.getSubjectId())
+                    operationLog(adminId, "SUBJECT_CREATE", "SUBJECT",
+                            s.getSubjectId(),
+                            s.getSubjectName(),
+                            "과목을 등록")
             );
         }
 
@@ -131,6 +139,9 @@ public class AdminContentService {
                         ErrorCode.COMMON_NOT_FOUND,
                         "수정할 과목을 찾을 수 없습니다."
                 ));
+
+        boolean activeChanged = form.getIsActive() != null
+                && !Objects.equals(s.getIsActive(), form.getIsActive());
 
         boolean becomingInactive =
                 Boolean.TRUE.equals(s.getIsActive())
@@ -154,9 +165,18 @@ public class AdminContentService {
 
         int updated = sm.update(s);
 
+        String actionType = activeChanged ? "SUBJECT_STATUS_UPDATE" : "SUBJECT_UPDATE";
+        String changeDetail = activeChanged
+                ? (Boolean.TRUE.equals(form.getIsActive()) ? "과목을 활성화" : "과목을 비활성화")
+                : "과목을 수정";
+
         if(updated == 1){
             adminLogService.insert(
-                    operationLog(adminId, "SUBJECT_UPDATE", "SUBJECT", s.getSubjectId())
+                    operationLog(adminId, actionType, "SUBJECT",
+                            s.getSubjectId(),
+                            s.getSubjectName(),
+                            changeDetail
+                            )
             );
         }
         return updated;
@@ -172,6 +192,7 @@ public class AdminContentService {
         return cm.findById(id);
     }
 
+    @Transactional
     public int createCurriculumNode(CurriculumNodeForm form, Long adminId){
 
         CurriculumNode c = new CurriculumNode();
@@ -191,18 +212,24 @@ public class AdminContentService {
 
         if(created == 1){
             adminLogService.insert(
-                    operationLog(adminId, "CURRICULUM_NODE_CREATE", "CURRICULUM_NODE", c.getNodeId())
+                    operationLog(adminId, "CURRICULUM_NODE_CREATE", "CURRICULUM_NODE",
+                            c.getNodeId(), c.getTitle(),
+                            "커리큘럼을 등록")
             );
         }
         return created;
     }
 
+    @Transactional
     public int updateCurriculumNode(CurriculumNodeForm form, Long adminId){
         CurriculumNode c = cm.findById(form.getNodeId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.COMMON_NOT_FOUND,
                         "수정할 커리큘럼을 찾을 수 없습니다."
                 ));
+
+        boolean activeChanged = form.getIsActive() != null
+                && !Objects.equals(c.getIsActive(), form.getIsActive());
 
         c.setSubjectId(form.getSubjectId());
         c.setLevelCode(form.getLevelCode());
@@ -216,9 +243,16 @@ public class AdminContentService {
 
         int updated = cm.update(c);
 
+        String actionType = activeChanged ? "CURRICULUM_NODE_STATUS_UPDATE" : "CURRICULUM_NODE_UPDATE";
+        String changeDetail = activeChanged
+                ? (Boolean.TRUE.equals(c.getIsActive()) ? "커리큘럼을 활성화" : "커리큘럼을 비활성화")
+                : "커리큘럼을 수정";
+
         if(updated == 1){
             adminLogService.insert(
-                    operationLog(adminId, "CURRICULUM_NODE_UPDATE", "CURRICULUM_NODE", c.getNodeId())
+                    operationLog(adminId, actionType, "CURRICULUM_NODE",
+                            c.getNodeId(), c.getTitle(),
+                            changeDetail)
             );
         }
         return updated;
@@ -288,6 +322,7 @@ public class AdminContentService {
         return lm.update(model);
     }
 
+    @Transactional
     public int createLesson(LessonForm form, Long adminId){
         Lesson lesson = new Lesson();
         lesson.setNodeId(form.getNodeId());
@@ -303,7 +338,9 @@ public class AdminContentService {
 
         if(inserted == 1){
             adminLogService.insert(
-                    operationLog(adminId, "LESSON_CREATE", "LESSON", lesson.getLessonId())
+                    operationLog(adminId, "LESSON_CREATE", "LESSON",
+                            lesson.getLessonId(), lesson.getTitle(),
+                            "이론 수업을 등록")
             );
         }
 
@@ -311,12 +348,16 @@ public class AdminContentService {
         return inserted;
     }
 
+    @Transactional
     public int updateLesson(LessonForm form, Long adminId){
         Lesson lesson = lm.findById(form.getLessonId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.COMMON_NOT_FOUND,
                         "수정할 이론 자료를 찾을 수 없습니다."
                 ));
+
+        boolean activeChanged = form.getIsActive() != null
+                && !Objects.equals(lesson.getIsActive(), form.getIsActive());
 
         lesson.setNodeId(form.getNodeId());
         lesson.setTitle(form.getTitle());
@@ -331,9 +372,16 @@ public class AdminContentService {
 
         int updated = lm.update(lesson);
 
+        String actionType = activeChanged ? "LESSON_STATUS_UPDATE" : "LESSON_UPDATE";
+        String changeDetail = activeChanged
+                ? (Boolean.TRUE.equals(lesson.getIsActive()) ? "이론 수업을 활성화" : "이론 수업을 비활성화")
+                : "이론 수업 내용을 변경";
+
         if(updated == 1){
             adminLogService.insert(
-                    operationLog(adminId, "LESSON_UPDATE", "LESSON", lesson.getLessonId())
+                    operationLog(adminId, actionType, "LESSON",
+                            lesson.getLessonId(), lesson.getTitle(),
+                            changeDetail)
             );
         }
         return updated;
@@ -341,13 +389,22 @@ public class AdminContentService {
 
     @Transactional
     public int deleteLesson(Long lessonId, Long adminId) {
+
+        Lesson lesson = lm.findById(lessonId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "삭제할 이론 자료를 찾을 수 없습니다."
+                ));
+
         alm.deleteBookmarksByLessonId(lessonId);
 
         int deleted = alm.deleteById(lessonId);
 
+        String targetName = lesson.getTitle();
         if(deleted == 1){
             adminLogService.insert(
-                    operationLog(adminId, "LESSON_DELETE", "LESSON", lessonId)
+                    operationLog(adminId, "LESSON_DELETE", "LESSON",
+                            lessonId, lesson.getTitle(), "이론 수업을 삭제")
             );
         }
         return deleted;
@@ -359,13 +416,22 @@ public class AdminContentService {
         return apm.findAll();
     }
 
+    @Transactional
     public int deleteProblem(Long problemId, Long adminId) {
+
+        PracticeProblem problem = ppm.findById(problemId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "삭제할 문제를 찾을 수 없습니다."
+                ));
 
         int deleted = apm.deleteById(problemId);
 
+
         if(deleted == 1){
             adminLogService.insert(
-                    operationLog(adminId, "PROBLEM_DELETE", "PROBLEM", problemId)
+                    operationLog(adminId, "PROBLEM_DELETE", "PROBLEM",
+                            problemId, problem.getQuestion(), "문제를 삭제")
             );
         }
         
@@ -392,6 +458,7 @@ public class AdminContentService {
         return ppm.update(model);
     }
 
+    @Transactional
     public int createProblem(ProblemForm form, Long adminId){
         PracticeProblem problem = new PracticeProblem();
 
@@ -422,19 +489,24 @@ public class AdminContentService {
 
         if(inserted == 1){
             adminLogService.insert(
-                    operationLog(adminId, "PROBLEM_CREATE", "PROBLEM", problem.getProblemId())
+                    operationLog(adminId, "PROBLEM_CREATE", "PROBLEM",
+                            problem.getProblemId(), problem.getQuestion(), "문제를 등록")
             );
         }
 
         return inserted;
     }
 
+    @Transactional
     public int updateProblem(ProblemForm form, Long adminId){
         PracticeProblem problem = ppm.findById(form.getProblemId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.COMMON_NOT_FOUND,
                         "수정할 문제를 찾을 수 없습니다."
                 ));
+
+        boolean activeChanged = form.getIsActive() != null
+                && !Objects.equals(problem.getIsActive(), form.getIsActive());
 
 
         Lesson lesson = lm.findById(form.getLessonId())
@@ -461,14 +533,21 @@ public class AdminContentService {
 
         int updated = ppm.update(problem);
 
+        String actionType = activeChanged ? "PROBLEM_STATUS_UPDATE" : "PROBLEM_UPDATE";
+        String changeDetail = activeChanged
+                ? (Boolean.TRUE.equals(problem.getIsActive()) ? "문제를 활성화" : "문제를 비활성화")
+                : "문제를 수정";
+
         if(updated == 1){
             adminLogService.insert(
-                    operationLog(adminId, "PROBLEM_UPDATE", "PROBLEM", problem.getProblemId())
+                    operationLog(adminId, actionType, "PROBLEM",
+                            problem.getProblemId(), problem.getQuestion(), changeDetail)
             );
         }
         return updated;
     }
 
+    @Transactional
     public int updateProblemStatus(Long problemId, Boolean isActive, Long adminId) {
         if (isActive == null) {
             return 0;
@@ -484,9 +563,15 @@ public class AdminContentService {
 
         int updated = ppm.update(problem);
 
+
+        String changeDetail = Boolean.TRUE.equals(isActive)
+                ? "문제를 활성화"
+                : "문제를 비활성화";
+
         if (updated == 1) {
             adminLogService.insert(
-                    operationLog(adminId, "PROBLEM_STATUS_UPDATE", "PROBLEM", problemId)
+                    operationLog(adminId, "PROBLEM_STATUS_UPDATE", "PROBLEM"
+                            , problemId, problem.getQuestion(), changeDetail )
             );
         }
 
@@ -571,9 +656,18 @@ public class AdminContentService {
 
         int updated = sm.update(s);
 
+        String targetName = s.getSubjectName();
+        String changeDetail = Boolean.TRUE.equals(isActive)
+                        ? "과목을 활성화"
+                        : "과목을 비활성화";
+
         if(updated == 1){
             adminLogService.insert(
-                    operationLog(adminId, "SUBJECT_STATUS_UPDATE", "SUBJECT", subjectId)
+                    operationLog(adminId, "SUBJECT_STATUS_UPDATE", "SUBJECT",
+                            subjectId,
+                            targetName,
+                            changeDetail
+                            )
             );
         }
         return updated;
@@ -601,6 +695,7 @@ public class AdminContentService {
 
     }
 
+    @Transactional
     public int updateCurriculumNodeStatus(Long nodeId, Boolean isActive, Long adminId){
         CurriculumNode c = cm.findById(nodeId)
                 .orElseThrow(() -> new BusinessException(
@@ -612,14 +707,22 @@ public class AdminContentService {
 
         int updated = cm.update(c);
 
+        String targetName = c.getTitle();
+        String changeDetail = Boolean.TRUE.equals(isActive)
+                ? "커리큘럼을 활성화"
+                : "커리큘럼을 비활성화";
+
         if(updated == 1){
             adminLogService.insert(
-                    operationLog(adminId, "CURRICULUM_NODE_STATUS_UPDATE", "CURRICULUM_NODE", nodeId)
+                    operationLog(adminId, "CURRICULUM_NODE_STATUS_UPDATE", "CURRICULUM_NODE"
+                            , nodeId, targetName, changeDetail
+                            )
             );
         }
         return updated;
     }
 
+    @Transactional
     public int updateLessonStatus(Long lessonId, Boolean isActive, Long adminId){
 
         if(isActive == null){
@@ -635,9 +738,13 @@ public class AdminContentService {
 
         int updated = lm.update(l);
 
+        String changeDetail = Boolean.TRUE.equals(isActive)
+                ? "이론 수업을 활성화"
+                : "이론 수업을 비활성화";
         if(updated == 1){
             adminLogService.insert(
-                    operationLog(adminId, "LESSON_STATUS_UPDATE", "LESSON", lessonId)
+                    operationLog(adminId, "LESSON_STATUS_UPDATE", "LESSON",
+                            lessonId, l.getTitle(), changeDetail )
             );
         }
         return updated;
