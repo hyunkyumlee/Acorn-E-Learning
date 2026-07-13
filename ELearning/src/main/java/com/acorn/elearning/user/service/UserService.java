@@ -3,6 +3,7 @@ package com.acorn.elearning.user.service;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.config.UploadProperties;
+import com.acorn.elearning.learning.service.EnrollmentService;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.dto.response.UserProfileResponse;
 import com.acorn.elearning.user.form.ProfileForm;
@@ -27,15 +28,18 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
     private final UserMapper userMapper;
     private final UserLearningProfileMapper userLearningProfileMapper;
+    private final EnrollmentService enrollmentService;
     private final UploadProperties uploadProperties;
 
     public UserService(
             UserMapper userMapper,
             UserLearningProfileMapper userLearningProfileMapper,
+            EnrollmentService enrollmentService,
             UploadProperties uploadProperties
     ) {
         this.userMapper = userMapper;
         this.userLearningProfileMapper = userLearningProfileMapper;
+        this.enrollmentService = enrollmentService;
         this.uploadProperties = uploadProperties;
     }
 
@@ -62,6 +66,7 @@ public class UserService {
 
         UserLearningProfile learningProfile = userLearningProfileMapper.findByUserId(userId).orElse(null);
         String learningGoal = normalizeOptional(form.getLearningGoal());
+        validatePrimarySubject(userId, form.getPrimarySubjectId());
         if (learningProfile != null) {
             learningProfile.setLearningGoal(learningGoal);
             if (form.getPrimarySubjectId() != null) {
@@ -139,6 +144,12 @@ public class UserService {
 
     private String normalizeEmail(String value) {
         return normalizeRequired(value).toLowerCase(Locale.ROOT);
+    }
+
+    private void validatePrimarySubject(Long userId, Long primarySubjectId) {
+        if (primarySubjectId != null && !enrollmentService.isEnrolled(userId, primarySubjectId)) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "수강신청한 과목만 대표 과목으로 선택할 수 있습니다.");
+        }
     }
 
     private boolean hasProfileImage(MultipartFile file) {

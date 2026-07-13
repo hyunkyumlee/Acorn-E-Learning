@@ -1,6 +1,9 @@
 package com.acorn.elearning.user.controller;
 
 import com.acorn.elearning.config.UploadProperties;
+import com.acorn.elearning.learning.mapper.SubjectMapper;
+import com.acorn.elearning.learning.model.Subject;
+import com.acorn.elearning.learning.service.EnrollmentService;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.dto.response.CommunityActivityPageResponse;
 import com.acorn.elearning.user.dto.response.LearningStatusPageResponse;
@@ -14,6 +17,8 @@ import jakarta.validation.Valid;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Set;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
@@ -33,15 +38,21 @@ import org.springframework.validation.BindingResult;
 public class MyPageController {
     private final UserActivityService userActivityService;
     private final UserService userService;
+    private final EnrollmentService enrollmentService;
+    private final SubjectMapper subjectMapper;
     private final UploadProperties uploadProperties;
 
     public MyPageController(
             UserActivityService userActivityService,
             UserService userService,
+            EnrollmentService enrollmentService,
+            SubjectMapper subjectMapper,
             UploadProperties uploadProperties
     ) {
         this.userActivityService = userActivityService;
         this.userService = userService;
+        this.enrollmentService = enrollmentService;
+        this.subjectMapper = subjectMapper;
         this.uploadProperties = uploadProperties;
     }
 
@@ -57,6 +68,7 @@ public class MyPageController {
         model.addAttribute("screen", "mypage/index");
         model.addAttribute("view", view);
         model.addAttribute("profileForm", profileForm(view));
+        model.addAttribute("enrolledSubjects", enrolledSubjects(sessionUser));
         return "mypage/index";
     }
 
@@ -155,6 +167,14 @@ public class MyPageController {
         form.setLearningGoal(view.learning().learningGoal());
         form.setPrimarySubjectId(view.learning().primarySubjectId());
         return form;
+    }
+
+    private List<Subject> enrolledSubjects(SessionUser sessionUser) {
+        Set<Long> enrolledSubjectIds = enrollmentService.getEnrolledSubjectIds(sessionUser.userId());
+        return subjectMapper.findAll().stream()
+                .filter(subject -> Boolean.TRUE.equals(subject.getIsActive()))
+                .filter(subject -> enrolledSubjectIds.contains(subject.getSubjectId()))
+                .toList();
     }
 
     private String communityActivity(

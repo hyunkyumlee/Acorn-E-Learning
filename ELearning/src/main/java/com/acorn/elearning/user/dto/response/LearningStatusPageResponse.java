@@ -138,20 +138,11 @@ public record LearningStatusPageResponse(
 
     private static SubjectLevelProgress currentLevelProgress(List<SubjectLevelProgress> levelProgressItems) {
         List<SubjectLevelProgress> levels = normalizedLevelProgresses(levelProgressItems);
-        SubjectLevelProgress selected = levels.stream()
+        // 레벨 테스트로 상위 레벨부터 시작한 경우에도 실제 시작 레벨을 현재 단계로 표시한다.
+        return levels.stream()
                 .filter(SubjectLevelProgress::unlocked)
-                .findFirst()
+                .reduce((ignored, level) -> level)
                 .orElse(levels.get(0));
-        for (SubjectLevelProgress level : levels) {
-            if (!level.unlocked()) {
-                continue;
-            }
-            selected = level;
-            if (level.progressRate() < 100) {
-                break;
-            }
-        }
-        return selected;
     }
 
     private static List<SubjectLevelProgress> normalizedLevelProgresses(List<SubjectLevelProgress> levelProgressItems) {
