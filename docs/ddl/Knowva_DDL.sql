@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.9
+  Source: Notion DB 명세 v2.0
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -39,6 +39,7 @@ USE elearning;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS subject_content_status_backups;
 DROP TABLE IF EXISTS content_recommendations;
 DROP TABLE IF EXISTS admin_operation_logs;
 DROP TABLE IF EXISTS notices;

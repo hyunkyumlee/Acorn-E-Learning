@@ -1,6 +1,6 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.9 / 레슨 단위 학습 구조
+  Source: Notion DB 명세 v2.0 / 레슨 단위 학습 구조
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Execution contract
@@ -72,7 +72,7 @@ START TRANSACTION;
 
 SET @sample_password_hash = '$2a$10$rXWwp4H7mIiDJv.c2H9moOtZ3m/8cBMGOsMuaX0G7vW/A1W3tPCxy';
 
-DELETE FROM subject_content_status_backups;
+DELETE FROM subject_content_status_backups WHERE backup_id > 0;
 
 INSERT INTO subjects (subject_code, subject_name, description, sort_order, is_active)
 VALUES
