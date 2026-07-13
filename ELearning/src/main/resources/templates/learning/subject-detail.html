@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${subject != null ? subject.subjectName + ' | Knowva' : '과목 | Knowva'}">과목 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/learning.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+</head>
+<body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="page-shell learning-screen subject-screen">
+
+    <a class="lesson-back-link" th:href="@{/learning}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+      학습 로드맵으로
+    </a>
+
+    <!-- 과목 히어로: 과목명 + 소개 + (수강 중이면) 진행률 -->
+    <section class="subject-hero" th:classappend="${enrolled} ? ' is-enrolled' : ' is-locked'">
+      <span class="subject-hero-mark" aria-hidden="true">
+        <img th:src="@{'/assets/images/icons/subject/' + ${#strings.toLowerCase(subject.subjectCode)} + '.png'}"
+             alt="" loading="lazy" decoding="async">
+      </span>
+      <div class="subject-hero-text">
+        <span class="subject-hero-tags">
+          <span class="subject-hero-code" th:text="${subject.subjectCode}">JAVA</span>
+          <span class="subject-hero-state" th:if="${enrolled}">수강 중</span>
+          <span class="subject-hero-state is-off" th:unless="${enrolled}">수강 전</span>
+        </span>
+        <h1 class="subject-hero-name" th:text="${subject.subjectName}">Java</h1>
+        <p class="subject-hero-desc" th:if="${subject.description != null}"
+           th:text="${subject.description}">과목 소개</p>
+        <p class="subject-hero-desc" th:unless="${subject.description != null}">
+          아직 과목 소개가 등록되지 않았어요.
+        </p>
+
+        <div class="subject-hero-progress" th:if="${enrolled}">
+          <div class="subject-hero-bar"><i th:style="'width:' + ${progressPercent} + '%'"></i></div>
+          <span class="subject-hero-count">진행률 <strong th:text="${progressPercent} + '%'">0%</strong></span>
+        </div>
+        <p class="subject-hero-status" th:unless="${enrolled}">
+          수강 신청하면 로드맵이 열리고 진행률이 기록돼요.
+        </p>
+      </div>
+
+      <!-- 과목 규모 요약: 레벨/행성/레슨 총량 -->
+      <dl class="subject-hero-stats" th:if="${levelSummaries != null and !levelSummaries.isEmpty()}">
+        <div class="subject-hero-stat">
+          <dt>레벨</dt>
+          <dd th:text="${#lists.size(levelSummaries)}">3</dd>
+        </div>
+        <div class="subject-hero-stat">
+          <dt>행성</dt>
+          <dd th:text="${#aggregates.sum(levelSummaries.![planetCount])}">15</dd>
+        </div>
+        <div class="subject-hero-stat">
+          <dt>레슨</dt>
+          <dd th:text="${#aggregates.sum(levelSummaries.![lessonCount])}">150</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- 이 과목에서 배우는 것: 레벨별 행성/레슨 수 -->
+    <section class="panel subject-levels">
+      <h2 class="subject-levels-title">이 과목에서 배우는 것</h2>
+      <ul class="subject-level-list">
+        <li th:each="summary : ${levelSummaries}" class="subject-level-row"
+            th:classappend="${'level-' + #strings.toLowerCase(summary.levelCode)}">
+          <span class="subject-level-code" th:text="${summary.levelCode}">BRONZE</span>
+          <span class="subject-level-counts">
+            행성 <strong th:text="${summary.planetCount}">0</strong>개 ·
+            레슨 <strong th:text="${summary.lessonCount}">0</strong>개
+          </span>
+          <span class="subject-level-empty" th:if="${summary.planetCount == 0}">준비 중</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 수강 중: 바로 학습 계속 -->
+    <section class="panel subject-cta" th:if="${enrolled}">
+      <a class="button primary" th:href="@{/learning(subjectId=${subject.subjectId})}">학습 계속하기</a>
+    </section>
+
+    <!-- 수강 전: 시작 방식 2택 (온보딩과 동일한 선택지) -->
+    <section class="panel subject-cta" th:unless="${enrolled}">
+      <h2 class="subject-cta-title">어떻게 시작할까요?</h2>
+
+      <div class="subject-start-grid">
+        <form th:action="@{/learning/subjects/{id}/enroll(id=${subject.subjectId})}" method="post"
+              class="subject-start-card is-recommended">
+          <input type="hidden" name="startMode" value="BASIC">
+          <span class="subject-start-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"></path><circle cx="12" cy="12" r="3.2"></circle></svg>
+          </span>
+          <h3 class="subject-start-name">기초부터 시작</h3>
+          <p class="subject-start-desc">첫 행성부터 차근차근 학습해요.</p>
+          <button type="submit" class="button primary">기초부터 시작</button>
+        </form>
+
+        <form th:action="@{/learning/subjects/{id}/enroll(id=${subject.subjectId})}" method="post"
+              class="subject-start-card"
+              th:classappend="${levelTestAvailable} ? '' : ' is-disabled'">
+          <input type="hidden" name="startMode" value="LEVEL_TEST">
+          <span class="subject-start-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"></path></svg>
+          </span>
+          <h3 class="subject-start-name">레벨 테스트</h3>
+          <p class="subject-start-desc" th:if="${levelTestAvailable}">
+            8문항을 풀고 내 레벨부터 시작해요.
+          </p>
+          <p class="subject-start-desc" th:unless="${levelTestAvailable}">
+            이 과목은 아직 레벨 테스트 문항이 준비 중이에요.
+          </p>
+          <button type="submit" class="button" th:disabled="${!levelTestAvailable}">
+            <span th:if="${levelTestAvailable}">레벨 테스트 보기</span>
+            <span th:unless="${levelTestAvailable}">문항 준비 중</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

@@ -15,6 +15,8 @@ public interface UserLevelUnlockMapper {
     /** 특정 과목에서 사용자가 해금한 레벨 전체(레벨 코드 오름차순). */
     List<UserLevelUnlock> findByUserAndSubject(@Param("userId") Long userId,
                                                @Param("subjectId") Long subjectId);
+    /** 사용자의 전 과목 unlock 기록. 과목 목록을 한 번에 그릴 때 과목마다 조회하지 않기 위해 사용한다. */
+    List<UserLevelUnlock> findByUser(@Param("userId") Long userId);
     int insert(UserLevelUnlock model);
     int update(UserLevelUnlock model);
 }

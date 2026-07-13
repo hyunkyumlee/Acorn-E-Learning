@@ -40,19 +40,29 @@ public class LessonService {
     private final UserLevelUnlockMapper userLevelUnlockMapper;
     private final LessonBookmarkMapper lessonBookmarkMapper;
     private final UserLessonProgressMapper userLessonProgressMapper;
+    private final EnrollmentService enrollmentService;
 
     public LessonService(LessonMapper lessonMapper,
                          CurriculumNodeMapper curriculumNodeMapper,
                          LearningProgressMapper learningProgressMapper,
                          UserLevelUnlockMapper userLevelUnlockMapper,
                          LessonBookmarkMapper lessonBookmarkMapper,
-                         UserLessonProgressMapper userLessonProgressMapper) {
+                         UserLessonProgressMapper userLessonProgressMapper,
+                         EnrollmentService enrollmentService) {
         this.lessonMapper = lessonMapper;
         this.curriculumNodeMapper = curriculumNodeMapper;
         this.learningProgressMapper = learningProgressMapper;
         this.userLevelUnlockMapper = userLevelUnlockMapper;
         this.lessonBookmarkMapper = lessonBookmarkMapper;
         this.userLessonProgressMapper = userLessonProgressMapper;
+        this.enrollmentService = enrollmentService;
+    }
+
+    /** 수강하지 않은 과목의 학습은 막는다(레벨 해금 여부와 별개). */
+    private void requireEnrolled(Long userId, Long subjectId) {
+        if (!enrollmentService.isEnrolled(userId, subjectId)) {
+            throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "수강 신청하지 않은 과목입니다.");
+        }
     }
 
     /**
@@ -73,6 +83,8 @@ public class LessonService {
         CurriculumNode node = curriculumNodeMapper.findById(lesson.getNodeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "단원 정보를 찾을 수 없습니다."));
         Long subjectId = node.getSubjectId();
+
+        requireEnrolled(userId, subjectId);
 
         // 403: 노드 레벨이 사용자에게 unlock 됐는지 확인(user_level_unlocks). 잠긴 레벨이면 학습 불가.
         if (userLevelUnlockMapper.findByUserSubjectLevel(userId, subjectId, node.getLevelCode()).isEmpty()) {
@@ -152,6 +164,8 @@ public class LessonService {
         CurriculumNode node = curriculumNodeMapper.findById(lesson.getNodeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "단원 정보를 찾을 수 없습니다."));
         Long subjectId = node.getSubjectId();
+
+        requireEnrolled(userId, subjectId);
 
         if (userLevelUnlockMapper.findByUserSubjectLevel(userId, subjectId, node.getLevelCode()).isEmpty()) {
             throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "아직 잠긴 레벨의 학습입니다.");

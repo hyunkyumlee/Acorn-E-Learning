@@ -54,6 +54,24 @@
           AND ulp.theory_completed = 1
           AND ulp.practice_passed = 1
     </select>
+
+    <!-- 과목 목록 표시용: 과목별 required 레슨 총수/완료수를 한 번에 집계 -->
+    <select id="findLessonStatsBySubject" resultType="com.acorn.elearning.learning.view.SubjectProgressRow">
+        SELECT n.subject_id AS subject_id,
+               COUNT(l.lesson_id) AS total_lessons,
+               SUM(CASE WHEN ulp.theory_completed = 1 AND ulp.practice_passed = 1 THEN 1 ELSE 0 END)
+                   AS completed_lessons
+        FROM curriculum_nodes n
+        JOIN lessons l
+          ON l.node_id = n.node_id
+         AND l.is_active = 1
+         AND l.required_for_completion = 1
+        LEFT JOIN user_lesson_progress ulp
+          ON ulp.lesson_id = l.lesson_id AND ulp.user_id = #{userId}
+        WHERE n.is_active = 1
+        GROUP BY n.subject_id
+    </select>
+
     <!--추가한 부분-->
     <insert id="upsertPracticePassed">
         INSERT INTO user_lesson_progress (

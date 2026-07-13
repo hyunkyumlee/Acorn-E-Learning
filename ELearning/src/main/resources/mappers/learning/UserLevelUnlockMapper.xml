@@ -48,12 +48,24 @@
         ORDER BY level_code ASC
     </select>
 
+    <!-- 과목 목록 표시용: 전 과목 unlock을 한 번에 조회 -->
+    <select id="findByUser" resultMap="UserLevelUnlockResultMap">
+        SELECT <include refid="columns" />
+        FROM user_level_unlocks
+        WHERE user_id = #{userId}
+        ORDER BY subject_id ASC, level_code ASC
+    </select>
+
+    <!-- (user_id, subject_id, level_code) UNIQUE 기준 멱등: 같은 해금이 동시에 들어와도 실패시키지 않고
+         기존 행 id를 그대로 돌려준다(LAST_INSERT_ID). 해금은 한 번 열리면 그만이므로 값을 덮어쓰지 않는다. -->
     <insert id="insert" parameterType="com.acorn.elearning.learning.model.UserLevelUnlock"
             useGeneratedKeys="true" keyProperty="unlockId">
         INSERT INTO user_level_unlocks
             (user_id, subject_id, level_code, unlock_source, unlocked_by_exam_id, unlocked_at)
         VALUES
             (#{userId}, #{subjectId}, #{levelCode}, #{unlockSource}, #{unlockedByExamId}, #{unlockedAt})
+        ON DUPLICATE KEY UPDATE
+            unlock_id = LAST_INSERT_ID(unlock_id)
     </insert>
 
     <update id="update" parameterType="com.acorn.elearning.learning.model.UserLevelUnlock">

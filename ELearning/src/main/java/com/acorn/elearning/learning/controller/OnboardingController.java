@@ -2,7 +2,9 @@ package com.acorn.elearning.learning.controller;
 
 import com.acorn.elearning.learning.mapper.LearningProfileWriteMapper;
 import com.acorn.elearning.learning.model.Subject;
+import com.acorn.elearning.learning.service.EnrollmentService;
 import com.acorn.elearning.learning.service.LearningService;
+import com.acorn.elearning.learning.service.LevelTestService;
 import com.acorn.elearning.learning.view.OnboardingProfileView;
 import com.acorn.elearning.learning.view.OnboardingResultView;
 import com.acorn.elearning.security.SessionUser;
@@ -36,13 +38,19 @@ public class OnboardingController {
     private final LearningService learningService;
     private final LearningProfileWriteMapper profileWriteMapper;
     private final UserLearningProfileMapper userLearningProfileMapper;
+    private final EnrollmentService enrollmentService;
+    private final LevelTestService levelTestService;
 
     public OnboardingController(LearningService learningService,
                                LearningProfileWriteMapper profileWriteMapper,
-                               UserLearningProfileMapper userLearningProfileMapper) {
+                               UserLearningProfileMapper userLearningProfileMapper,
+                               EnrollmentService enrollmentService,
+                               LevelTestService levelTestService) {
         this.learningService = learningService;
         this.profileWriteMapper = profileWriteMapper;
         this.userLearningProfileMapper = userLearningProfileMapper;
+        this.enrollmentService = enrollmentService;
+        this.levelTestService = levelTestService;
     }
 
     @GetMapping("/learning/onboarding")
@@ -76,13 +84,22 @@ public class OnboardingController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             HttpSession session, Model model) {
         Long subjectId = (Long) session.getAttribute(SESSION_SUBJECT_ID);
+        if (subjectId == null) {
+            // 세션이 끊겨 과목 선택이 비면 수강 신청을 확정할 수 없다(subject_id는 NOT NULL).
+            return "redirect:/learning/onboarding?step=subject";
+        }
         String learningGoal = (String) session.getAttribute(SESSION_GOAL);
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
         // 온보딩에서 고른 과목/목표를 프로필에 확정(BASIC·SCAN 공통).
         userLearningProfileMapper.updateOnboarding(user.userId(), subjectId, learningGoal);
-        if ("SCAN".equals(startMode)) {
+        // 문항이 등록되지 않은 과목은 레벨 테스트로 시작할 수 없어 기초 시작으로 처리한다.
+        if ("SCAN".equals(startMode) && levelTestService.hasQuestions(subjectId)) {
+            // 레벨 테스트로 시작: 신청만 하고 레벨은 열지 않는다(채점 결과가 판정 등급까지 연다).
+            enrollmentService.enroll(user.userId(), subjectId, EnrollmentService.START_MODE_LEVEL_TEST);
             return "redirect:/learning/level-test?subjectId=" + subjectId;
         }
+        // 기초부터 시작: 신청과 함께 최저 레벨을 연다.
+        enrollmentService.enroll(user.userId(), subjectId, EnrollmentService.START_MODE_BASIC);
         profileWriteMapper.updateLevel(user.userId(), DEFAULT_LEVEL_CODE);
         model.addAttribute("step", "result");
         model.addAttribute("result", new OnboardingResultView(DEFAULT_LEVEL_CODE, 0, 0, false, 1));

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.learning.mapper.UserSubjectEnrollmentMapper">
+
+    <resultMap id="UserSubjectEnrollmentResultMap" type="com.acorn.elearning.learning.model.UserSubjectEnrollment">
+        <id property="enrollmentId" column="enrollment_id" />
+        <result property="userId" column="user_id" />
+        <result property="subjectId" column="subject_id" />
+        <result property="status" column="status" />
+        <result property="startMode" column="start_mode" />
+        <result property="enrolledAt" column="enrolled_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="columns">
+        enrollment_id, user_id, subject_id, status, start_mode,
+        enrolled_at, created_at, updated_at
+    </sql>
+
+    <select id="findById" parameterType="long" resultMap="UserSubjectEnrollmentResultMap">
+        SELECT <include refid="columns" />
+        FROM user_subject_enrollments
+        WHERE enrollment_id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="UserSubjectEnrollmentResultMap">
+        SELECT <include refid="columns" />
+        FROM user_subject_enrollments
+        ORDER BY user_id ASC, subject_id ASC
+    </select>
+
+    <!-- 중복 수강신청 방지용: (user_id, subject_id) UNIQUE 키 조회 -->
+    <select id="findByUserAndSubject" resultMap="UserSubjectEnrollmentResultMap">
+        SELECT <include refid="columns" />
+        FROM user_subject_enrollments
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+    </select>
+
+    <!-- 과목 잠금 판정용: 수강 중(ACTIVE) 과목 전체 -->
+    <select id="findActiveByUser" resultMap="UserSubjectEnrollmentResultMap">
+        SELECT <include refid="columns" />
+        FROM user_subject_enrollments
+        WHERE user_id = #{userId}
+          AND status = 'ACTIVE'
+        ORDER BY subject_id ASC
+    </select>
+
+    <!-- backfill 판정용: status와 무관하게 수강 이력이 하나라도 있는지 본다 -->
+    <select id="findByUser" resultMap="UserSubjectEnrollmentResultMap">
+        SELECT <include refid="columns" />
+        FROM user_subject_enrollments
+        WHERE user_id = #{userId}
+        ORDER BY subject_id ASC
+    </select>
+
+    <!-- (user_id, subject_id) UNIQUE 기준 멱등: 폼 중복 제출로 같은 신청이 겹쳐 들어와도 실패시키지 않는다 -->
+    <insert id="insert" parameterType="com.acorn.elearning.learning.model.UserSubjectEnrollment"
+            useGeneratedKeys="true" keyProperty="enrollmentId">
+        INSERT INTO user_subject_enrollments
+            (user_id, subject_id, status, start_mode, enrolled_at)
+        VALUES
+            (#{userId}, #{subjectId}, #{status}, #{startMode}, #{enrolledAt})
+        ON DUPLICATE KEY UPDATE
+            enrollment_id = LAST_INSERT_ID(enrollment_id)
+    </insert>
+
+    <update id="update" parameterType="com.acorn.elearning.learning.model.UserSubjectEnrollment">
+        UPDATE user_subject_enrollments
+        SET status      = #{status},
+            start_mode  = #{startMode},
+            enrolled_at = #{enrolledAt},
+            updated_at  = NOW()
+        WHERE enrollment_id = #{enrollmentId}
+    </update>
+
+</mapper>
