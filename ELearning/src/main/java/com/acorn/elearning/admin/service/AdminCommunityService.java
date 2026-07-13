@@ -2,6 +2,7 @@ package com.acorn.elearning.admin.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import com.acorn.elearning.admin.dto.response.AdminCommunityPageResponse;
 import com.acorn.elearning.admin.dto.response.AdminPageResponse;
@@ -18,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AdminCommunityService {
+
+    private static final Set<String> ALLOWED_STATUSES =
+            Set.of("ACTIVE", "HIDDEN", "DELETED");
 
     private final AdminCommunityMapper cm;
     private final AdminLogService adminLogService;
@@ -65,13 +69,16 @@ public class AdminCommunityService {
 
     @Transactional
     public int updatePostStatus(Long postId, CommunityStatusForm form, SessionUser sessionUser) {
+
+        String status = validateStatus(form);
+
         AdminCommunityPageResponse.PostItem post = cm.findPostById(postId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.COMMON_NOT_FOUND,
                         "상태를 변경할 게시글을 찾을 수 없습니다."
                 ));
 
-        int updated = cm.updatePostStatus(postId, form.getStatus());
+        int updated = cm.updatePostStatus(postId, status);
         if (updated == 1) {
             adminLogService.insert(operationLog(
                     sessionUser,
@@ -79,7 +86,7 @@ public class AdminCommunityService {
                     "POST",
                     postId,
                     post.title(),
-                    statusChangeDetail("게시글", form.getStatus())
+                    statusChangeDetail("게시글", status)
             ));
         }
 
@@ -88,13 +95,14 @@ public class AdminCommunityService {
 
     @Transactional
     public int updateCommentStatus(Long commentId, CommunityStatusForm form, SessionUser sessionUser) {
+        String status = validateStatus(form);
         AdminCommunityPageResponse.CommentItem comment = cm.findCommentById(commentId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.COMMON_NOT_FOUND,
                         "상태를 변경할 댓글을 찾을 수 없습니다."
                 ));
 
-        int updated = cm.updateCommentStatus(commentId, form.getStatus());
+        int updated = cm.updateCommentStatus(commentId, status);
         if (updated == 1) {
             adminLogService.insert(operationLog(
                     sessionUser,
@@ -102,7 +110,7 @@ public class AdminCommunityService {
                     "COMMENT",
                     commentId,
                     comment.contentSummary(),
-                    statusChangeDetail("댓글", form.getStatus())
+                    statusChangeDetail("댓글", status)
             ));
         }
 
@@ -136,6 +144,24 @@ public class AdminCommunityService {
             case "DELETED" -> targetLabel + "을 삭제 처리";
             default -> targetLabel + " 상태를 " + status + "로 변경";
         };
+    }
+
+    private String validateStatus(CommunityStatusForm form) {
+        if (form == null || form.getStatus() == null || form.getStatus().isBlank()) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_VALIDATION_FAILED,
+                    "상태 값은 필수입니다."
+            );
+        }
+
+        String status = form.getStatus().trim().toUpperCase();
+        if (!ALLOWED_STATUSES.contains(status)) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_VALIDATION_FAILED,
+                    "ACTIVE, HIDDEN, DELETED 상태만 사용할 수 있습니다."
+            );
+        }
+        return status;
     }
 
     private Long requireAdminId(SessionUser sessionUser) {
