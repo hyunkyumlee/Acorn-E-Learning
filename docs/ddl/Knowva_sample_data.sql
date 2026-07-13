@@ -1,6 +1,6 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.2 / 레슨 단위 학습 구조 / Premium 환불
+  Source: Notion DB 명세 v2.3 / 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Execution contract
@@ -42,6 +42,7 @@ BEGIN
       ('community_posts', 'view_count'),
       ('user_credentials', 'login_email'),
       ('user_credentials', 'email_verified_at'),
+      ('password_reset_tokens', 'token_id'),
       ('social_accounts', 'provider_email_verified'),
       ('lessons', 'node_id'),
       ('practice_set_attempts', 'lesson_id'),
@@ -74,7 +75,7 @@ BEGIN
     AND table_name = 'ai_analysis_reports'
     AND index_name = 'idx_ai_analysis_reports_refund_eligibility';
 
-  IF required_column_count <> 18
+  IF required_column_count <> 19
       OR pending_status_default_count <> 1
       OR refund_eligibility_index_count <> 2 THEN
     SIGNAL SQLSTATE '45000'
