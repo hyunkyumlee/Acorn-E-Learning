@@ -74,6 +74,11 @@ SET @sample_password_hash = '$2a$10$rXWwp4H7mIiDJv.c2H9moOtZ3m/8cBMGOsMuaX0G7vW/
 
 DELETE FROM subject_content_status_backups WHERE backup_id > 0;
 
+DELETE FROM wrong_answers WHERE set_attempt_id IN (100101, 200501);
+DELETE FROM practice_submissions WHERE set_attempt_id IN (100101, 200501);
+DELETE FROM practice_set_items WHERE set_attempt_id IN (100101, 200501);
+DELETE FROM practice_set_attempts WHERE set_attempt_id IN (100101, 200501);
+
 INSERT INTO subjects (subject_code, subject_name, description, sort_order, is_active)
 VALUES
   ('JAVA', 'Java', 'Java programming', 1, 1),
@@ -637,6 +642,7 @@ FROM (
   WHERE node.node_type = 'PLANET'
     AND node.is_active = 1
     AND lesson.required_for_completion = 1
+    AND lesson.lesson_id <> 501
   UNION ALL
   SELECT
     100000 + lesson.lesson_id AS set_attempt_id,
@@ -655,6 +661,7 @@ FROM (
   JOIN lessons lesson ON lesson.node_id = node.node_id
   WHERE node.node_id = 1
     AND lesson.required_for_completion = 1
+    AND lesson.lesson_id <> 101
 ) seed_attempt
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
@@ -798,6 +805,48 @@ VALUES
   (8, 1, 108, 2, 10108, 'PRACTICE_SET', 'return value;', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
   (9, 1, 109, 2, 10109, 'PRACTICE_SET', 'if (value == null) return;', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
   (10, 1, 110, 2, 10110, 'PRACTICE_SET', 'System.out.println(wrong);', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  set_attempt_id = VALUES(set_attempt_id),
+  set_item_id = VALUES(set_item_id),
+  user_id = VALUES(user_id),
+  problem_id = VALUES(problem_id),
+  submission_context = VALUES(submission_context),
+  submitted_answer = VALUES(submitted_answer),
+  is_correct = VALUES(is_correct),
+  is_skipped = VALUES(is_skipped),
+  solved_at = VALUES(solved_at);
+
+INSERT INTO practice_submissions (
+  submission_id, set_attempt_id, set_item_id, user_id, problem_id, submission_context, submitted_answer, is_correct, is_skipped, solved_at, created_at
+)
+SELECT
+  (attempt.set_attempt_id * 100) + item.sort_order AS submission_id,
+  attempt.set_attempt_id,
+  item.set_item_id,
+  attempt.user_id,
+  item.problem_id,
+  'PRACTICE_SET',
+  CASE
+    WHEN item.sort_order <= attempt.correct_count THEN problem.answer_text
+    ELSE CONCAT('__seed_incorrect_', item.sort_order)
+  END AS submitted_answer,
+  IF(item.sort_order <= attempt.correct_count, 1, 0) AS is_correct,
+  0 AS is_skipped,
+  COALESCE(attempt.completed_at, attempt.created_at) AS solved_at,
+  attempt.created_at
+FROM practice_set_attempts attempt
+JOIN practice_set_items item ON item.set_attempt_id = attempt.set_attempt_id
+JOIN practice_problems problem ON problem.problem_id = item.problem_id
+LEFT JOIN practice_submissions existing
+  ON existing.set_attempt_id = attempt.set_attempt_id
+  AND existing.problem_id = item.problem_id
+  AND existing.submission_context = 'PRACTICE_SET'
+WHERE attempt.status = 'COMPLETED'
+  AND existing.submission_id IS NULL
+  AND (
+    (attempt.user_id = 2 AND (attempt.set_attempt_id = 1 OR attempt.set_attempt_id = 100000 + attempt.lesson_id))
+    OR (attempt.user_id = 3 AND (attempt.set_attempt_id = 2 OR attempt.set_attempt_id = 200000 + attempt.lesson_id))
+  )
 ON DUPLICATE KEY UPDATE
   set_attempt_id = VALUES(set_attempt_id),
   set_item_id = VALUES(set_item_id),
