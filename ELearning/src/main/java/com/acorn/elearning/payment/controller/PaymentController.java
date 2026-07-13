@@ -9,6 +9,7 @@ import com.acorn.elearning.payment.form.DummyPaymentForm;
 import com.acorn.elearning.payment.service.DummyPaymentService;
 import com.acorn.elearning.payment.service.KakaoPayService;
 import com.acorn.elearning.payment.service.PaymentAccessService;
+import com.acorn.elearning.payment.service.TossPaymentService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -35,19 +36,22 @@ public class PaymentController {
     private final PaymentAccessService paymentAccessService;
     private final IdempotencyTokenService idempotencyTokenService;
     private final TossPaymentsProperties tossPaymentsProperties;
+    private final TossPaymentService tossPaymentService;
 
     public PaymentController(
             DummyPaymentService dummyPaymentService,
             KakaoPayService kakaoPayService,
             PaymentAccessService paymentAccessService,
             IdempotencyTokenService idempotencyTokenService,
-            TossPaymentsProperties tossPaymentsProperties
+            TossPaymentsProperties tossPaymentsProperties,
+            TossPaymentService tossPaymentService
     ) {
         this.dummyPaymentService = dummyPaymentService;
         this.kakaoPayService = kakaoPayService;
         this.paymentAccessService = paymentAccessService;
         this.idempotencyTokenService = idempotencyTokenService;
         this.tossPaymentsProperties = tossPaymentsProperties;
+        this.tossPaymentService = tossPaymentService;
     }
 
     @GetMapping("/payments")
@@ -120,11 +124,16 @@ public class PaymentController {
             @Valid DummyPaymentForm form,
             BindingResult bindingResult,
             HttpSession httpSession,
+            RedirectAttributes redirectAttributes,
             Model model
     ) {
         SessionUser currentUser = currentUser(sessionUser);
         if (currentUser == null) {
             return "redirect:/login";
+        }
+        if (paymentAccessService.hasPremiumAccess(currentUser)) {
+            redirectAttributes.addFlashAttribute("paymentError", "이미 Premium 권한이 활성화되어 있습니다.");
+            return "redirect:/payments/kakao-pay";
         }
         if (bindingResult.hasErrors()) {
             model.addAttribute("screen", "payment/kakao");
@@ -174,6 +183,44 @@ public class PaymentController {
         return "redirect:/payments";
     }
 
+    @GetMapping("/payments/toss/success")
+    public String tossSuccess(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam String paymentKey,
+            @RequestParam String orderId,
+            @RequestParam Integer amount,
+            RedirectAttributes redirectAttributes
+    ) {
+        SessionUser currentUser = currentUser(sessionUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        PaymentResultResponse result = tossPaymentService.approve(currentUser, paymentKey, orderId, amount);
+        redirectAttributes.addAttribute("paymentId", result.paymentId());
+        return "redirect:/payments/complete";
+    }
+
+    @GetMapping("/payments/toss/fail")
+    public String tossFail(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @RequestParam String orderId,
+            @RequestParam(required = false) String code,
+            RedirectAttributes redirectAttributes
+    ) {
+        SessionUser currentUser = currentUser(sessionUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        tossPaymentService.handleFailure(currentUser, orderId, code);
+        String message = "PAY_PROCESS_CANCELED".equals(code) || "USER_CANCEL".equals(code)
+                ? "토스페이먼츠 결제가 취소되었습니다."
+                : "토스페이먼츠 결제에 실패했습니다. 다시 시도해주세요.";
+        redirectAttributes.addFlashAttribute("paymentError", message);
+        return "redirect:/payments/card";
+    }
+
     @GetMapping("/payments/complete")
     public String complete(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
@@ -210,6 +257,7 @@ public class PaymentController {
         model.addAttribute("form", form);
         addProductModel(model);
         model.addAttribute("idempotencyToken", form.getIdempotencyToken());
+        model.addAttribute("premiumActive", paymentAccessService.hasPremiumAccess(sessionUser));
         if (DummyPaymentService.METHOD_CARD.equals(paymentMethod)) {
             model.addAttribute("tossClientKey", tossPaymentsProperties.getClientKey());
         }

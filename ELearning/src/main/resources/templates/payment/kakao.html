@@ -37,7 +37,9 @@
             <h2>카카오페이로 결제</h2>
             <p>버튼을 누르면 카카오페이 결제창으로 이동합니다. 결제 인증이 끝나면 Knowva로 돌아와 Premium 권한이 활성화됩니다.</p>
           </section>
-          <button class="figma-button kakao-pay-button kakao-pay-submit" type="submit">카카오페이로 결제</button>
+          <p class="figma-payment-alert" th:if="${premiumActive}" role="alert">이미 Premium 권한이 활성화되어 있습니다.</p>
+          <p class="figma-payment-alert" th:if="${paymentError}" th:text="${paymentError}" role="alert">카카오페이 결제를 진행할 수 없습니다.</p>
+          <button class="figma-button kakao-pay-button kakao-pay-submit" type="submit" th:disabled="${premiumActive}">카카오페이로 결제</button>
         </form>
         <aside class="figma-order-panel">
           <h2>상품 정보</h2>

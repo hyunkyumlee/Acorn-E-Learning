@@ -143,12 +143,12 @@
   font-weight: 950;
 }
 
-.payment-screen .figma-method-card .payment-card-symbol {
+.payment-screen .payment-card-symbol {
   position: relative;
   background: color-mix(in srgb, var(--payment-business) 18%, var(--surface));
 }
 
-.payment-screen .figma-method-card .payment-card-symbol::before {
+.payment-screen .payment-card-symbol::before {
   position: absolute;
   width: 42px;
   height: 28px;
@@ -158,7 +158,7 @@
   content: "";
 }
 
-.payment-screen .figma-method-card .payment-card-symbol::after {
+.payment-screen .payment-card-symbol::after {
   position: absolute;
   width: 27px;
   height: 3px;
@@ -216,8 +216,15 @@
 }
 
 .payment-screen .kakao-pay-button.active,
-.payment-screen .kakao-pay-submit {
+.payment-screen .kakao-pay-submit,
+.payment-screen .toss-card-submit {
   justify-self: stretch;
+}
+
+.payment-screen .figma-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+  box-shadow: none;
 }
 
 .payment-screen .figma-kakao-guide {
@@ -229,6 +236,40 @@
   background: color-mix(in srgb, #ffeb00 14%, var(--surface));
   padding: clamp(22px, 4vw, 42px);
   text-align: center;
+}
+
+.payment-screen .figma-card-guide {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  border: 1px solid color-mix(in srgb, var(--payment-business) 24%, transparent);
+  border-radius: var(--radius);
+  background: var(--payment-bg-soft);
+  padding: clamp(22px, 4vw, 42px);
+  text-align: center;
+}
+
+.payment-screen .figma-card-guide h2,
+.payment-screen .figma-card-guide p {
+  margin: 0;
+}
+
+.payment-screen .figma-card-guide p {
+  max-width: 520px;
+  color: var(--payment-muted);
+  font-weight: 850;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.payment-screen .figma-card-guide .payment-card-symbol {
+  display: grid;
+  width: 82px;
+  height: 82px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--payment-business) 22%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--payment-business) 14%, var(--surface));
 }
 
 .payment-screen .figma-kakao-guide h2,
