@@ -4,6 +4,7 @@ import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.learning.service.AttendanceService;
 import com.acorn.elearning.learning.service.CurriculumService;
+import com.acorn.elearning.learning.service.EnrollmentService;
 import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.ProgressService;
 import com.acorn.elearning.learning.support.PlanetCatalog;
@@ -48,17 +49,20 @@ public class LearningController {
     private final ProgressService progressService;
     private final AttendanceService attendanceService;
     private final RankingService rankingService;
+    private final EnrollmentService enrollmentService;
 
     public LearningController(LearningService learningService,
                               CurriculumService curriculumService,
                               ProgressService progressService,
                               AttendanceService attendanceService,
-                              RankingService rankingService) {
+                              RankingService rankingService,
+                              EnrollmentService enrollmentService) {
         this.learningService = learningService;
         this.curriculumService = curriculumService;
         this.progressService = progressService;
         this.attendanceService = attendanceService;
         this.rankingService = rankingService;
+        this.enrollmentService = enrollmentService;
     }
 
     @GetMapping("/learning")
@@ -71,6 +75,9 @@ public class LearningController {
             Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
 
+        // 수강신청 도입 이전부터 학습해 온 사용자가 자기 과목에서 잠기지 않도록 1회 보정한다.
+        enrollmentService.ensureBackfill(user.userId());
+
         // 학습 메인 대시보드: 프로필/레벨/등급/점수/출석 streak
         LearningDashboardView dashboard = learningService.getLearningHome(user);
         model.addAttribute("dashboard", dashboard);
@@ -79,11 +86,26 @@ public class LearningController {
         model.addAttribute("weeklyAttendance", attendanceService.getWeeklyAttendance(user.userId()));
 
         List<Subject> subjects = learningService.getActiveSubjects();
-        model.addAttribute("subjects", subjects);
 
         // 로드맵 대상 과목: 과목칩 선택(subjectId) 우선 → 프로필 주 과목 → JAVA fallback.
         Long roadmapSubjectId = (subjectId != null) ? subjectId
                 : (dashboard.primarySubjectId() != null ? dashboard.primarySubjectId() : DEFAULT_SUBJECT_ID);
+
+        // 수강하지 않은 과목의 로드맵은 열지 않는다 — 과목 소개 화면에서 수강신청부터 하게 한다.
+        if (!enrollmentService.isEnrolled(user.userId(), roadmapSubjectId)) {
+            return "redirect:/learning/subjects/" + roadmapSubjectId;
+        }
+
+        // 레벨 테스트로 시작한 과목은 채점 전까지 열린 레벨이 하나도 없다.
+        // 이때 로드맵을 열면 전 레벨이 잠긴 화면만 보이므로, 테스트를 마치도록 되돌린다.
+        if (enrollmentService.requiresLevelTest(user.userId(), roadmapSubjectId)) {
+            return "redirect:/learning/level-test?subjectId=" + roadmapSubjectId;
+        }
+
+        // 좌측 과목 목록: 과목별 수강 여부 · 현재 레벨 · 진행률
+        model.addAttribute("subjectCards",
+                learningService.getSubjectCards(user.userId(), roadmapSubjectId));
+
         String roadmapSubjectCode = subjectCodeOf(subjects, roadmapSubjectId);
         model.addAttribute("roadmapSubjectId", roadmapSubjectId);
         model.addAttribute("roadmapSubjectCode", roadmapSubjectCode);

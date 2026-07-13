@@ -15,6 +15,8 @@ import com.acorn.elearning.learning.model.Lesson;
 import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.learning.model.UserLessonProgress;
 import com.acorn.elearning.learning.model.UserLevelUnlock;
+import com.acorn.elearning.learning.view.SubjectLevelSummary;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CurriculumService {
+
+    /** 과목 소개 화면에서 요약할 레벨 순서. */
+    private static final List<String> LEVEL_ORDER = List.of("BRONZE", "SILVER", "GOLD");
+    /** 시험 관문 노드. 행성 수에서 제외한다. */
+    private static final String NODE_TYPE_GATE = "GATE";
 
     private final CurriculumNodeMapper curriculumNodeMapper;
     private final LessonMapper lessonMapper;
@@ -150,6 +157,29 @@ public class CurriculumService {
             }
         }
         return counts;
+    }
+
+    /**
+     * 과목 소개 화면: 레벨별로 행성 몇 개, 레슨 몇 개를 배우는지 요약한다.
+     * GATE 노드는 학습 단원이 아니므로 행성 수에서 제외한다.
+     */
+    public List<SubjectLevelSummary> getLevelSummaries(Long subjectId) {
+        List<SubjectLevelSummary> summaries = new ArrayList<>();
+        for (String levelCode : LEVEL_ORDER) {
+            List<CurriculumNode> nodes = getRoadmap(subjectId, levelCode);
+            Map<Long, Integer> lessonCounts = getLessonCountsByNodes(nodes);
+            int planetCount = 0;
+            int lessonCount = 0;
+            for (CurriculumNode node : nodes) {
+                if (NODE_TYPE_GATE.equals(node.getNodeType())) {
+                    continue;
+                }
+                planetCount++;
+                lessonCount += lessonCounts.getOrDefault(node.getNodeId(), 0);
+            }
+            summaries.add(new SubjectLevelSummary(levelCode, planetCount, lessonCount));
+        }
+        return summaries;
     }
 
     /** 단일 노드(행성) 상세. 없으면 null. */

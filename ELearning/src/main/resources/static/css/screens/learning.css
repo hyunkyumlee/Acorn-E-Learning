@@ -187,11 +187,31 @@
 /* 과목칩 전체를 링크로: 칩을 꽉 채우고 텍스트 색/장식은 칩 톤을 상속(밑줄 없음). */
 .subject-chip-link {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
   width: 100%;
   color: inherit;
   text-decoration: none;
+}
+
+/* 과목명 줄: 과목 아이콘 + 과목명 + (선택 도트 | 잠금 자물쇠) */
+.subject-chip-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* 과목 아이콘(java/python/web/sql.png) — 코드 배지 대신 과목을 한눈에 구분한다. */
+.subject-chip-icon {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  object-fit: contain;
+}
+.subject-chip.is-locked .subject-chip-icon {
+  filter: grayscale(1);
+  opacity: .55;
 }
 
 /* 활성 과목 표시 도트(오른쪽 끝) + 코드 배지 primary 강조 */
@@ -209,6 +229,64 @@
   border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
   background: color-mix(in srgb, var(--primary) 16%, var(--surface));
   color: var(--primary);
+}
+
+/* 수강 중 과목: 현재 레벨 + 진행률 % + 진행 바 */
+.subject-chip-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.subject-chip-level {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.subject-chip-percent {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.subject-chip-bar {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 70%, transparent);
+  overflow: hidden;
+}
+
+.subject-chip-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+/* 수강 전 과목: 잠금 표시. 레벨 탭 잠금(.roadmap-level.is-locked)과 같은 어휘를 쓴다. */
+.subject-chip.is-locked {
+  opacity: .62;
+}
+
+.subject-chip.is-locked:hover {
+  opacity: .8;
+}
+
+.subject-chip-lock {
+  margin-left: auto;
+  flex: none;
+  color: var(--muted);
+}
+
+.subject-chip-hint {
+  font-size: 12px;
+  color: var(--muted);
 }
 
 /* ----- ProgressSummary ----- */
@@ -537,6 +615,14 @@
   color: var(--text);
 }
 
+/* 연속 0일: 경고색(불꽃) 없이 조용한 안내 톤으로 */
+.streak-banner.is-idle {
+  border-color: var(--line);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-weight: 600;
+}
+
 .streak-banner strong {
   font-size: 16px;
   color: var(--warning);
@@ -750,6 +836,10 @@ a.roadmap-level:hover {
      (페이지 전체는 안 건드림. reduce면 네이티브 스크롤.) */
 .roadmap-stage {
   position: relative;
+  /* 호버 카드 배치의 기준 폭. stage가 좁아지면 옆에 붙은 카드가 overflow-x에 잘리므로
+     뷰포트가 아니라 이 stage의 실제 폭으로 판단해 카드를 행성 아래로 내린다. */
+  container-type: inline-size;
+  container-name: roadmapstage;
   /* 중앙이 로드맵 전용이 되어 세로로 더 길게(오늘의 미션 카드는 사이드바로 이동). */
   height: min(82vh, 960px);
   overflow-y: auto;
@@ -1247,6 +1337,36 @@ a.roadmap-level:hover {
   transition-delay: 0s; /* 표시는 즉시 */
 }
 
+/* 좁은 stage: 노드는 stage 폭의 30%/66% 지점에 있어 옆(카드폭 244px + 간격)이 stage를 넘어간다.
+   → 카드를 행성 아래 중앙으로 내리고 폭을 줄여 항상 stage 안에 들어오게 한다. */
+@container roadmapstage (max-width: 560px) {
+  .roadmap-node.card-right .roadmap-card,
+  .roadmap-node.card-left .roadmap-card {
+    top: calc(100% + 14px);
+    left: 50%;
+    right: auto;
+    width: 210px;
+    max-width: none;
+    transform: translate(-50%, 0) scale(0.96);
+  }
+
+  /* 행성↔카드 브릿지도 아래 방향으로 */
+  .roadmap-node.card-right .roadmap-card::before,
+  .roadmap-node.card-left .roadmap-card::before {
+    top: -20px;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 24px;
+  }
+
+  .roadmap-node:hover .roadmap-card,
+  .roadmap-node:focus-within .roadmap-card {
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
 /* 카드 상단 cover: 미니 행성 + 행성 이름(좌) + 상태 태그(우). 상태색 그라데이션 배경. */
 .roadmap-card-cover {
   display: flex;
@@ -1716,3 +1836,335 @@ a.roadmap-level:hover {
 .empty-title { font-size: 17px; font-weight: 800; color: var(--text); }
 .empty-sub { font-size: 13.5px; color: var(--muted); max-width: 38ch; line-height: 1.6; }
 .bookmark-empty-panel .button { margin-top: 8px; }
+
+/* ===== 과목 소개 화면 (수강 전 과목의 착지 화면) ===== */
+/* 대시보드(1480px)가 아니라 랜딩 성격 → 좁은 폭으로 잡아야 내용이 흩어지지 않는다. */
+.page-shell.learning-screen.subject-screen { max-width: 1060px; }
+
+.subject-hero {
+  position: relative;
+  display: flex; align-items: center; gap: clamp(16px, 4vw, 32px);
+  padding: clamp(24px, 4vw, 38px);
+  border-radius: 20px; border: 1px solid var(--line);
+  /* 얕은 톤 그라데이션 + 우상단 accent glow — 카드 중첩 없이 히어로만 살짝 띄운다. */
+  background:
+    radial-gradient(120% 140% at 100% 0%,
+        color-mix(in srgb, var(--primary) 12%, transparent) 0%,
+        transparent 58%),
+    linear-gradient(180deg,
+        color-mix(in srgb, var(--surface-soft) 70%, var(--surface)) 0%,
+        var(--surface) 100%);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+/* 과목 엠블럼: 과목 아이콘 에셋(java/python/web/sql.png)을 담는 타일. */
+.subject-hero-mark {
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  width: clamp(72px, 9vw, 100px);
+  aspect-ratio: 1;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--line));
+  background:
+    linear-gradient(160deg,
+        color-mix(in srgb, var(--primary) 18%, var(--surface)) 0%,
+        var(--surface-soft) 100%);
+}
+.subject-hero-mark img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+/* 수강 전 과목은 아이콘도 채도를 낮춰 잠금 상태를 색 외에도 드러낸다. */
+.subject-hero.is-locked .subject-hero-mark {
+  border-color: var(--line);
+  background: var(--surface-soft);
+}
+.subject-hero.is-locked .subject-hero-mark img {
+  filter: grayscale(1);
+  opacity: .6;
+}
+
+.subject-hero-text { display: grid; gap: 8px; min-width: 0; }
+.subject-hero-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.subject-hero-code {
+  padding: 2px 10px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, var(--line));
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+  color: var(--primary);
+  font-size: 12px; font-weight: 800; letter-spacing: .04em;
+}
+.subject-hero-state {
+  padding: 2px 10px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--success) 40%, var(--line));
+  background: color-mix(in srgb, var(--success) 12%, var(--surface));
+  color: var(--success);
+  font-size: 12px; font-weight: 700;
+}
+.subject-hero-state.is-off {
+  border-color: var(--line);
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+.subject-hero-name {
+  margin: 0;
+  font-size: clamp(26px, 4vw, 36px); font-weight: 850; line-height: 1.2;
+  color: var(--text);
+}
+.subject-hero-desc { margin: 0; color: var(--muted); line-height: 1.7; max-width: 60ch; }
+.subject-hero-status { margin: 4px 0 0; font-size: 13.5px; color: var(--muted); }
+
+/* 과목 규모 요약(레벨/행성/레슨) — 히어로 우측 */
+.subject-hero-stats {
+  margin: 0 0 0 auto;
+  display: flex; gap: clamp(14px, 2.4vw, 28px);
+  padding-left: clamp(14px, 2.4vw, 28px);
+  border-left: 1px solid var(--line);
+}
+.subject-hero-stat { display: grid; gap: 2px; justify-items: center; }
+.subject-hero-stat dt {
+  font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  color: var(--muted);
+}
+.subject-hero-stat dd {
+  margin: 0;
+  font-size: clamp(20px, 2.4vw, 26px); font-weight: 850;
+  color: var(--text); font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 860px) {
+  .subject-hero { flex-wrap: wrap; }
+  .subject-hero-stats {
+    margin: 4px 0 0;
+    padding: 14px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 640px) {
+  .subject-hero { flex-direction: column; align-items: flex-start; }
+}
+
+.subject-hero-progress { display: grid; gap: 6px; margin-top: 6px; max-width: 420px; }
+.subject-hero-bar {
+  height: 8px; border-radius: 999px; overflow: hidden;
+  background: color-mix(in srgb, var(--line) 70%, transparent);
+}
+.subject-hero-bar > i { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+.subject-hero-count { font-size: 13px; color: var(--muted); }
+.subject-hero-count strong { color: var(--text); font-variant-numeric: tabular-nums; }
+
+.subject-levels { margin-top: var(--space-4, 16px); }
+.subject-levels-title { margin: 0 0 12px; font-size: 16px; font-weight: 800; color: var(--text); }
+.subject-level-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.subject-level-row {
+  --lv: var(--primary);
+  position: relative;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 14px 14px 18px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+/* 좌측 레벨 색 띠 — 색만으로 구분하지 않도록 코드 배지와 함께 쓴다. */
+.subject-level-row::before {
+  content: "";
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--lv);
+}
+.subject-level-row.level-bronze { --lv: #d9883f; }
+.subject-level-row.level-silver { --lv: #8ea6b8; }
+.subject-level-row.level-gold   { --lv: #e6b23c; }
+.subject-level-code {
+  min-width: 66px;
+  padding: 2px 8px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--lv) 45%, var(--line));
+  color: var(--lv);
+  font-size: 12px; font-weight: 800; text-align: center;
+}
+.subject-level-counts { font-size: 13.5px; color: var(--muted); }
+.subject-level-counts strong { color: var(--text); font-variant-numeric: tabular-nums; }
+.subject-level-empty { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+.subject-cta { margin-top: var(--space-4, 16px); }
+.subject-cta-title { margin: 0 0 12px; font-size: 16px; font-weight: 800; color: var(--text); }
+.subject-start-grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 720px;
+}
+@media (max-width: 560px) {
+  .subject-start-grid { grid-template-columns: 1fr; }
+}
+.subject-start-card {
+  display: grid; gap: 6px; align-content: start;
+  padding: 20px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface-soft);
+  transition: transform 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+.subject-start-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
+  box-shadow: var(--shadow-soft);
+}
+/* 권장 경로(기초부터 시작)는 accent 테두리로 한 단계 앞세운다. */
+.subject-start-card.is-recommended {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
+  background:
+    linear-gradient(180deg,
+        color-mix(in srgb, var(--primary) 8%, var(--surface-soft)) 0%,
+        var(--surface-soft) 100%);
+}
+.subject-start-card.is-disabled { opacity: .62; }
+.subject-start-card.is-disabled:hover {
+  transform: none;
+  border-color: var(--line);
+  box-shadow: none;
+}
+.subject-start-icon {
+  display: grid; place-items: center;
+  width: 36px; height: 36px; margin-bottom: 4px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  color: var(--primary);
+}
+.subject-start-icon svg { width: 19px; height: 19px; }
+.subject-start-card.is-disabled .subject-start-icon {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--muted);
+}
+.subject-start-name { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
+.subject-start-desc { margin: 0 0 8px; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+.subject-start-card .button { justify-self: start; }
+
+/* ===== 북마크 목록 ===== */
+.bookmark-item {
+  position: relative;
+  --lv: var(--primary);
+  align-items: center;
+  overflow: hidden;
+  transition: transform 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+.bookmark-item::before {
+  content: "";
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--lv);
+}
+.bookmark-item.level-bronze { --lv: #d9883f; }
+.bookmark-item.level-silver { --lv: #8ea6b8; }
+.bookmark-item.level-gold   { --lv: #e6b23c; }
+.bookmark-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+.bookmark-level {
+  align-self: start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--lv) 45%, var(--line));
+  color: var(--lv);
+  font-size: 11.5px; font-weight: 800; letter-spacing: .04em;
+}
+.bookmark-body { gap: 6px; }
+.bookmark-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ===== 이론 학습(읽기) 화면 보강 ===== */
+
+/* 제목 아래 맥락 바: 레벨 배지 · 단원(행성) · 레슨 순번 */
+.lesson-context {
+  --lv: var(--primary);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 10px;
+}
+.lesson-context-level {
+  padding: 2px 10px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--lv) 45%, var(--line));
+  background: color-mix(in srgb, var(--lv) 12%, var(--surface));
+  color: var(--lv);
+  font-size: 12px; font-weight: 800; letter-spacing: .04em;
+}
+.lesson-context-level.level-bronze { --lv: #d9883f; }
+.lesson-context-level.level-silver { --lv: #8ea6b8; }
+.lesson-context-level.level-gold   { --lv: #e6b23c; }
+.lesson-context-node { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.lesson-context-step {
+  margin-left: auto;
+  font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.lesson-context-step strong { color: var(--text); }
+
+/* 다음 레슨: 액션 줄 우측 텍스트 링크(버튼 3개와 무게 경쟁하지 않게) */
+.lesson-next-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-left: auto;
+  color: var(--primary);
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  transition: transform 160ms ease-out;
+}
+.lesson-next-link:hover { transform: translateX(2px); }
+
+.lesson-reading .panel { padding: clamp(22px, 3vw, 32px); }
+.lesson-reading .lesson-head { margin-bottom: var(--space-4, 16px); }
+
+/* 레슨 요약 = 리드 문단: accent 세로선으로 본문과 구분 */
+.lesson-reading .lesson-summary {
+  position: relative;
+  margin: 0;
+  padding-left: 14px;
+  font-size: 15.5px;
+  line-height: 1.7;
+}
+.lesson-reading .lesson-summary::before {
+  content: "";
+  position: absolute; left: 0; top: 3px; bottom: 3px;
+  width: 3px; border-radius: 999px;
+  background: var(--primary);
+}
+
+.lesson-reading hr {
+  height: 1px; border: 0;
+  margin: var(--space-5, 20px) 0;
+  background: var(--line);
+}
+
+.lesson-reading .lesson-content { max-width: 68ch; font-size: 16.5px; line-height: 1.85; }
+
+/* 예시 코드: 상단에 라벨 바를 얹어 본문과 분리 */
+.lesson-reading pre {
+  position: relative;
+  padding-top: 42px;
+}
+.lesson-reading pre::before {
+  content: "예시 코드";
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center;
+  height: 30px;
+  padding: 0 var(--space-5, 20px);
+  border-bottom: 1px solid var(--line);
+  border-radius: 10px 10px 0 0;
+  background: color-mix(in srgb, var(--line) 28%, transparent);
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
+}
+
+/* 액션 줄: 본문과 구분되는 하단 바 */
+.lesson-reading .lesson-actions {
+  margin-top: var(--space-6, 24px);
+  padding-top: var(--space-5, 20px);
+  border-top: 1px solid var(--line);
+}

@@ -14,7 +14,21 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
       <span th:text="${lesson != null ? '레슨 목록으로' : '학습 로드맵으로'}">레슨 목록으로</span>
     </a>
-    <section class="page-heading"><span class="eyebrow">이론 학습</span><h1 th:text="${lesson != null ? lesson.title : '이론 학습'}">이론 학습</h1></section>
+    <section class="page-heading">
+      <span class="eyebrow">이론 학습</span>
+      <h1 th:text="${lesson != null ? lesson.title : '이론 학습'}">이론 학습</h1>
+
+      <!-- 읽는 위치 맥락: 레벨 · 단원(행성) · 레슨 순번 -->
+      <div class="lesson-context" th:if="${lesson != null}">
+        <span class="lesson-context-level" th:if="${node != null}"
+              th:classappend="${'level-' + #strings.toLowerCase(node.levelCode)}"
+              th:text="${node.levelCode}">BRONZE</span>
+        <span class="lesson-context-node" th:if="${node != null}" th:text="${node.title}">단원</span>
+        <span class="lesson-context-step" th:if="${lessonIndex != null}">
+          레슨 <strong th:text="${lessonIndex}">1</strong> / <span th:text="${lessonTotal}">10</span>
+        </span>
+      </div>
+    </section>
 
     <!-- 이론 완료(LEARN-005) 후 redirect flash 메시지 -->
     <p class="flash-message" th:if="${message != null}" th:text="${message}">처리되었습니다.</p>
@@ -57,6 +71,13 @@
             <span th:text="${bookmarked} ? '북마크됨' : '북마크'">북마크</span>
           </button>
         </form>
+
+        <!-- 같은 행성의 다음 레슨으로 바로 이어 읽기 -->
+        <a class="lesson-next-link" th:if="${nextLessonId != null}"
+           th:href="@{/learning/lessons/{id}(id=${nextLessonId})}">
+          다음 레슨
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
       </div>
     </section>
 

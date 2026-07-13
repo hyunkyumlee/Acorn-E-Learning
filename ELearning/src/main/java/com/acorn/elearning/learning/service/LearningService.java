@@ -1,30 +1,92 @@
 package com.acorn.elearning.learning.service;
 
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.learning.mapper.AttendanceRecordMapper;
 import com.acorn.elearning.learning.mapper.LearningProfileReadMapper;
 import com.acorn.elearning.learning.mapper.SubjectMapper;
+import com.acorn.elearning.learning.mapper.UserLevelUnlockMapper;
 import com.acorn.elearning.learning.model.AttendanceRecord;
 import com.acorn.elearning.learning.model.Subject;
+import com.acorn.elearning.learning.model.UserLevelUnlock;
 import com.acorn.elearning.learning.view.LearningDashboardView;
+import com.acorn.elearning.learning.view.SubjectCardView;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.model.UserLearningProfile;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LearningService {
 
+    /** 레벨 코드를 낮은 난이도 → 높은 난이도 순으로 본다. 과목별 "현재 레벨" = 연 레벨 중 가장 높은 것. */
+    private static final List<String> LEVEL_ORDER = List.of("BRONZE", "SILVER", "GOLD");
+
+    /** 출석 기준일은 AttendanceService와 동일하게 KST로 고정한다. */
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+
     private final SubjectMapper subjectMapper;
     private final LearningProfileReadMapper learningProfileReadMapper;
     private final AttendanceRecordMapper attendanceRecordMapper;
+    private final UserLevelUnlockMapper userLevelUnlockMapper;
+    private final EnrollmentService enrollmentService;
+    private final ProgressService progressService;
 
     public LearningService(SubjectMapper subjectMapper,
                            LearningProfileReadMapper learningProfileReadMapper,
-                           AttendanceRecordMapper attendanceRecordMapper) {
+                           AttendanceRecordMapper attendanceRecordMapper,
+                           UserLevelUnlockMapper userLevelUnlockMapper,
+                           EnrollmentService enrollmentService,
+                           ProgressService progressService) {
         this.subjectMapper = subjectMapper;
         this.learningProfileReadMapper = learningProfileReadMapper;
         this.attendanceRecordMapper = attendanceRecordMapper;
+        this.userLevelUnlockMapper = userLevelUnlockMapper;
+        this.enrollmentService = enrollmentService;
+        this.progressService = progressService;
+    }
+
+    /** 과목 단건 조회. 비활성 과목은 학습 대상이 아니므로 없는 것으로 본다. */
+    public Subject getSubject(Long subjectId) {
+        return subjectMapper.findById(subjectId)
+                .filter(subject -> Boolean.TRUE.equals(subject.getIsActive()))
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "과목 정보를 찾을 수 없습니다."));
+    }
+
+    /**
+     * 좌측 과목 목록을 조립한다. 과목마다 수강 여부 · 현재 레벨 · 진행률을 함께 담는다.
+     * unlock과 진행률은 과목별로 다시 조회하지 않고 사용자 단위로 한 번씩만 조회해 과목에 나눠 붙인다.
+     */
+    public List<SubjectCardView> getSubjectCards(Long userId, Long selectedSubjectId) {
+        Set<Long> enrolledSubjectIds = enrollmentService.getEnrolledSubjectIds(userId);
+        Map<Long, Integer> progressBySubject = progressService.computeSubjectProgress(userId);
+
+        Map<Long, String> levelBySubject = new HashMap<>();
+        for (UserLevelUnlock unlock : userLevelUnlockMapper.findByUser(userId)) {
+            levelBySubject.merge(unlock.getSubjectId(), unlock.getLevelCode(),
+                    (current, candidate) ->
+                            LEVEL_ORDER.indexOf(candidate) > LEVEL_ORDER.indexOf(current) ? candidate : current);
+        }
+
+        return getActiveSubjects().stream()
+                .map(subject -> {
+                    Long subjectId = subject.getSubjectId();
+                    return new SubjectCardView(
+                            subjectId,
+                            subject.getSubjectCode(),
+                            subject.getSubjectName(),
+                            subject.getDescription(),
+                            enrolledSubjectIds.contains(subjectId),
+                            subjectId.equals(selectedSubjectId),
+                            levelBySubject.get(subjectId),
+                            progressBySubject.getOrDefault(subjectId, 0));
+                })
+                .toList();
     }
 
     /**
@@ -58,9 +120,14 @@ public class LearningService {
         int streakCount = 0;
         boolean attendedToday = false;
         AttendanceRecord latest = attendanceRecordMapper.findLatestByUserId(userId).orElse(null);
-        if (latest != null) {
-            streakCount = (latest.getStreakCount() != null) ? latest.getStreakCount() : 0;
-            attendedToday = LocalDate.now().equals(latest.getAttendanceDate());
+        if (latest != null && latest.getAttendanceDate() != null) {
+            LocalDate today = LocalDate.now(KST);
+            LocalDate lastAttended = latest.getAttendanceDate();
+            attendedToday = today.equals(lastAttended);
+            // 마지막 출석이 오늘도 어제도 아니면 연속은 이미 끊긴 것 → 지난 streak_count를 그대로 보여주지 않는다.
+            if (attendedToday || lastAttended.equals(today.minusDays(1))) {
+                streakCount = (latest.getStreakCount() != null) ? latest.getStreakCount() : 0;
+            }
         }
 
         return new LearningDashboardView(

@@ -4,12 +4,16 @@ import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
 import com.acorn.elearning.learning.mapper.LearningProgressMapper;
+import com.acorn.elearning.learning.mapper.UserLessonProgressMapper;
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
+import com.acorn.elearning.learning.view.SubjectProgressRow;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +32,33 @@ public class ProgressService {
     private final LearningProgressMapper learningProgressMapper;
     private final CurriculumNodeMapper curriculumNodeMapper;
     private final CurriculumService curriculumService;
+    private final UserLessonProgressMapper userLessonProgressMapper;
 
     public ProgressService(LearningProgressMapper learningProgressMapper,
                            CurriculumNodeMapper curriculumNodeMapper,
-                           CurriculumService curriculumService) {
+                           CurriculumService curriculumService,
+                           UserLessonProgressMapper userLessonProgressMapper) {
         this.learningProgressMapper = learningProgressMapper;
         this.curriculumNodeMapper = curriculumNodeMapper;
         this.curriculumService = curriculumService;
+        this.userLessonProgressMapper = userLessonProgressMapper;
+    }
+
+    /**
+     * 과목별 진행률(0~100)을 한 번의 집계 쿼리로 계산한다. 과목 목록에 진도를 함께 그릴 때 쓴다.
+     * 완료 판정은 computeRoadmapProgress와 같은 레슨 단위 규약(이론+문제풀이 둘 다)이지만,
+     * 여기서는 행성 단위 평균이 아니라 과목 전체 required 레슨 대비 완료 비율이다.
+     * required 레슨이 없는 과목은 0%.
+     */
+    public Map<Long, Integer> computeSubjectProgress(Long userId) {
+        Map<Long, Integer> result = new HashMap<>();
+        for (SubjectProgressRow row : userLessonProgressMapper.findLessonStatsBySubject(userId)) {
+            int total = row.getTotalLessons();
+            int percent = (total == 0) ? 0
+                    : (int) Math.round(row.getCompletedLessons() * 100.0 / total);
+            result.put(row.getSubjectId(), percent);
+        }
+        return result;
     }
 
     /**
