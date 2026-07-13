@@ -42,6 +42,21 @@
         </span>
       </p>
 
+      <div th:if="${completeResult != null}" class="practice-result">
+        <p>
+          정답:
+          <strong th:text="${completeResult.data()['correctCount']}">0</strong>문제
+        </p>
+        <p>
+          오답:
+          <strong th:text="${completeResult.data()['wrongCount']}">0</strong>문제
+        </p>
+        <p>
+          건너뛰기:
+          <strong th:text="${completeResult.data()['skippedCount']}">0</strong>문제
+        </p>
+      </div>
+
       <!--이동경로 -->
       <div class="practice-footer">
         <a th:if="${completeResult != null}"
@@ -95,7 +110,6 @@
 
     <!-- 문제 화면 전체-->
     <div th:if="${!completed and problem != null}" class="practice-problem-card">
-      <!-- 문제 -->
       <p class="practice-problem-meta">
         문제
         <span th:text="${currentIndex + 1}">1</span>
@@ -105,54 +119,145 @@
 
       <progress th:value="${currentIndex + 1}" th:max="${totalCount}"></progress>
 
-      <!-- 수정: 문제유형 톤 정리용 -->
       <p class="practice-problem-type" th:text="${problem['problemType']}">문제유형</p>
       <h2 th:text="${problem['question']}">문제 내용</h2>
 
       <div th:if="${!answered}">
-        <form th:action="@{|/learning/practice/sets/${setAttemptId}/answers|}" method="post">
+        <div th:if="${problem['problemType'] == 'MULTIPLE_CHOICE'}">
+          <div th:each="choice : ${problem['choices']}">
+            <label>
+              <input type="radio"
+                     name="submittedAnswer"
+                     th:value="${choice['choiceText']}"
+                     form="submitAnswerForm"
+                     required>
+              <span th:text="${choice['choiceLabel']}">A</span>
+              <span th:text="${choice['choiceText']}">보기 내용</span>
+            </label>
+          </div>
+        </div>
+
+        <div th:if="${problem['problemType'] == 'FILL_BLANK'}">
+          <input type="text"
+                 name="submittedAnswer"
+                 placeholder="정답을 입력하세요"
+                 form="submitAnswerForm"
+                 required>
+        </div>
+
+        <div th:if="${problem['problemType'] == 'SHORT_ANSWER'}">
+    <textarea name="submittedAnswer"
+              placeholder="답안을 입력하세요"
+              form="submitAnswerForm"
+              required></textarea>
+        </div>
+
+        <div th:if="${problem['problemType'] != 'MULTIPLE_CHOICE'
+        and problem['problemType'] != 'FILL_BLANK'
+        and problem['problemType'] != 'SHORT_ANSWER'}">
+          <input type="text"
+                 name="submittedAnswer"
+                 placeholder="답안을 입력하세요"
+                 form="submitAnswerForm"
+                 required>
+        </div>
+
+        <form id="submitAnswerForm"
+              th:action="@{|/learning/practice/sets/${setAttemptId}/answers|}"
+              method="post">
           <input type="hidden" name="problemId" th:value="${problem['problemId']}">
           <input type="hidden" name="index" th:value="${currentIndex}">
-
-          <div th:if="${problem['problemType'] == 'MULTIPLE_CHOICE'}">
-            <div th:each="choice : ${problem['choices']}">
-              <label>
-                <input type="radio"
-                       name="submittedAnswer"
-                       th:value="${choice['choiceText']}"
-                       required>
-                <span th:text="${choice['choiceLabel']}">A</span>
-                <span th:text="${choice['choiceText']}">보기 내용</span>
-              </label>
-            </div>
-          </div>
-
-          <div th:if="${problem['problemType'] == 'FILL_BLANK'}">
-            <input type="text"
-                   name="submittedAnswer"
-                   placeholder="정답을 입력하세요."
-                   required>
-          </div>
-
-          <div th:if="${problem['problemType'] == 'SHORT_ANSWER'}">
-            <textarea name="submittedAnswer"
-                      placeholder="답안을 입력하세요."
-                      required></textarea>
-          </div>
-
-          <div th:if="${problem['problemType'] != 'MULTIPLE_CHOICE'
-                and problem['problemType'] != 'FILL_BLANK'
-                and problem['problemType'] != 'SHORT_ANSWER'}">
-            <input type="text"
-                   name="submittedAnswer"
-                   placeholder="답안을 입력하세요."
-                   required>
-          </div>
-
-          <section class="practice-footer">
-            <button type="submit">제출</button>
-          </section>
         </form>
+
+        <form id="skipAnswerForm"
+              th:action="@{|/learning/practice/sets/${setAttemptId}/skip|}"
+              method="post">
+          <input type="hidden" name="problemId" th:value="${problem['problemId']}">
+          <input type="hidden" name="index" th:value="${currentIndex}">
+        </form>
+
+        <section class="practice-footer practice-footer--split">
+          <div class="practice-footer-group">
+            <button type="submit" form="skipAnswerForm">건너뛰기</button>
+            <button type="submit" form="submitAnswerForm"
+                    th:text="${isLastProblem} ? '제출 후 최종완료' : '제출'">제출</button>
+          </div>
+
+          <div class="practice-footer-group practice-footer-group--nav">
+            <form th:if="${!isFirstProblem}"
+                  th:action="@{|/learning/practice/problems/${prevProblemId}|}"
+                  method="get">
+              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
+              <input type="hidden" name="index" th:value="${currentIndex - 1}">
+              <button type="submit">이전</button>
+            </form>
+
+            <form th:if="${!isLastProblem and canGoNext}"
+                  th:action="@{|/learning/practice/problems/${nextProblemId}|}"
+                  method="get">
+              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
+              <input type="hidden" name="index" th:value="${currentIndex + 1}">
+              <button type="submit">다음</button>
+            </form>
+          </div>
+        </section>
+      </div>
+      <!--
+      <div th:if="${skipped and !showFinalSkipConfirm}">
+        <section class="practice-result">
+          <p>이 문제는 건너뛴 상태입니다.</p>
+          <p>다음 문제로 이동했으며, 필요하면 이전 버튼으로 다시 조회할 수 있습니다.</p>
+        </section>
+
+        <section class="practice-footer practice-footer--split">
+          <div class="practice-footer-group">
+          </div>
+
+          <div class="practice-footer-group practice-footer-group--nav">
+            <form th:if="${!isFirstProblem}"
+                  th:action="@{|/learning/practice/problems/${prevProblemId}|}"
+                  method="get">
+              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
+              <input type="hidden" name="index" th:value="${currentIndex - 1}">
+              <button type="submit">이전</button>
+            </form>
+
+            <form th:if="${!isLastProblem and canGoNext}"
+                  th:action="@{|/learning/practice/problems/${nextProblemId}|}"
+                  method="get">
+              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
+              <input type="hidden" name="index" th:value="${currentIndex + 1}">
+              <button type="submit">다음</button>
+            </form>
+          </div>
+        </section>
+      </div>
+      -->
+
+      <div th:if="${showFinalSkipConfirm}" class="practice-result">
+        <p>이 문제를 건너뛴 채 최종 제출하시겠습니까?</p>
+        <p>건너뛴 문제는 정답 처리되지 않습니다.</p>
+
+        <div class="practice-footer practice-footer--split">
+          <div class="practice-footer-group">
+            <form th:action="@{|/learning/practice/sets/${setAttemptId}/skip|}" method="post">
+              <input type="hidden" name="problemId" th:value="${problem['problemId']}">
+              <input type="hidden" name="index" th:value="${currentIndex}">
+              <input type="hidden" name="confirmFinalSkip" value="true">
+              <button type="submit">건너뛰기 확정 후 최종 제출</button>
+            </form>
+          </div>
+
+          <div class="practice-footer-group practice-footer-group--nav">
+            <form th:if="${!isFirstProblem}"
+                  th:action="@{|/learning/practice/problems/${prevProblemId}|}"
+                  method="get">
+              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
+              <input type="hidden" name="index" th:value="${currentIndex - 1}">
+              <button type="submit">이전</button>
+            </form>
+          </div>
+        </div>
       </div>
 
       <div th:if="${answered and lastResult != null}">
@@ -161,11 +266,11 @@
           <p th:if="${!lastResult.data()['correct']}">오답입니다.</p>
 
           <p>
-            제출한 답:
+            제출 답안:
             <strong th:text="${lastResult.data()['submittedAnswer']}">A</strong>
           </p>
 
-          <p th:if="${!lastResult.data()['correct']}">
+          <p>
             정답:
             <strong th:text="${lastResult.data()['correctAnswer']}">B</strong>
           </p>
@@ -176,20 +281,33 @@
           </p>
         </section>
 
-        <section class="practice-footer">
-          <form th:if="${!isLastProblem}"
-                th:action="@{|/learning/practice/problems/${nextProblemId}|}"
-                method="get">
-            <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
-            <input type="hidden" name="index" th:value="${currentIndex + 1}">
-            <button type="submit">다음 문제</button>
-          </form>
+        <section class="practice-footer practice-footer--split">
+          <div class="practice-footer-group">
+          </div>
 
-          <form th:if="${isLastProblem}"
-                th:action="@{|/learning/practice/sets/${setAttemptId}/complete|}"
-                method="post">
-            <button type="submit">결과 보기</button>
-          </form>
+          <div class="practice-footer-group practice-footer-group--nav">
+            <form th:if="${!isFirstProblem}"
+                  th:action="@{|/learning/practice/problems/${prevProblemId}|}"
+                  method="get">
+              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
+              <input type="hidden" name="index" th:value="${currentIndex - 1}">
+              <button type="submit">이전</button>
+            </form>
+
+            <form th:if="${!isLastProblem and canGoNext}"
+                  th:action="@{|/learning/practice/problems/${nextProblemId}|}"
+                  method="get">
+              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
+              <input type="hidden" name="index" th:value="${currentIndex + 1}">
+              <button type="submit">다음</button>
+            </form>
+
+            <form th:if="${isLastProblem}"
+                  th:action="@{|/learning/practice/sets/${setAttemptId}/complete|}"
+                  method="post">
+              <button type="submit">결과 보기</button>
+            </form>
+          </div>
         </section>
       </div>
     </div>
