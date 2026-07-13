@@ -127,11 +127,11 @@
 <body>
   <section class="page">
     <h1>Knowva ERD</h1>
-    <p class="source">Source: Notion DB 명세 v2.0 Mermaid ERD. 과목 비활성 콘텐츠 상태 백업과 PG 거래 식별자 계약을 현재 DDL과 동기화한 HTML 원본.</p>
+    <p class="source">Source: Notion DB 명세 v2.1 Mermaid ERD. 사용자별 과목 수강 상태와 관리자 작업 당시 상세 보존 계약을 현재 DDL과 동기화한 HTML 원본.</p>
     <div class="summary">
-      <div class="summary-card"><strong>Version</strong><span>v2.0</span></div>
-      <div class="summary-card"><strong>Tables</strong><span>43</span></div>
-      <div class="summary-card"><strong>Foreign Keys</strong><span>78</span></div>
+      <div class="summary-card"><strong>Version</strong><span>v2.1</span></div>
+      <div class="summary-card"><strong>Tables</strong><span>44</span></div>
+      <div class="summary-card"><strong>Foreign Keys</strong><span>80</span></div>
       <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
     </div>
     <table class="inventory compact">
@@ -144,6 +144,7 @@
 <tr><td>social_accounts</td><td>BIGINT social_account_id PK</td><td>1</td></tr>
 <tr><td>user_settings</td><td>BIGINT setting_id PK</td><td>1</td></tr>
 <tr><td>user_learning_profiles</td><td>BIGINT profile_id PK</td><td>2</td></tr>
+<tr><td>user_subject_enrollments</td><td>BIGINT enrollment_id PK</td><td>2</td></tr>
 <tr><td>lessons</td><td>BIGINT lesson_id PK</td><td>2</td></tr>
 <tr><td>lesson_bookmarks</td><td>BIGINT bookmark_id PK</td><td>2</td></tr>
 <tr><td>user_lesson_progress</td><td>BIGINT lesson_progress_id PK</td><td>2</td></tr>
@@ -267,6 +268,16 @@
         VARCHAR current_level_code
         INT total_score
         VARCHAR grade_code
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    user_subject_enrollments {
+        BIGINT enrollment_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR status
+        VARCHAR start_mode
+        DATETIME enrolled_at
         DATETIME created_at
         DATETIME updated_at
     }
@@ -635,6 +646,8 @@
     users ||--o{ user_settings : user
     users ||--o{ user_learning_profiles : user
     subjects ||--o{ user_learning_profiles : primary_subject
+    users ||--o{ user_subject_enrollments : user
+    subjects ||--o{ user_subject_enrollments : subject
     curriculum_nodes ||--o{ lessons : node
     users ||--o{ lessons : created_by
     users ||--o{ lesson_bookmarks : user
@@ -768,6 +781,16 @@
         DATETIME created_at
         DATETIME updated_at
     }
+    user_subject_enrollments {
+        BIGINT enrollment_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR status
+        VARCHAR start_mode
+        DATETIME enrolled_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
     subjects {
         BIGINT subject_id PK
         VARCHAR subject_code UK
@@ -782,7 +805,9 @@
     users ||--o{ social_accounts : user
     users ||--o{ user_settings : user
     users ||--o{ user_learning_profiles : user
-    subjects ||--o{ user_learning_profiles : primary_subject</pre></div>
+    subjects ||--o{ user_learning_profiles : primary_subject
+    users ||--o{ user_subject_enrollments : user
+    subjects ||--o{ user_subject_enrollments : subject</pre></div>
             </section>
             <section class="page detail-page">
               <h2>회원 / 인증 / 설정 - 관계 / 컬럼</h2>
@@ -792,7 +817,9 @@
 <tr><td>social_accounts</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>user_settings</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>user_learning_profiles</td><td>user_id</td><td>users</td><td>user_id</td></tr>
-<tr><td>user_learning_profiles</td><td>primary_subject_id</td><td>subjects</td><td>subject_id</td></tr></tbody>
+<tr><td>user_learning_profiles</td><td>primary_subject_id</td><td>subjects</td><td>subject_id</td></tr>
+<tr><td>user_subject_enrollments</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>user_subject_enrollments</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr></tbody>
               </table>
               <div class="detail-grid">
                 <section class="table-card">
@@ -876,6 +903,21 @@
                   </table>
                 </section>
                 
+                <section class="table-card">
+                  <h3>user_subject_enrollments</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>enrollment_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td>IDX</td><td>NN</td></tr>
+<tr><td>start_mode</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;BASIC&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>enrolled_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+
                 <section class="table-card">
                   <h3>subjects</h3>
                   <table class="small-table">
@@ -1168,6 +1210,16 @@
         INT sort_order
         BOOLEAN is_active
     }
+    user_subject_enrollments {
+        BIGINT enrollment_id PK
+        BIGINT user_id FK
+        BIGINT subject_id FK
+        VARCHAR status
+        VARCHAR start_mode
+        DATETIME enrolled_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
     user_level_unlocks {
         BIGINT unlock_id PK
         BIGINT user_id FK
@@ -1303,6 +1355,8 @@
     subjects ||--o{ curriculum_nodes : subject
     curriculum_nodes ||--o{ curriculum_nodes : parent_node
     curriculum_nodes ||--o{ lessons : node
+    users ||--o{ user_subject_enrollments : user
+    subjects ||--o{ user_subject_enrollments : subject
     users ||--o{ user_level_unlocks : user
     subjects ||--o{ user_level_unlocks : subject
     users ||--o{ learning_progress : user
@@ -1342,6 +1396,8 @@
                 <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
                 <tbody><tr><td>curriculum_nodes</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
 <tr><td>curriculum_nodes</td><td>parent_node_id</td><td>curriculum_nodes</td><td>node_id</td></tr>
+<tr><td>user_subject_enrollments</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>user_subject_enrollments</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
 <tr><td>user_level_unlocks</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>user_level_unlocks</td><td>subject_id</td><td>subjects</td><td>subject_id</td></tr>
 <tr><td>learning_progress</td><td>user_id</td><td>users</td><td>user_id</td></tr>
@@ -1428,6 +1484,21 @@
                   </table>
                 </section>
                 
+                <section class="table-card">
+                  <h3>user_subject_enrollments</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>enrollment_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td>IDX</td><td>NN</td></tr>
+<tr><td>start_mode</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;BASIC&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>enrolled_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+
                 <section class="table-card">
                   <h3>user_level_unlocks</h3>
                   <table class="small-table">
@@ -2331,6 +2402,8 @@
         VARCHAR action_type
         VARCHAR target_type
         BIGINT target_id
+        VARCHAR target_name
+        VARCHAR change_detail
         VARCHAR result_status
         DATETIME created_at
     }
@@ -2442,6 +2515,8 @@
 <tr><td>action_type</td><td>VARCHAR(50) NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>target_type</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>target_id</td><td>BIGINT UNSIGNED NULL</td><td></td><td>NULL</td></tr>
+<tr><td>target_name</td><td>VARCHAR(255) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>change_detail</td><td>VARCHAR(500) NULL</td><td></td><td>NULL</td></tr>
 <tr><td>result_status</td><td>VARCHAR(30) NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
                   </table>
@@ -2480,6 +2555,15 @@
             
 
   <section class="page">
+    <h2>v2.1 변경 요약</h2>
+    <section class="callout">
+      <h2>과목 수강 상태와 관리자 이력 상세</h2>
+      <ul>
+        <li><code>user_subject_enrollments</code>: 사용자별 과목 수강 상태와 시작 방식을 저장한다. <code>(user_id, subject_id)</code> 복합 unique로 중복 수강을 막고, 학습 화면은 <code>ACTIVE</code> 과목만 조회한다.</li>
+        <li><code>admin_operation_logs.target_name</code>: 관리자 action 당시의 대상명을 보존한다. 이후 대상이 삭제되거나 이름이 바뀌어도 이력 상세는 유지된다.</li>
+        <li><code>admin_operation_logs.change_detail</code>: 실제 적용한 변경 내용을 보존해 운영 로그의 문장형 상세 표시를 지원한다.</li>
+      </ul>
+    </section>
     <h2>v2.0 변경 요약</h2>
     <section class="callout">
       <h2>과목 콘텐츠 복원과 PG 전환 준비</h2>
