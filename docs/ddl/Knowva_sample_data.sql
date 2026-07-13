@@ -31,6 +31,7 @@ DELIMITER $$
 CREATE PROCEDURE assert_knowva_seed_schema()
 BEGIN
   DECLARE required_column_count INT DEFAULT 0;
+  DECLARE pending_status_default_count INT DEFAULT 0;
 
   SELECT COUNT(*)
     INTO required_column_count
@@ -43,12 +44,23 @@ BEGIN
       ('social_accounts', 'provider_email_verified'),
       ('lessons', 'node_id'),
       ('practice_set_attempts', 'lesson_id'),
-      ('practice_set_items', 'set_item_id')
+      ('practice_set_items', 'set_item_id'),
+      ('subject_content_status_backups', 'backup_id'),
+      ('dummy_payments', 'pg_provider'),
+      ('dummy_payments', 'pg_transaction_id')
     );
 
-  IF required_column_count <> 7 THEN
+  SELECT COUNT(*)
+    INTO pending_status_default_count
+  FROM information_schema.columns
+  WHERE table_schema = DATABASE()
+    AND table_name = 'dummy_payments'
+    AND column_name = 'payment_status'
+    AND column_default = 'PENDING';
+
+  IF required_column_count <> 10 OR pending_status_default_count <> 1 THEN
     SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Knowva sample data requires DB schema v1.9. Run Knowva_DDL.sql first.';
+      SET MESSAGE_TEXT = 'Knowva sample data requires the current Knowva_DDL.sql. Run Knowva_DDL.sql first.';
   END IF;
 END$$
 DELIMITER ;
@@ -59,6 +71,8 @@ DROP PROCEDURE assert_knowva_seed_schema;
 START TRANSACTION;
 
 SET @sample_password_hash = '$2a$10$rXWwp4H7mIiDJv.c2H9moOtZ3m/8cBMGOsMuaX0G7vW/A1W3tPCxy';
+
+DELETE FROM subject_content_status_backups;
 
 INSERT INTO subjects (subject_code, subject_name, description, sort_order, is_active)
 VALUES
@@ -1028,16 +1042,18 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO dummy_payments (
-  payment_id, order_no, user_id, product_id, payment_method, payment_status, amount, paid_at, created_at, updated_at
+  payment_id, order_no, user_id, product_id, payment_method, payment_status, pg_provider, pg_transaction_id, amount, paid_at, created_at, updated_at
 )
 VALUES
-  (1, 'SEED-PREMIUM-0001', 3, @premium_product_id, 'CARD', 'PAID', 9900.00, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (1, 'SEED-PREMIUM-0001', 3, @premium_product_id, 'CARD', 'PAID', NULL, NULL, 9900.00, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   order_no = VALUES(order_no),
   user_id = VALUES(user_id),
   product_id = VALUES(product_id),
   payment_method = VALUES(payment_method),
   payment_status = VALUES(payment_status),
+  pg_provider = VALUES(pg_provider),
+  pg_transaction_id = VALUES(pg_transaction_id),
   amount = VALUES(amount),
   paid_at = VALUES(paid_at),
   updated_at = CURRENT_TIMESTAMP;
