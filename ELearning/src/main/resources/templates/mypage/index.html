@@ -219,11 +219,9 @@
               </label>
               <label>
                 <strong>대표 과목</strong>
-                <select class="mypage-field" th:field="*{primarySubjectId}">
-                  <option th:value="1">Java</option>
-                  <option th:value="2">Python</option>
-                  <option th:value="3">Web</option>
-                  <option th:value="4">SQL</option>
+                <select class="mypage-field" th:field="*{primarySubjectId}" th:disabled="${#lists.isEmpty(enrolledSubjects)}">
+                  <option th:if="${#lists.isEmpty(enrolledSubjects)}" value="">수강신청한 과목이 없습니다.</option>
+                  <option th:each="subject : ${enrolledSubjects}" th:value="${subject.subjectId}" th:text="${subject.subjectName}">Java</option>
                 </select>
               </label>
               <label>
@@ -247,6 +245,7 @@
           </header>
           <nav class="exam-filter-tabs" aria-label="시험 결과 필터">
             <button class="is-active" type="button" data-exam-filter="ALL">전체</button>
+            <button type="button" data-exam-filter="LEVEL_TEST">레벨테스트</button>
             <button type="button" data-exam-filter="PASS">합격</button>
             <button type="button" data-exam-filter="RETRY">재시</button>
           </nav>

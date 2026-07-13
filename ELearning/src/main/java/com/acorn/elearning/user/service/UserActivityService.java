@@ -18,6 +18,7 @@ import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
 import com.acorn.elearning.learning.model.LevelTestAttempt;
 import com.acorn.elearning.learning.service.CurriculumService;
+import com.acorn.elearning.learning.service.EnrollmentService;
 import com.acorn.elearning.payment.dto.response.PremiumAccessResponse;
 import com.acorn.elearning.payment.mapper.DummyPaymentMapper;
 import com.acorn.elearning.payment.model.DummyPayment;
@@ -65,6 +66,7 @@ public class UserActivityService {
     private final ExamSessionMapper examSessionMapper;
     private final UserLearningProfileMapper userLearningProfileMapper;
     private final CurriculumService curriculumService;
+    private final EnrollmentService enrollmentService;
 
     public UserActivityService(
             DummyPaymentMapper dummyPaymentMapper,
@@ -80,7 +82,8 @@ public class UserActivityService {
             LevelTestAttemptMapper levelTestAttemptMapper,
             ExamSessionMapper examSessionMapper,
             UserLearningProfileMapper userLearningProfileMapper,
-            CurriculumService curriculumService
+            CurriculumService curriculumService,
+            EnrollmentService enrollmentService
     ) {
         this.dummyPaymentMapper = dummyPaymentMapper;
         this.paymentAccessService = paymentAccessService;
@@ -96,6 +99,7 @@ public class UserActivityService {
         this.examSessionMapper = examSessionMapper;
         this.userLearningProfileMapper = userLearningProfileMapper;
         this.curriculumService = curriculumService;
+        this.enrollmentService = enrollmentService;
     }
 
     @Transactional(readOnly = true)
@@ -241,6 +245,7 @@ public class UserActivityService {
     }
 
     private Map<Long, List<LearningStatusPageResponse.SubjectLevelProgress>> progressBySubjectLevel(Long userId) {
+        Set<Long> enrolledSubjectIds = enrollmentService.getEnrolledSubjectIds(userId);
         Map<Long, Map<String, List<CurriculumNode>>> planetsBySubjectLevel = new HashMap<>();
         curriculumNodeMapper.findAll().stream()
                 .filter(node -> node.getSubjectId() != null)
@@ -268,7 +273,7 @@ public class UserActivityService {
                 levels.add(new LearningStatusPageResponse.SubjectLevelProgress(
                         levelCode,
                         progressRate,
-                        "BRONZE".equals(levelCode) || unlockedLevels.contains(levelCode)
+                        enrolledSubjectIds.contains(subjectId) && unlockedLevels.contains(levelCode)
                 ));
             }
             if (!levels.isEmpty()) {

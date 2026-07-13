@@ -1075,6 +1075,15 @@ textarea.mypage-field {
   color: var(--danger);
 }
 
+.exam-summary-section .result-badge.level-test {
+  min-width: 92px;
+  border-color: color-mix(in srgb, var(--muted) 34%, var(--mypage-line));
+  background: color-mix(in srgb, var(--surface) 82%, var(--muted));
+  color: var(--text);
+  font-size: 15px;
+  white-space: nowrap;
+}
+
 .exam-summary-section .exam-result-row.subtle {
   grid-template-columns: minmax(120px, 1fr) minmax(180px, 1.2fr) 48px;
 }
@@ -1179,7 +1188,7 @@ textarea.mypage-field {
 
 .exam-modal-row {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) auto;
+  grid-template-columns: max-content minmax(0, 1fr) auto;
   gap: 18px;
   align-items: center;
   min-height: 77px;
@@ -1210,6 +1219,15 @@ textarea.mypage-field {
   border-color: color-mix(in srgb, var(--danger) 34%, var(--line));
   background: var(--mypage-danger-soft);
   color: var(--danger);
+}
+
+.exam-status-dot.level-test {
+  width: 92px;
+  border-color: color-mix(in srgb, var(--muted) 34%, var(--line));
+  background: color-mix(in srgb, var(--surface) 82%, var(--muted));
+  color: var(--text);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .exam-modal-main {

@@ -341,17 +341,15 @@ public record MyPageSummaryResponse(
         }
 
         public static ExamResultItem from(LevelTestAttempt attempt) {
-            boolean passed = passed(attempt.getCorrectCount(), attempt.getTotalCount());
-            String levelLabel = levelLabel(attempt.getResultLevelCode());
             String subject = MyPageSummaryResponse.subjectLabel(attempt.getSubjectId());
             return new ExamResultItem(
-                    subject + " " + levelLabel,
+                    subject + " 레벨테스트",
                     subject,
                     attempt.getResultLevelCode(),
-                    levelLabel,
-                    resultLabel(passed),
-                    passed ? "PASS" : "RETRY",
-                    passed ? "pass" : "retry",
+                    "레벨테스트",
+                    "레벨 판정",
+                    "LEVEL_TEST",
+                    "level-test",
                     formatDate(attempt.getSubmittedAt()),
                     scoreLabel(attempt.getCorrectCount(), attempt.getTotalCount()),
                     attempt.getSubmittedAt() == null ? EMPTY_DATE : attempt.getSubmittedAt()
