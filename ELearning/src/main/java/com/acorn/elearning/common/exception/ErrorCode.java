@@ -14,6 +14,13 @@ public enum ErrorCode {
     AUTH_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "AUTH-NICKNAME-DUPLICATED", "이미 사용 중인 닉네임입니다."),
     AUTH_SOCIAL_PENDING_EXPIRED(HttpStatus.BAD_REQUEST, "AUTH-SOCIAL-PENDING-EXPIRED", "소셜 가입 정보가 만료되었습니다. 다시 시도해 주세요."), // [추가] 소셜 회원가입 대기정보 만료
 
+    //이정하 작업 - 비밀번호 찾기(재설정) 실패 코드
+    AUTH_RESET_TOKEN_INVALID(HttpStatus.BAD_REQUEST, "AUTH-RESET-TOKEN-INVALID", "유효하지 않은 재설정 링크입니다. 비밀번호 찾기를 다시 요청해 주세요."),
+    AUTH_RESET_TOKEN_EXPIRED(HttpStatus.GONE, "AUTH-RESET-TOKEN-EXPIRED", "재설정 링크가 만료되었습니다. 비밀번호 찾기를 다시 요청해 주세요."),
+    AUTH_RESET_TOKEN_USED(HttpStatus.CONFLICT, "AUTH-RESET-TOKEN-USED", "이미 사용된 재설정 링크입니다. 비밀번호 찾기를 다시 요청해 주세요."),
+    AUTH_MAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH-MAIL-SEND-FAILED", "메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요."),
+
+
     COMMON_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION-400", "입력값이 올바르지 않습니다."),
     COMMON_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON-NOT-FOUND", "요청한 대상을 찾을 수 없습니다."),
     COMMON_IDEMPOTENCY_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "COMMON-IDEMPOTENCY-KEY-REQUIRED", "중복 방지 토큰이 필요합니다."),
