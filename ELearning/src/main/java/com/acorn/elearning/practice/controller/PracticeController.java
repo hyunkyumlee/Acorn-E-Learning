@@ -146,26 +146,74 @@ public class PracticeController {
 
         Map<String, Object> currentProblem = problems.get(index);
 
-        PracticeAnswerResultResponse lastResult =
+        List<PracticeAnswerForm.SingleAnswer> answers = getAnswerSessionList(session);
+        PracticeAnswerForm.SingleAnswer currentAnswer = index < answers.size() ? answers.get(index) : null;
+
+        PracticeAnswerResultResponse flashResult =
                 (PracticeAnswerResultResponse) model.asMap().get("lastResult");
 
-        boolean answered = lastResult != null;
+        boolean isFirstProblem = index == 0;
         boolean isLastProblem = index == problems.size() - 1;
+
+        Long prevProblemId = null;
+        if (!isFirstProblem) {
+            prevProblemId = toLong(problems.get(index - 1).get("problemId"));
+        }
 
         Long nextProblemId = null;
         if (!isLastProblem) {
             nextProblemId = toLong(problems.get(index + 1).get("problemId"));
         }
 
+        boolean alreadyProcessed = currentAnswer != null;
+        boolean skipped = currentAnswer != null && "__SKIPPED__".equals(currentAnswer.getSubmittedAnswer());
+        boolean canGoNext = alreadyProcessed;
+
+        PracticeAnswerResultResponse restoredResult = null;
+
+        if (flashResult != null) {
+            restoredResult = flashResult;
+        } else if (currentAnswer != null && !skipped) {
+            PracticeProblem problem = problemService.getProblem(problemId);
+            boolean correct = normalizeAnswer(problem.getAnswerText())
+                    .equals(normalizeAnswer(currentAnswer.getSubmittedAnswer()));
+
+            restoredResult = new PracticeAnswerResultResponse(
+                    "SUCCESS",
+                    Map.of(
+                            "problemId", problemId,
+                            "submittedAnswer", currentAnswer.getSubmittedAnswer(),
+                            "correct", correct,
+                            "correctAnswer", problem.getAnswerText(),
+                            "explanation", "",
+                            "scoreDelta", 0,
+                            "wrongAnswerUpdated", !correct
+                    )
+            );
+        }
+
+        boolean answered = restoredResult != null;
+
         model.addAttribute("view", view);
         model.addAttribute("problem", currentProblem);
         model.addAttribute("setAttemptId", setAttemptId);
         model.addAttribute("currentIndex", index);
         model.addAttribute("totalCount", problems.size());
+
+        model.addAttribute("isFirstProblem", isFirstProblem);
         model.addAttribute("isLastProblem", isLastProblem);
+        model.addAttribute("prevProblemId", prevProblemId);
         model.addAttribute("nextProblemId", nextProblemId);
-        model.addAttribute("lastResult", lastResult);
+        model.addAttribute("canGoNext", canGoNext);
+        model.addAttribute("skipped", skipped);
+
+        model.addAttribute("lastResult", restoredResult);
         model.addAttribute("answered", answered);
+        model.addAttribute("alreadyProcessed", alreadyProcessed);
+
+        model.addAttribute("showFinalSkipConfirm",
+                Boolean.TRUE.equals(model.asMap().get("showFinalSkipConfirm")));
+
         model.addAttribute("completed", false);
         model.addAttribute("screen", "learning/practice");
 
@@ -201,12 +249,7 @@ public class PracticeController {
         answer.setProblemId(problemId);
         answer.setSubmittedAnswer(submittedAnswer);
 
-        if (answers.size() > index) {
-            answers.set(index, answer);
-        } else {
-            answers.add(answer);
-        }
-
+        setAnswerAtIndex(answers, index, answer);
         session.setAttribute(PRACTICE_ANSWERS_SESSION_KEY, answers);
 
         PracticeAnswerResultResponse result = new PracticeAnswerResultResponse(
@@ -242,8 +285,23 @@ public class PracticeController {
 
         List<PracticeAnswerForm.SingleAnswer> answers = getAnswerSessionList(session);
         if (answers.isEmpty()) {
-            redirectAttributes.addFlashAttribute("message", "제출된 답안이 없습니다.");
+            redirectAttributes.addFlashAttribute("message", "제출한 답안이 없습니다.");
             return "redirect:/learning/practice";
+        }
+
+        //건너뛰기 제출 포함 수정
+        PracticeSetView view = (PracticeSetView) session.getAttribute(PRACTICE_VIEW_SESSION_KEY);
+        if (view == null) {
+            return "redirect:/learning/practice";
+        }
+
+        int totalProblemCount = getProblems(view).size();
+        if (answers.size() < totalProblemCount) {
+            redirectAttributes.addFlashAttribute("message", "아직 처리되지 않은 문제가 있습니다.");
+            Long firstProblemId = toLong(getProblems(view).get(answers.size()).get("problemId"));
+            redirectAttributes.addAttribute("setAttemptId", setAttemptId);
+            redirectAttributes.addAttribute("index", answers.size());
+            return "redirect:/learning/practice/problems/" + firstProblemId;
         }
 
         PracticeSetCompleteForm completeForm = new PracticeSetCompleteForm();
@@ -261,6 +319,134 @@ public class PracticeController {
         session.setAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY, completeResult);
 
         return "redirect:/learning/practice";
+    }
+
+    //건너뛰기 관련 추가 매서드
+
+    @PostMapping("/learning/practice/sets/{setAttemptId}/skip")
+    public String skipAnswer(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long setAttemptId,
+            @RequestParam Long problemId,
+            @RequestParam(defaultValue = "0") int index,
+            @RequestParam(defaultValue = "false") boolean confirmFinalSkip,
+            RedirectAttributes redirectAttributes,
+            HttpSession session
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        PracticeSetView view = (PracticeSetView) session.getAttribute(PRACTICE_VIEW_SESSION_KEY);
+        List<Map<String, Object>> problems = view == null ? null : getProblems(view);
+        List<PracticeAnswerForm.SingleAnswer> answers = getAnswerSessionList(session);
+
+        if (view == null || problems == null || problems.isEmpty()) {
+            return "redirect:/learning/practice";
+        }
+
+        boolean isLastProblem = index == problems.size() - 1;
+
+        if (isLastProblem && !confirmFinalSkip) {
+            redirectAttributes.addFlashAttribute("message", "이 문제를 건너뛴 채 최종 제출하시겠습니까?");
+            redirectAttributes.addFlashAttribute("showFinalSkipConfirm", true);
+            redirectAttributes.addAttribute("setAttemptId", setAttemptId);
+            redirectAttributes.addAttribute("index", index);
+            return "redirect:/learning/practice/problems/" + problemId;
+        }
+
+        PracticeAnswerForm.SingleAnswer skippedAnswer = new PracticeAnswerForm.SingleAnswer();
+        skippedAnswer.setProblemId(problemId);
+        skippedAnswer.setSubmittedAnswer("__SKIPPED__");
+
+        setAnswerAtIndex(answers, index, skippedAnswer);
+        session.setAttribute(PRACTICE_ANSWERS_SESSION_KEY, answers);
+
+        if (isLastProblem && confirmFinalSkip) {
+            PracticeSetCompleteForm completeForm = new PracticeSetCompleteForm();
+            completeForm.setSetAttemptId(setAttemptId);
+            completeForm.setAnswers(answers);
+            completeForm.setIdempotencyToken(
+                    "PRACTICE_COMPLETE:" + sessionUser.userId() + ":" + setAttemptId
+            );
+
+            practiceService.submitAnswers(sessionUser, completeForm);
+            PracticeSetResponse completeResult = practiceService.completeSet(sessionUser, setAttemptId);
+
+            session.removeAttribute(PRACTICE_VIEW_SESSION_KEY);
+            session.removeAttribute(PRACTICE_ANSWERS_SESSION_KEY);
+            session.setAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY, completeResult);
+
+            return "redirect:/learning/practice";
+        }
+
+        Long nextProblemId = toLong(problems.get(index + 1).get("problemId"));
+
+        redirectAttributes.addAttribute("setAttemptId", setAttemptId);
+        redirectAttributes.addAttribute("index", index + 1);
+
+        return "redirect:/learning/practice/problems/" + nextProblemId;
+    }
+
+    @GetMapping("/learning/practice/finalize/{setAttemptId}")
+    public String finalizePractice(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long setAttemptId,
+            HttpSession session
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        return "redirect:/learning/practice/sets/" + setAttemptId + "/complete-ready";
+    }
+
+    @GetMapping("/learning/practice/sets/{setAttemptId}/complete-ready")
+    public String completeReady(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long setAttemptId,
+            Model model,
+            HttpSession session
+    ) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+
+        PracticeSetView view = (PracticeSetView) session.getAttribute(PRACTICE_VIEW_SESSION_KEY);
+        if (view == null) {
+            return "redirect:/learning/practice";
+        }
+
+        List<Map<String, Object>> problems = getProblems(view);
+        if (problems == null || problems.isEmpty()) {
+            return "redirect:/learning/practice";
+        }
+
+        int lastIndex = problems.size() - 1;
+        Map<String, Object> lastProblem = problems.get(lastIndex);
+
+        model.addAttribute("view", view);
+        model.addAttribute("problem", lastProblem);
+        model.addAttribute("setAttemptId", setAttemptId);
+        model.addAttribute("currentIndex", lastIndex);
+        model.addAttribute("totalCount", problems.size());
+
+        model.addAttribute("isFirstProblem", lastIndex == 0);
+        model.addAttribute("isLastProblem", true);
+        model.addAttribute("prevProblemId", lastIndex > 0 ? toLong(problems.get(lastIndex - 1).get("problemId")) : null);
+        model.addAttribute("nextProblemId", null);
+        model.addAttribute("canGoNext", false);
+        model.addAttribute("skipped", true);
+
+        model.addAttribute("lastResult", null);
+        model.addAttribute("answered", false);
+        model.addAttribute("alreadyProcessed", true);
+        model.addAttribute("showFinalSkipConfirm", true);
+
+        model.addAttribute("completed", false);
+        model.addAttribute("screen", "learning/practice");
+
+        return "learning/practice";
     }
 
     @SuppressWarnings("unchecked")
@@ -292,6 +478,16 @@ public class PracticeController {
             return numberValue.longValue();
         }
         return Long.valueOf(String.valueOf(value));
+    }
+
+    //건너뛰기 관련 추가
+    private void setAnswerAtIndex(List<PracticeAnswerForm.SingleAnswer> answers,
+                                  int index,
+                                  PracticeAnswerForm.SingleAnswer answer) {
+        while (answers.size() <= index) {
+            answers.add(null);
+        }
+        answers.set(index, answer);
     }
 
     private String normalizeAnswer(String value) {
