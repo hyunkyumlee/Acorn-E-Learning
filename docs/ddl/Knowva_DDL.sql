@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.0
+  Source: Notion DB 명세 v2.1
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -56,6 +56,7 @@ DROP TABLE IF EXISTS ai_request_logs;
 DROP TABLE IF EXISTS ai_analysis_reports;
 DROP TABLE IF EXISTS exam_answers;
 DROP TABLE IF EXISTS ai_exam_problems;
+DROP TABLE IF EXISTS user_subject_enrollments;
 DROP TABLE IF EXISTS user_level_unlocks;
 DROP TABLE IF EXISTS exam_sessions;
 DROP TABLE IF EXISTS ranking_scores;
@@ -211,6 +212,22 @@ CREATE TABLE user_learning_profiles (
   KEY idx_learning_profiles_subject_level (primary_subject_id, current_level_code),
   CONSTRAINT fk_learning_profiles_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_learning_profiles_subject FOREIGN KEY (primary_subject_id) REFERENCES subjects (subject_id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE user_subject_enrollments (
+  enrollment_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id BIGINT UNSIGNED NOT NULL,
+  subject_id BIGINT UNSIGNED NOT NULL,
+  status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+  start_mode VARCHAR(30) NOT NULL DEFAULT 'BASIC',
+  enrolled_at DATETIME NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (enrollment_id),
+  UNIQUE KEY uk_user_subject_enrollment (user_id, subject_id),
+  KEY idx_enrollment_user_status (user_id, status),
+  CONSTRAINT fk_user_subject_enrollments_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_user_subject_enrollments_subject FOREIGN KEY (subject_id) REFERENCES subjects (subject_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE lessons (
@@ -818,6 +835,8 @@ CREATE TABLE admin_operation_logs (
   action_type VARCHAR(50) NOT NULL,
   target_type VARCHAR(30) NOT NULL,
   target_id BIGINT UNSIGNED NULL,
+  target_name VARCHAR(255) NULL,
+  change_detail VARCHAR(500) NULL,
   result_status VARCHAR(30) NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (log_id),
