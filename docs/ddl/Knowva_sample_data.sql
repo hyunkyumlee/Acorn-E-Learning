@@ -1,6 +1,6 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.0 / 레슨 단위 학습 구조
+  Source: Notion DB 명세 v2.1 / 레슨 단위 학습 구조
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Execution contract
@@ -47,7 +47,12 @@ BEGIN
       ('practice_set_items', 'set_item_id'),
       ('subject_content_status_backups', 'backup_id'),
       ('dummy_payments', 'pg_provider'),
-      ('dummy_payments', 'pg_transaction_id')
+      ('dummy_payments', 'pg_transaction_id'),
+      ('user_subject_enrollments', 'enrollment_id'),
+      ('user_subject_enrollments', 'status'),
+      ('user_subject_enrollments', 'start_mode'),
+      ('admin_operation_logs', 'target_name'),
+      ('admin_operation_logs', 'change_detail')
     );
 
   SELECT COUNT(*)
@@ -58,7 +63,7 @@ BEGIN
     AND column_name = 'payment_status'
     AND column_default = 'PENDING';
 
-  IF required_column_count <> 10 OR pending_status_default_count <> 1 THEN
+  IF required_column_count <> 15 OR pending_status_default_count <> 1 THEN
     SIGNAL SQLSTATE '45000'
       SET MESSAGE_TEXT = 'Knowva sample data requires the current Knowva_DDL.sql. Run Knowva_DDL.sql first.';
   END IF;
@@ -73,6 +78,11 @@ START TRANSACTION;
 SET @sample_password_hash = '$2a$10$rXWwp4H7mIiDJv.c2H9moOtZ3m/8cBMGOsMuaX0G7vW/A1W3tPCxy';
 
 DELETE FROM subject_content_status_backups WHERE backup_id > 0;
+
+DELETE FROM wrong_answers WHERE set_attempt_id IN (100101, 200501);
+DELETE FROM practice_submissions WHERE set_attempt_id IN (100101, 200501);
+DELETE FROM practice_set_items WHERE set_attempt_id IN (100101, 200501);
+DELETE FROM practice_set_attempts WHERE set_attempt_id IN (100101, 200501);
 
 INSERT INTO subjects (subject_code, subject_name, description, sort_order, is_active)
 VALUES
@@ -436,6 +446,21 @@ ON DUPLICATE KEY UPDATE
   unlocked_by_exam_id = VALUES(unlocked_by_exam_id),
   unlocked_at = VALUES(unlocked_at);
 
+INSERT INTO user_subject_enrollments (
+  user_id, subject_id, status, start_mode, enrolled_at
+)
+SELECT
+  profile.user_id,
+  profile.primary_subject_id,
+  'ACTIVE',
+  'BASIC',
+  CURRENT_TIMESTAMP
+FROM user_learning_profiles profile
+WHERE profile.primary_subject_id IS NOT NULL
+ON DUPLICATE KEY UPDATE
+  status = VALUES(status),
+  updated_at = CURRENT_TIMESTAMP;
+
 INSERT INTO user_level_unlocks (
   unlock_id, user_id, subject_id, level_code, unlock_source, unlocked_by_exam_id, unlocked_at, created_at
 )
@@ -467,6 +492,20 @@ ON DUPLICATE KEY UPDATE
   unlock_source = VALUES(unlock_source),
   unlocked_by_exam_id = VALUES(unlocked_by_exam_id),
   unlocked_at = VALUES(unlocked_at);
+
+INSERT INTO user_subject_enrollments (
+  user_id, subject_id, status, start_mode, enrolled_at
+)
+SELECT DISTINCT
+  level_unlock.user_id,
+  level_unlock.subject_id,
+  'ACTIVE',
+  'BASIC',
+  CURRENT_TIMESTAMP
+FROM user_level_unlocks level_unlock
+ON DUPLICATE KEY UPDATE
+  status = VALUES(status),
+  updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO learning_progress (
   progress_id, user_id, subject_id, node_id, lesson_completed, practice_passed, progress_rate, completed_at, created_at, updated_at
@@ -637,6 +676,7 @@ FROM (
   WHERE node.node_type = 'PLANET'
     AND node.is_active = 1
     AND lesson.required_for_completion = 1
+    AND lesson.lesson_id <> 501
   UNION ALL
   SELECT
     100000 + lesson.lesson_id AS set_attempt_id,
@@ -655,6 +695,7 @@ FROM (
   JOIN lessons lesson ON lesson.node_id = node.node_id
   WHERE node.node_id = 1
     AND lesson.required_for_completion = 1
+    AND lesson.lesson_id <> 101
 ) seed_attempt
 ON DUPLICATE KEY UPDATE
   user_id = VALUES(user_id),
@@ -798,6 +839,48 @@ VALUES
   (8, 1, 108, 2, 10108, 'PRACTICE_SET', 'return value;', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
   (9, 1, 109, 2, 10109, 'PRACTICE_SET', 'if (value == null) return;', 1, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
   (10, 1, 110, 2, 10110, 'PRACTICE_SET', 'System.out.println(wrong);', 0, 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  set_attempt_id = VALUES(set_attempt_id),
+  set_item_id = VALUES(set_item_id),
+  user_id = VALUES(user_id),
+  problem_id = VALUES(problem_id),
+  submission_context = VALUES(submission_context),
+  submitted_answer = VALUES(submitted_answer),
+  is_correct = VALUES(is_correct),
+  is_skipped = VALUES(is_skipped),
+  solved_at = VALUES(solved_at);
+
+INSERT INTO practice_submissions (
+  submission_id, set_attempt_id, set_item_id, user_id, problem_id, submission_context, submitted_answer, is_correct, is_skipped, solved_at, created_at
+)
+SELECT
+  (attempt.set_attempt_id * 100) + item.sort_order AS submission_id,
+  attempt.set_attempt_id,
+  item.set_item_id,
+  attempt.user_id,
+  item.problem_id,
+  'PRACTICE_SET',
+  CASE
+    WHEN item.sort_order <= attempt.correct_count THEN problem.answer_text
+    ELSE CONCAT('__seed_incorrect_', item.sort_order)
+  END AS submitted_answer,
+  IF(item.sort_order <= attempt.correct_count, 1, 0) AS is_correct,
+  0 AS is_skipped,
+  COALESCE(attempt.completed_at, attempt.created_at) AS solved_at,
+  attempt.created_at
+FROM practice_set_attempts attempt
+JOIN practice_set_items item ON item.set_attempt_id = attempt.set_attempt_id
+JOIN practice_problems problem ON problem.problem_id = item.problem_id
+LEFT JOIN practice_submissions existing
+  ON existing.set_attempt_id = attempt.set_attempt_id
+  AND existing.problem_id = item.problem_id
+  AND existing.submission_context = 'PRACTICE_SET'
+WHERE attempt.status = 'COMPLETED'
+  AND existing.submission_id IS NULL
+  AND (
+    (attempt.user_id = 2 AND (attempt.set_attempt_id = 1 OR attempt.set_attempt_id = 100000 + attempt.lesson_id))
+    OR (attempt.user_id = 3 AND (attempt.set_attempt_id = 2 OR attempt.set_attempt_id = 200000 + attempt.lesson_id))
+  )
 ON DUPLICATE KEY UPDATE
   set_attempt_id = VALUES(set_attempt_id),
   set_item_id = VALUES(set_item_id),
@@ -1087,16 +1170,18 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 INSERT INTO admin_operation_logs (
-  log_id, admin_id, action_type, target_type, target_id, result_status, created_at
+  log_id, admin_id, action_type, target_type, target_id, target_name, change_detail, result_status, created_at
 )
 VALUES
-  (1, 1, 'CREATE_NOTICE', 'NOTICE', 1, 'SUCCESS', CURRENT_TIMESTAMP),
-  (2, 1, 'HANDLE_REPORT', 'REPORT', 1, 'SUCCESS', CURRENT_TIMESTAMP)
+  (1, 1, 'CREATE_NOTICE', 'NOTICE', 1, 'Knowva 로컬 개발 샘플 공지', '공지사항을 등록하고 게시 상태로 설정', 'SUCCESS', CURRENT_TIMESTAMP),
+  (2, 1, 'HANDLE_REPORT', 'REPORT', 1, 'Java 질문 게시글 신고', '스팸 신고를 처리하고 신고 상태를 RESOLVED로 변경', 'SUCCESS', CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   admin_id = VALUES(admin_id),
   action_type = VALUES(action_type),
   target_type = VALUES(target_type),
   target_id = VALUES(target_id),
+  target_name = VALUES(target_name),
+  change_detail = VALUES(change_detail),
   result_status = VALUES(result_status);
 
 INSERT INTO content_recommendations (

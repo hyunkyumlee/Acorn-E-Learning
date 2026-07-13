@@ -12,6 +12,7 @@ import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
 import com.acorn.elearning.admin.form.ProblemForm;
 import com.acorn.elearning.admin.form.SubjectForm;
+import com.acorn.elearning.admin.mapper.AdminContentMapper;
 import com.acorn.elearning.admin.mapper.AdminCurriculumNodeMapper;
 import com.acorn.elearning.admin.mapper.AdminLessonMapper;
 import com.acorn.elearning.admin.mapper.AdminProblemMapper;
@@ -41,6 +42,7 @@ public class AdminContentService {
     private final AdminLessonMapper alm;
     private final AdminProblemMapper apm;
     private final AdminCurriculumNodeMapper acm;
+    private final AdminContentMapper actm;
 
     private final AdminLogService adminLogService;
 
@@ -56,6 +58,25 @@ public class AdminContentService {
 
         return log;
     }
+
+
+    //과목 비활성화
+    private void deactivateSubjectContents(Long subjectId){
+        actm.backupContentStatusesBySubjectId(subjectId);
+
+        actm.deactivateLessonsBySubjectId(subjectId);
+        actm.deactivateProblemsBySubjectId(subjectId);
+        actm.deactivateCurriculumNodesBySubjectId(subjectId);
+        actm.cancelActiveExamsBySubjectId(subjectId);
+    }
+
+    private void reactivateSubjectContents(Long subjectId) {
+        actm.restoreCurriculumNodesBySubjectId(subjectId);
+        actm.restoreLessonsBySubjectId(subjectId);
+        actm.restoreProblemsBySubjectId(subjectId);
+        actm.deleteContentStatusBackupsBySubjectId(subjectId);
+    }
+
 
     //과목 목록 조회
     public List<Subject> findAllSubject(){
@@ -103,12 +124,29 @@ public class AdminContentService {
         return inserted;
     }
 
+    @Transactional
     public int updateSubject(SubjectForm form, Long adminId){
         Subject s = sm.findById(form.getSubjectId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.COMMON_NOT_FOUND,
                         "수정할 과목을 찾을 수 없습니다."
                 ));
+
+        boolean becomingInactive =
+                Boolean.TRUE.equals(s.getIsActive())
+                        && Boolean.FALSE.equals(form.getIsActive());
+
+        if (becomingInactive) {
+            deactivateSubjectContents(s.getSubjectId());
+        }
+
+        boolean becomingActive =
+                Boolean.FALSE.equals(s.getIsActive())
+                        && Boolean.TRUE.equals(form.getIsActive());
+
+        if (becomingActive) {
+            reactivateSubjectContents(s.getSubjectId());
+        }
 
         s.setSubjectName(form.getSubjectName());
         s.setIsActive(form.getIsActive());
@@ -505,12 +543,29 @@ public class AdminContentService {
                 .toList();
     }
 
+    @Transactional
     public int updateSubjectStatus(Long subjectId, Boolean isActive, Long adminId){
         Subject s = sm.findById(subjectId)
                 .orElseThrow(() -> new BusinessException(
                 ErrorCode.COMMON_NOT_FOUND,
                 "상태를 변경할 과목을 찾을 수 없습니다."
         ));
+
+        boolean becomingInactive =
+                Boolean.TRUE.equals(s.getIsActive())
+                        && Boolean.FALSE.equals(isActive);
+
+        if (becomingInactive) {
+            deactivateSubjectContents(subjectId);
+        }
+
+        boolean becomingActive =
+                Boolean.FALSE.equals(s.getIsActive())
+                        && Boolean.TRUE.equals(isActive);
+
+        if (becomingActive) {
+            reactivateSubjectContents(subjectId);
+        }
 
         s.setIsActive(isActive);
 
