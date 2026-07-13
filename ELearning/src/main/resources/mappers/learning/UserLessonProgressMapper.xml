@@ -72,6 +72,23 @@
         GROUP BY n.subject_id
     </select>
 
+    <select id="findLessonStatsByLevel" resultType="com.acorn.elearning.learning.view.LevelProgressRow">
+        SELECT n.level_code AS level_code,
+               COUNT(l.lesson_id) AS total_lessons,
+               SUM(CASE WHEN ulp.theory_completed = 1 AND ulp.practice_passed = 1 THEN 1 ELSE 0 END)
+                   AS completed_lessons
+        FROM curriculum_nodes n
+        JOIN lessons l
+          ON l.node_id = n.node_id
+         AND l.is_active = 1
+         AND l.required_for_completion = 1
+        LEFT JOIN user_lesson_progress ulp
+          ON ulp.lesson_id = l.lesson_id AND ulp.user_id = #{userId}
+        WHERE n.is_active = 1
+          AND n.subject_id = #{subjectId}
+        GROUP BY n.level_code
+    </select>
+
     <!--추가한 부분-->
     <insert id="upsertPracticePassed">
         INSERT INTO user_lesson_progress (

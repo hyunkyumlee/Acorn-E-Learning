@@ -7,11 +7,13 @@ import com.acorn.elearning.learning.mapper.LearningProgressMapper;
 import com.acorn.elearning.learning.mapper.UserLessonProgressMapper;
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.LearningProgress;
+import com.acorn.elearning.learning.view.LevelProgressRow;
 import com.acorn.elearning.learning.view.SubjectProgressRow;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProgressService {
 
     private static final String NODE_TYPE_PLANET = "PLANET";
+    /** 레벨 진행 순서(LevelTestService와 같은 규약). 레벨별 진행률을 항상 이 순서로 보여준다. */
+    private static final List<String> LEVEL_ORDER = List.of("BRONZE", "SILVER", "GOLD");
 
     /**
      * 단원 진행률 규약(임시): 한쪽만 완료=50, 이론+문제풀이 둘 다=100.
@@ -59,6 +63,26 @@ public class ProgressService {
             result.put(row.getSubjectId(), percent);
         }
         return result;
+    }
+
+    /**
+     * 한 과목의 레벨별 진행률(0~100)을 레벨 진행 순서대로 계산한다.
+     * 계산 규약은 computeSubjectProgress와 같고(해당 범위의 required 레슨 대비 완료 비율) 범위만 레벨로 좁힌다.
+     * 레벨 테스트로 상위 레벨에 배정돼도 건너뛴 레벨은 학습한 적이 없으므로 0%로 남는다.
+     * 노드가 없는 레벨도 0%로 채워 세 레벨을 항상 같은 순서로 보여준다.
+     */
+    public Map<String, Integer> computeLevelProgress(Long userId, Long subjectId) {
+        Map<String, Integer> percentByLevel = new LinkedHashMap<>();
+        for (String levelCode : LEVEL_ORDER) {
+            percentByLevel.put(levelCode, 0);
+        }
+        for (LevelProgressRow row : userLessonProgressMapper.findLessonStatsByLevel(userId, subjectId)) {
+            int total = row.getTotalLessons();
+            int percent = (total == 0) ? 0
+                    : (int) Math.round(row.getCompletedLessons() * 100.0 / total);
+            percentByLevel.replace(row.getLevelCode(), percent);
+        }
+        return percentByLevel;
     }
 
     /**

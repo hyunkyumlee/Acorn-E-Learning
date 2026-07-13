@@ -421,6 +421,64 @@
   font-size: 16px;
 }
 
+/* 레벨별 진행률: 링(과목 전체) 아래에 BRONZE/SILVER/GOLD 세 줄. 이름/바/% 3열 고정 그리드 */
+.progress-summary-scope {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.progress-summary-scope strong {
+  color: var(--text);
+}
+
+.progress-levels {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+}
+
+.progress-level {
+  display: grid;
+  grid-template-columns: 52px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-level-name {
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.progress-level-bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.progress-level-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+}
+
+.progress-level-percent {
+  text-align: right;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ----- TodayMissionCard (중앙 상단 강조) ----- */
 .mission-card {
   display: grid;
@@ -1264,7 +1322,10 @@ a.roadmap-level:hover {
   border-color: color-mix(in srgb, var(--success) 34%, var(--line));
 }
 
-.roadmap-node.is-current .roadmap-badge {
+/* open = 지나온 레벨이라 순차 잠금 없이 바로 들어갈 수 있는 행성. 잠김과 같은 회색으로 보이면
+   클릭 가능한지 알 수 없으므로 학습 중과 같은 색을 쓴다(지나온 레벨엔 current가 없어 겹치지 않는다). */
+.roadmap-node.is-current .roadmap-badge,
+.roadmap-node.is-open .roadmap-badge {
   color: var(--primary);
   background: color-mix(in srgb, var(--primary) 15%, var(--surface));
   border-color: color-mix(in srgb, var(--primary) 34%, var(--line));
@@ -1383,7 +1444,8 @@ a.roadmap-level:hover {
     radial-gradient(circle at 84% 15%, color-mix(in srgb, var(--success) 26%, transparent), transparent 60%);
 }
 
-.roadmap-node.is-current .roadmap-card-cover {
+.roadmap-node.is-current .roadmap-card-cover,
+.roadmap-node.is-open .roadmap-card-cover {
   background:
     linear-gradient(120deg, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%),
     radial-gradient(circle at 84% 15%, color-mix(in srgb, var(--primary) 30%, transparent), transparent 60%);
@@ -1470,7 +1532,8 @@ a.roadmap-level:hover {
   background: color-mix(in srgb, var(--success) 14%, var(--surface));
   border-color: color-mix(in srgb, var(--success) 30%, var(--line));
 }
-.roadmap-node.is-current .roadmap-card-tag {
+.roadmap-node.is-current .roadmap-card-tag,
+.roadmap-node.is-open .roadmap-card-tag {
   color: var(--primary);
   background: color-mix(in srgb, var(--primary) 14%, var(--surface));
   border-color: color-mix(in srgb, var(--primary) 30%, var(--line));

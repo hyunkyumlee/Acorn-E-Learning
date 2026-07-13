@@ -11,6 +11,7 @@ import com.acorn.elearning.learning.support.PlanetCatalog;
 import com.acorn.elearning.learning.support.PlanetCatalog.PlanetView;
 import com.acorn.elearning.learning.view.LearningDashboardView;
 import com.acorn.elearning.learning.view.RoadmapLevelTab;
+import com.acorn.elearning.learning.view.SubjectCardView;
 import com.acorn.elearning.ranking.service.RankingService;
 import com.acorn.elearning.security.SessionUser;
 import java.util.LinkedHashMap;
@@ -103,8 +104,19 @@ public class LearningController {
         }
 
         // 좌측 과목 목록: 과목별 수강 여부 · 현재 레벨 · 진행률
-        model.addAttribute("subjectCards",
-                learningService.getSubjectCards(user.userId(), roadmapSubjectId));
+        List<SubjectCardView> subjectCards =
+                learningService.getSubjectCards(user.userId(), roadmapSubjectId);
+        model.addAttribute("subjectCards", subjectCards);
+
+        // 진행 요약: 과목 전체 진행률 1개 + 레벨별 진행률 3개.
+        // 레벨 테스트로 상위 레벨에 배정돼도 건너뛴 레벨은 0%로 남으므로, 왜 전체 진행률이 낮은지 화면에서 드러난다.
+        model.addAttribute("subjectPercent", subjectCards.stream()
+                .filter(SubjectCardView::selected)
+                .map(SubjectCardView::progressPercent)
+                .findFirst()
+                .orElse(0));
+        model.addAttribute("levelProgress",
+                progressService.computeLevelProgress(user.userId(), roadmapSubjectId));
 
         String roadmapSubjectCode = subjectCodeOf(subjects, roadmapSubjectId);
         model.addAttribute("roadmapSubjectId", roadmapSubjectId);
@@ -149,18 +161,43 @@ public class LearningController {
 
         // 로드맵 완료/현재/잠금 판정 = 선택 과목의 노드별 learning_progress 기준(평균 근사치 아님).
         var progress = progressService.computeRoadmapProgress(user.userId(), roadmapSubjectId, roadmap);
+
+        int planetCount = progress.planetCount();
         int completedPlanets = progress.completedPlanets();
         model.addAttribute("completedPlanets", completedPlanets);
-        model.addAttribute("planetCount", progress.planetCount());
+        model.addAttribute("planetCount", planetCount);
         model.addAttribute("progressPercent", progress.progressPercent());
 
-        // 게이트 상태: 다음 레벨이 이미 해금됐으면 이 레벨 게이트는 통과함(재응시 가능),
-        // 아니면 전 행성 완료 시 응시 가능(ready), 그 외 잠김(locked).
+        // 다음 레벨이 이미 열려 있으면 이 레벨은 지나온 레벨이다(레벨 테스트로 건너뛰었거나 게이트를 통과했거나).
         String nextLevel = nextLevel(selectedLevel);
-        boolean gatePassed = nextLevel != null && unlockedLevels.contains(nextLevel);
-        String gateState = gatePassed ? "passed"
-                : ((progress.planetCount() > 0 && completedPlanets >= progress.planetCount()) ? "ready" : "locked");
+        boolean levelPassed = nextLevel != null && unlockedLevels.contains(nextLevel);
+
+        // 게이트 상태: 지나온 레벨이면 통과함(재응시 가능), 아니면 전 행성 완료 시 응시 가능(ready), 그 외 잠김(locked).
+        String gateState = levelPassed ? "passed"
+                : ((planetCount > 0 && completedPlanets >= planetCount) ? "ready" : "locked");
         model.addAttribute("gateState", gateState);
+
+        // 노드 상태(done/current/open/locked) — 템플릿이 같은 판정을 되풀이하지 않게 여기서 한 번만 계산한다.
+        // 지나온 레벨의 행성은 순차 잠금을 걸지 않고 모두 open으로 연다(상위 레벨로 배정된 사용자가 건너뛴
+        // 레벨의 행성을 못 여는 것을 막는다). 학습한 적이 없으므로 완료로 치지는 않는다 — 진행률도 실제 학습 기준.
+        // locked만 링크가 없다.
+        Map<Long, String> nodeStates = new LinkedHashMap<>();
+        for (CurriculumNode node : roadmap) {
+            if ("GATE".equals(node.getNodeType())) {
+                nodeStates.put(node.getNodeId(), gateState);
+            } else if (node.getPlanetNo() == null) {
+                nodeStates.put(node.getNodeId(), "locked");
+            } else if (node.getPlanetNo() <= completedPlanets) {
+                nodeStates.put(node.getNodeId(), "done");
+            } else if (levelPassed) {
+                nodeStates.put(node.getNodeId(), "open");
+            } else if (node.getPlanetNo() == completedPlanets + 1) {
+                nodeStates.put(node.getNodeId(), "current");
+            } else {
+                nodeStates.put(node.getNodeId(), "locked");
+            }
+        }
+        model.addAttribute("nodeStates", nodeStates);
 
         // TodayMissionCard용 현재 학습 행성 = 완료수 다음 행성. (모두 완료면 null → 게이트 단계)
         CurriculumNode currentNode = roadmap.stream()

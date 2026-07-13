@@ -27,6 +27,8 @@ public class EnrollmentService {
     public static final String START_MODE_LEVEL_TEST = "LEVEL_TEST";
 
     private static final String STATUS_ACTIVE = "ACTIVE";
+    /** 레벨 진행 순서(LevelTestService와 같은 규약). 하위 레벨부터 채워 연다. */
+    private static final List<String> LEVEL_ORDER = List.of("BRONZE", "SILVER", "GOLD");
     private static final String LOWEST_LEVEL_CODE = "BRONZE";
     /** 수강신청으로 생긴 unlock의 출처. AI 코딩테스트(AI_EXAM_PASS)와 구분한다. */
     private static final String SOURCE_ENROLLMENT = "ENROLLMENT";
@@ -75,20 +77,55 @@ public class EnrollmentService {
     }
 
     /**
-     * 수강 중인데 연 레벨이 하나도 없는 과목인지 판정한다. 레벨 테스트로 시작하고 아직 채점하지 않은 상태다.
-     * 이 상태로 로드맵을 열면 전 레벨이 잠긴 화면만 보이므로 테스트를 먼저 마쳐야 한다.
-     * 다만 문항이 없는 과목은 테스트로 갈 수 없으므로, 최저 레벨을 열어 기초부터 학습하게 한다.
+     * 수강 중인데 연 레벨이 하나도 없는 과목인지 판정한다.
+     *
+     * 열린 레벨이 없는 상태는 두 가지다.
+     *   1) 레벨 테스트로 시작하고 아직 채점하지 않았다 → 테스트를 마쳐야 레벨이 열린다.
+     *   2) 기초 시작인데 unlock 기록만 없다 → 레벨을 열어 주지 않던 예전 온보딩으로 시작했거나
+     *      프로필 레벨만 심어 둔 계정이다. 이 상태로 테스트에 보내면 기초 시작을 고른 사용자가 계속 되돌려진다.
+     * 둘의 구분자는 start_mode뿐이다(프로필 current_level_code는 NOT NULL DEFAULT라 미응시를 못 가린다).
+     *
+     * 2)는 프로필 레벨까지 unlock을 채워 복구한다. 학습 가능 여부는 user_level_unlocks만 보므로
+     * 프로필이 GOLD인데 unlock이 없으면 화면은 GOLD인데 학습은 403이 된다. 레벨 테스트 채점과 같은 규약으로
+     * 판정 레벨까지의 하위 레벨을 모두 연다.
      */
     @Transactional
     public boolean requiresLevelTest(Long userId, Long subjectId) {
         if (!unlockMapper.findByUserAndSubject(userId, subjectId).isEmpty()) {
             return false;
         }
-        if (levelTestService.hasQuestions(subjectId)) {
+
+        UserSubjectEnrollment enrollment =
+                enrollmentMapper.findByUserAndSubject(userId, subjectId).orElse(null);
+        boolean startedWithLevelTest =
+                enrollment != null && START_MODE_LEVEL_TEST.equals(enrollment.getStartMode());
+        if (startedWithLevelTest && levelTestService.hasQuestions(subjectId)) {
             return true;
         }
-        unlockService.unlock(userId, subjectId, LOWEST_LEVEL_CODE, SOURCE_ENROLLMENT, null);
+
+        for (String levelCode : levelsUpTo(profileLevelOf(userId, subjectId))) {
+            unlockService.unlock(userId, subjectId, levelCode, SOURCE_ENROLLMENT, null);
+        }
         return false;
+    }
+
+    /**
+     * 복구 기준 레벨. 프로필 레벨은 주 과목의 레벨이므로 다른 과목에는 적용하지 않고 최저 레벨로 연다.
+     */
+    private String profileLevelOf(Long userId, Long subjectId) {
+        UserLearningProfile profile = profileMapper.findByUserId(userId).orElse(null);
+        if (profile == null
+                || !subjectId.equals(profile.getPrimarySubjectId())
+                || profile.getCurrentLevelCode() == null) {
+            return LOWEST_LEVEL_CODE;
+        }
+        return profile.getCurrentLevelCode();
+    }
+
+    /** 최저 레벨부터 기준 레벨(포함)까지. 기준 레벨을 모르면 최저 레벨만. */
+    private static List<String> levelsUpTo(String levelCode) {
+        int index = LEVEL_ORDER.indexOf(levelCode);
+        return (index < 0) ? List.of(LOWEST_LEVEL_CODE) : LEVEL_ORDER.subList(0, index + 1);
     }
 
     /** 수강 중(ACTIVE)인 과목 id 집합. 과목 잠금 판정에 쓴다. */
