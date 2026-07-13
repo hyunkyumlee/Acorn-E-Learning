@@ -35,4 +35,92 @@
         WHERE subject_id = #{subjectId}
             AND status IN ('CREATED', 'READY')
     </update>
+
+
+    <!-- 과목 비활성화 전 콘텐츠 상태 백업 -->
+    <insert id="backupContentStatusesBySubjectId">
+        INSERT INTO subject_content_status_backups (
+            subject_id,
+            content_type,
+            content_id,
+            was_active
+        )
+        SELECT
+            #{subjectId},
+            source.content_type,
+            source.content_id,
+            source.was_active
+        FROM (
+            SELECT
+                'CURRICULUM' AS content_type,
+                cn.node_id AS content_id,
+                cn.is_active AS was_active
+        FROM curriculum_nodes cn
+        WHERE cn.subject_id = #{subjectId}
+
+        UNION ALL
+
+        SELECT
+            'LESSON' AS content_type,
+            l.lesson_id AS content_id,
+            l.is_active AS was_active
+        FROM lessons l
+        INNER JOIN curriculum_nodes cn
+            ON cn.node_id = l.node_id
+        WHERE cn.subject_id = #{subjectId}
+
+        UNION ALL
+
+        SELECT
+            'PROBLEM' AS content_type,
+            pp.problem_id AS content_id,
+            pp.is_active AS was_active
+        FROM practice_problems pp
+        WHERE pp.subject_id = #{subjectId}
+        ) source
+        ON DUPLICATE KEY UPDATE
+            was_active = VALUES(was_active),
+            created_at = NOW()
+    </insert>
+
+    <!-- 커리큘럼 상태 복원 -->
+    <update id="restoreCurriculumNodesBySubjectId">
+        UPDATE curriculum_nodes cn
+        INNER JOIN subject_content_status_backups backup
+            ON backup.content_id = cn.node_id
+            AND backup.content_type = 'CURRICULUM'
+            AND backup.subject_id = #{subjectId}
+        SET cn.is_active = backup.was_active,
+            cn.updated_at = NOW()
+        WHERE cn.subject_id = #{subjectId}
+    </update>
+
+    <!-- 이론 상태 복원 -->
+    <update id="restoreLessonsBySubjectId">
+        UPDATE lessons l
+        INNER JOIN subject_content_status_backups backup
+            ON backup.content_id = l.lesson_id
+            AND backup.content_type = 'LESSON'
+            AND backup.subject_id = #{subjectId}
+        SET l.is_active = backup.was_active,
+            l.updated_at = NOW()
+    </update>
+
+    <!-- 문제 상태 복원 -->
+    <update id="restoreProblemsBySubjectId">
+        UPDATE practice_problems pp
+        INNER JOIN subject_content_status_backups backup
+            ON backup.content_id = pp.problem_id
+            AND backup.content_type = 'PROBLEM'
+            AND backup.subject_id = #{subjectId}
+        SET pp.is_active = backup.was_active,
+            pp.updated_at = NOW()
+        WHERE pp.subject_id = #{subjectId}
+    </update>
+
+    <!-- 복원 완료 후 백업 데이터 삭제 -->
+    <delete id="deleteContentStatusBackupsBySubjectId">
+        DELETE FROM subject_content_status_backups
+        WHERE subject_id = #{subjectId}
+    </delete>
 </mapper>

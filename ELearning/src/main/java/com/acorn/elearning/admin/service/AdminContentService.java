@@ -62,11 +62,19 @@ public class AdminContentService {
 
     //과목 비활성화
     private void deactivateSubjectContents(Long subjectId){
+        actm.backupContentStatusesBySubjectId(subjectId);
 
         actm.deactivateLessonsBySubjectId(subjectId);
         actm.deactivateProblemsBySubjectId(subjectId);
         actm.deactivateCurriculumNodesBySubjectId(subjectId);
         actm.cancelActiveExamsBySubjectId(subjectId);
+    }
+
+    private void reactivateSubjectContents(Long subjectId) {
+        actm.restoreCurriculumNodesBySubjectId(subjectId);
+        actm.restoreLessonsBySubjectId(subjectId);
+        actm.restoreProblemsBySubjectId(subjectId);
+        actm.deleteContentStatusBackupsBySubjectId(subjectId);
     }
 
 
@@ -130,6 +138,14 @@ public class AdminContentService {
 
         if (becomingInactive) {
             deactivateSubjectContents(s.getSubjectId());
+        }
+
+        boolean becomingActive =
+                Boolean.FALSE.equals(s.getIsActive())
+                        && Boolean.TRUE.equals(form.getIsActive());
+
+        if (becomingActive) {
+            reactivateSubjectContents(s.getSubjectId());
         }
 
         s.setSubjectName(form.getSubjectName());
@@ -541,6 +557,14 @@ public class AdminContentService {
 
         if (becomingInactive) {
             deactivateSubjectContents(subjectId);
+        }
+
+        boolean becomingActive =
+                Boolean.FALSE.equals(s.getIsActive())
+                        && Boolean.TRUE.equals(isActive);
+
+        if (becomingActive) {
+            reactivateSubjectContents(subjectId);
         }
 
         s.setIsActive(isActive);
