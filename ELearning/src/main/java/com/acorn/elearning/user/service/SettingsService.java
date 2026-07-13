@@ -132,9 +132,14 @@ public class SettingsService {
         return new WithdrawConfirmView("회원 탈퇴", userService.me(sessionUser));
     }
 
+    // 정하 작업 - 탈퇴시 credential, 소셜 비활성 처리
     @Transactional
     public UserProfileResponse withdraw(SessionUser sessionUser, WithdrawUserForm form) {
-        return userService.withdraw(sessionUser, form);
+        Long userId = userService.requireUserId(sessionUser);                    // 정하 - 추가
+        UserProfileResponse response = userService.withdraw(sessionUser, form);   // 정하 - 수정 : 결과를 변수에 담아두고 마지막에 반환하게끔 수정
+        userCredentialMapper.deactivateByUserId(userId);                         // 정하 - 추가 : credential 비활성 처리(이메일 계정)
+        oAuthService.deactivateSocialAccounts(userId);                           // 정하 - 추가 :  소셜 연동 해제
+        return response;
     }
 
     private void applySettings(UserSetting setting, SystemSettingsForm form) {
