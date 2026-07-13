@@ -369,7 +369,7 @@ public class AdminApiController {
 
         return ApiResponse.success(Map.of(
                 "postId", postId,
-                "status", form.getStatus() == null ? "" : form.getStatus(),
+                "status", form.getStatus() == null ? "" : form.getStatus().trim().toUpperCase(),
                 "updated", updated == 1
         ));
     }
@@ -388,7 +388,7 @@ public class AdminApiController {
 
         return ApiResponse.success(Map.of(
                 "commentId", commentId,
-                "status", form.getStatus() == null ? "" : form.getStatus(),
+                "status", form.getStatus() == null ? "" : form.getStatus().trim().toUpperCase(),
                 "updated", updated == 1
         ));
     }
