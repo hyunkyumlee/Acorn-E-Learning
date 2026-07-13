@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>신용카드 결제 | Knowva</title>
+  <title>일반 카드 결제 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
   <link rel="stylesheet" th:href="@{/css/common/reset.css}">
@@ -11,41 +11,42 @@
   <link rel="stylesheet" th:href="@{/css/common/components.css}">
   <link rel="stylesheet" th:href="@{/css/common/themes.css}">
   <link rel="stylesheet" th:href="@{/css/screens/payment.css}">
+  <script defer src="https://js.tosspayments.com/v2/standard"></script>
   <script defer th:src="@{/js/common/theme.js}"></script>
+  <script defer th:src="@{/js/screens/payment-card.js}"></script>
 </head>
 <body>
-  <main class="payment-screen">
+  <main class="payment-screen" th:attr="data-toss-client-key=${tossClientKey},data-premium-active=${premiumActive}">
     <section class="figma-payment-page">
-      <div class="figma-payment-step"><strong>1 / 2</strong><span></span></div>
+      <div class="figma-payment-step is-half" aria-label="결제 진행 1단계, 총 2단계"><strong>1 / 2</strong><span aria-hidden="true"></span></div>
       <header class="figma-payment-head">
         <h1>결제 진행</h1>
-        <p>신용카드 정보를 입력합니다.</p>
+        <p>토스페이먼츠 결제창에서 일반 카드 결제를 진행합니다.</p>
       </header>
+      <p class="figma-payment-alert" th:if="${paymentError}" th:text="${paymentError}">토스페이먼츠 결제가 취소되었습니다.</p>
       <section class="figma-payment-layout">
-        <form class="figma-payment-form" method="post" th:action="@{/payments/dummy}" action="/payments/dummy">
+        <form class="figma-payment-form toss-card-payment-form" data-toss-card-form>
           <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <input type="hidden" name="productCode" th:value="${productCode ?: 'PREMIUM_LIFETIME'}" value="PREMIUM_LIFETIME">
-          <input type="hidden" name="paymentMethod" value="CARD">
-          <input type="hidden" name="cardLast4" value="4242">
           <input type="hidden" name="idempotencyToken" th:value="${idempotencyToken}" value="">
           <div class="figma-method-row">
-            <a class="figma-button primary" th:href="@{/payments/card}" href="/payments/card">VISA</a>
+            <span class="figma-button primary" aria-current="true">일반 카드</span>
             <a class="figma-button kakao-pay-button" th:href="@{/payments/kakao-pay}" href="/payments/kakao-pay">카카오페이</a>
           </div>
-          <div class="figma-form-grid">
-            <label for="cardLastName">성<input id="cardLastName" class="field" name="lastName" value="Lee" autocomplete="family-name"></label>
-            <label for="cardFirstName">이름<input id="cardFirstName" class="field" name="firstName" value="Jeongha" autocomplete="given-name"></label>
-            <label class="span-2" for="cardNumber">카드 번호<input id="cardNumber" class="field" name="cardNumber" value="4242 4242 4242 4242" inputmode="numeric" autocomplete="cc-number"></label>
-            <label for="cardBirthDate">생년 월일<input id="cardBirthDate" class="field" name="birthDate" value="2000.01.01" autocomplete="bday"></label>
-            <label for="cardCvc">CVC<input id="cardCvc" class="field" name="cvc" value="123" inputmode="numeric" autocomplete="cc-csc"></label>
-          </div>
-          <button class="figma-button primary" type="submit">결제하기</button>
+          <section class="figma-card-guide" aria-label="일반 카드 결제 안내">
+            <span class="payment-card-symbol" aria-hidden="true"></span>
+            <h2>일반 카드 결제</h2>
+            <p>카드 정보와 인증 절차는 토스페이먼츠 결제창에서 안전하게 진행됩니다.</p>
+          </section>
+          <p class="figma-payment-alert" th:if="${premiumActive}" role="alert">이미 Premium 권한이 활성화되어 있습니다.</p>
+          <p class="figma-payment-alert" data-toss-payment-error role="alert" hidden></p>
+          <button class="figma-button primary toss-card-submit" data-toss-payment-submit type="button" th:disabled="${premiumActive}">일반 카드 결제</button>
         </form>
         <aside class="figma-order-panel">
           <h2>상품 정보</h2>
           <dl>
             <div><dt>주문 번호</dt><dd>결제 시 자동 생성</dd></div>
-            <div><dt>결제 방식</dt><dd>신용카드</dd></div>
+            <div><dt>결제 방식</dt><dd>일반 카드</dd></div>
             <div><dt>상품명</dt><dd th:text="${productName ?: 'Premium Lifetime'}">Premium Lifetime</dd></div>
             <div><dt>결제 금액</dt><dd th:text="${productPriceLabel ?: '9,900원'}">9,900원</dd></div>
           </dl>

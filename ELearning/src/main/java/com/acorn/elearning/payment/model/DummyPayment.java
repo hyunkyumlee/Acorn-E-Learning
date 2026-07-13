@@ -14,6 +14,8 @@ public class DummyPayment {
     private Long productId;
     private String paymentMethod;
     private String paymentStatus;
+    private String pgProvider;
+    private String pgTransactionId;
     private BigDecimal amount;
     private LocalDateTime paidAt;
     private LocalDateTime createdAt;

@@ -8,6 +8,8 @@
         <result property="productId" column="product_id" />
         <result property="paymentMethod" column="payment_method" />
         <result property="paymentStatus" column="payment_status" />
+        <result property="pgProvider" column="pg_provider" />
+        <result property="pgTransactionId" column="pg_transaction_id" />
         <result property="amount" column="amount" />
         <result property="paidAt" column="paid_at" />
         <result property="createdAt" column="created_at" />
@@ -41,6 +43,8 @@
         product_id,
         payment_method,
         payment_status,
+        pg_provider,
+        pg_transaction_id,
         amount,
         paid_at,
         created_at,
@@ -59,6 +63,14 @@
         <include refid="DummyPaymentColumns" />
         FROM dummy_payments
         WHERE order_no = #{orderNo}
+    </select>
+
+    <select id="findByOrderNoForUpdate" parameterType="string" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        WHERE order_no = #{orderNo}
+        FOR UPDATE
     </select>
 
     <select id="findByIdAndUserId" resultMap="DummyPaymentResultMap">
@@ -135,6 +147,8 @@
             product_id,
             payment_method,
             payment_status,
+            pg_provider,
+            pg_transaction_id,
             amount,
             paid_at
         )
@@ -144,8 +158,33 @@
             #{productId},
             #{paymentMethod},
             #{paymentStatus},
+            #{pgProvider},
+            #{pgTransactionId},
             #{amount},
             #{paidAt}
+        )
+    </insert>
+
+    <insert id="insertPending" parameterType="com.acorn.elearning.payment.model.DummyPayment" useGeneratedKeys="true" keyProperty="paymentId">
+        INSERT INTO dummy_payments (
+            order_no,
+            user_id,
+            product_id,
+            payment_method,
+            payment_status,
+            pg_provider,
+            pg_transaction_id,
+            amount
+        )
+        VALUES (
+            #{orderNo},
+            #{userId},
+            #{productId},
+            #{paymentMethod},
+            'PENDING',
+            #{pgProvider},
+            #{pgTransactionId},
+            #{amount}
         )
     </insert>
 
@@ -156,6 +195,8 @@
             product_id,
             payment_method,
             payment_status,
+            pg_provider,
+            pg_transaction_id,
             amount,
             paid_at
         )
@@ -165,10 +206,42 @@
             #{productId},
             #{paymentMethod},
             'PAID',
+            #{pgProvider},
+            #{pgTransactionId},
             #{amount},
             CURRENT_TIMESTAMP
         )
     </insert>
+
+    <update id="markPaid">
+        UPDATE dummy_payments
+        SET
+            payment_status = 'PAID',
+            pg_provider = #{pgProvider},
+            pg_transaction_id = #{pgTransactionId},
+            paid_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE payment_id = #{paymentId}
+          AND payment_status = 'PENDING'
+    </update>
+
+    <update id="markFailed">
+        UPDATE dummy_payments
+        SET
+            payment_status = 'FAILED',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE payment_id = #{paymentId}
+          AND payment_status = 'PENDING'
+    </update>
+
+    <update id="markCanceled">
+        UPDATE dummy_payments
+        SET
+            payment_status = 'CANCELED',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE payment_id = #{paymentId}
+          AND payment_status = 'PENDING'
+    </update>
 
     <update id="update" parameterType="com.acorn.elearning.payment.model.DummyPayment">
         UPDATE dummy_payments
@@ -178,6 +251,8 @@
             product_id = #{productId},
             payment_method = #{paymentMethod},
             payment_status = #{paymentStatus},
+            pg_provider = #{pgProvider},
+            pg_transaction_id = #{pgTransactionId},
             amount = #{amount},
             paid_at = #{paidAt},
             updated_at = CURRENT_TIMESTAMP
