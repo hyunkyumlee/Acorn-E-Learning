@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 public record CreateDummyPaymentRequest(
         @NotBlank String productCode,
-        @NotBlank @Pattern(regexp = "CARD|BANK_TRANSFER") String paymentMethod,
+        @NotBlank @Pattern(regexp = "CARD|BANK_TRANSFER|KAKAO_PAY") String paymentMethod,
         @Size(max = 4) String cardLast4,
         @Size(max = 100) String depositorName,
         @Size(max = 255) String memo,

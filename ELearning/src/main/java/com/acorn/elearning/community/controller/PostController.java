@@ -11,14 +11,8 @@ import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.community.service.PostService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -31,9 +25,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PostController {
-    private static final int HOT_MIN_SCORE = 12;
-    private static final int HOT_MIN_INTERACTION_COUNT = 4;
-
     private final PostService postService;
 
     public PostController(PostService postService) {
@@ -46,38 +37,15 @@ public class PostController {
             @ModelAttribute PostSearchCondition condition,
             Model model
     ) {
-        PostSearchCondition hotCondition = new PostSearchCondition();
-        hotCondition.setSort("hot");
-        hotCondition.setSize(8);
-        PostSearchCondition weeklyHotCondition = new PostSearchCondition();
-        weeklyHotCondition.setSort("hot");
-        weeklyHotCondition.setPeriod("week");
-        weeklyHotCondition.setSize(6);
-        PostSearchCondition monthlyHotCondition = new PostSearchCondition();
-        monthlyHotCondition.setSort("hot");
-        monthlyHotCondition.setPeriod("month");
-        monthlyHotCondition.setSize(6);
+        condition.setSize(20);
         PostPageResponse view = postService.page(condition);
-        var hotView = postService.page(hotCondition);
-        hotView = qualifiedHotView(hotView);
-        var weeklyHotView = qualifiedHotView(postService.page(weeklyHotCondition));
-        var monthlyHotView = qualifiedHotView(postService.page(monthlyHotCondition));
-        Set<Long> hotPostIds = hotView.posts().stream()
-                .map(CommunityPost::getPostId)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        weeklyHotView.posts().stream().map(CommunityPost::getPostId).forEach(hotPostIds::add);
-        monthlyHotView.posts().stream().map(CommunityPost::getPostId).forEach(hotPostIds::add);
-        hotPostIds.addAll(subjectHotPostIds(view.posts()));
-        view = blendHotPosts(view, hotPostIds, condition);
 
         model.addAttribute("screen", "community/board");
         model.addAttribute("condition", condition);
         model.addAttribute("view", view);
-        model.addAttribute("hotView", hotView);
-        model.addAttribute("weeklyHotView", weeklyHotView);
-        model.addAttribute("monthlyHotView", monthlyHotView);
-        model.addAttribute("hotPostIds", hotPostIds);
-        model.addAttribute("writerNicknames", writerNicknames(view, hotView, weeklyHotView, monthlyHotView));
+        model.addAttribute("pageStart", Math.max(1, view.page() - 2));
+        model.addAttribute("pageEnd", Math.min(view.totalPages(), view.page() + 2));
+        model.addAttribute("writerNicknames", writerNicknames(view));
         addCommunityShell(model, sessionUser, condition);
         return "community/board";
     }
@@ -222,114 +190,6 @@ public class PostController {
             view.posts().forEach(post -> nicknames.putIfAbsent(post.getWriterId(), nicknameFor(post.getWriterId())));
         }
         return nicknames;
-    }
-
-    private PostPageResponse blendHotPosts(PostPageResponse view, Set<Long> hotPostIds, PostSearchCondition condition) {
-        if (view == null || hotPostIds == null || condition == null
-                || condition.hotSort() || condition.likeSort() || condition.viewSort()) {
-            return view;
-        }
-        List<CommunityPost> hotPosts = new ArrayList<>();
-        List<CommunityPost> normalPosts = new ArrayList<>();
-        for (CommunityPost post : view.posts()) {
-            if (hotPostIds.contains(post.getPostId())) {
-                hotPosts.add(post);
-            } else {
-                normalPosts.add(post);
-            }
-        }
-        if (hotPosts.size() <= 1 || normalPosts.isEmpty()) {
-            return view;
-        }
-
-        List<CommunityPost> blended = new ArrayList<>(view.posts().size());
-        int hotIndex = 0;
-        int normalIndex = 0;
-        int normalStreak = 0;
-
-        blended.add(hotPosts.get(hotIndex++));
-        blended.add(normalPosts.get(normalIndex++));
-        if (hotIndex < hotPosts.size()) {
-            blended.add(hotPosts.get(hotIndex++));
-        }
-
-        while (hotIndex < hotPosts.size() || normalIndex < normalPosts.size()) {
-            if (normalIndex < normalPosts.size() && (normalStreak < 2 || hotIndex >= hotPosts.size())) {
-                blended.add(normalPosts.get(normalIndex++));
-                normalStreak++;
-                continue;
-            }
-            if (hotIndex < hotPosts.size()) {
-                blended.add(hotPosts.get(hotIndex++));
-                normalStreak = 0;
-                continue;
-            }
-            blended.add(normalPosts.get(normalIndex++));
-        }
-
-        return new PostPageResponse(
-                blended,
-                view.total(),
-                view.page(),
-                view.size(),
-                view.totalPages(),
-                view.sort()
-        );
-    }
-
-    private PostPageResponse qualifiedHotView(PostPageResponse view) {
-        List<CommunityPost> hotPosts = view.posts().stream()
-                .filter(this::qualifiedHotPost)
-                .toList();
-        return new PostPageResponse(
-                hotPosts,
-                hotPosts.size(),
-                view.page(),
-                view.size(),
-                view.totalPages(),
-                view.sort()
-        );
-    }
-
-    private Set<Long> subjectHotPostIds(List<CommunityPost> posts) {
-        Map<Long, List<CommunityPost>> postsBySubject = new LinkedHashMap<>();
-        for (CommunityPost post : posts) {
-            postsBySubject.computeIfAbsent(post.getSubjectId(), key -> new ArrayList<>()).add(post);
-        }
-
-        Set<Long> ids = new LinkedHashSet<>();
-        for (List<CommunityPost> subjectPosts : postsBySubject.values()) {
-            subjectPosts.stream()
-                    .filter(this::qualifiedHotPost)
-                    .sorted(Comparator
-                            .comparingInt(this::hotScore)
-                            .thenComparing(CommunityPost::getPostId, Comparator.nullsLast(Comparator.naturalOrder()))
-                            .reversed())
-                    .limit(2)
-                    .map(CommunityPost::getPostId)
-                    .forEach(ids::add);
-        }
-        return ids;
-    }
-
-    private boolean qualifiedHotPost(CommunityPost post) {
-        return hotScore(post) >= HOT_MIN_SCORE && interactionCount(post) >= HOT_MIN_INTERACTION_COUNT;
-    }
-
-    private int hotScore(CommunityPost post) {
-        return safeCount(post.getLikeCount()) * 3
-                + safeCount(post.getCommentCount()) * 2
-                + safeCount(post.getScrapCount());
-    }
-
-    private int interactionCount(CommunityPost post) {
-        return safeCount(post.getLikeCount())
-                + safeCount(post.getCommentCount())
-                + safeCount(post.getScrapCount());
-    }
-
-    private int safeCount(Integer count) {
-        return count == null ? 0 : count;
     }
 
     private Map<Long, String> writerNicknames(PostDetailResponse view) {

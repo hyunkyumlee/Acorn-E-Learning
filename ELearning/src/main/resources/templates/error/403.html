@@ -4,14 +4,11 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>권한 없음 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/error.css(v='20260711-5')}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
-<body>
+<body class="error-page">
   <div th:replace="~{fragments/topbar :: topbar}"></div>
-  <main class="page-shell admin-screen">
-    <section class="page-heading"><span class="eyebrow">Skeleton</span><h1>권한 없음</h1><p>Notion v1.4/v0.5, DDL, MVC route 기준으로 연결된 Spring MVC skeleton 화면입니다.</p></section>
-    <section class="panel"><h2>Route contract</h2><p>View name: <code>error/403</code></p><p>Business logic, SQL, CSRF provider, OAuth/AI/PG integration은 TODO로 남겨둡니다.</p></section>
-  </main>
+  <div th:replace="~{fragments/page-error :: pageError(403, 'ACCESS RESTRICTED', '이 구역은 아직 열 수 없어요.', '현재 계정으로는 이 페이지에 접근할 수 없습니다. 필요한 권한을 확인한 뒤 다시 시도해 주세요.')}"></div>
 </body>
 </html>
