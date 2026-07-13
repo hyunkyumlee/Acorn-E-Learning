@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.1
+  Source: Notion DB 명세 v2.2
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -43,6 +43,7 @@ DROP TABLE IF EXISTS subject_content_status_backups;
 DROP TABLE IF EXISTS content_recommendations;
 DROP TABLE IF EXISTS admin_operation_logs;
 DROP TABLE IF EXISTS notices;
+DROP TABLE IF EXISTS payment_refunds;
 DROP TABLE IF EXISTS premium_grants;
 DROP TABLE IF EXISTS dummy_payments;
 DROP TABLE IF EXISTS payment_products;
@@ -656,6 +657,7 @@ CREATE TABLE ai_analysis_reports (
   KEY idx_ai_analysis_reports_user (user_id),
   KEY idx_ai_analysis_reports_exam (exam_id),
   KEY idx_ai_analysis_reports_status (status),
+  KEY idx_ai_analysis_reports_refund_eligibility (user_id, status),
   CONSTRAINT fk_ai_analysis_reports_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_ai_analysis_reports_exam FOREIGN KEY (exam_id) REFERENCES exam_sessions (exam_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -813,6 +815,8 @@ CREATE TABLE premium_grants (
   status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
   granted_at DATETIME NOT NULL,
   expires_at DATETIME NULL,
+  revoked_at DATETIME NULL,
+  revoke_reason VARCHAR(200) NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (grant_id),
@@ -820,6 +824,29 @@ CREATE TABLE premium_grants (
   KEY idx_premium_grants_user_status (user_id, status),
   CONSTRAINT fk_premium_grants_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT fk_premium_grants_payment FOREIGN KEY (payment_id) REFERENCES dummy_payments (payment_id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE payment_refunds (
+  refund_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  payment_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NOT NULL,
+  refund_status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+  refund_amount DECIMAL(10,2) NOT NULL,
+  refund_reason VARCHAR(200) NOT NULL,
+  pg_provider VARCHAR(30) NOT NULL,
+  pg_refund_transaction_id VARCHAR(200) NULL,
+  requested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  completed_at DATETIME NULL,
+  failed_at DATETIME NULL,
+  failure_code VARCHAR(100) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (refund_id),
+  UNIQUE KEY uk_payment_refunds_payment (payment_id),
+  KEY idx_payment_refunds_user_status (user_id, refund_status),
+  KEY idx_payment_refunds_provider_transaction (pg_provider, pg_refund_transaction_id),
+  CONSTRAINT fk_payment_refunds_payment FOREIGN KEY (payment_id) REFERENCES dummy_payments (payment_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_payment_refunds_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE notices (

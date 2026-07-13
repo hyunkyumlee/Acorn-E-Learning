@@ -127,11 +127,11 @@
 <body>
   <section class="page">
     <h1>Knowva ERD</h1>
-    <p class="source">Source: Notion DB 명세 v2.1 Mermaid ERD. 사용자별 과목 수강 상태와 관리자 작업 당시 상세 보존 계약을 현재 DDL과 동기화한 HTML 원본.</p>
+    <p class="source">Source: Notion DB 명세 v2.2 Mermaid ERD. Premium 환불 이력과 PG 성공 기준 권한 회수 계약을 현재 DDL과 동기화한 HTML 원본.</p>
     <div class="summary">
-      <div class="summary-card"><strong>Version</strong><span>v2.1</span></div>
-      <div class="summary-card"><strong>Tables</strong><span>44</span></div>
-      <div class="summary-card"><strong>Foreign Keys</strong><span>80</span></div>
+      <div class="summary-card"><strong>Version</strong><span>v2.2</span></div>
+      <div class="summary-card"><strong>Tables</strong><span>45</span></div>
+      <div class="summary-card"><strong>Foreign Keys</strong><span>82</span></div>
       <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
     </div>
     <table class="inventory compact">
@@ -175,6 +175,7 @@
 <tr><td>post_scraps</td><td>BIGINT scrap_id PK</td><td>2</td></tr>
 <tr><td>reports</td><td>BIGINT report_id PK</td><td>2</td></tr>
 <tr><td>dummy_payments</td><td>BIGINT payment_id PK</td><td>2</td></tr>
+<tr><td>payment_refunds</td><td>BIGINT refund_id PK</td><td>2</td></tr>
 <tr><td>premium_grants</td><td>BIGINT grant_id PK</td><td>2</td></tr>
 <tr><td>notices</td><td>BIGINT notice_id PK</td><td>1</td></tr>
 <tr><td>admin_operation_logs</td><td>BIGINT log_id PK</td><td>1</td></tr>
@@ -591,6 +592,20 @@
         DATETIME created_at
         DATETIME updated_at
     }
+    payment_refunds {
+        BIGINT refund_id PK
+        BIGINT payment_id FK
+        BIGINT user_id FK
+        VARCHAR refund_status
+        DECIMAL refund_amount
+        VARCHAR refund_reason
+        VARCHAR pg_provider
+        VARCHAR pg_refund_transaction_id
+        DATETIME requested_at
+        DATETIME completed_at
+        DATETIME failed_at
+        VARCHAR failure_code
+    }
     premium_grants {
         BIGINT grant_id PK
         BIGINT user_id FK
@@ -599,6 +614,8 @@
         VARCHAR status
         DATETIME granted_at
         DATETIME expires_at
+        DATETIME revoked_at
+        VARCHAR revoke_reason
         DATETIME created_at
         DATETIME updated_at
     }
@@ -714,6 +731,8 @@
     users ||--o{ reports : handled_by
     users ||--o{ dummy_payments : user
     payment_products ||--o{ dummy_payments : product
+    users ||--o{ payment_refunds : user
+    dummy_payments ||--o| payment_refunds : refund
     users ||--o{ premium_grants : user
     dummy_payments ||--o{ premium_grants : payment
     users ||--o{ notices : writer
@@ -2257,6 +2276,22 @@
         DATETIME created_at
         DATETIME updated_at
     }
+    payment_refunds {
+        BIGINT refund_id PK
+        BIGINT payment_id FK
+        BIGINT user_id FK
+        VARCHAR refund_status
+        DECIMAL refund_amount
+        VARCHAR refund_reason
+        VARCHAR pg_provider
+        VARCHAR pg_refund_transaction_id
+        DATETIME requested_at
+        DATETIME completed_at
+        DATETIME failed_at
+        VARCHAR failure_code
+        DATETIME created_at
+        DATETIME updated_at
+    }
     premium_grants {
         BIGINT grant_id PK
         BIGINT user_id FK
@@ -2265,11 +2300,15 @@
         VARCHAR status
         DATETIME granted_at
         DATETIME expires_at
+        DATETIME revoked_at
+        VARCHAR revoke_reason
         DATETIME created_at
         DATETIME updated_at
     }
     users ||--o{ dummy_payments : user
     payment_products ||--o{ dummy_payments : product
+    users ||--o{ payment_refunds : user
+    dummy_payments ||--o| payment_refunds : refund
     users ||--o{ premium_grants : user
     dummy_payments ||--o{ premium_grants : payment</pre></div>
             </section>
@@ -2279,6 +2318,8 @@
                 <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
                 <tbody><tr><td>dummy_payments</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>dummy_payments</td><td>product_id</td><td>payment_products</td><td>product_id</td></tr>
+<tr><td>payment_refunds</td><td>payment_id</td><td>dummy_payments</td><td>payment_id</td></tr>
+<tr><td>payment_refunds</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>premium_grants</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>premium_grants</td><td>payment_id</td><td>dummy_payments</td><td>payment_id</td></tr></tbody>
               </table>
@@ -2334,6 +2375,27 @@
                 </section>
                 
                 <section class="table-card">
+                  <h3>payment_refunds</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>refund_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>payment_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK UK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>refund_status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;PENDING&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>refund_amount</td><td>DECIMAL(10,2) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>refund_reason</td><td>VARCHAR(200) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>pg_provider</td><td>VARCHAR(30) NOT NULL</td><td>IDX (composite)</td><td>NN</td></tr>
+<tr><td>pg_refund_transaction_id</td><td>VARCHAR(200) NULL</td><td>IDX (composite)</td><td>NULL</td></tr>
+<tr><td>requested_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>completed_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>failed_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>failure_code</td><td>VARCHAR(100) NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
+<tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+
+                <section class="table-card">
                   <h3>premium_grants</h3>
                   <table class="small-table">
                     <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
@@ -2344,6 +2406,8 @@
 <tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
 <tr><td>granted_at</td><td>DATETIME NOT NULL</td><td></td><td>NN</td></tr>
 <tr><td>expires_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>revoked_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>revoke_reason</td><td>VARCHAR(200) NULL</td><td></td><td>NULL</td></tr>
 <tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
 <tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
                   </table>
@@ -2555,6 +2619,16 @@
             
 
   <section class="page">
+    <h2>v2.2 변경 요약</h2>
+    <section class="callout">
+      <h2>Premium 환불과 권한 회수</h2>
+      <ul>
+        <li><code>payment_refunds</code>: 결제당 1건의 환불 요청, PG 성공·실패, 환불 PG 거래 식별자를 보존한다.</li>
+        <li><code>dummy_payments</code>: PG 환불 성공 시에만 원결제를 <code>REFUNDED</code>로 전환한다.</li>
+        <li><code>premium_grants</code>: 성공한 환불에서만 <code>REVOKED</code>, <code>revoked_at</code>, <code>revoke_reason</code>으로 권한 회수를 기록한다.</li>
+        <li><code>ai_analysis_reports</code>: <code>idx_ai_analysis_reports_refund_eligibility(user_id, status)</code>로 성공 Premium 상세 분석 사용 이력의 환불 제한 조회를 보강한다.</li>
+      </ul>
+    </section>
     <h2>v2.1 변경 요약</h2>
     <section class="callout">
       <h2>과목 수강 상태와 관리자 이력 상세</h2>

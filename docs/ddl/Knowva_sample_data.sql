@@ -1,6 +1,6 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.1 / 레슨 단위 학습 구조
+  Source: Notion DB 명세 v2.2 / 레슨 단위 학습 구조 / Premium 환불
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Execution contract
@@ -32,6 +32,7 @@ CREATE PROCEDURE assert_knowva_seed_schema()
 BEGIN
   DECLARE required_column_count INT DEFAULT 0;
   DECLARE pending_status_default_count INT DEFAULT 0;
+  DECLARE refund_eligibility_index_count INT DEFAULT 0;
 
   SELECT COUNT(*)
     INTO required_column_count
@@ -48,6 +49,9 @@ BEGIN
       ('subject_content_status_backups', 'backup_id'),
       ('dummy_payments', 'pg_provider'),
       ('dummy_payments', 'pg_transaction_id'),
+      ('payment_refunds', 'refund_id'),
+      ('premium_grants', 'revoked_at'),
+      ('premium_grants', 'revoke_reason'),
       ('user_subject_enrollments', 'enrollment_id'),
       ('user_subject_enrollments', 'status'),
       ('user_subject_enrollments', 'start_mode'),
@@ -63,7 +67,16 @@ BEGIN
     AND column_name = 'payment_status'
     AND column_default = 'PENDING';
 
-  IF required_column_count <> 15 OR pending_status_default_count <> 1 THEN
+  SELECT COUNT(*)
+    INTO refund_eligibility_index_count
+  FROM information_schema.statistics
+  WHERE table_schema = DATABASE()
+    AND table_name = 'ai_analysis_reports'
+    AND index_name = 'idx_ai_analysis_reports_refund_eligibility';
+
+  IF required_column_count <> 18
+      OR pending_status_default_count <> 1
+      OR refund_eligibility_index_count <> 2 THEN
     SIGNAL SQLSTATE '45000'
       SET MESSAGE_TEXT = 'Knowva sample data requires the current Knowva_DDL.sql. Run Knowva_DDL.sql first.';
   END IF;
