@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>관리자 운영 로그 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/adminLog.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+</head>
+<body>
+<div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
+
+<main class="page-shell admin-screen admin-log-screen">
+  <section class="admin-log-header">
+    <h1>관리자 운영 로그</h1>
+  </section>
+
+  <section class="admin-log-toolbar">
+    <form method="get" th:action="@{/admin/operation-logs}" class="admin-log-filter">
+      <input type="hidden" name="page" value="1">
+      <select name="targetType" aria-label="콘텐츠 유형">
+        <option value="">콘텐츠 유형</option>
+        <option value="SUBJECT" th:selected="${selectedTargetType == 'SUBJECT'}">과목</option>
+        <option value="CURRICULUM_NODE" th:selected="${selectedTargetType == 'CURRICULUM_NODE'}">커리큘럼</option>
+        <option value="LESSON" th:selected="${selectedTargetType == 'LESSON'}">이론</option>
+        <option value="PROBLEM" th:selected="${selectedTargetType == 'PROBLEM'}">문제</option>
+        <option value="NOTICE" th:selected="${selectedTargetType == 'NOTICE'}">공지사항</option>
+        <option value="POST" th:selected="${selectedTargetType == 'POST'}">게시글</option>
+        <option value="COMMENT" th:selected="${selectedTargetType == 'COMMENT'}">댓글</option>
+        <option value="REPORT" th:selected="${selectedTargetType == 'REPORT'}">신고</option>
+        <option value="USER" th:selected="${selectedTargetType == 'USER'}">사용자</option>
+      </select>
+      <select name="actionCategory" aria-label="작업 유형">
+        <option value="">작업 유형</option>
+        <option value="CREATE" th:selected="${selectedActionCategory == 'CREATE'}">등록</option>
+        <option value="UPDATE" th:selected="${selectedActionCategory == 'UPDATE'}">수정</option>
+        <option value="DELETE" th:selected="${selectedActionCategory == 'DELETE'}">삭제</option>
+      </select>
+      <button type="submit" class="admin-log-filter-button">검색</button>
+    </form>
+  </section>
+
+  <section class="admin-log-section">
+    <div class="admin-log-section-title"><h2>운영 로그 목록</h2></div>
+    <div class="admin-log-table-wrap">
+      <table class="admin-log-table">
+        <thead>
+        <tr>
+          <th>번호</th><th>관리자</th><th>콘텐츠 유형</th><th>작업 유형</th>
+          <th>대상 ID</th><th>처리 결과</th><th>처리 일시</th><th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="log, stat : ${operationLogPage.items}">
+          <td th:text="${log.logId}">1</td>
+          <td th:text="${log.adminNickname != null ? log.adminNickname + ' (' + log.adminEmail + ')' : (log.adminEmail ?: '-')}">관리자</td>
+          <td th:text="${log.targetType == 'SUBJECT' ? '과목' : (log.targetType == 'CURRICULUM_NODE' ? '커리큘럼' : (log.targetType == 'LESSON' ? '이론' : (log.targetType == 'PROBLEM' ? '문제' : (log.targetType == 'NOTICE' ? '공지사항' : (log.targetType == 'POST' ? '게시글' : (log.targetType == 'COMMENT' ? '댓글' : (log.targetType == 'REPORT' ? '신고' : (log.targetType == 'USER' ? '사용자' : log.targetType))))))))}">과목</td>
+          <td th:text="${log.actionType == 'USER_ROLE_UPDATE' ? '권한 변경' : (log.actionType == 'HANDLE_REPORT' ? '신고 처리' : (#strings.endsWith(log.actionType, '_CREATE') or log.actionType == 'CREATE_NOTICE' ? '등록' : (#strings.endsWith(log.actionType, '_DELETE') ? '삭제' : (#strings.endsWith(log.actionType, '_STATUS_UPDATE') ? '상태 변경' : (#strings.endsWith(log.actionType, '_UPDATE') ? '수정' : log.actionType)))))}">등록</td>
+          <td th:text="${log.targetId ?: '-'}">1</td>
+          <td th:text="${log.resultStatus == 'SUCCESS' ? '성공' : log.resultStatus}"
+              th:classappend="${log.resultStatus != 'SUCCESS'} ? ' admin-log-status-failed'">성공</td>
+          <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm')}">2026-07-13 10:30</td>
+          <td>
+            <button type="button" class="admin-log-detail-button"
+                    th:data-log-id="${log.logId}"
+                    th:data-admin="${log.adminNickname != null ? log.adminNickname + ' (' + log.adminEmail + ')' : (log.adminEmail ?: '-')}"
+                    th:data-target-type="${log.targetType}"
+                    th:data-action-type="${log.actionType}"
+                    th:data-target-id="${log.targetId}"
+                    th:data-result-status="${log.resultStatus}"
+                    th:data-created-at="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm')}">상세보기</button>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(operationLogPage.items)}">
+          <td colspan="8" class="admin-log-empty">조회된 운영 로그가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="admin-pagination" th:if="${operationLogPage.totalPages > 0}" aria-label="운영 로그 페이지">
+      <a class="admin-page-link" th:if="${operationLogPage.hasPrevious}"
+         th:href="@{/admin/operation-logs(page=${operationLogPage.currentPage - 1}, targetType=${selectedTargetType}, actionCategory=${selectedActionCategory})}">&lt;</a>
+      <span th:each="pageNumber : ${#numbers.sequence(operationLogPage.startPage, operationLogPage.endPage)}">
+        <a class="admin-page-link" th:if="${pageNumber != operationLogPage.currentPage}"
+           th:href="@{/admin/operation-logs(page=${pageNumber}, targetType=${selectedTargetType}, actionCategory=${selectedActionCategory})}"
+           th:text="${pageNumber}">1</a>
+        <strong class="admin-page-link admin-page-current" th:if="${pageNumber == operationLogPage.currentPage}" th:text="${pageNumber}">1</strong>
+      </span>
+      <a class="admin-page-link" th:if="${operationLogPage.hasNext}"
+         th:href="@{/admin/operation-logs(page=${operationLogPage.currentPage + 1}, targetType=${selectedTargetType}, actionCategory=${selectedActionCategory})}">&gt;</a>
+    </nav>
+  </section>
+
+  <section class="admin-log-detail-panel" id="operationLogDetailPanel">
+    <h2>운영 로그 상세</h2>
+    <div class="admin-log-detail-grid">
+      <label>로그 번호<input id="detailLogId" type="text" readonly placeholder="상세보기를 선택하세요."></label>
+      <label>관리자<input id="detailAdmin" type="text" readonly></label>
+      <label>콘텐츠 유형<input id="detailTargetType" type="text" readonly></label>
+      <label>작업 유형<input id="detailActionType" type="text" readonly></label>
+      <label>대상 ID<input id="detailTargetId" type="text" readonly></label>
+      <label>처리 결과<input id="detailResultStatus" type="text" readonly></label>
+      <label class="admin-log-detail-wide">처리 일시<input id="detailCreatedAt" type="text" readonly></label>
+    </div>
+  </section>
+</main>
+
+<script>
+  const targetTypeLabels = { SUBJECT: "과목", CURRICULUM_NODE: "커리큘럼", LESSON: "이론", PROBLEM: "문제", NOTICE: "공지사항", POST: "게시글", COMMENT: "댓글", REPORT: "신고", USER: "사용자" };
+  const actionTypeLabels = { USER_ROLE_UPDATE: "권한 변경", HANDLE_REPORT: "신고 처리", CREATE_NOTICE: "등록" };
+
+  function actionLabel(actionType) {
+    if (actionTypeLabels[actionType]) return actionTypeLabels[actionType];
+    if (actionType.endsWith("_CREATE")) return "등록";
+    if (actionType.endsWith("_DELETE")) return "삭제";
+    if (actionType.endsWith("_STATUS_UPDATE")) return "상태 변경";
+    if (actionType.endsWith("_UPDATE")) return "수정";
+    return actionType;
+  }
+
+  document.querySelectorAll(".admin-log-detail-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelector("#detailLogId").value = button.dataset.logId || "-";
+      document.querySelector("#detailAdmin").value = button.dataset.admin || "-";
+      document.querySelector("#detailTargetType").value = targetTypeLabels[button.dataset.targetType] || button.dataset.targetType || "-";
+      document.querySelector("#detailActionType").value = actionLabel(button.dataset.actionType || "");
+      document.querySelector("#detailTargetId").value = button.dataset.targetId || "-";
+      document.querySelector("#detailResultStatus").value = button.dataset.resultStatus === "SUCCESS" ? "성공" : (button.dataset.resultStatus || "-");
+      document.querySelector("#detailCreatedAt").value = button.dataset.createdAt || "-";
+      document.querySelector("#operationLogDetailPanel").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+</script>
+</body>
+</html>

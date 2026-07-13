@@ -60,6 +60,11 @@
          th:classappend="${screen == 'admin/notices'} ? ' is-active'">
         공지사항 관리
       </a>
+      <a class="admin-sidebar-link"
+         th:href="@{/admin/operation-logs}"
+         th:classappend="${screen == 'admin/operation-logs'} ? ' is-active'">
+        관리자 운영 로그
+      </a>
     </div>
   </nav>
 
