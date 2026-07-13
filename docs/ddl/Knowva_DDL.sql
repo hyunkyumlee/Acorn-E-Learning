@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.9
+  Source: Notion DB 명세 v2.0
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭

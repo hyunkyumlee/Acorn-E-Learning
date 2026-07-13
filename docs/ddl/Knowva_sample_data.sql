@@ -1,6 +1,6 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v1.9 / 레슨 단위 학습 구조
+  Source: Notion DB 명세 v2.0 / 레슨 단위 학습 구조
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Execution contract
