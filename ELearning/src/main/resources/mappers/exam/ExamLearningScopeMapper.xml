@@ -26,35 +26,11 @@
             AND cn.level_code = #{levelCode}
             AND cn.node_type = 'PLANET'
             AND ulp.theory_completed = 1
-            AND cn.is_active = 1
-            AND l.is_active = 1
-        ORDER BY cn.sort_order ASC, l.sort_order ASC, l.lesson_id ASC
-    </select>
-
-    <select id="findPassedPracticeScope" resultMap="ExamLearningScopeItemResultMap">
-        SELECT DISTINCT
-            'PRACTICE' AS source_type,
-            cn.title AS node_title,
-            pp.question AS title,
-            COALESCE(NULLIF(pp.explanation, ''), pp.answer_text) AS summary,
-            pp.answer_text AS example_code,
-            (cn.sort_order * 100 + l.sort_order) AS sort_order
-        FROM user_lesson_progress ulp
-        JOIN lessons l
-            ON l.lesson_id = ulp.lesson_id
-        JOIN curriculum_nodes cn
-            ON cn.node_id = l.node_id
-        JOIN practice_problems pp
-            ON pp.lesson_id = l.lesson_id
-        WHERE ulp.user_id = #{userId}
-            AND cn.subject_id = #{subjectId}
-            AND cn.level_code = #{levelCode}
-            AND cn.node_type = 'PLANET'
             AND ulp.practice_passed = 1
             AND cn.is_active = 1
             AND l.is_active = 1
-            AND pp.is_active = 1
-        ORDER BY sort_order ASC
+            AND l.required_for_completion = 1
+        ORDER BY cn.sort_order ASC, l.sort_order ASC, l.lesson_id ASC
     </select>
 
     <select id="countRequiredLessons" resultType="int">

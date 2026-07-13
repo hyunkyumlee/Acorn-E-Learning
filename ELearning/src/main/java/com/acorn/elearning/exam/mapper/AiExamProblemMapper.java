@@ -9,6 +9,7 @@ public interface AiExamProblemMapper {
     Optional<AiExamProblem> findById(Long id);
     Optional<AiExamProblem> findByIdAndExamId(@Param("aiProblemId") Long aiProblemId, @Param("examId") Long examId);
     List<AiExamProblem> findByExamId(Long examId);
+    List<AiExamProblem> findByExamIdForUpdate(Long examId);
     List<AiExamProblem> findAll();
     int insert(AiExamProblem model);
     int update(AiExamProblem model);

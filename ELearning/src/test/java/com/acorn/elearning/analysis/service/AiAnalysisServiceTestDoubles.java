@@ -5,6 +5,8 @@ import com.acorn.elearning.analysis.model.AiAnalysisReport;
 import com.acorn.elearning.common.ai.ChatGptApiClient;
 import com.acorn.elearning.common.ai.ChatGptRequest;
 import com.acorn.elearning.common.ai.ChatGptResponse;
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.exam.mapper.AiRequestLogMapper;
 import com.acorn.elearning.exam.model.AiRequestLog;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
+import org.springframework.dao.DuplicateKeyException;
 import tools.jackson.databind.ObjectMapper;
 
 class CountingChatGptApiClient extends ChatGptApiClient {
@@ -62,9 +65,35 @@ class CountingChatGptApiClient extends ChatGptApiClient {
     }
 }
 
+class FailingChatGptApiClient extends ChatGptApiClient {
+    private final AtomicInteger sendCount = new AtomicInteger();
+    private final long delayMillis;
+
+    FailingChatGptApiClient(ObjectMapper objectMapper, long delayMillis) {
+        super("openai", true, "test-key", "https://example.com", "gpt-test", 800, objectMapper);
+        this.delayMillis = delayMillis;
+    }
+
+    @Override
+    public ChatGptResponse send(ChatGptRequest request) {
+        sendCount.incrementAndGet();
+        try {
+            Thread.sleep(delayMillis);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        }
+        throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "테스트용 분석 실패입니다.");
+    }
+
+    int sendCount() {
+        return sendCount.get();
+    }
+}
+
 class InMemoryAiAnalysisReportMapper implements AiAnalysisReportMapper {
     private final AtomicLong sequence = new AtomicLong();
     private final List<AiAnalysisReport> reports = new ArrayList<>();
+    private AiAnalysisReport duplicateReportOnNextInsert;
 
     @Override
     public synchronized Optional<AiAnalysisReport> findById(Long id) {
@@ -91,6 +120,11 @@ class InMemoryAiAnalysisReportMapper implements AiAnalysisReportMapper {
     }
 
     @Override
+    public synchronized Optional<AiAnalysisReport> findByExamIdAndUserIdForUpdate(Long examId, Long userId) {
+        return findByExamIdAndUserId(examId, userId);
+    }
+
+    @Override
     public synchronized List<AiAnalysisReport> findByUserId(Long userId) {
         return reports.stream()
                 .filter(report -> report.getUserId().equals(userId))
@@ -105,9 +139,32 @@ class InMemoryAiAnalysisReportMapper implements AiAnalysisReportMapper {
 
     @Override
     public synchronized int insert(AiAnalysisReport model) {
+        if (duplicateReportOnNextInsert != null) {
+            AiAnalysisReport existingReport = duplicateReportOnNextInsert;
+            duplicateReportOnNextInsert = null;
+            existingReport.setReportId(sequence.incrementAndGet());
+            reports.add(existingReport);
+            throw new DuplicateKeyException("분석 리포트가 이미 생성되었습니다.");
+        }
         model.setReportId(sequence.incrementAndGet());
         reports.add(model);
         return 1;
+    }
+
+    @Override
+    public synchronized int claimRetry(Long reportId, Long userId, int retryCount) {
+        return reports.stream()
+                .filter(report -> report.getReportId().equals(reportId) && report.getUserId().equals(userId))
+                .filter(report -> "FAILED".equals(report.getStatus()))
+                .filter(report -> report.getRetryCount() == retryCount)
+                .findFirst()
+                .map(report -> {
+                    report.setStatus("PENDING");
+                    report.setRetryCount(report.getRetryCount() + 1);
+                    report.setAnalysisErrorCode(null);
+                    return 1;
+                })
+                .orElse(0);
     }
 
     @Override
@@ -117,6 +174,10 @@ class InMemoryAiAnalysisReportMapper implements AiAnalysisReportMapper {
 
     synchronized int count() {
         return reports.size();
+    }
+
+    synchronized void rejectNextInsertWithExistingReport(AiAnalysisReport report) {
+        duplicateReportOnNextInsert = report;
     }
 
     private Optional<AiAnalysisReport> latest(Predicate<AiAnalysisReport> predicate) {

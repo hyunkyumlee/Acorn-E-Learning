@@ -27,6 +27,7 @@ import com.acorn.elearning.security.SessionUser;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
@@ -68,6 +69,19 @@ class AiExamServiceStatusTest {
 
         assertEquals(8L, response.examId());
         assertEquals(0, sessionMapper.insertCount);
+    }
+
+    @Test
+    void create_returns_active_exam_when_active_unique_key_rejects_a_concurrent_insert() {
+        ExamSession activeSession = readySession();
+        FakeExamSessionMapper sessionMapper = new FakeExamSessionMapper(activeSession);
+        sessionMapper.duplicateSession = activeSession;
+        AiExamService service = service(sessionMapper, new EmptyAiExamProblemMapper(), new EmptyExamAnswerMapper());
+
+        ExamSessionResponse response = service.create(user(), new CreateExamRequest(1L, "BRONZE"));
+
+        assertEquals(activeSession.getExamId(), response.examId());
+        assertEquals(1, sessionMapper.insertCount);
     }
 
     private static AiExamService service(
@@ -154,11 +168,6 @@ class AiExamServiceStatusTest {
         }
 
         @Override
-        public List<ExamLearningScopeItem> findPassedPracticeScope(Long userId, Long subjectId, String levelCode) {
-            return List.of();
-        }
-
-        @Override
         public int countRequiredLessons(Long subjectId, String levelCode) {
             return 1;
         }
@@ -178,6 +187,9 @@ class AiExamServiceStatusTest {
 
         @Override
         public List<AiExamProblem> findByExamId(Long examId) { return List.of(); }
+
+        @Override
+        public List<AiExamProblem> findByExamIdForUpdate(Long examId) { return List.of(); }
 
         @Override
         public List<AiExamProblem> findAll() {
@@ -236,6 +248,7 @@ class AiExamServiceStatusTest {
     private static class FakeExamSessionMapper implements ExamSessionMapper {
         private final ExamSession session;
         private ExamSession activeSession;
+        private ExamSession duplicateSession;
         private int insertCount;
         private int updateResultCount;
 
@@ -254,12 +267,22 @@ class AiExamServiceStatusTest {
         }
 
         @Override
+        public Optional<ExamSession> findByIdAndUserIdForUpdate(Long examId, Long userId) {
+            return Optional.ofNullable(session);
+        }
+
+        @Override
         public Optional<ExamSession> findLatestByUserId(Long userId) {
             return Optional.empty();
         }
 
         @Override
         public Optional<ExamSession> findLatestActiveByUserSubjectLevel(Long userId, Long subjectId, String levelCode) {
+            return Optional.ofNullable(activeSession);
+        }
+
+        @Override
+        public Optional<ExamSession> findLatestActiveByUserSubjectLevelForUpdate(Long userId, Long subjectId, String levelCode) {
             return Optional.ofNullable(activeSession);
         }
 
@@ -276,6 +299,11 @@ class AiExamServiceStatusTest {
         @Override
         public int insert(ExamSession model) {
             insertCount++;
+            if (duplicateSession != null) {
+                activeSession = duplicateSession;
+                duplicateSession = null;
+                throw new DuplicateKeyException("활성 시험이 이미 생성되었습니다.");
+            }
             return 1;
         }
 

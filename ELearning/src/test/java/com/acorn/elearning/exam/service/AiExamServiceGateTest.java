@@ -81,11 +81,6 @@ class AiExamServiceGateTest {
         }
 
         @Override
-        public List<ExamLearningScopeItem> findPassedPracticeScope(Long userId, Long subjectId, String levelCode) {
-            return List.of();
-        }
-
-        @Override
         public int countRequiredLessons(Long subjectId, String levelCode) {
             return 0;
         }
@@ -110,12 +105,22 @@ class AiExamServiceGateTest {
         }
 
         @Override
+        public Optional<ExamSession> findByIdAndUserIdForUpdate(Long examId, Long userId) {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<ExamSession> findLatestByUserId(Long userId) {
             return Optional.empty();
         }
 
         @Override
         public Optional<ExamSession> findLatestActiveByUserSubjectLevel(Long userId, Long subjectId, String levelCode) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<ExamSession> findLatestActiveByUserSubjectLevelForUpdate(Long userId, Long subjectId, String levelCode) {
             return Optional.empty();
         }
 

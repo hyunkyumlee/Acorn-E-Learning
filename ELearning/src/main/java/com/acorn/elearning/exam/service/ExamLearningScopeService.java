@@ -4,7 +4,6 @@ import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.exam.mapper.ExamLearningScopeMapper;
 import com.acorn.elearning.exam.model.ExamLearningScopeItem;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExamLearningScopeService {
-    private static final int MAX_SCOPE_ITEM_COUNT = 18;
     private static final int MAX_TEXT_LENGTH = 320;
 
     private final ExamLearningScopeMapper examLearningScopeMapper;
@@ -24,16 +22,14 @@ public class ExamLearningScopeService {
     }
 
     public ExamLearningScope build(Long userId, Long subjectId, String levelCode) {
-        List<LearnedItem> learnedItems = Stream.concat(
-                        examLearningScopeMapper.findCompletedLessonScope(userId, subjectId, levelCode).stream(),
-                        examLearningScopeMapper.findPassedPracticeScope(userId, subjectId, levelCode).stream())
-                .sorted(Comparator.comparing(ExamLearningScopeItem::getSortOrder, Comparator.nullsLast(Integer::compareTo)))
-                .limit(MAX_SCOPE_ITEM_COUNT)
+        List<LearnedItem> learnedItems = examLearningScopeMapper
+                .findCompletedLessonScope(userId, subjectId, levelCode)
+                .stream()
                 .map(this::toLearnedItem)
                 .toList();
 
         if (learnedItems.isEmpty()) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "완료한 이론 학습 또는 문제풀이 범위가 없어 AI 시험 문제를 생성할 수 없습니다.");
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "완료한 필수 레슨 범위가 없어 AI 시험 문제를 생성할 수 없습니다.");
         }
 
         return new ExamLearningScope(

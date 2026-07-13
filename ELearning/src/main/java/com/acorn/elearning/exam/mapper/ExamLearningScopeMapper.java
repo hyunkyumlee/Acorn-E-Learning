@@ -10,11 +10,6 @@ public interface ExamLearningScopeMapper {
             @Param("subjectId") Long subjectId,
             @Param("levelCode") String levelCode);
 
-    List<ExamLearningScopeItem> findPassedPracticeScope(
-            @Param("userId") Long userId,
-            @Param("subjectId") Long subjectId,
-            @Param("levelCode") String levelCode);
-
     int countRequiredLessons(
             @Param("subjectId") Long subjectId,
             @Param("levelCode") String levelCode);

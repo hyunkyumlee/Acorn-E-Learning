@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,7 +113,16 @@ public class AiExamService {
         session.setCorrectCount(0);
         session.setRetryCount(0);
         session.setStartedAt(LocalDateTime.now());
-        examSessionMapper.insert(session);
+        try {
+            examSessionMapper.insert(session);
+        } catch (DuplicateKeyException exception) {
+            return examSessionMapper.findLatestActiveByUserSubjectLevelForUpdate(
+                            userId,
+                            request.subjectId(),
+                            request.levelCode())
+                    .map(active -> detailForUpdate(userId, active.getExamId()))
+                    .orElseThrow(() -> exception);
+        }
 
         ChatGptRequest chatGptRequest = ExamProblemGenerationRequestFactory.create(request, learningScope, PROBLEM_COUNT);
         AiRequestLog log = aiRequestLogService.start(TARGET_TYPE, session.getExamId(), "PROBLEM_GENERATION", chatGptRequest);
@@ -192,6 +202,15 @@ public class AiExamService {
         return ExamSessionResponse.from(
                 session,
                 aiExamProblemMapper.findByExamId(examId),
+                examAnswerMapper.findByExamId(examId));
+    }
+
+    private ExamSessionResponse detailForUpdate(Long userId, Long examId) {
+        ExamSession session = examSessionMapper.findByIdAndUserIdForUpdate(examId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "AI 시험을 찾을 수 없습니다."));
+        return ExamSessionResponse.from(
+                session,
+                aiExamProblemMapper.findByExamIdForUpdate(examId),
                 examAnswerMapper.findByExamId(examId));
     }
 

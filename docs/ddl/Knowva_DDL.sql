@@ -562,6 +562,12 @@ CREATE TABLE exam_sessions (
   subject_id BIGINT UNSIGNED NOT NULL,
   level_code VARCHAR(30) NOT NULL,
   status VARCHAR(30) NOT NULL DEFAULT 'CREATED',
+  active_session_key VARCHAR(128) GENERATED ALWAYS AS (
+    CASE
+      WHEN status IN ('CREATED', 'READY') THEN CONCAT(user_id, ':', subject_id, ':', level_code)
+      ELSE NULL
+    END
+  ) VIRTUAL,
   result_status VARCHAR(30) NULL,
   total_problem_count TINYINT UNSIGNED NOT NULL DEFAULT 3,
   correct_count TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -572,6 +578,7 @@ CREATE TABLE exam_sessions (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (exam_id),
+  UNIQUE KEY uk_exam_sessions_active (active_session_key),
   KEY idx_exam_sessions_user_subject_level (user_id, subject_id, level_code),
   KEY idx_exam_sessions_status (status),
   KEY idx_exam_sessions_result_status (result_status),
@@ -645,6 +652,7 @@ CREATE TABLE ai_analysis_reports (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (report_id),
+  UNIQUE KEY uk_ai_analysis_reports_user_exam (user_id, exam_id),
   KEY idx_ai_analysis_reports_user (user_id),
   KEY idx_ai_analysis_reports_exam (exam_id),
   KEY idx_ai_analysis_reports_status (status),
