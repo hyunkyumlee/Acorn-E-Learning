@@ -130,7 +130,8 @@
                ON pg.payment_id = dp.payment_id
               AND pg.user_id = dp.user_id
         WHERE dp.user_id = #{userId}
-        ORDER BY COALESCE(dp.paid_at, dp.created_at) DESC, dp.payment_id DESC
+          AND dp.payment_status = 'PAID'
+        ORDER BY dp.paid_at DESC, dp.payment_id DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
@@ -138,6 +139,7 @@
         SELECT COUNT(*)
         FROM dummy_payments
         WHERE user_id = #{userId}
+          AND payment_status = 'PAID'
     </select>
 
     <insert id="insert" parameterType="com.acorn.elearning.payment.model.DummyPayment" useGeneratedKeys="true" keyProperty="paymentId">

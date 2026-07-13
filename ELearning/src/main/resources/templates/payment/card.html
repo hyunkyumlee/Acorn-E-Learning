@@ -29,10 +29,6 @@
           <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <input type="hidden" name="productCode" th:value="${productCode ?: 'PREMIUM_LIFETIME'}" value="PREMIUM_LIFETIME">
           <input type="hidden" name="idempotencyToken" th:value="${idempotencyToken}" value="">
-          <div class="figma-method-row">
-            <span class="figma-button primary" aria-current="true">일반 카드</span>
-            <a class="figma-button kakao-pay-button" th:href="@{/payments/kakao-pay}" href="/payments/kakao-pay">카카오페이</a>
-          </div>
           <section class="figma-card-guide" aria-label="일반 카드 결제 안내">
             <span class="payment-card-symbol" aria-hidden="true"></span>
             <h2>일반 카드 결제</h2>
