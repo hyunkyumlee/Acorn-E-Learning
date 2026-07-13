@@ -33,7 +33,7 @@ public interface AdminDashboardMapper {
     );
 
     List<AdminChartPointResponse> findSubjectAverageExamScores(
-            @Param("subject") String subject,
+            @Param("periodUnit") String periodUnit,
             @Param("range") String range
     );
 

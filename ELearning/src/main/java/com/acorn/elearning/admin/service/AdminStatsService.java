@@ -95,7 +95,7 @@ public class AdminStatsService {
         }
 
         for (AdminChartPointResponse point : points) {
-            int percent = (int) Math.round((double) point.getValue() / maxValue * 88);
+            int percent = (int) Math.round((double) point.getValue() / maxValue * 72);
             point.setPercent(percent);
         }
 
@@ -119,8 +119,8 @@ public class AdminStatsService {
         return applyPercent(dm.findSubjectCompletionCounts(periodUnit, subject, range));
     }
 
-    public List<AdminChartPointResponse> subjectExamScoreChart(String subject, String range) {
-        return dm.findSubjectAverageExamScores(subject, range);
+    public List<AdminChartPointResponse> subjectExamScoreChart(String periodUnit, String range) {
+        return applyPercent(dm.findSubjectAverageExamScores(periodUnit, range));
     }
 
     public List<AdminStatsResponse.TableRow> findStatsTableRows(String subject, String range){
@@ -140,7 +140,7 @@ public class AdminStatsService {
                 summary,
                 dailyLearningChart(periodUnit, null),
                 subjectCompleteChart(periodUnit, subject, null),
-                subjectExamScoreChart(subject, null),
+                subjectExamScoreChart(periodUnit, null),
                 findStatsTableRows(subject, null)
         );
     }

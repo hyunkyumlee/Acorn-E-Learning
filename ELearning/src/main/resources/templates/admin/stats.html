@@ -27,7 +27,7 @@
       <h2>요약</h2>
       <form method="get" th:action="@{/admin/stats}" class="admin-stats-scope-filter">
         <input type="hidden" name="periodUnit" th:value="${selectedPeriodUnit}">
-        <input type="hidden" name="subject" th:value="${selectedSubject}">
+        <input type="hidden" name="tableRange" th:value="${selectedTableRange}">
         <button type="submit" name="summaryScope" value="all"
                 th:classappend="${selectedSummaryScope == null or selectedSummaryScope == 'all'} ? ' is-active' : ''">
           전체
@@ -68,16 +68,10 @@
       <h2>통계 그래프</h2>
       <form method="get" th:action="@{/admin/stats}" class="admin-stats-filter-row">
         <input type="hidden" name="summaryScope" th:value="${selectedSummaryScope}">
+        <input type="hidden" name="tableRange" th:value="${selectedTableRange}">
         <select name="periodUnit" aria-label="일별 월별 선택" onchange="this.form.submit()">
           <option value="day" th:selected="${selectedPeriodUnit == null or selectedPeriodUnit == '' or selectedPeriodUnit == 'day'}">일별</option>
           <option value="month" th:selected="${selectedPeriodUnit == 'month'}">월별</option>
-        </select>
-        <select name="subject" aria-label="과목 선택" onchange="this.form.submit()">
-          <option value="">과목별 선택</option>
-          <option value="Java" th:selected="${selectedSubject == 'Java'}">Java</option>
-          <option value="Python" th:selected="${selectedSubject == 'Python'}">Python</option>
-          <option value="SQL" th:selected="${selectedSubject == 'SQL'}">SQL</option>
-          <option value="Web" th:selected="${selectedSubject == 'Web'}">Web</option>
         </select>
       </form>
     </div>
@@ -134,7 +128,18 @@
   </section>
 
   <section class="admin-stats-table-section" aria-label="통계 테이블">
-    <h2>통계 테이블</h2>
+    <div class="admin-stats-section-head">
+      <h2>통계 테이블</h2>
+      <form method="get" th:action="@{/admin/stats}" class="admin-stats-table-filter">
+        <input type="hidden" name="summaryScope" th:value="${selectedSummaryScope}">
+        <input type="hidden" name="periodUnit" th:value="${selectedPeriodUnit}">
+        <select name="tableRange" aria-label="통계 테이블 기간 선택" onchange="this.form.submit()">
+          <option value="recent3" th:selected="${selectedTableRange == null or selectedTableRange == '' or selectedTableRange == 'recent3'}">최근 3일</option>
+          <option value="week" th:selected="${selectedTableRange == 'week'}">주간</option>
+          <option value="month" th:selected="${selectedTableRange == 'month'}">월간</option>
+        </select>
+      </form>
+    </div>
     <div class="admin-stats-table-wrap">
       <table class="admin-stats-table">
         <thead>

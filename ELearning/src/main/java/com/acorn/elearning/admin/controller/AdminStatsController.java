@@ -16,7 +16,7 @@ public class AdminStatsController {
     @GetMapping("/admin/stats")
     public String stats(@RequestParam(defaultValue = "all") String summaryScope,
                         @RequestParam(required = false) String periodUnit,
-                        @RequestParam(required = false) String subject,
+                        @RequestParam(defaultValue = "recent3") String tableRange,
                         Model model) {
 
 
@@ -28,11 +28,11 @@ public class AdminStatsController {
 
         model.addAttribute("selectedSummaryScope", summaryScope);
         model.addAttribute("selectedPeriodUnit", periodUnit);
-        model.addAttribute("selectedSubject", subject);
-        model.addAttribute("statsRows", service.findStatsTableRows(null, null));
+        model.addAttribute("selectedTableRange", tableRange);
+        model.addAttribute("statsRows", service.findStatsTableRows(null, tableRange));
         model.addAttribute("dailyLearningChart", service.dailyLearningChart(periodUnit, null));
-        model.addAttribute("subjectCompleteChart", service.subjectCompleteChart(periodUnit, subject, null));
-        model.addAttribute("subjectExamScoreChart", service.subjectExamScoreChart(subject, null));
+        model.addAttribute("subjectCompleteChart", service.subjectCompleteChart(periodUnit, null, null));
+        model.addAttribute("subjectExamScoreChart", service.subjectExamScoreChart(periodUnit, null));
         model.addAttribute("screen", "admin/stats");
         return "admin/stats";
     }
