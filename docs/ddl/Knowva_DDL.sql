@@ -39,6 +39,7 @@ USE elearning;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS subject_content_status_backups;
 DROP TABLE IF EXISTS content_recommendations;
 DROP TABLE IF EXISTS admin_operation_logs;
 DROP TABLE IF EXISTS notices;
