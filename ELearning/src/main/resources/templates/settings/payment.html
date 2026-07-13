@@ -16,7 +16,7 @@
         <h1>설정</h1>
         <nav aria-label="설정 메뉴">
           <a th:href="@{/settings/profile}">회원 정보</a>
-          <a th:href="@{/settings/security}">이메일 / 비밀번호</a>
+          <a th:href="@{/settings/security}">비밀번호 설정</a>
           <a th:href="@{/settings/social}">연동된 소셜 계정</a>
           <a th:href="@{/settings/system}">시스템 설정</a>
           <a class="is-active" th:href="@{/settings/payment}">결제 정보</a>
@@ -68,7 +68,7 @@
                       </div>
                       <div>
                         <dt>결제수단</dt>
-                        <dd th:text="${payment.paymentMethodDetailLabel()}">신용카드 더미 승인</dd>
+                        <dd th:text="${payment.paymentMethodDetailLabel()}">일반 카드</dd>
                       </div>
                       <div>
                         <dt>결제금액</dt>

@@ -99,7 +99,7 @@ public record PaymentHistoryPageResponse(
 
         public String paymentMethodLabel() {
             if ("CARD".equals(paymentMethod)) {
-                return "신용카드";
+                return "일반 카드";
             }
             if ("BANK_TRANSFER".equals(paymentMethod)) {
                 return "무통장 입금";
@@ -112,7 +112,7 @@ public record PaymentHistoryPageResponse(
 
         public String paymentMethodDetailLabel() {
             if ("CARD".equals(paymentMethod)) {
-                return "신용카드 더미 승인";
+                return "일반 카드";
             }
             if ("BANK_TRANSFER".equals(paymentMethod)) {
                 return "무통장 입금 더미 승인";

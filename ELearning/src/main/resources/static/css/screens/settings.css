@@ -288,6 +288,17 @@ textarea.figma-field {
   accent-color: var(--primary);
 }
 
+.figma-withdraw-confirmation {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.figma-withdraw-confirmation .figma-field-error {
+  display: block;
+  white-space: nowrap;
+}
+
 .figma-flash {
   justify-self: start;
   border: 1px solid color-mix(in srgb, var(--success) 42%, var(--line));
