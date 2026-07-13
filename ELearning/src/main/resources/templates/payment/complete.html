@@ -16,7 +16,7 @@
 <body>
   <main class="payment-screen">
     <section class="figma-payment-page">
-      <div class="figma-payment-step"><strong>2 / 2</strong><span></span></div>
+      <div class="figma-payment-step is-complete" aria-label="결제 진행 2단계, 완료"><strong>2 / 2</strong><span aria-hidden="true"></span></div>
       <section class="figma-payment-complete">
         <h1>결제가 완료 되었습니다!</h1>
         <p th:text="${detail != null && detail.productName() != null ? detail.productName() + '이 활성화되었습니다. 결제가 정상 처리되어 바로 Premium 기능을 사용할 수 있습니다.' : '상세 분석 이용권이 활성화되었습니다. 결제가 정상 처리되어 바로 Premium 기능을 사용할 수 있습니다.'}">상세 분석 이용권이 활성화되었습니다. 결제가 정상 처리되어 바로 Premium 기능을 사용할 수 있습니다.</p>

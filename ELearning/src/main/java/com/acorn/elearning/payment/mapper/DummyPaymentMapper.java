@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 public interface DummyPaymentMapper {
     Optional<DummyPayment> findById(Long id);
     Optional<DummyPayment> findByOrderNo(String orderNo);
+    Optional<DummyPayment> findByOrderNoForUpdate(String orderNo);
     Optional<DummyPayment> findByIdAndUserId(@Param("paymentId") Long paymentId, @Param("userId") Long userId);
     List<DummyPayment> findAll();
     List<DummyPayment> findByUserId(Long userId);
@@ -20,6 +21,14 @@ public interface DummyPaymentMapper {
     );
     long countHistoryByUserId(Long userId);
     int insert(DummyPayment model);
+    int insertPending(DummyPayment model);
     int insertPaid(DummyPayment model);
+    int markPaid(
+            @Param("paymentId") Long paymentId,
+            @Param("pgProvider") String pgProvider,
+            @Param("pgTransactionId") String pgTransactionId
+    );
+    int markFailed(@Param("paymentId") Long paymentId);
+    int markCanceled(@Param("paymentId") Long paymentId);
     int update(DummyPayment model);
 }

@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * 이론 학습(SR-005) MVC 컨트롤러.
+ * 이론 학습 MVC 컨트롤러.
  * 라우트: 이론 상세(GET) / 이론 완료(POST) / 북마크(POST).
- * 현재 브랜치 범위 = completeLesson(LEARN-005) 배선. lessonDetail은 기존 단순 조회, bookmark는 후속 브랜치.
  */
 @Controller
 public class CurriculumController {
@@ -47,6 +46,23 @@ public class CurriculumController {
         // 이론 완료 상태: 완료된 레슨은 액션 버튼 대신 완료 표시(재클릭 시 409도 예방)
         model.addAttribute("lessonCompleted",
                 lesson != null && curriculumService.isTheoryCompletedForLesson(user.userId(), lessonId));
+
+        // 읽는 위치 맥락: 어느 행성(단원)의 몇 번째 레슨인지 + 다음 레슨
+        if (lesson != null) {
+            model.addAttribute("node", curriculumService.getNodeDetail(lesson.getNodeId()));
+            var siblings = curriculumService.getLessonsByNode(lesson.getNodeId());
+            model.addAttribute("lessonTotal", siblings.size());
+            for (int i = 0; i < siblings.size(); i++) {
+                if (lessonId.equals(siblings.get(i).getLessonId())) {
+                    model.addAttribute("lessonIndex", i + 1);
+                    if (i + 1 < siblings.size()) {
+                        model.addAttribute("nextLessonId", siblings.get(i + 1).getLessonId());
+                    }
+                    break;
+                }
+            }
+        }
+
         model.addAttribute("screen", "learning/curriculum");
         return "learning/curriculum";
     }

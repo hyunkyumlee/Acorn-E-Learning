@@ -22,6 +22,10 @@
         🔥 <strong th:text="${dashboard.streakCount}">0</strong>일 연속 학습 중<span
            th:text="${dashboard.attendedToday} ? ' · 오늘 출석 완료 ✓' : ' · 오늘 아직 학습 전'"> · 오늘 아직 학습 전</span>
       </p>
+      <!-- 연속이 끊겼거나 아직 없을 때: 빈 자리를 두지 않고 다시 시작하는 방법을 안내한다. -->
+      <p class="streak-banner is-idle" th:if="${dashboard != null and dashboard.streakCount == 0}">
+        문제풀이 세트를 통과하면 연속 학습이 시작돼요
+      </p>
     </div>
 
     <!--
@@ -63,18 +67,39 @@
         <!-- SubjectSwitcher -->
         <section class="console-card">
           <h2 class="console-card-title">과목 선택</h2>
-          <p th:if="${#lists.isEmpty(subjects)}" class="console-empty">아직 열린 과목이 없어요. 곧 준비될 예정이에요.</p>
-          <!-- 과목칩 클릭 → ?subjectId=로 로드맵 전환. 선택 강조는 현재 로드맵 과목(roadmapSubjectId) 기준. -->
-          <ul th:unless="${#lists.isEmpty(subjects)}" class="subject-switcher">
-            <li th:each="subject : ${subjects}"
+          <p th:if="${#lists.isEmpty(subjectCards)}" class="console-empty">아직 열린 과목이 없어요. 곧 준비될 예정이에요.</p>
+          <!-- 수강 중인 과목은 로드맵으로, 수강 전 과목은 잠금 표시 + 과목 소개 화면으로 보낸다. -->
+          <ul th:unless="${#lists.isEmpty(subjectCards)}" class="subject-switcher">
+            <li th:each="card : ${subjectCards}"
                 class="subject-chip"
-                th:classappend="${roadmapSubjectId != null and subject.subjectId == roadmapSubjectId} ? 'is-current' : ''">
-              <a class="subject-chip-link" th:href="@{/learning(subjectId=${subject.subjectId})}"
-                 th:attr="aria-current=${roadmapSubjectId != null and subject.subjectId == roadmapSubjectId} ? 'true' : null">
-                <code th:text="${subject.subjectCode}">JAVA</code>
-                <span class="subject-chip-name" th:text="${subject.subjectName}">과목명</span>
-                <span class="subject-chip-dot" aria-hidden="true"
-                      th:if="${roadmapSubjectId != null and subject.subjectId == roadmapSubjectId}"></span>
+                th:classappend="${card.selected} ? 'is-current' : (${card.enrolled} ? '' : 'is-locked')">
+              <a class="subject-chip-link"
+                 th:href="${card.enrolled} ? @{/learning(subjectId=${card.subjectId})} : @{/learning/subjects/{id}(id=${card.subjectId})}"
+                 th:attr="aria-current=${card.selected} ? 'true' : null">
+                <span class="subject-chip-head">
+                  <img class="subject-chip-icon" aria-hidden="true"
+                       th:src="@{'/assets/images/icons/subject/' + ${#strings.toLowerCase(card.subjectCode)} + '.png'}"
+                       alt="" loading="lazy" decoding="async">
+                  <span class="subject-chip-name" th:text="${card.subjectName}">과목명</span>
+                  <span class="subject-chip-dot" aria-hidden="true" th:if="${card.selected}"></span>
+                  <svg th:unless="${card.enrolled}" class="subject-chip-lock" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                       th:attr="aria-label=${card.subjectName} + ' (수강 전)'">
+                    <rect x="4" y="11" width="16" height="10" rx="2"></rect>
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+                  </svg>
+                </span>
+                <span class="subject-chip-meta" th:if="${card.enrolled}">
+                  <span class="subject-chip-level" th:if="${card.currentLevelCode != null}"
+                        th:text="${card.currentLevelCode}">BRONZE</span>
+                  <span class="subject-chip-percent" th:text="${card.progressPercent} + '%'">0%</span>
+                </span>
+                <span class="subject-chip-bar" th:if="${card.enrolled}" aria-hidden="true">
+                  <span class="subject-chip-bar-fill" th:style="'width:' + ${card.progressPercent} + '%'"></span>
+                </span>
+                <span class="subject-chip-meta" th:unless="${card.enrolled}">
+                  <span class="subject-chip-hint">수강 전</span>
+                </span>
               </a>
             </li>
           </ul>

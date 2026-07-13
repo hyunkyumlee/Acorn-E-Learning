@@ -27,14 +27,18 @@
     <section class="panel bookmark-panel" th:if="${bookmarks != null and !bookmarks.items.isEmpty()}">
       <div class="bookmark-count">저장한 이론 <strong th:text="${bookmarks.totalCount}">0</strong>개</div>
       <ul class="bookmark-list">
-        <li class="bookmark-item" th:each="item : ${bookmarks.items}">
+        <li class="bookmark-item" th:each="item : ${bookmarks.items}"
+            th:classappend="${item.levelCode != null ? ' level-' + #strings.toLowerCase(item.levelCode) : ''}">
           <span class="bookmark-ribbon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"></path></svg>
           </span>
-          <span class="bookmark-level" th:text="${item.levelCode}">BRONZE</span>
           <span class="bookmark-body">
+            <span class="bookmark-level" th:text="${item.levelCode}">BRONZE</span>
             <span class="bookmark-title" th:text="${item.lessonTitle}">레슨 제목</span>
-            <span class="bookmark-node" th:if="${item.nodeTitle != null}" th:text="${item.nodeTitle}">행성</span>
+            <span class="bookmark-node" th:if="${item.nodeTitle != null}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><ellipse cx="12" cy="12" rx="11" ry="4" transform="rotate(-22 12 12)"></ellipse></svg>
+              <span th:text="${item.nodeTitle}">행성</span>
+            </span>
           </span>
           <a class="button primary bookmark-cta"
              th:href="@{/learning/lessons/{id}(id=${item.lessonId})}">이어보기</a>

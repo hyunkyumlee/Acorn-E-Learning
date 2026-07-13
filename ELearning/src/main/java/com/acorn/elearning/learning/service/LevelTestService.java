@@ -73,6 +73,16 @@ public class LevelTestService {
     }
 
     /**
+     * 해당 과목에 응시할 수 있는 레벨 테스트 문항이 있는지 확인한다.
+     * 문항이 없는 과목은 레벨 테스트로 시작할 수 없다(기초부터 시작만 가능) — 이 판단은 예외 없이 해야 하므로
+     * getQuestions(404를 던짐)와 별도로 둔다.
+     */
+    @Transactional(readOnly = true)
+    public boolean hasQuestions(Long subjectId) {
+        return !questionMapper.findActiveBySubjectId(subjectId).isEmpty();
+    }
+
+    /**
      * LEVEL-001: 특정 과목의 활성 문항 + 선택지를 화면 표시용 View로 조립한다.
      * 정답 여부(is_correct)는 View에 담지 않는다(화면 소스 노출 방지).
      */
