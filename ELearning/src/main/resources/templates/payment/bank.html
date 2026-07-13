@@ -29,7 +29,7 @@
           <input type="hidden" name="memo" value="카카오페이 단건 결제">
           <input type="hidden" name="idempotencyToken" th:value="${idempotencyToken}" value="">
           <div class="figma-method-row">
-            <a class="figma-button" th:href="@{/payments/card}" href="/payments/card">신용카드</a>
+            <a class="figma-button" th:href="@{/payments/card}" href="/payments/card">일반 카드 결제</a>
             <a class="figma-button kakao-pay-button active" th:href="@{/payments/kakao-pay}" href="/payments/kakao-pay">카카오페이</a>
           </div>
           <section class="figma-kakao-guide" aria-label="카카오페이 결제 안내">

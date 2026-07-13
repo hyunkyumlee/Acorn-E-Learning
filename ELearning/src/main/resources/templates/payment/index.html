@@ -16,7 +16,7 @@
 <body>
   <main class="payment-screen">
     <section class="figma-payment-page">
-      <div class="figma-payment-step"><strong>1 / 2</strong><span></span></div>
+      <div class="figma-payment-step is-not-started" aria-label="결제 진행 전, 총 2단계"><strong>0 / 2</strong><span aria-hidden="true"></span></div>
       <header class="figma-payment-head">
         <h1>결제 진행</h1>
         <p>Premium 상세 분석 이용권 결제 수단을 선택합니다.</p>
@@ -24,10 +24,10 @@
       <p class="figma-payment-alert" th:if="${paymentError}" th:text="${paymentError}">카카오페이 결제가 취소되었습니다.</p>
       <section class="figma-payment-choice">
         <article class="figma-method-card">
-          <span>VISA</span>
-          <h2>신용카드 결제</h2>
+          <span class="payment-card-symbol" aria-hidden="true"></span>
+          <h2>일반 카드</h2>
           <p>카드 정보를 입력하고 결제를 완료합니다.</p>
-          <a class="figma-button primary" th:href="@{/payments/card}" href="/payments/card">신용카드</a>
+          <a class="figma-button primary" th:href="@{/payments/card}" href="/payments/card">일반 카드 결제</a>
         </article>
         <article class="figma-method-card kakao-method-card">
           <span>pay</span>

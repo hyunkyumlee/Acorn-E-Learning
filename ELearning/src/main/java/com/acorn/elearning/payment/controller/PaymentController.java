@@ -1,6 +1,7 @@
 package com.acorn.elearning.payment.controller;
 
 import com.acorn.elearning.common.idempotency.IdempotencyTokenService;
+import com.acorn.elearning.config.TossPaymentsProperties;
 import com.acorn.elearning.payment.dto.response.PaymentDetailResponse;
 import com.acorn.elearning.payment.dto.response.PaymentProductListResponse;
 import com.acorn.elearning.payment.dto.response.PaymentResultResponse;
@@ -33,17 +34,20 @@ public class PaymentController {
     private final KakaoPayService kakaoPayService;
     private final PaymentAccessService paymentAccessService;
     private final IdempotencyTokenService idempotencyTokenService;
+    private final TossPaymentsProperties tossPaymentsProperties;
 
     public PaymentController(
             DummyPaymentService dummyPaymentService,
             KakaoPayService kakaoPayService,
             PaymentAccessService paymentAccessService,
-            IdempotencyTokenService idempotencyTokenService
+            IdempotencyTokenService idempotencyTokenService,
+            TossPaymentsProperties tossPaymentsProperties
     ) {
         this.dummyPaymentService = dummyPaymentService;
         this.kakaoPayService = kakaoPayService;
         this.paymentAccessService = paymentAccessService;
         this.idempotencyTokenService = idempotencyTokenService;
+        this.tossPaymentsProperties = tossPaymentsProperties;
     }
 
     @GetMapping("/payments")
@@ -206,6 +210,9 @@ public class PaymentController {
         model.addAttribute("form", form);
         addProductModel(model);
         model.addAttribute("idempotencyToken", form.getIdempotencyToken());
+        if (DummyPaymentService.METHOD_CARD.equals(paymentMethod)) {
+            model.addAttribute("tossClientKey", tossPaymentsProperties.getClientKey());
+        }
     }
 
     private String paymentFormView(String paymentMethod) {

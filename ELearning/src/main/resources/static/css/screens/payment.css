@@ -52,7 +52,26 @@
 
 .payment-screen .figma-payment-step span {
   height: 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--payment-business) 18%, var(--surface-soft));
+}
+
+.payment-screen .figma-payment-step.is-half span::after,
+.payment-screen .figma-payment-step.is-complete span::after {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
   background: var(--payment-business);
+  content: "";
+  transition: width 180ms ease-out;
+}
+
+.payment-screen .figma-payment-step.is-half span::after {
+  width: 50%;
+}
+
+.payment-screen .figma-payment-step.is-complete span::after {
+  width: 100%;
 }
 
 .payment-screen .figma-payment-head h1,
@@ -122,6 +141,31 @@
     var(--payment-business);
   color: var(--payment-cta-text);
   font-weight: 950;
+}
+
+.payment-screen .figma-method-card .payment-card-symbol {
+  position: relative;
+  background: color-mix(in srgb, var(--payment-business) 18%, var(--surface));
+}
+
+.payment-screen .figma-method-card .payment-card-symbol::before {
+  position: absolute;
+  width: 42px;
+  height: 28px;
+  border: 3px solid var(--payment-business-dark);
+  border-radius: 6px;
+  background: var(--payment-card-bg-strong);
+  content: "";
+}
+
+.payment-screen .figma-method-card .payment-card-symbol::after {
+  position: absolute;
+  width: 27px;
+  height: 3px;
+  transform: translateY(6px);
+  border-radius: var(--radius-pill);
+  background: var(--payment-business-dark);
+  content: "";
 }
 
 .payment-screen .kakao-method-card span,
