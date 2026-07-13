@@ -74,6 +74,8 @@
                     th:data-target-type="${log.targetType}"
                     th:data-action-type="${log.actionType}"
                     th:data-target-id="${log.targetId}"
+                    th:data-target-name="${log.targetName}"
+                    th:data-change-detail="${log.changeDetail}"
                     th:data-result-status="${log.resultStatus}"
                     th:data-created-at="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm')}">상세보기</button>
           </td>
@@ -108,6 +110,8 @@
       <label>작업 유형<input id="detailActionType" type="text" readonly></label>
       <label>대상 ID<input id="detailTargetId" type="text" readonly></label>
       <label>처리 결과<input id="detailResultStatus" type="text" readonly></label>
+      <label class="admin-log-detail-wide">대상 이름<input id="detailTargetName" type="text" readonly></label>
+      <label class="admin-log-detail-wide">상세 내용<textarea id="detailChangeDetail" readonly placeholder="상세 내용이 없습니다."></textarea></label>
       <label class="admin-log-detail-wide">처리 일시<input id="detailCreatedAt" type="text" readonly></label>
     </div>
   </section>
@@ -133,6 +137,8 @@
       document.querySelector("#detailTargetType").value = targetTypeLabels[button.dataset.targetType] || button.dataset.targetType || "-";
       document.querySelector("#detailActionType").value = actionLabel(button.dataset.actionType || "");
       document.querySelector("#detailTargetId").value = button.dataset.targetId || "-";
+      document.querySelector("#detailTargetName").value = button.dataset.targetName || "-";
+      document.querySelector("#detailChangeDetail").value = button.dataset.changeDetail || "상세 내용이 없습니다.";
       document.querySelector("#detailResultStatus").value = button.dataset.resultStatus === "SUCCESS" ? "성공" : (button.dataset.resultStatus || "-");
       document.querySelector("#detailCreatedAt").value = button.dataset.createdAt || "-";
       document.querySelector("#operationLogDetailPanel").scrollIntoView({ behavior: "smooth", block: "center" });

@@ -11,5 +11,7 @@ public record AdminOperationLogPageResponse(
         String actionType,
         Long targetId,
         String resultStatus,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String targetName,
+        String changeDetail
 ) {}

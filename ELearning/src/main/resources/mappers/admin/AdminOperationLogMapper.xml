@@ -11,24 +11,44 @@
         <result property="targetId" column="target_id" />
         <result property="resultStatus" column="result_status" />
         <result property="createdAt" column="created_at" />
+        <result property="targetName" column="target_name"/>
+        <result property="changeDetail" column="change_detail"/>
     </resultMap>
 
     <select id="findById" parameterType="long" resultMap="AdminOperationLogResultMap">
-        SELECT log_id, admin_id, action_type, target_type, target_id, result_status, created_at
+        SELECT
+            log_id,
+            admin_id,
+            action_type,
+            target_type,
+            target_id,
+            result_status,
+            created_at,
+            target_name,
+            change_detail
         FROM admin_operation_logs
         WHERE log_id = #{id}
     </select>
 
 
     <select id="findAll" resultMap="AdminOperationLogResultMap">
-        SELECT log_id, admin_id, action_type, target_type, target_id, result_status, created_at
+        SELECT
+            log_id,
+            admin_id,
+            action_type,
+            target_type,
+            target_id,
+            result_status,
+            created_at,
+            target_name,
+            change_detail
         FROM admin_operation_logs
         ORDER BY log_id DESC
     </select>
 
     <insert id="insert" parameterType="com.acorn.elearning.admin.model.AdminOperationLog" useGeneratedKeys="true" keyProperty="logId">
         INSERT INTO admin_operation_logs (
-        admin_id, action_type, target_type, target_id, result_status, created_at
+        admin_id, action_type, target_type, target_id, result_status, created_at, target_name, change_detail
         )
         VALUES (
             #{adminId},
@@ -36,7 +56,9 @@
             #{targetType},
             #{targetId},
             #{resultStatus},
-            #{createdAt}
+            #{createdAt},
+            #{targetName},
+            #{changeDetail}
         )
     </insert>
 
@@ -45,7 +67,11 @@
         SET admin_id = #{adminId},
         action_type = #{actionType},
         target_id = #{targetId},
+        target_name = #{targetName},
+        change_detail = #{changeDetail},
         result_status = #{resultStatus},
+        target_name = #{targetName},
+        change_detail = #{changeDetail},
         target_type = #{targetType}
         WHERE log_id = #{logId}
     </update>
@@ -75,7 +101,9 @@
             l.action_type AS actionType,
             l.target_id AS targetId,
             l.result_status AS resultStatus,
-            l.created_at AS createdAt
+            l.created_at AS createdAt,
+            l.target_name AS targetName,
+            l.change_detail AS changeDetail
         FROM admin_operation_logs l
         LEFT JOIN users u
             ON u.user_id = l.admin_id

@@ -40,6 +40,23 @@
         ORDER BY R.created_at DESC
     </select>
 
+    <select id="findById" resultMap="ReportItemResultMap">
+        SELECT
+            R.report_id, U.nickname AS reporter_nickname,
+            R.target_type, R.target_id,
+            CASE
+                WHEN R.target_type = 'POST' THEN P.title
+                WHEN R.target_type = 'COMMENT' THEN C.content
+                ELSE CONCAT(R.target_type, ' #', R.target_id)
+            END AS target_summary,
+            R.reason_code, R.status, R.created_at
+        FROM reports R
+        JOIN users U ON R.reporter_id = U.user_id
+        LEFT JOIN community_posts P ON R.target_type = 'POST' AND R.target_id = P.post_id
+        LEFT JOIN comments C ON R.target_type = 'COMMENT' AND R.target_id = C.comment_id
+        WHERE R.report_id = #{reportId}
+    </select>
+
     <select id="findPage" resultMap="ReportItemResultMap">
         SELECT
         R.report_id,

@@ -12,6 +12,7 @@ import com.acorn.elearning.admin.mapper.AdminUserMapper;
 import com.acorn.elearning.admin.model.AdminOperationLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,19 +49,23 @@ public class AdminUserService {
         return mapper.findById(userId);
     }
 
-    private AdminOperationLog operationLog(Long adminId, String actionType, Long userId){
+    private AdminOperationLog operationLog(Long adminId, String actionType, Long userId, String targetName, String changeDetail){
 
         AdminOperationLog log = new AdminOperationLog();
         log.setAdminId(adminId);
         log.setActionType(actionType);
         log.setTargetType("USER");
         log.setTargetId(userId);
+        log.setTargetName(targetName);
+        log.setChangeDetail(changeDetail);
         log.setResultStatus("SUCCESS");
         log.setCreatedAt(LocalDateTime.now());
+
 
         return log;
     }
 
+    @Transactional
     public int updateStatus(Long userId, String status, Long adminId){
 
 
@@ -69,27 +74,51 @@ public class AdminUserService {
            return 0;
        }
 
+       AdminUserManageRowResponse user = mapper.findById(userId).orElse(null);
+
+       if(user == null){
+           return 0;
+       }
+
         int updated = mapper.updateStatus(userId, status);
 
         if(updated == 1){
+
+            String changeDetail = "SUSPENDED".equals(status)
+                    ? "계정 상태를 정지로 변경"
+                    : "계정 상태를 정상으로 변경";
+
             service.insert(
-                    operationLog(adminId, "USER_STATUS_UPDATE", userId)
+                    operationLog(adminId, "USER_STATUS_UPDATE", userId,
+                            user.getEmail(),
+                            changeDetail)
             );
         }
 
        return updated;
     }
 
+    @Transactional
     public int updateRole(Long userId, String role, Long adminId){
         if(! "ROLE_USER".equals(role) && ! "ROLE_ADMIN".equals(role)){
+            return 0;
+        }
+
+        AdminUserManageRowResponse user = mapper.findById(userId).orElse(null);
+
+        if(user == null){
             return 0;
         }
 
         int updated = mapper.updateRole(userId, role);
 
         if(updated == 1){
+
+            String changeDetail = user.getRole() + "에서" + role + "로 권한 변경";
             service.insert(
-                    operationLog(adminId, "USER_ROLE_UPDATE",userId)
+                    operationLog(adminId, "USER_ROLE_UPDATE",userId,
+                            user.getEmail(),
+                            changeDetail)
             );
         }
 

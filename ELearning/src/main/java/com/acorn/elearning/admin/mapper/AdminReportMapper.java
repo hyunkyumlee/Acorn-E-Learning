@@ -4,9 +4,11 @@ import com.acorn.elearning.admin.dto.response.ReportPageResponse;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AdminReportMapper {
 
+    Optional<ReportPageResponse.ReportItem> findById(@Param("reportId") Long reportId);
     List<ReportPageResponse.ReportItem> findAll();
     List<ReportPageResponse.ReportItem> findPage(@Param("limit") int limit,
                                                  @Param("offset") int offset,

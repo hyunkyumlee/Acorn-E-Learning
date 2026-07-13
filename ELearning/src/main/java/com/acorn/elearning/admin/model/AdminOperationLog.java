@@ -14,4 +14,6 @@
         private Long targetId;
         private String resultStatus;
         private LocalDateTime createdAt;
+        private String targetName;
+        private String changeDetail;
     }
