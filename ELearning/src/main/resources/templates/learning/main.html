@@ -105,17 +105,20 @@
           </ul>
         </section>
 
-        <!-- ProgressSummary: 진행률 링 + 레벨/등급/누적점수. (진행률 바는 우패널 '단원 진행 현황'에 있어 여기선 링으로 표시) -->
+        <!-- ProgressSummary: 링 = 선택 과목 전체 진행률, 아래 3줄 = 레벨별 진행률.
+             레벨 테스트로 상위 레벨에 배정되면 건너뛴 레벨이 0%로 남아 전체 진행률이 낮게 보이므로,
+             그 이유가 화면에서 바로 읽히도록 레벨별로 나눠 표시한다. -->
         <section class="console-card progress-summary" th:if="${dashboard != null}">
           <h2 class="console-card-title">진행 요약</h2>
           <div class="progress-summary-body">
-            <div class="progress-ring" th:style="'--pct:' + ${progressPercent}"
-                 role="img" th:attr="aria-label='진행률 ' + ${progressPercent} + '퍼센트'">
+            <div class="progress-ring" th:style="'--pct:' + ${subjectPercent}"
+                 role="img" th:attr="aria-label=${roadmapSubjectCode} + ' 전체 진행률 ' + ${subjectPercent} + '퍼센트'">
               <div class="progress-ring-core">
-                <strong th:text="${progressPercent}">0</strong><span>%</span>
+                <strong th:text="${subjectPercent}">0</strong><span>%</span>
               </div>
             </div>
             <div class="progress-summary-info">
+              <p class="progress-summary-scope"><strong th:text="${roadmapSubjectCode}">JAVA</strong> 전체</p>
               <div class="level-line">
                 <span class="level-pill" th:text="${dashboard.currentLevelCode} ?: '-'">BRONZE</span>
                 <span class="summary-grade" th:text="${dashboard.gradeCode} ?: '-'">BEGINNER</span>
@@ -123,6 +126,15 @@
               <p class="score-line">누적 <strong th:text="${dashboard.totalScore}">0</strong> 점</p>
             </div>
           </div>
+          <ul class="progress-levels" th:if="${levelProgress != null}">
+            <li class="progress-level" th:each="entry : ${levelProgress}">
+              <span class="progress-level-name" th:text="${entry.key}">BRONZE</span>
+              <span class="progress-level-bar">
+                <span class="progress-level-fill" th:style="'width:' + ${entry.value} + '%'"></span>
+              </span>
+              <span class="progress-level-percent" th:text="${entry.value} + '%'">0%</span>
+            </li>
+          </ul>
         </section>
 
         <!-- 이번 주 출석: 월~일 요일별 도트(weeklyAttendance boolean 7, index 0=월) -->
@@ -195,8 +207,9 @@
             - 배경 맵(dark/light 테마별 스왑)은 learning.css의 .roadmap-layer background-image에서 처리.
             - 좌표(topArr/leftArr/sizeArr): 맵 길이 규칙적 S자라 상단→하단 균등+좌우 교차 배치하면 길 위에 얹힘. 노드 6개(planet5+gate) 기준.
               멀티레벨로 노드가 6개를 넘으면 % 6으로 순환(후속 개선 대상).
-            - 노드 상태 = completedPlanets/planetCount(컨트롤러 계산). 상태는 색 + 텍스트 배지 병기(색만으로 구분 금지, 디자인명세 v2.0).
-              PLANET: planetNo<=완료수 → done / 다음 1개 → current / 그 외 → locked.  GATE: 전 행성 완료면 ready, 아니면 locked.
+            - 노드 상태 = 컨트롤러가 계산한 nodeStates[nodeId]. 상태는 색 + 텍스트 배지 병기(색만으로 구분 금지, 디자인명세 v2.0).
+              PLANET: done(완료) / current(다음 1개) / open(지나온 레벨이라 순차 잠금 없음) / locked.  GATE: passed / ready / locked.
+              locked만 링크 없음(클릭 불가).
             - 행성 아트/이름/스토리: 컨트롤러가 PlanetCatalog로 (레벨, planetNo)→행성 15종을 매핑해 nodePlanets[nodeId]로 넘긴다.
               레벨당 5종(BRONZE 00~04 / SILVER 05~09 / GOLD 10~14). 등장/스크롤은 learning-roadmap.js(transform/opacity, reduced-motion 대응).
           -->
@@ -215,20 +228,15 @@
                 -->
                 <li th:each="node,it : ${roadmap}"
                     class="roadmap-node"
-                    th:classappend="${(node.nodeType == 'GATE'
-                        ? 'is-gate is-' + gateState
-                        : (node.planetNo <= completedPlanets ? 'is-done'
-                            : (node.planetNo == completedPlanets + 1 ? 'is-current' : 'is-locked')))
-                        + (leftArr[it.index % 6] < 50 ? ' card-right' : ' card-left')}"
-                    th:style="'top:' + ${topArr[it.index % 6]} + '%;left:' + ${leftArr[it.index % 6]} + '%;width:' + ${sizeArr[it.index % 6]} + '%'"
                     th:with="planet=${nodePlanets != null ? nodePlanets[node.nodeId] : null},
-                        navHref=${node.nodeType == 'GATE'
-                        ? (gateState != 'locked' ? ('/exams/coding-test?subjectId=' + roadmapSubjectId + '&amp;levelCode=' + selectedLevel) : null)
-                        : (node.planetNo <= completedPlanets + 1 ? ('/learning/nodes/' + node.nodeId + '/lessons') : null)},
-                        nodeState=${node.nodeType == 'GATE'
-                        ? gateState
-                        : (node.planetNo <= completedPlanets ? 'done'
-                            : (node.planetNo == completedPlanets + 1 ? 'current' : 'locked'))}">
+                        nodeState=${nodeStates[node.nodeId]},
+                        navHref=${nodeStates[node.nodeId] == 'locked' ? null
+                        : (node.nodeType == 'GATE'
+                            ? ('/exams/coding-test?subjectId=' + roadmapSubjectId + '&amp;levelCode=' + selectedLevel)
+                            : ('/learning/nodes/' + node.nodeId + '/lessons'))}"
+                    th:classappend="${(node.nodeType == 'GATE' ? 'is-gate ' : '') + 'is-' + nodeState
+                        + (leftArr[it.index % 6] < 50 ? ' card-right' : ' card-left')}"
+                    th:style="'top:' + ${topArr[it.index % 6]} + '%;left:' + ${leftArr[it.index % 6]} + '%;width:' + ${sizeArr[it.index % 6]} + '%'">
                   <!-- 행성 마커(항상 표시): 접근 가능하면 링크(클릭·키보드), 잠김이면 정적. 이름은 hover 카드로 이동. -->
                   <a class="roadmap-node-link"
                      th:classappend="${navHref == null} ? 'is-static' : ''"
@@ -245,14 +253,15 @@
                     <span class="roadmap-badge">
                       <span class="roadmap-badge-icon" aria-hidden="true">
                         <svg th:if="${nodeState == 'done'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>
-                        <svg th:if="${nodeState == 'current'}" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l11-7z"></path></svg>
+                        <svg th:if="${nodeState == 'current' or nodeState == 'open'}" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l11-7z"></path></svg>
                         <svg th:if="${nodeState == 'ready' or nodeState == 'passed'}" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"></path></svg>
                         <svg th:if="${nodeState == 'locked'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="11" width="12" height="8" rx="2"></rect><path d="M9 11V8a3 3 0 0 1 6 0v3"></path></svg>
                       </span>
                       <span th:text="${node.nodeType == 'GATE'
-                              ? (gateState == 'passed' ? '통과 · 재응시' : (gateState == 'ready' ? '응시 가능' : '잠김'))
-                              : (node.planetNo <= completedPlanets ? '완료'
-                                  : (node.planetNo == completedPlanets + 1 ? (currentPlanetStarted ? '학습 중' : '학습 전') : '잠김'))}">상태</span>
+                              ? (nodeState == 'passed' ? '통과 · 재응시' : (nodeState == 'ready' ? '응시 가능' : '잠김'))
+                              : (nodeState == 'done' ? '완료'
+                                  : (nodeState == 'locked' ? '잠김'
+                                      : (nodeState == 'current' and currentPlanetStarted ? '학습 중' : '학습 전')))}">상태</span>
                     </span>
                   </a>
                   <!-- hover/focus 카드: 지그재그 빈 쪽에 행성 이름 + 테마 스토리 + 단원 메타 + CTA. -->
@@ -268,9 +277,10 @@
                             th:text="${node.nodeType == 'GATE' ? '코딩테스트 관문' : (planet != null ? planet.name : node.title)}">Fruition Planet</span>
                       <span class="roadmap-card-tag"
                             th:text="${node.nodeType == 'GATE'
-                                ? (gateState == 'passed' ? '통과 · 재응시' : (gateState == 'ready' ? '응시 가능' : '잠김'))
-                                : (node.planetNo <= completedPlanets ? '완료'
-                                    : (node.planetNo == completedPlanets + 1 ? (currentPlanetStarted ? '학습 중' : '학습 전') : '잠김'))}">완료</span>
+                                ? (nodeState == 'passed' ? '통과 · 재응시' : (nodeState == 'ready' ? '응시 가능' : '잠김'))
+                                : (nodeState == 'done' ? '완료'
+                                    : (nodeState == 'locked' ? '잠김'
+                                        : (nodeState == 'current' and currentPlanetStarted ? '학습 중' : '학습 전')))}">완료</span>
                     </div>
                     <div class="roadmap-card-body">
                       <p class="roadmap-card-desc"
@@ -315,11 +325,13 @@
           </div>
           <p class="status-sub">행성 <strong th:text="${completedPlanets + ' / ' + planetCount}">0 / 0</strong> 완료<span
              th:text="${gateState == 'passed' ? ' · 통과함(재응시 가능)' : (completedPlanets >= planetCount ? ' · 응시 가능' : ' · ' + (planetCount - completedPlanets) + '개 남음')}"> · N개 남음</span></p>
-          <div class="gate-unlock" th:classappend="${gateState != 'locked'} ? 'is-ready' : ''">
-            <svg th:if="${completedPlanets < planetCount}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
-            <svg th:if="${completedPlanets >= planetCount}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
-            <span th:if="${completedPlanets < planetCount}" th:text="'행성 ' + ${planetCount - completedPlanets} + '개 더 완료 시 코딩테스트 unlock'">행성 N개 더 완료 시 unlock</span>
-            <span th:if="${completedPlanets >= planetCount}" th:text="${gateState == 'passed' ? '이미 통과한 레벨이에요 · 재응시 가능' : '지금 코딩테스트에 응시할 수 있어요'}">지금 코딩테스트에 응시할 수 있어요</span>
+          <!-- 지나온 레벨(gateState=passed)은 행성이 남아 있어도 unlock 조건 안내를 띄우지 않는다. 이미 열린 관문이다. -->
+          <div class="gate-unlock" th:classappend="${gateState != 'locked'} ? 'is-ready' : ''"
+               th:with="gateLocked=${gateState == 'locked'}">
+            <svg th:if="${gateLocked}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+            <svg th:unless="${gateLocked}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+            <span th:if="${gateLocked}" th:text="'행성 ' + ${planetCount - completedPlanets} + '개 더 완료 시 코딩테스트 unlock'">행성 N개 더 완료 시 unlock</span>
+            <span th:unless="${gateLocked}" th:text="${gateState == 'passed' ? '이미 통과한 레벨이에요 · 재응시 가능' : '지금 코딩테스트에 응시할 수 있어요'}">지금 코딩테스트에 응시할 수 있어요</span>
           </div>
         </section>
 
@@ -341,7 +353,7 @@
             <p class="status-sub">문제 풀이 기록은 곧 이곳에 연동돼요.</p>
           </div>
           <p class="status-sub" th:if="${planetCount == 0}">커리큘럼을 준비 중이에요.</p>
-          <p class="status-sub" th:if="${currentNode != null}">다음 단원: <strong th:text="${currentNode.title}">배열</strong> 🔒</p>
+          <p class="status-sub" th:if="${currentNode != null}">다음 단원: <strong th:text="${currentNode.title}">배열</strong></p>
         </section>
 
         <!-- 내 랭킹 (ranking 도메인 read: 주간 통합 기준) -->
