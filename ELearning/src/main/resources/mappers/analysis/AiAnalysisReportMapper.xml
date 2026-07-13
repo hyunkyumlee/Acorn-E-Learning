@@ -61,6 +61,17 @@
         LIMIT 1
     </select>
 
+    <select id="findByExamIdAndUserIdForUpdate" resultMap="AiAnalysisReportResultMap">
+        SELECT
+        <include refid="AiAnalysisReportColumns" />
+        FROM ai_analysis_reports
+        WHERE exam_id = #{examId}
+          AND user_id = #{userId}
+        ORDER BY report_id DESC
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
     <select id="findByUserId" parameterType="long" resultMap="AiAnalysisReportResultMap">
         SELECT
         <include refid="AiAnalysisReportColumns" />
@@ -109,5 +120,18 @@
             retry_count = #{retryCount},
             updated_at = CURRENT_TIMESTAMP
         WHERE report_id = #{reportId}
+    </update>
+
+    <update id="claimRetry">
+        UPDATE ai_analysis_reports
+        SET
+            status = 'PENDING',
+            retry_count = retry_count + 1,
+            analysis_error_code = NULL,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE report_id = #{reportId}
+          AND user_id = #{userId}
+          AND status = 'FAILED'
+          AND retry_count = #{retryCount}
     </update>
 </mapper>

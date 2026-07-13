@@ -8,8 +8,15 @@ import org.apache.ibatis.annotations.Param;
 public interface ExamSessionMapper {
     Optional<ExamSession> findById(Long id);
     Optional<ExamSession> findByIdAndUserId(@Param("examId") Long examId, @Param("userId") Long userId);
+    Optional<ExamSession> findByIdAndUserIdForUpdate(
+            @Param("examId") Long examId,
+            @Param("userId") Long userId);
     Optional<ExamSession> findLatestByUserId(Long userId);
     Optional<ExamSession> findLatestActiveByUserSubjectLevel(
+            @Param("userId") Long userId,
+            @Param("subjectId") Long subjectId,
+            @Param("levelCode") String levelCode);
+    Optional<ExamSession> findLatestActiveByUserSubjectLevelForUpdate(
             @Param("userId") Long userId,
             @Param("subjectId") Long subjectId,
             @Param("levelCode") String levelCode);

@@ -10,6 +10,7 @@ import com.acorn.elearning.analysis.model.AiAnalysisReport;
 import com.acorn.elearning.analysis.model.AnalysisCodingAnswerSummary;
 import com.acorn.elearning.analysis.model.AnalysisCodingExamAggregate;
 import com.acorn.elearning.analysis.model.AnalysisExamSummary;
+import com.acorn.elearning.common.ai.ChatGptApiClient;
 import com.acorn.elearning.exam.mapper.ExamSessionMapper;
 import com.acorn.elearning.exam.model.ExamSession;
 import com.acorn.elearning.exam.service.AiRequestLogService;
@@ -35,7 +36,7 @@ final class AiAnalysisServiceTestFixtures {
 
     static AiAnalysisService service(
             InMemoryAiAnalysisReportMapper reportMapper,
-            CountingChatGptApiClient client
+            ChatGptApiClient client
     ) {
         ObjectMapper objectMapper = new ObjectMapper();
         AnalysisDashboardMapper dashboardMapper = mock(AnalysisDashboardMapper.class);

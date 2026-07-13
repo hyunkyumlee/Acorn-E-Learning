@@ -48,6 +48,15 @@
         ORDER BY problem_no ASC
     </select>
 
+    <select id="findByExamIdForUpdate" parameterType="long" resultMap="AiExamProblemResultMap">
+        SELECT
+        <include refid="AiExamProblemColumns" />
+        FROM ai_exam_problems
+        WHERE exam_id = #{examId}
+        ORDER BY problem_no ASC
+        FOR UPDATE
+    </select>
+
     <select id="findAll" resultMap="AiExamProblemResultMap">
         SELECT
         <include refid="AiExamProblemColumns" />

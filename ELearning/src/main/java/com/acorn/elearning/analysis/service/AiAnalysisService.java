@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,9 +103,12 @@ public class AiAnalysisService {
             if (existingReport != null) {
                 return AnalysisReportResponse.from(existingReport);
             }
-            AiAnalysisReport report = pendingReport(userId, session);
-            generateContent(report, session);
-            return AnalysisReportResponse.from(report);
+            ReportClaim claim = pendingReport(userId, session);
+            if (!claim.created()) {
+                return AnalysisReportResponse.from(claim.report());
+            }
+            generateContent(claim.report(), session);
+            return AnalysisReportResponse.from(claim.report());
         }
     }
 
@@ -115,37 +119,58 @@ public class AiAnalysisService {
                 return AnalysisAutoRefreshResponse.skipped(AnalysisReportResponse.from(report));
             }
             ExamSession session = requireExam(userId, examId);
-            AiAnalysisReport targetReport = pendingReport(userId, session);
+            ReportClaim claim = pendingReport(userId, session);
+            if (!claim.created()) {
+                return AnalysisAutoRefreshResponse.skipped(AnalysisReportResponse.from(claim.report()));
+            }
             try {
-                generateContent(targetReport, session);
+                generateContent(claim.report(), session);
             } catch (BusinessException exception) {
                 log.warn("AI 분석 자동 갱신에 실패했습니다. examId={}", examId, exception);
             }
-            return AnalysisAutoRefreshResponse.attempted(AnalysisReportResponse.from(targetReport));
+            return AnalysisAutoRefreshResponse.attempted(AnalysisReportResponse.from(claim.report()));
         }
     }
 
-    private AiAnalysisReport pendingReport(Long userId, ExamSession session) {
+    private ReportClaim pendingReport(Long userId, ExamSession session) {
         AiAnalysisReport report = new AiAnalysisReport();
         report.setUserId(userId);
         report.setExamId(session.getExamId());
         report.setStatus("PENDING");
         report.setRetryCount(0);
-        aiAnalysisReportMapper.insert(report);
-        return report;
+        try {
+            aiAnalysisReportMapper.insert(report);
+            return new ReportClaim(report, true);
+        } catch (DuplicateKeyException exception) {
+            AiAnalysisReport existingReport = aiAnalysisReportMapper
+                    .findByExamIdAndUserIdForUpdate(session.getExamId(), userId)
+                    .orElseThrow(() -> exception);
+            return new ReportClaim(existingReport, false);
+        }
     }
 
     @Transactional(noRollbackFor = BusinessException.class)
     public AnalysisReportResponse retry(SessionUser sessionUser, Long reportId) {
         Long userId = requireUserId(sessionUser);
-        AiAnalysisReport report = requireReport(userId, reportId);
-        ExamSession session = requireExam(userId, report.getExamId());
-        report.setStatus("PENDING");
-        report.setRetryCount(number(report.getRetryCount()) + 1);
-        report.setAnalysisErrorCode(null);
-        aiAnalysisReportMapper.update(report);
-        generateContent(report, session);
-        return AnalysisReportResponse.from(report);
+        AiAnalysisReport initialReport = requireReport(userId, reportId);
+        int expectedRetryCount = number(initialReport.getRetryCount());
+        synchronized (reportLock(userId, initialReport.getExamId())) {
+            AiAnalysisReport report = requireReport(userId, reportId);
+            if (!"FAILED".equals(report.getStatus())) {
+                return AnalysisReportResponse.from(report);
+            }
+            ExamSession session = requireExam(userId, report.getExamId());
+            if (aiAnalysisReportMapper.claimRetry(reportId, userId, expectedRetryCount) == 0) {
+                return AnalysisReportResponse.from(aiAnalysisReportMapper
+                        .findByExamIdAndUserIdForUpdate(report.getExamId(), userId)
+                        .orElseThrow(() -> new BusinessException(
+                                ErrorCode.COMMON_NOT_FOUND,
+                                "AI 분석 결과를 찾을 수 없습니다.")));
+            }
+            AiAnalysisReport claimedReport = requireReport(userId, reportId);
+            generateContent(claimedReport, session);
+            return AnalysisReportResponse.from(claimedReport);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -272,4 +297,6 @@ public class AiAnalysisService {
                 .mapToObj(index -> new Object())
                 .toArray(Object[]::new);
     }
+
+    private record ReportClaim(AiAnalysisReport report, boolean created) {}
 }

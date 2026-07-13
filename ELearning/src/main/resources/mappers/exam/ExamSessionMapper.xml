@@ -50,6 +50,15 @@
           AND user_id = #{userId}
     </select>
 
+    <select id="findByIdAndUserIdForUpdate" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        WHERE exam_id = #{examId}
+          AND user_id = #{userId}
+        FOR UPDATE
+    </select>
+
     <select id="findLatestByUserId" parameterType="long" resultMap="ExamSessionResultMap">
         SELECT
         <include refid="ExamSessionColumns" />
@@ -69,6 +78,19 @@
           AND status IN ('CREATED', 'READY')
         ORDER BY exam_id DESC
         LIMIT 1
+    </select>
+
+    <select id="findLatestActiveByUserSubjectLevelForUpdate" resultMap="ExamSessionResultMap">
+        SELECT
+        <include refid="ExamSessionColumns" />
+        FROM exam_sessions
+        WHERE user_id = #{userId}
+          AND subject_id = #{subjectId}
+          AND level_code = #{levelCode}
+          AND status IN ('CREATED', 'READY')
+        ORDER BY exam_id DESC
+        LIMIT 1
+        FOR UPDATE
     </select>
 
     <select id="findByUserId" parameterType="long" resultMap="ExamSessionResultMap">
