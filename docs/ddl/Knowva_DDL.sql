@@ -412,6 +412,18 @@ CREATE TABLE practice_problems (
   CONSTRAINT fk_practice_problems_created_by FOREIGN KEY (created_by) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE subject_content_status_backups (
+  backup_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  subject_id BIGINT UNSIGNED NOT NULL,
+  content_type VARCHAR(30) NOT NULL,
+  content_id BIGINT UNSIGNED NOT NULL,
+  was_active TINYINT(1) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (backup_id),
+  UNIQUE KEY uk_subject_content_backup (subject_id, content_type, content_id),
+  KEY idx_subject_content_backup_subject (subject_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE problem_choices (
   choice_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   problem_id BIGINT UNSIGNED NOT NULL,
@@ -750,13 +762,16 @@ CREATE TABLE dummy_payments (
   user_id BIGINT UNSIGNED NOT NULL,
   product_id BIGINT UNSIGNED NOT NULL,
   payment_method VARCHAR(30) NOT NULL DEFAULT 'DUMMY',
-  payment_status VARCHAR(30) NOT NULL DEFAULT 'READY',
+  payment_status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+  pg_provider VARCHAR(30) NULL,
+  pg_transaction_id VARCHAR(200) NULL,
   amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   paid_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (payment_id),
   UNIQUE KEY uk_dummy_payments_order_no (order_no),
+  UNIQUE KEY uk_dummy_payments_pg_transaction (pg_provider, pg_transaction_id),
   KEY idx_dummy_payments_user (user_id),
   KEY idx_dummy_payments_product (product_id),
   KEY idx_dummy_payments_status (payment_status),

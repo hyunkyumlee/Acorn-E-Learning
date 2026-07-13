@@ -127,10 +127,10 @@
 <body>
   <section class="page">
     <h1>Knowva ERD</h1>
-    <p class="source">Source: Notion DB 명세 v1.9 Mermaid ERD. 커뮤니티 조회수와 seed 실행 안전성, 인증 수단별 독립 계정 정책을 반영한 HTML 원본.</p>
+    <p class="source">Source: Notion DB 명세 v2.0 Mermaid ERD. 과목 비활성 콘텐츠 상태 백업과 PG 거래 식별자 계약을 현재 DDL과 동기화한 HTML 원본.</p>
     <div class="summary">
-      <div class="summary-card"><strong>Version</strong><span>v1.9</span></div>
-      <div class="summary-card"><strong>Tables</strong><span>42</span></div>
+      <div class="summary-card"><strong>Version</strong><span>v2.0</span></div>
+      <div class="summary-card"><strong>Tables</strong><span>43</span></div>
       <div class="summary-card"><strong>Foreign Keys</strong><span>78</span></div>
       <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
     </div>
@@ -177,6 +177,7 @@
 <tr><td>premium_grants</td><td>BIGINT grant_id PK</td><td>2</td></tr>
 <tr><td>notices</td><td>BIGINT notice_id PK</td><td>1</td></tr>
 <tr><td>admin_operation_logs</td><td>BIGINT log_id PK</td><td>1</td></tr>
+<tr><td>subject_content_status_backups</td><td>BIGINT backup_id PK</td><td>0</td></tr>
 <tr><td>content_recommendations</td><td>BIGINT content_id PK</td><td>1</td></tr></tbody>
     </table>
   </section>
@@ -572,6 +573,8 @@
         BIGINT product_id FK
         VARCHAR payment_method
         VARCHAR payment_status
+        VARCHAR pg_provider
+        VARCHAR pg_transaction_id
         DECIMAL amount
         DATETIME paid_at
         DATETIME created_at
@@ -605,6 +608,14 @@
         VARCHAR target_type
         BIGINT target_id
         VARCHAR result_status
+        DATETIME created_at
+    }
+    subject_content_status_backups {
+        BIGINT backup_id PK
+        BIGINT subject_id
+        VARCHAR content_type
+        BIGINT content_id
+        BOOLEAN was_active
         DATETIME created_at
     }
     content_recommendations {
@@ -833,7 +844,7 @@
 <tr><td>disconnected_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr></tbody>
                   </table>
                 </section>
-                
+
                 <section class="table-card">
                   <h3>user_settings</h3>
                   <table class="small-table">
@@ -2168,6 +2179,8 @@
         BIGINT product_id FK
         VARCHAR payment_method
         VARCHAR payment_status
+        VARCHAR pg_provider
+        VARCHAR pg_transaction_id
         DECIMAL amount
         DATETIME paid_at
         DATETIME created_at
@@ -2239,7 +2252,9 @@
 <tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>product_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
 <tr><td>payment_method</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;DUMMY&#x27;</td><td></td><td>NN</td></tr>
-<tr><td>payment_status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;READY&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>payment_status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;PENDING&#x27;</td><td></td><td>NN</td></tr>
+<tr><td>pg_provider</td><td>VARCHAR(30) NULL</td><td>UK (composite)</td><td>NULL</td></tr>
+<tr><td>pg_transaction_id</td><td>VARCHAR(200) NULL</td><td>UK (composite)</td><td>NULL</td></tr>
 <tr><td>amount</td><td>DECIMAL(10,2) NOT NULL DEFAULT 0.00</td><td></td><td>NN</td></tr>
 <tr><td>paid_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
 <tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
@@ -2317,6 +2332,14 @@
         VARCHAR target_type
         BIGINT target_id
         VARCHAR result_status
+        DATETIME created_at
+    }
+    subject_content_status_backups {
+        BIGINT backup_id PK
+        BIGINT subject_id
+        VARCHAR content_type
+        BIGINT content_id
+        BOOLEAN was_active
         DATETIME created_at
     }
     content_recommendations {
@@ -2425,6 +2448,19 @@
                 </section>
                 
                 <section class="table-card">
+                  <h3>subject_content_status_backups</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>backup_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>subject_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>UK (composite)</td><td>NN</td></tr>
+<tr><td>content_type</td><td>VARCHAR(30) NOT NULL</td><td>UK (composite)</td><td>NN</td></tr>
+<tr><td>content_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>UK (composite)</td><td>NN</td></tr>
+<tr><td>was_active</td><td>TINYINT(1) NOT NULL</td><td></td><td>NN</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
+                  </table>
+                </section>
+
+                <section class="table-card">
                   <h3>content_recommendations</h3>
                   <table class="small-table">
                     <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
@@ -2444,6 +2480,15 @@
             
 
   <section class="page">
+    <h2>v2.0 변경 요약</h2>
+    <section class="callout">
+      <h2>과목 콘텐츠 복원과 PG 전환 준비</h2>
+      <ul>
+        <li><code>subject_content_status_backups</code>: 과목 비활성화 직전의 <code>CURRICULUM</code>, <code>LESSON</code>, <code>PROBLEM</code> 활성 상태를 보존하고 재활성화 시 복원한다. <code>(subject_id, content_type, content_id)</code> 복합 unique로 중복 스냅샷을 차단한다.</li>
+        <li><code>dummy_payments</code>: 결제 시작 주문은 기본 <code>PENDING</code> 상태로 생성한다. <code>pg_provider</code>와 <code>pg_transaction_id</code>로 카카오페이 tid와 토스페이먼츠 paymentKey를 저장한다.</li>
+        <li><code>uk_dummy_payments_pg_transaction</code>: 동일 PG 안의 거래 식별자 중복을 차단하며, 기존 dummy 결제의 두 PG 컬럼은 <code>NULL</code>을 허용한다.</li>
+      </ul>
+    </section>
     <h2>v1.9 변경 요약</h2>
     <section class="callout">
       <h2>커뮤니티 조회수 및 seed 실행 안전성</h2>
