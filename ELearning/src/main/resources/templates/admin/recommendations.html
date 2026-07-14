@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>추천 콘텐츠 관리 | Knowva</title>
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}">
+  <link rel="stylesheet" th:href="@{/css/common/reset.css}">
+  <link rel="stylesheet" th:href="@{/css/common/base.css}">
+  <link rel="stylesheet" th:href="@{/css/common/components.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/screens/adminRecommendations.css}">
+</head>
+<body>
+<div th:replace="~{fragments/admin-sidebar :: adminSidebar}"></div>
+
+<main class="page-shell admin-screen admin-recommendation-screen">
+  <section class="admin-recommendation-header">
+    <h1>추천 콘텐츠 관리</h1>
+  </section>
+
+  <section class="admin-recommendation-toolbar">
+    <form class="admin-recommendation-filter" method="get" th:action="@{/admin/recommendations}">
+    <input type="search" name="keyword" placeholder="제목·URL 검색"
+           th:value="${selectedKeyword}" aria-label="제목·URL 검색">
+      <select name="subjectId" aria-label="과목">
+        <option value="">과목</option>
+        <option th:each="subject : ${subjectList}"
+                th:value="${subject.subjectId}"
+                th:text="${subject.subjectName}"
+                th:selected="${selectedSubjectId != null and selectedSubjectId == subject.subjectId}">
+          Java
+        </option>
+      </select>
+      <select name="contentType" aria-label="콘텐츠 유형">
+        <option value="">콘텐츠 유형</option>
+        <option value="VIDEO" th:selected="${selectedContentType == 'VIDEO'}">영상</option>
+        <option value="ARTICLE" th:selected="${selectedContentType == 'ARTICLE'}">자료</option>
+      </select>
+      <select name="isActive" aria-label="활성 상태">
+        <option value="">활성 상태</option>
+        <option value="true" th:selected="${selectedIsActive == true}">활성</option>
+        <option value="false" th:selected="${selectedIsActive == false}">비활성</option>
+      </select>
+      <input type="hidden" name="size" th:value="${recommendationPage.pageSize}">
+      <button type="submit" class="admin-recommendation-filter-button">검색</button>
+    </form>
+    <button type="button" id="recommendationCreateButton" class="admin-recommendation-primary">+ 추천 콘텐츠 등록</button>
+  </section>
+
+  <section class="admin-recommendation-panel" aria-label="추천 콘텐츠 목록">
+    <div class="admin-recommendation-section-head">
+      <h2>추천 콘텐츠 목록</h2>
+    </div>
+
+    <div class="admin-recommendation-table-wrap">
+      <table class="admin-recommendation-table">
+        <thead>
+        <tr>
+          <th>번호</th>
+          <th>과목</th>
+          <th>제목</th>
+          <th>콘텐츠 유형</th>
+          <th>추천 슬롯</th>
+          <th>활성 상태</th>
+          <th>수정일</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="content, stat : ${recommendationPage.items}"
+            th:data-content-id="${content.contentId}"
+            th:data-subject-id="${content.subjectId}"
+            th:data-title="${content.title}"
+            th:data-url="${content.url}"
+            th:data-content-type="${content.contentType}"
+            th:data-recommendation-slot="${content.recommendationSlot}"
+            th:data-is-active="${content.isActive}">
+          <td th:text="${((recommendationPage.currentPage - 1) * recommendationPage.pageSize) + stat.count}">1</td>
+          <td th:text="${content.subjectName}">Java</td>
+          <td>
+            <a th:href="${content.url}" target="_blank" rel="noopener" th:text="${content.title}">추천 콘텐츠</a>
+          </td>
+          <td th:switch="${content.contentType}">
+            <span th:case="'VIDEO'">영상</span>
+            <span th:case="'ARTICLE'">자료</span>
+            <span th:case="*" th:text="${content.contentType}">VIDEO</span>
+          </td>
+          <td th:text="${content.recommendationSlot}">MAIN</td>
+          <td th:text="${content.isActive ? '활성' : '비활성'}"
+              th:classappend="${content.isActive} ? ' is-active' : ' is-inactive'">활성</td>
+          <td th:text="${content.updatedAt != null ? #temporals.format(content.updatedAt, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+          <td class="admin-recommendation-actions">
+            <button type="button" class="admin-recommendation-action recommendation-edit-button">수정</button>
+            <form method="post"
+                  th:action="@{/admin/recommendations/{contentId}/delete(contentId=${content.contentId})}"
+                  onsubmit="return confirm('추천 콘텐츠를 삭제하시겠습니까?');">
+              <button type="submit" class="admin-recommendation-action">삭제</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(recommendationPage.items)}">
+          <td colspan="8" class="admin-recommendation-empty">등록된 추천 콘텐츠가 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <nav class="admin-recommendation-pagination" th:if="${recommendationPage.totalPages > 0}" aria-label="추천 콘텐츠 페이지">
+    <a th:if="${recommendationPage.hasPrevious}"
+       th:href="@{/admin/recommendations(page=${recommendationPage.currentPage - 1}, size=${recommendationPage.pageSize}, subjectId=${selectedSubjectId}, contentType=${selectedContentType}, isActive=${selectedIsActive}, keyword=${selectedKeyword})}">&lt;</a>
+    <span th:each="pageNumber : ${#numbers.sequence(recommendationPage.startPage, recommendationPage.endPage)}">
+      <a th:if="${pageNumber != recommendationPage.currentPage}"
+         th:href="@{/admin/recommendations(page=${pageNumber}, size=${recommendationPage.pageSize}, subjectId=${selectedSubjectId}, contentType=${selectedContentType}, isActive=${selectedIsActive}, keyword=${selectedKeyword})}"
+         th:text="${pageNumber}">1</a>
+      <strong th:if="${pageNumber == recommendationPage.currentPage}" th:text="${pageNumber}">1</strong>
+    </span>
+    <a th:if="${recommendationPage.hasNext}"
+       th:href="@{/admin/recommendations(page=${recommendationPage.currentPage + 1}, size=${recommendationPage.pageSize}, subjectId=${selectedSubjectId}, contentType=${selectedContentType}, isActive=${selectedIsActive}, keyword=${selectedKeyword})}">&gt;</a>
+  </nav>
+
+  <section class="admin-recommendation-form-panel" id="recommendationFormPanel">
+    <h2 id="recommendationFormTitle">추천 콘텐츠 등록</h2>
+    <form method="post" id="recommendationForm" th:action="@{/admin/recommendations}">
+      <input type="hidden" id="recommendationContentId">
+      <div class="admin-recommendation-form-grid">
+        <label>
+          과목
+          <select name="subjectId" id="recommendationSubjectId" required>
+            <option value="">과목 선택</option>
+            <option th:each="subject : ${subjectList}"
+                    th:value="${subject.subjectId}"
+                    th:text="${subject.subjectName}">Java</option>
+          </select>
+        </label>
+        <label>
+          콘텐츠 유형
+          <select name="contentType" id="recommendationContentType" required>
+            <option value="">콘텐츠 유형 선택</option>
+            <option value="VIDEO">영상</option>
+            <option value="ARTICLE">자료</option>
+          </select>
+        </label>
+        <label>
+          제목
+          <input type="text" name="title" id="recommendationTitle" maxlength="200" required>
+        </label>
+        <label>
+          추천 슬롯
+          <select name="recommendationSlot" id="recommendationSlot" required>
+            <option value="">추천 슬롯 선택</option>
+            <option value="BEGINNER">BEGINNER</option>
+            <option value="TRENDING">TRENDING</option>
+            <option value="REFERENCE">REFERENCE</option>
+          </select>
+        </label>
+        <label>
+          URL
+          <input type="url" name="url" id="recommendationUrl" placeholder="https://" required>
+        </label>
+        <label>
+          활성 상태
+          <select name="isActive" id="recommendationIsActive" required>
+            <option value="true">활성</option>
+            <option value="false">비활성</option>
+          </select>
+        </label>
+      </div>
+      <div class="admin-recommendation-form-actions">
+        <button type="submit" class="admin-recommendation-primary" id="recommendationSubmitButton">등록</button>
+        <button type="button" class="admin-recommendation-secondary" id="recommendationCancelButton">취소</button>
+      </div>
+    </form>
+  </section>
+
+</main>
+<script>
+  const recommendationForm = document.querySelector("#recommendationForm");
+  const recommendationFormPanel = document.querySelector("#recommendationFormPanel");
+  const recommendationFormTitle = document.querySelector("#recommendationFormTitle");
+  const recommendationContentId = document.querySelector("#recommendationContentId");
+  const recommendationSubmitButton = document.querySelector("#recommendationSubmitButton");
+
+  function openCreateForm() {
+    recommendationForm.action = "/admin/recommendations";
+    recommendationForm.reset();
+    recommendationContentId.value = "";
+    recommendationFormTitle.textContent = "추천 콘텐츠 등록";
+    recommendationSubmitButton.textContent = "등록";
+    recommendationFormPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  document.querySelector("#recommendationCreateButton")?.addEventListener("click", openCreateForm);
+
+  recommendationForm?.addEventListener("submit", (event) => {
+    const contentId = recommendationContentId.value;
+    if (contentId && !window.confirm("추천 콘텐츠를 저장하시겠습니까?")) {
+      event.preventDefault();
+    }
+  });
+
+  document.querySelectorAll(".recommendation-edit-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest("tr");
+      const contentId = row.dataset.contentId;
+
+      recommendationForm.action = `/admin/recommendations/${contentId}`;
+      recommendationContentId.value = contentId;
+      document.querySelector("#recommendationSubjectId").value = row.dataset.subjectId || "";
+      document.querySelector("#recommendationTitle").value = row.dataset.title || "";
+      document.querySelector("#recommendationUrl").value = row.dataset.url || "";
+      document.querySelector("#recommendationContentType").value = row.dataset.contentType || "";
+      document.querySelector("#recommendationSlot").value = row.dataset.recommendationSlot || "";
+      document.querySelector("#recommendationIsActive").value = row.dataset.isActive || "true";
+      recommendationFormTitle.textContent = "추천 콘텐츠 수정";
+      recommendationSubmitButton.textContent = "저장";
+      recommendationFormPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+
+  document.querySelector("#recommendationCancelButton")?.addEventListener("click", openCreateForm);
+</script>
+</body>
+</html>
