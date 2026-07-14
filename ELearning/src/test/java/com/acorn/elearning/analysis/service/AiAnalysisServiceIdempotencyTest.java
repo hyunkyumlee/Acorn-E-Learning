@@ -100,6 +100,7 @@ class AiAnalysisServiceIdempotencyTest {
         AnalysisCodingAnswerSummary answerSummary =
                 (AnalysisCodingAnswerSummary) ((List<?>) request.payload().get("codingAnswerSummaries")).get(0);
         assertNotNull(answerSummary.getStarterCode());
+        assertTrue(answerSummary.getStarterCode().contains("TODO"));
         assertNotNull(answerSummary.getSubmittedCode());
         assertTrue((Boolean) request.payload().get("premiumActive"));
         assertFalse(request.payload().containsKey("latestCodingTest"));

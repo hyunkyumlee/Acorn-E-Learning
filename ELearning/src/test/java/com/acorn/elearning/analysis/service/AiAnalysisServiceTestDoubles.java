@@ -9,6 +9,7 @@ import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.exam.mapper.AiRequestLogMapper;
 import com.acorn.elearning.exam.model.AiRequestLog;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -122,6 +123,16 @@ class InMemoryAiAnalysisReportMapper implements AiAnalysisReportMapper {
     @Override
     public synchronized Optional<AiAnalysisReport> findByExamIdAndUserIdForUpdate(Long examId, Long userId) {
         return findByExamIdAndUserId(examId, userId);
+    }
+
+    @Override
+    public synchronized boolean existsSuccessfulReportCreatedAfter(Long userId, LocalDateTime paidAt) {
+        return paidAt != null && reports.stream()
+                .filter(report -> userId.equals(report.getUserId()))
+                .filter(report -> "SUCCESS".equals(report.getStatus()))
+                .map(AiAnalysisReport::getCreatedAt)
+                .filter(java.util.Objects::nonNull)
+                .anyMatch(createdAt -> !createdAt.isBefore(paidAt));
     }
 
     @Override

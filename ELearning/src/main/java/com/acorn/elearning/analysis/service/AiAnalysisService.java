@@ -7,6 +7,7 @@ import com.acorn.elearning.analysis.dto.response.AnalysisStatusResponse;
 import com.acorn.elearning.analysis.mapper.AiAnalysisReportMapper;
 import com.acorn.elearning.analysis.mapper.AnalysisDashboardMapper;
 import com.acorn.elearning.analysis.model.AnalysisCodingExamAggregate;
+import com.acorn.elearning.analysis.model.AnalysisCodingAnswerSummary;
 import com.acorn.elearning.analysis.model.AnalysisExamSummary;
 import com.acorn.elearning.analysis.model.AiAnalysisReport;
 import com.acorn.elearning.common.ai.ChatGptApiClient;
@@ -18,8 +19,10 @@ import com.acorn.elearning.exam.mapper.ExamSessionMapper;
 import com.acorn.elearning.exam.model.AiRequestLog;
 import com.acorn.elearning.exam.model.ExamSession;
 import com.acorn.elearning.exam.service.AiRequestLogService;
+import com.acorn.elearning.exam.support.ExamStarterCodeResolver;
 import com.acorn.elearning.payment.service.PaymentAccessService;
 import com.acorn.elearning.security.SessionUser;
+import java.util.List;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -236,12 +239,18 @@ public class AiAnalysisService {
         payload.put("recentCodingTests", analysisDashboardMapper.findRecentGradedExamSummariesByUser(userId, TREND_LIMIT));
         payload.put("subjectCodingSummaries", analysisDashboardMapper.findSubjectSummaries(userId));
         payload.put("levelCodingSummaries", analysisDashboardMapper.findLevelSummaries(userId));
-        payload.put("codingAnswerSummaries", analysisDashboardMapper.findCodingAnswerSummaries(userId));
+        payload.put("codingAnswerSummaries", codingAnswerSummaries(userId));
         payload.put("codingMistakeStats", analysisDashboardMapper.findCodingMistakeStatsByUser(userId));
         return new ChatGptRequest(
                 "exam-analysis",
                 "analysis-v3",
                 payload);
+    }
+
+    private List<AnalysisCodingAnswerSummary> codingAnswerSummaries(Long userId) {
+        List<AnalysisCodingAnswerSummary> summaries = analysisDashboardMapper.findCodingAnswerSummaries(userId);
+        summaries.forEach(summary -> summary.setStarterCode(ExamStarterCodeResolver.defaultStarterCode()));
+        return summaries;
     }
 
     private void applyAnalysisResponse(AiAnalysisReport report, String content, boolean premiumActive) {

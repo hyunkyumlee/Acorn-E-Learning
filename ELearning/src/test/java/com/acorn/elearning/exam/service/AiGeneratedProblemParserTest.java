@@ -61,18 +61,32 @@ class AiGeneratedProblemParserTest {
         assertEquals(1, problems.size());
     }
 
+    @Test
+    void parse_converts_literal_newline_sequences_in_prompt_before_persisting() {
+        List<AiGeneratedProblemParser.GeneratedProblem> problems = parser.parse(
+                validContent("첫 번째 문장\\n\\n두 번째 문장", scannerStarterCode(), validTestCases()),
+                beginnerScope(),
+                1);
+
+        assertEquals("첫 번째 문장\n\n두 번째 문장", problems.get(0).prompt());
+    }
+
     private String validContent(String starterCode, String testCases) {
+        return validContent("1부터 n까지 합을 구하세요.", starterCode, testCases);
+    }
+
+    private String validContent(String prompt, String starterCode, String testCases) {
         return """
                 {
                   "problems": [
                     {
-                      "prompt": "1부터 n까지 합을 구하세요.",
+                      "prompt": "%s",
                       "starterCode": "%s",
                       "testCases": %s
                     }
                   ]
                 }
-                """.formatted(starterCode, testCases);
+                """.formatted(prompt, starterCode, testCases);
     }
 
     private String validTestCases() {
