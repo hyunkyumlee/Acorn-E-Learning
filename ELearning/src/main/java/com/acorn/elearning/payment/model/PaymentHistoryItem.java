@@ -16,6 +16,8 @@ public class PaymentHistoryItem {
     private String productName;
     private String paymentMethod;
     private String paymentStatus;
+    private String pgProvider;
+    private String pgTransactionId;
     private BigDecimal amount;
     private LocalDateTime paidAt;
     private LocalDateTime paymentCreatedAt;
@@ -25,4 +27,14 @@ public class PaymentHistoryItem {
     private String grantStatus;
     private LocalDateTime grantedAt;
     private LocalDateTime expiresAt;
+    private Long refundId;
+    private String refundStatus;
+    private BigDecimal refundAmount;
+    private String refundReason;
+    private String refundPgProvider;
+    private String pgRefundTransactionId;
+    private LocalDateTime refundRequestedAt;
+    private LocalDateTime refundCompletedAt;
+    private LocalDateTime refundFailedAt;
+    private String refundFailureCode;
 }

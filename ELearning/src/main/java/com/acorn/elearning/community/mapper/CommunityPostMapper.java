@@ -12,6 +12,8 @@ public interface CommunityPostMapper {
     List<CommunityPost> findAll();
     List<CommunityPost> findPage(@Param("condition") PostSearchCondition condition);
     long countPage(@Param("condition") PostSearchCondition condition);
+    List<Long> findWeeklyPopularPostIds();
+    List<Long> findMonthlyPopularPostIds();
     List<CommunityPost> findByWriterId(@Param("writerId") Long writerId);
     int insert(CommunityPost model);
     int update(CommunityPost model);

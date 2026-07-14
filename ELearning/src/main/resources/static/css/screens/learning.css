@@ -289,6 +289,36 @@
   color: var(--muted);
 }
 
+/* ----- 과목 추가 ----- */
+.subject-add {
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-3);
+}
+
+.subject-add-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.subject-add-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.subject-add-toggle:hover {
+  text-decoration: underline;
+}
+
+.subject-add-list {
+  margin-top: var(--space-3);
+}
+
 /* ----- ProgressSummary ----- */
 .summary-grid {
   display: grid;
@@ -547,6 +577,16 @@
 
 .mission-card-gate .mission-eyebrow {
   color: var(--warning);
+}
+
+/* 잠긴 레벨 안내: 학습이 가능한 미션 카드와 구분되도록 강조색을 빼고 중립 배경을 쓴다. */
+.mission-card-locked {
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+.mission-card-locked .mission-eyebrow {
+  color: var(--muted);
 }
 
 /* ----- StatusPanel 카드 ----- */
@@ -1426,6 +1466,18 @@ a.roadmap-level:hover {
   .roadmap-node:focus-within .roadmap-card {
     transform: translate(-50%, 0) scale(1);
   }
+
+  /* 맵 끝의 게이트는 카드를 아래에 두면 카드가 맵 밖으로 나가고, 숨어 있어도 스크롤 영역을 늘려
+     맨 아래에 맵 없는 빈 칸이 생긴다 → 이 노드만 카드를 위로 연다. */
+  .roadmap-node:last-child .roadmap-card {
+    top: auto;
+    bottom: calc(100% + 14px);
+  }
+
+  .roadmap-node:last-child .roadmap-card::before {
+    top: auto;
+    bottom: -20px;
+  }
 }
 
 /* 카드 상단 cover: 미니 행성 + 행성 이름(좌) + 상태 태그(우). 상태색 그라데이션 배경. */
@@ -2058,30 +2110,32 @@ a.roadmap-level:hover {
 .subject-start-grid {
   display: grid; gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  max-width: 720px;
+}
+/* 레벨 테스트 문항이 없는 과목은 시작 선택지가 하나뿐이므로 그 한 칸이 폭을 다 쓴다. */
+.subject-start-grid.is-single {
+  grid-template-columns: 1fr;
 }
 @media (max-width: 560px) {
   .subject-start-grid { grid-template-columns: 1fr; }
 }
+/* 시작 선택 카드는 form이라 공통 form 폭 제한(420px)에 묶인다 → 이 카드에서만 풀어 그리드 칸을 채운다.
+   두 선택지는 같은 무게다 — 한쪽만 강조하면 그 카드만 호버된 것처럼 보인다. */
 .subject-start-card {
   display: grid; gap: 6px; align-content: start;
+  max-width: none;
   padding: 20px;
-  border: 1px solid var(--line); border-radius: var(--radius);
-  background: var(--surface-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, var(--line));
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg,
+        color-mix(in srgb, var(--primary) 8%, var(--surface-soft)) 0%,
+        var(--surface-soft) 100%);
   transition: transform 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out;
 }
 .subject-start-card:hover {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
   box-shadow: var(--shadow-soft);
-}
-/* 권장 경로(기초부터 시작)는 accent 테두리로 한 단계 앞세운다. */
-.subject-start-card.is-recommended {
-  border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
-  background:
-    linear-gradient(180deg,
-        color-mix(in srgb, var(--primary) 8%, var(--surface-soft)) 0%,
-        var(--surface-soft) 100%);
 }
 .subject-start-card.is-disabled { opacity: .62; }
 .subject-start-card.is-disabled:hover {
@@ -2106,6 +2160,34 @@ a.roadmap-level:hover {
 .subject-start-name { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
 .subject-start-desc { margin: 0 0 8px; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
 .subject-start-card .button { justify-self: start; }
+
+/* 선택지가 하나면 카드가 폭을 다 쓰므로 세로로 쌓으면 오른쪽이 빈다 → 아이콘·글·버튼을 한 줄로 편다. */
+.subject-start-grid.is-single .subject-start-card {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "icon name button"
+    "icon desc button";
+  align-items: center;
+  column-gap: 16px;
+}
+.subject-start-grid.is-single .subject-start-icon {
+  grid-area: icon;
+  margin-bottom: 0;
+  width: 44px; height: 44px;
+}
+.subject-start-grid.is-single .subject-start-icon svg { width: 22px; height: 22px; }
+.subject-start-grid.is-single .subject-start-name { grid-area: name; align-self: end; }
+.subject-start-grid.is-single .subject-start-desc { grid-area: desc; margin-bottom: 0; align-self: start; }
+.subject-start-grid.is-single .button { grid-area: button; align-self: center; justify-self: end; }
+
+/* 좁은 화면에선 한 줄이 안 들어가므로 원래대로 쌓는다. */
+@media (max-width: 560px) {
+  .subject-start-grid.is-single .subject-start-card {
+    grid-template-columns: 1fr;
+    grid-template-areas: "icon" "name" "desc" "button";
+  }
+  .subject-start-grid.is-single .button { justify-self: start; }
+}
 
 /* ===== 북마크 목록 ===== */
 .bookmark-item {

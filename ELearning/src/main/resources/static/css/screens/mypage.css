@@ -798,7 +798,7 @@ textarea.mypage-field {
 
 .learning-full-row {
   display: grid;
-  grid-template-columns: 64px minmax(150px, 0.9fr) minmax(260px, 1.2fr) auto;
+  grid-template-columns: 64px minmax(150px, 0.7fr) minmax(260px, 1.4fr) auto;
   gap: 18px;
   align-items: center;
   border: 1px solid var(--mypage-line);
@@ -878,6 +878,8 @@ textarea.mypage-field {
 .learning-full-progress {
   display: grid;
   gap: 10px;
+  width: min(665px, 100%);
+  justify-self: start;
 }
 
 .learning-full-progress-head {
@@ -1675,6 +1677,12 @@ textarea.mypage-field {
 
 .community-activity-pagination {
   margin-top: -4px;
+}
+
+@media (min-width: 921px) {
+  .learning-full-progress {
+    transform: translateX(-45px);
+  }
 }
 
 @media (max-width: 920px) {

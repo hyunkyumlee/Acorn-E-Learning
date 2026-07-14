@@ -65,6 +65,7 @@ public class ExamController {
             @Valid CreateExamForm form,
             BindingResult bindingResult,
             HttpSession httpSession,
+            @RequestParam(name = "restart", defaultValue = "false") boolean restart,
             Model model,
             RedirectAttributes redirectAttributes
     ) {
@@ -74,19 +75,22 @@ public class ExamController {
             prepareCodingTestModel(sessionUser, model, form);
             return "exam/coding-test";
         }
-        return createExam(sessionUser, form, httpSession, model, redirectAttributes);
+        return createExam(sessionUser, form, httpSession, restart, model, redirectAttributes);
     }
 
     private String createExam(
             SessionUser sessionUser,
             CreateExamForm form,
             HttpSession httpSession,
+            boolean restart,
             Model model,
             RedirectAttributes redirectAttributes
     ) {
         try {
             idempotencyTokenService.requireAndConsume(form.getIdempotencyToken(), "", httpSession);
-            ExamSessionResponse response = aiExamService.create(sessionUser, new CreateExamRequest(form.getSubjectId(), form.getLevelCode()));
+            ExamSessionResponse response = restart
+                    ? aiExamService.restart(sessionUser, new CreateExamRequest(form.getSubjectId(), form.getLevelCode()))
+                    : aiExamService.create(sessionUser, new CreateExamRequest(form.getSubjectId(), form.getLevelCode()));
             redirectAttributes.addAttribute("examId", response.examId());
             return "redirect:/exams/{examId}/problems/1";
         } catch (BusinessException exception) {

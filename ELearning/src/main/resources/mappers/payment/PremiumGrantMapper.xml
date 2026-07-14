@@ -9,6 +9,8 @@
         <result property="status" column="status" />
         <result property="grantedAt" column="granted_at" />
         <result property="expiresAt" column="expires_at" />
+        <result property="revokedAt" column="revoked_at" />
+        <result property="revokeReason" column="revoke_reason" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
     </resultMap>
@@ -21,6 +23,8 @@
         status,
         granted_at,
         expires_at,
+        revoked_at,
+        revoke_reason,
         created_at,
         updated_at
     </sql>
@@ -103,6 +107,18 @@
         )
     </insert>
 
+    <update id="revokeByPaymentIdAndUserId">
+        UPDATE premium_grants
+        SET
+            status = 'REVOKED',
+            revoked_at = CURRENT_TIMESTAMP,
+            revoke_reason = #{revokeReason},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE payment_id = #{paymentId}
+          AND user_id = #{userId}
+          AND status = 'ACTIVE'
+    </update>
+
     <update id="update" parameterType="com.acorn.elearning.payment.model.PremiumGrant">
         UPDATE premium_grants
         SET
@@ -112,6 +128,8 @@
             status = #{status},
             granted_at = #{grantedAt},
             expires_at = #{expiresAt},
+            revoked_at = #{revokedAt},
+            revoke_reason = #{revokeReason},
             updated_at = CURRENT_TIMESTAMP
         WHERE grant_id = #{grantId}
     </update>

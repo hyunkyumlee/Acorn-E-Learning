@@ -8,6 +8,7 @@ public final class ExamSessionStatusPolicy {
     public static final String CREATED = "CREATED";
     public static final String READY = "READY";
     public static final String FAILED = "FAILED";
+    public static final String ABANDONED = "ABANDONED";
     public static final String GRADED = "GRADED";
 
     private ExamSessionStatusPolicy() {}

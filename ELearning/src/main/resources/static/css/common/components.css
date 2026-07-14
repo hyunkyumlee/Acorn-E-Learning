@@ -577,7 +577,7 @@ form {
   gap: var(--space-3);
 }
 
-@media (max-width: 880px) {
+@media (max-width: 1180px) {
   .topbar {
     grid-template-columns: 1fr auto;
   }

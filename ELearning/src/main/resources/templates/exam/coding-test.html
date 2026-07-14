@@ -47,12 +47,15 @@
               th:object="${form}"
               method="post"
               class="exam-create-form"
+              data-exam-start-form
+              th:attr="data-resumable-exam-id=${eligibility.latestExamId()}"
               data-loading-form
               data-loading-title="문제 생성 중입니다"
               data-loading-message="학습 범위를 확인하고 AI 코딩테스트 문제와 테스트케이스를 생성하고 있습니다.">
           <input type="hidden" th:field="*{idempotencyToken}">
           <input type="hidden" th:field="*{subjectId}">
           <input type="hidden" th:field="*{levelCode}">
+          <input type="hidden" name="restart" value="false" data-exam-restart-input>
           <button type="submit" class="button primary">코딩테스트 시작</button>
         </form>
       </article>
@@ -74,6 +77,22 @@
         <a class="button" th:href="@{/learning}">학습 이어가기</a>
       </aside>
     </section>
+
+    <dialog class="exam-resume-dialog"
+            data-exam-resume-dialog
+            th:if="${eligibility != null && eligibility.latestExamId() != null}"
+            aria-labelledby="exam-resume-title">
+      <div class="exam-resume-card">
+        <span class="exam-state-badge is-warning">진행 중인 시험</span>
+        <h2 id="exam-resume-title">이어서 풀 시험이 있어요</h2>
+        <p>최종 제출하지 않은 코딩테스트가 있습니다. 이어서 풀거나, 기존 시험을 종료하고 새 시험을 시작할 수 있습니다.</p>
+        <div class="exam-resume-actions">
+          <button type="button" class="button" data-exam-resume-cancel>취소</button>
+          <a class="button" th:href="@{/exams/{examId}(examId=${eligibility.latestExamId()})}">이어서 풀기</a>
+          <button type="button" class="button primary" data-exam-start-new>새로 시험 보기</button>
+        </div>
+      </div>
+    </dialog>
 
     <section class="exam-loading-modal"
              data-exam-loading-modal

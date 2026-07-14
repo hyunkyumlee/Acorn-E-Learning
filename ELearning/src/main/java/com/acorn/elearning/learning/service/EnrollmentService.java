@@ -88,6 +88,9 @@ public class EnrollmentService {
      * 2)는 프로필 레벨까지 unlock을 채워 복구한다. 학습 가능 여부는 user_level_unlocks만 보므로
      * 프로필이 GOLD인데 unlock이 없으면 화면은 GOLD인데 학습은 403이 된다. 레벨 테스트 채점과 같은 규약으로
      * 판정 레벨까지의 하위 레벨을 모두 연다.
+     *
+     * 수강 기록이 아예 없으면 아직 시작 방식을 고르지 않은 것이므로 복구 대상이 아니다.
+     * 여기서 걸러내지 않으면 시작 전 사용자에게 최저 레벨이 열려 잠긴 로드맵이 성립하지 않는다.
      */
     @Transactional
     public boolean requiresLevelTest(Long userId, Long subjectId) {
@@ -97,8 +100,11 @@ public class EnrollmentService {
 
         UserSubjectEnrollment enrollment =
                 enrollmentMapper.findByUserAndSubject(userId, subjectId).orElse(null);
-        boolean startedWithLevelTest =
-                enrollment != null && START_MODE_LEVEL_TEST.equals(enrollment.getStartMode());
+        if (enrollment == null) {
+            return true;
+        }
+
+        boolean startedWithLevelTest = START_MODE_LEVEL_TEST.equals(enrollment.getStartMode());
         if (startedWithLevelTest && levelTestService.hasQuestions(subjectId)) {
             return true;
         }
@@ -143,10 +149,18 @@ public class EnrollmentService {
      * 수강신청 도입 이전부터 학습해 온 사용자가 자기 과목에서 잠기지 않도록 보정한다.
      * 수강 기록이 하나도 없을 때만 동작하며, 프로필의 주 과목과 이미 레벨을 연 과목을 수강 상태로 만든다.
      * 이미 수강 기록이 있으면 아무 것도 하지 않는다(사용자가 스스로 해지한 과목을 되살리지 않기 위함).
+     *
+     * 레벨을 연 적이 없는 계정은 보정하지 않는다. 가입 때 고른 관심 과목만으로 수강 상태를 만들어 버리면
+     * 시작 방식(기초 시작 · 레벨 테스트)을 고르기도 전에 학습이 시작된 것으로 처리되기 때문이다.
      */
     @Transactional
     public void ensureBackfill(Long userId) {
         if (!enrollmentMapper.findByUser(userId).isEmpty()) {
+            return;
+        }
+
+        List<UserLevelUnlock> unlocks = unlockMapper.findByUser(userId);
+        if (unlocks.isEmpty()) {
             return;
         }
 
@@ -157,7 +171,6 @@ public class EnrollmentService {
             subjectIds.add(profile.getPrimarySubjectId());
         }
 
-        List<UserLevelUnlock> unlocks = unlockMapper.findByUser(userId);
         for (UserLevelUnlock unlock : unlocks) {
             subjectIds.add(unlock.getSubjectId());
         }

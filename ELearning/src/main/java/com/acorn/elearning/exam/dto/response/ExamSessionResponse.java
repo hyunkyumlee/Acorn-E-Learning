@@ -3,6 +3,7 @@ package com.acorn.elearning.exam.dto.response;
 import com.acorn.elearning.exam.model.AiExamProblem;
 import com.acorn.elearning.exam.model.ExamAnswer;
 import com.acorn.elearning.exam.model.ExamSession;
+import com.acorn.elearning.exam.support.ExamPromptNormalizer;
 import com.acorn.elearning.exam.support.ExamStarterCodeResolver;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public record ExamSessionResponse(
             return new Problem(
                     problem.getAiProblemId(),
                     problem.getProblemNo(),
-                    problem.getPrompt(),
+                    ExamPromptNormalizer.normalize(problem.getPrompt()),
                     problem.getStatus(),
                     answered ? answerText : ExamStarterCodeResolver.starterCode(problem),
                     answered);

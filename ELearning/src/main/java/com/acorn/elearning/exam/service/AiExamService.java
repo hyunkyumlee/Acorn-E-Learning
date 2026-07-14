@@ -91,6 +91,33 @@ public class AiExamService {
     @Transactional(noRollbackFor = BusinessException.class)
     public ExamSessionResponse create(SessionUser sessionUser, CreateExamRequest request) {
         Long userId = requireUserId(sessionUser);
+        ExamLearningScope learningScope = requireLearningScope(userId, request);
+
+        ExamSession activeSession = examSessionMapper.findLatestActiveByUserSubjectLevel(userId, request.subjectId(), request.levelCode()).orElse(null);
+        if (activeSession != null) {
+            return detail(userId, activeSession.getExamId());
+        }
+        return createNewExam(userId, request, learningScope);
+    }
+
+    @Transactional(noRollbackFor = BusinessException.class)
+    public ExamSessionResponse restart(SessionUser sessionUser, CreateExamRequest request) {
+        Long userId = requireUserId(sessionUser);
+        ExamLearningScope learningScope = requireLearningScope(userId, request);
+
+        examSessionMapper.findLatestActiveByUserSubjectLevelForUpdate(
+                        userId,
+                        request.subjectId(),
+                        request.levelCode())
+                .ifPresent(activeSession -> {
+                    activeSession.setStatus(ExamSessionStatusPolicy.ABANDONED);
+                    examSessionMapper.updateStatus(activeSession);
+                });
+
+        return createNewExam(userId, request, learningScope);
+    }
+
+    private ExamLearningScope requireLearningScope(Long userId, CreateExamRequest request) {
         ExamLearningEligibility eligibility =
                 examLearningScopeService.eligibility(userId, request.subjectId(), request.levelCode());
 
@@ -98,12 +125,10 @@ public class AiExamService {
             throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, eligibility.message());
         }
 
-        ExamLearningScope learningScope = examLearningScopeService.build(userId, request.subjectId(), request.levelCode());
+        return examLearningScopeService.build(userId, request.subjectId(), request.levelCode());
+    }
 
-        ExamSession activeSession = examSessionMapper.findLatestActiveByUserSubjectLevel(userId, request.subjectId(), request.levelCode()).orElse(null);
-        if (activeSession != null) {
-            return detail(userId, activeSession.getExamId());
-        }
+    private ExamSessionResponse createNewExam(Long userId, CreateExamRequest request, ExamLearningScope learningScope) {
         ExamSession session = new ExamSession();
         session.setUserId(userId);
         session.setSubjectId(request.subjectId());

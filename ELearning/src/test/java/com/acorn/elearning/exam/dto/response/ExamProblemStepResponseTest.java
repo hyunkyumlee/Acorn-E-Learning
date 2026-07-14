@@ -11,6 +11,7 @@ import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.exam.model.AiExamProblem;
 import com.acorn.elearning.exam.model.ExamAnswer;
 import com.acorn.elearning.exam.model.ExamSession;
+import com.acorn.elearning.exam.support.ExamStarterCodeResolver;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,7 @@ class ExamProblemStepResponseTest {
     }
 
     @Test
-    void from_uses_generated_starter_code_when_ai_response_contains_it() {
+    void from_uses_server_starter_code_when_ai_response_contains_solution() {
         ExamSession session = new ExamSession();
         session.setExamId(10L);
         session.setSubjectId(1L);
@@ -64,8 +65,24 @@ class ExamProblemStepResponseTest {
 
         ExamSessionResponse exam = ExamSessionResponse.from(session, List.of(problem), List.of());
 
-        assertTrue(exam.problems().get(0).answerText().contains("int n = scanner.nextInt();"));
-        assertFalse(exam.problems().get(0).answerText().contains("BufferedReader"));
+        assertEquals(ExamStarterCodeResolver.defaultStarterCode(), exam.problems().get(0).answerText());
+    }
+
+    @Test
+    void from_converts_literal_newline_sequences_in_prompt() {
+        ExamSession session = new ExamSession();
+        session.setExamId(10L);
+        session.setSubjectId(1L);
+        session.setLevelCode("BRONZE");
+        session.setStatus("READY");
+        session.setTotalProblemCount(1);
+
+        AiExamProblem problem = problem(101L, 1);
+        problem.setPrompt("첫 번째 문장\\n\\n두 번째 문장");
+
+        ExamSessionResponse exam = ExamSessionResponse.from(session, List.of(problem), List.of());
+
+        assertEquals("첫 번째 문장\n\n두 번째 문장", exam.problems().get(0).prompt());
     }
 
     @Test

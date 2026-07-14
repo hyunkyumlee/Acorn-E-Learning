@@ -71,6 +71,50 @@
   display: none;
 }
 
+.exam-resume-dialog {
+  width: min(520px, calc(100% - (var(--space-5) * 2)));
+  border: 1px solid color-mix(in srgb, var(--primary) 36%, var(--line));
+  border-radius: var(--radius);
+  background: transparent;
+  box-shadow: 0 24px 60px color-mix(in srgb, black 24%, transparent);
+  color: var(--text);
+  padding: 0;
+}
+
+.exam-resume-dialog::backdrop {
+  background: color-mix(in srgb, black 34%, transparent);
+}
+
+.exam-resume-card {
+  display: grid;
+  gap: var(--space-4);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, white), var(--surface));
+  padding: var(--space-6);
+}
+
+.exam-resume-card h2 {
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.exam-resume-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.exam-resume-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.exam-resume-actions .button:first-child {
+  margin-right: auto;
+}
+
 .exam-final-submit-card,
 .exam-loading-card {
   display: grid;
@@ -712,5 +756,14 @@
 
   .exam-editor-head {
     display: grid;
+  }
+
+  .exam-resume-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .exam-resume-actions .button:first-child {
+    margin-right: 0;
   }
 }

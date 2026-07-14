@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.payment.mapper.PaymentRefundMapper">
+    <resultMap id="PaymentRefundResultMap" type="com.acorn.elearning.payment.model.PaymentRefund">
+        <id property="refundId" column="refund_id" />
+        <result property="paymentId" column="payment_id" />
+        <result property="userId" column="user_id" />
+        <result property="refundStatus" column="refund_status" />
+        <result property="refundAmount" column="refund_amount" />
+        <result property="refundReason" column="refund_reason" />
+        <result property="pgProvider" column="pg_provider" />
+        <result property="pgRefundTransactionId" column="pg_refund_transaction_id" />
+        <result property="requestedAt" column="requested_at" />
+        <result property="completedAt" column="completed_at" />
+        <result property="failedAt" column="failed_at" />
+        <result property="failureCode" column="failure_code" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="PaymentRefundColumns">
+        refund_id,
+        payment_id,
+        user_id,
+        refund_status,
+        refund_amount,
+        refund_reason,
+        pg_provider,
+        pg_refund_transaction_id,
+        requested_at,
+        completed_at,
+        failed_at,
+        failure_code,
+        created_at,
+        updated_at
+    </sql>
+
+    <select id="findByPaymentId" parameterType="long" resultMap="PaymentRefundResultMap">
+        SELECT
+        <include refid="PaymentRefundColumns" />
+        FROM payment_refunds
+        WHERE payment_id = #{paymentId}
+    </select>
+
+    <select id="findByPaymentIdForUpdate" parameterType="long" resultMap="PaymentRefundResultMap">
+        SELECT
+        <include refid="PaymentRefundColumns" />
+        FROM payment_refunds
+        WHERE payment_id = #{paymentId}
+        FOR UPDATE
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="PaymentRefundResultMap">
+        SELECT
+        <include refid="PaymentRefundColumns" />
+        FROM payment_refunds
+        WHERE user_id = #{userId}
+        ORDER BY requested_at DESC, refund_id DESC
+    </select>
+
+    <insert id="insertPending" parameterType="com.acorn.elearning.payment.model.PaymentRefund"
+            useGeneratedKeys="true" keyProperty="refundId">
+        INSERT INTO payment_refunds (
+            payment_id,
+            user_id,
+            refund_status,
+            refund_amount,
+            refund_reason,
+            pg_provider,
+            requested_at
+        )
+        VALUES (
+            #{paymentId},
+            #{userId},
+            'PENDING',
+            #{refundAmount},
+            #{refundReason},
+            #{pgProvider},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="markCompleted">
+        UPDATE payment_refunds
+        SET
+            refund_status = 'COMPLETED',
+            pg_refund_transaction_id = #{pgRefundTransactionId},
+            completed_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE refund_id = #{refundId}
+          AND refund_status = 'PENDING'
+    </update>
+
+    <update id="markFailed">
+        UPDATE payment_refunds
+        SET
+            refund_status = 'FAILED',
+            failure_code = #{failureCode},
+            failed_at = CURRENT_TIMESTAMP,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE refund_id = #{refundId}
+          AND refund_status = 'PENDING'
+    </update>
+</mapper>

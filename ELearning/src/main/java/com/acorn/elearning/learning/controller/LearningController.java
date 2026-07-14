@@ -45,6 +45,9 @@ public class LearningController {
     ////subjectid session정보저장
     public static final String SESSION_LEARNING_SUBJECT_ID = "LEARNING_SUBJECT_ID";
 
+    /** 시작 선택 화면으로 되돌린 적이 있는지. 되돌리기는 세션당 한 번만 해야 로드맵 열람이 막히지 않는다. */
+    private static final String SESSION_START_GUIDE_SHOWN = "LEARNING_START_GUIDE_SHOWN";
+
     private final LearningService learningService;
     private final CurriculumService curriculumService;
     private final ProgressService progressService;
@@ -92,21 +95,34 @@ public class LearningController {
         Long roadmapSubjectId = (subjectId != null) ? subjectId
                 : (dashboard.primarySubjectId() != null ? dashboard.primarySubjectId() : DEFAULT_SUBJECT_ID);
 
-        // 수강하지 않은 과목의 로드맵은 열지 않는다 — 과목 소개 화면에서 수강신청부터 하게 한다.
-        if (!enrollmentService.isEnrolled(user.userId(), roadmapSubjectId)) {
+        // 관심 과목을 고르고 가입한 사용자는 그 과목의 시작 선택 화면을 먼저 본다.
+        // 되돌리는 것은 과목을 지정하지 않은 첫 진입 한 번뿐이다. 과목을 지정해 들어온 요청(로드맵 보기, 과목칩)은
+        // 되돌리지 않는다 — 되돌리면 그 화면의 '학습 로드맵으로'가 제자리를 맴돈다.
+        boolean enrolled = enrollmentService.isEnrolled(user.userId(), roadmapSubjectId);
+        if (subjectId == null
+                && !enrolled
+                && dashboard.primarySubjectId() != null
+                && session.getAttribute(SESSION_START_GUIDE_SHOWN) == null) {
+            session.setAttribute(SESSION_START_GUIDE_SHOWN, Boolean.TRUE);
             return "redirect:/learning/subjects/" + roadmapSubjectId;
         }
 
-        // 레벨 테스트로 시작한 과목은 채점 전까지 열린 레벨이 하나도 없다.
-        // 이때 로드맵을 열면 전 레벨이 잠긴 화면만 보이므로, 테스트를 마치도록 되돌린다.
-        if (enrollmentService.requiresLevelTest(user.userId(), roadmapSubjectId)) {
-            return "redirect:/learning/level-test?subjectId=" + roadmapSubjectId;
-        }
+        // 시작 방식을 고르지 않았거나(미수강) 레벨 테스트를 마치지 않은 과목은 열린 레벨이 하나도 없다.
+        // 로드맵은 잠긴 채로 보여 주고 시작 선택 화면으로 가는 안내만 띄운다 — 되돌리면 로드맵을 볼 수 없다.
+        boolean needsStart = !enrolled
+                || enrollmentService.requiresLevelTest(user.userId(), roadmapSubjectId);
+        model.addAttribute("needsStart", needsStart);
 
         // 좌측 과목 목록: 과목별 수강 여부 · 현재 레벨 · 진행률
         List<SubjectCardView> subjectCards =
                 learningService.getSubjectCards(user.userId(), roadmapSubjectId);
         model.addAttribute("subjectCards", subjectCards);
+
+        // 과목 목록은 수강 중인 것만 보여 주고, 아직 담지 않은 과목은 '과목 추가'를 펼쳤을 때만 보여 준다.
+        model.addAttribute("enrolledCards",
+                subjectCards.stream().filter(SubjectCardView::enrolled).toList());
+        model.addAttribute("availableCards",
+                subjectCards.stream().filter(card -> !card.enrolled()).toList());
 
         // 진행 요약: 과목 전체 진행률 1개 + 레벨별 진행률 3개.
         // 레벨 테스트로 상위 레벨에 배정돼도 건너뛴 레벨은 0%로 남으므로, 왜 전체 진행률이 낮은지 화면에서 드러난다.
@@ -168,13 +184,18 @@ public class LearningController {
         model.addAttribute("planetCount", planetCount);
         model.addAttribute("progressPercent", progress.progressPercent());
 
+        // 열리지 않은 레벨은 노드를 하나도 들어갈 수 없다. 레슨 진입 가드도 user_level_unlocks만 보므로
+        // 이 판정을 빼면 잠긴 레벨의 행성이 클릭 가능한 모습으로 그려졌다가 레슨에서 403이 난다.
+        boolean levelUnlocked = unlockedLevels.contains(selectedLevel);
+
         // 다음 레벨이 이미 열려 있으면 이 레벨은 지나온 레벨이다(레벨 테스트로 건너뛰었거나 게이트를 통과했거나).
         String nextLevel = nextLevel(selectedLevel);
         boolean levelPassed = nextLevel != null && unlockedLevels.contains(nextLevel);
 
         // 게이트 상태: 지나온 레벨이면 통과함(재응시 가능), 아니면 전 행성 완료 시 응시 가능(ready), 그 외 잠김(locked).
-        String gateState = levelPassed ? "passed"
-                : ((planetCount > 0 && completedPlanets >= planetCount) ? "ready" : "locked");
+        String gateState = !levelUnlocked ? "locked"
+                : (levelPassed ? "passed"
+                        : ((planetCount > 0 && completedPlanets >= planetCount) ? "ready" : "locked"));
         model.addAttribute("gateState", gateState);
 
         // 노드 상태(done/current/open/locked) — 템플릿이 같은 판정을 되풀이하지 않게 여기서 한 번만 계산한다.
@@ -183,7 +204,9 @@ public class LearningController {
         // locked만 링크가 없다.
         Map<Long, String> nodeStates = new LinkedHashMap<>();
         for (CurriculumNode node : roadmap) {
-            if ("GATE".equals(node.getNodeType())) {
+            if (!levelUnlocked) {
+                nodeStates.put(node.getNodeId(), "locked");
+            } else if ("GATE".equals(node.getNodeType())) {
                 nodeStates.put(node.getNodeId(), gateState);
             } else if (node.getPlanetNo() == null) {
                 nodeStates.put(node.getNodeId(), "locked");
@@ -199,8 +222,11 @@ public class LearningController {
         }
         model.addAttribute("nodeStates", nodeStates);
 
+        model.addAttribute("levelLocked", !levelUnlocked);
+
         // TodayMissionCard용 현재 학습 행성 = 완료수 다음 행성. (모두 완료면 null → 게이트 단계)
-        CurriculumNode currentNode = roadmap.stream()
+        // 잠긴 레벨에는 들어갈 행성이 없다 — 여기서 비우지 않으면 카드가 403이 나는 레슨으로 링크한다.
+        CurriculumNode currentNode = !levelUnlocked ? null : roadmap.stream()
                 .filter(node -> "PLANET".equals(node.getNodeType()))
                 .filter(node -> node.getPlanetNo() != null
                         && node.getPlanetNo() == completedPlanets + 1)

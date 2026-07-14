@@ -4,6 +4,7 @@ import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.exam.service.ExamLearningScopeService.ExamLearningScope;
 import com.acorn.elearning.exam.service.ExamLearningScopeService.LearnedItem;
+import com.acorn.elearning.exam.support.ExamPromptNormalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -55,7 +56,10 @@ final class AiGeneratedProblemParser {
             JsonNode problem = problems.get(index);
             String starterCode = requiredText(problem, "starterCode");
             validateStarterCode(starterCode, learningScopeText);
-            parsed.add(new GeneratedProblem(requiredText(problem, "prompt"), objectMapper.writeValueAsString(validTestCases(problem)), content));
+            parsed.add(new GeneratedProblem(
+                    ExamPromptNormalizer.normalize(requiredText(problem, "prompt")),
+                    objectMapper.writeValueAsString(validTestCases(problem)),
+                    content));
         }
         return parsed;
     }

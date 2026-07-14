@@ -42,8 +42,8 @@
               <dt th:text="${view.levelDetail()} ? '단계' : '현재 레벨'">현재 레벨</dt>
               <dd th:text="${item.currentLevelLabel()}">BRONZE</dd>
               <span class="learning-level-badge"
-                    th:if="${item.levelStatusLabel() != null}"
-                    th:classappend="${item.locked()} ? ' is-locked' : ' is-current'"
+                    th:if="${item.currentLevel() and item.locked() == false}"
+                    th:classappend="' is-current'"
                     th:text="${item.levelStatusLabel()}">진행 중</span>
             </dl>
           </div>
