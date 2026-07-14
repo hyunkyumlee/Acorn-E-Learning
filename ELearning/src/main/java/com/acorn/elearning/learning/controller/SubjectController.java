@@ -21,10 +21,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 @Controller
 public class SubjectController {
 
-    /** 세션 미구현 구간에서 사용하는 fallback learner(샘플데이터 userId=2). */
-    private static final SessionUser DEV_FALLBACK_USER =
-            new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
-
     private final LearningService learningService;
     private final CurriculumService curriculumService;
     private final EnrollmentService enrollmentService;
@@ -47,7 +43,10 @@ public class SubjectController {
     public String subjectDetail(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long subjectId, Model model) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
 
         model.addAttribute("subject", learningService.getSubject(subjectId));
         model.addAttribute("enrolled", enrollmentService.isEnrolled(user.userId(), subjectId));
@@ -70,7 +69,10 @@ public class SubjectController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long subjectId,
             @RequestParam(name = "startMode", required = false) String startMode) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
 
         learningService.getSubject(subjectId);
 
