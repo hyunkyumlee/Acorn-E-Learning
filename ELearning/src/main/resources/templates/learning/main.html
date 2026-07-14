@@ -37,8 +37,28 @@
       <!-- ===== 좌: LearningSidebar ===== -->
       <aside class="learning-sidebar" aria-label="학습 사이드바">
 
+        <!-- 잠긴 레벨 안내: 시작 방식을 안 골랐으면 시작 선택 화면으로, 아니면 이전 레벨을 마쳐야 열린다는 안내 -->
+        <section class="mission-card mission-card-locked" th:if="${levelLocked}">
+          <span class="mission-eyebrow">
+            <svg class="mission-eyebrow-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            잠긴 레벨
+          </span>
+          <h2 class="mission-title" th:text="${needsStart} ? '아직 학습을 시작하지 않았어요' : '아직 열리지 않은 레벨이에요'">아직 학습을 시작하지 않았어요</h2>
+          <p class="mission-desc" th:if="${needsStart}">
+            시작 방식을 고르면 첫 행성이 열려요. 아래 버튼으로 이 과목의 학습을 시작할 수 있어요.
+          </p>
+          <p class="mission-desc" th:unless="${needsStart}">
+            이전 레벨의 코딩테스트 Gate를 통과하면 이 레벨이 열려요.
+          </p>
+          <a th:if="${needsStart}" class="button primary mission-cta"
+             th:href="@{/learning/subjects/{id}(id=${roadmapSubjectId})}">
+            <span>학습 시작하기</span>
+            <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          </a>
+        </section>
+
         <!-- TodayMissionCard (중앙 → 사이드바 최상단으로 이동) -->
-        <section class="mission-card" th:if="${currentNode != null}">
+        <section class="mission-card" th:if="${!levelLocked and currentNode != null}">
           <span class="mission-eyebrow">
             <svg class="mission-eyebrow-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"></circle><path d="M12 3v3M12 18v3M3 12h3M18 12h3"></path></svg>
             오늘의 미션
@@ -51,7 +71,7 @@
           </a>
         </section>
         <!-- 모든 행성 완료 시: 게이트 안내(이미 통과한 레벨이면 재응시 안내로 전환) -->
-        <section class="mission-card mission-card-gate" th:if="${currentNode == null and !#lists.isEmpty(roadmap)}">
+        <section class="mission-card mission-card-gate" th:if="${!levelLocked and currentNode == null and !#lists.isEmpty(roadmap)}">
           <span class="mission-eyebrow">코딩테스트 Gate</span>
           <h2 class="mission-title" th:text="${gateState == 'passed' ? '이미 통과한 레벨' : '모든 행성 완료!'}">모든 행성 완료!</h2>
           <p class="mission-desc" th:text="${gateState == 'passed'
@@ -68,13 +88,14 @@
         <section class="console-card">
           <h2 class="console-card-title">과목 선택</h2>
           <p th:if="${#lists.isEmpty(subjectCards)}" class="console-empty">아직 열린 과목이 없어요. 곧 준비될 예정이에요.</p>
-          <!-- 수강 중인 과목은 로드맵으로, 수강 전 과목은 잠금 표시 + 과목 소개 화면으로 보낸다. -->
-          <ul th:unless="${#lists.isEmpty(subjectCards)}" class="subject-switcher">
-            <li th:each="card : ${subjectCards}"
+
+          <!-- 담은 과목: 로드맵으로 이동 + 레벨·진도율 -->
+          <ul th:unless="${#lists.isEmpty(enrolledCards)}" class="subject-switcher">
+            <li th:each="card : ${enrolledCards}"
                 class="subject-chip"
-                th:classappend="${card.selected} ? 'is-current' : (${card.enrolled} ? '' : 'is-locked')">
+                th:classappend="${card.selected} ? 'is-current' : ''">
               <a class="subject-chip-link"
-                 th:href="${card.enrolled} ? @{/learning(subjectId=${card.subjectId})} : @{/learning/subjects/{id}(id=${card.subjectId})}"
+                 th:href="@{/learning(subjectId=${card.subjectId})}"
                  th:attr="aria-current=${card.selected} ? 'true' : null">
                 <span class="subject-chip-head">
                   <img class="subject-chip-icon" aria-hidden="true"
@@ -82,27 +103,44 @@
                        alt="" loading="lazy" decoding="async">
                   <span class="subject-chip-name" th:text="${card.subjectName}">과목명</span>
                   <span class="subject-chip-dot" aria-hidden="true" th:if="${card.selected}"></span>
-                  <svg th:unless="${card.enrolled}" class="subject-chip-lock" width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                       th:attr="aria-label=${card.subjectName} + ' (수강 전)'">
-                    <rect x="4" y="11" width="16" height="10" rx="2"></rect>
-                    <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-                  </svg>
                 </span>
-                <span class="subject-chip-meta" th:if="${card.enrolled}">
+                <span class="subject-chip-meta">
                   <span class="subject-chip-level" th:if="${card.currentLevelCode != null}"
                         th:text="${card.currentLevelCode}">BRONZE</span>
                   <span class="subject-chip-percent" th:text="${card.progressPercent} + '%'">0%</span>
                 </span>
-                <span class="subject-chip-bar" th:if="${card.enrolled}" aria-hidden="true">
+                <span class="subject-chip-bar" aria-hidden="true">
                   <span class="subject-chip-bar-fill" th:style="'width:' + ${card.progressPercent} + '%'"></span>
-                </span>
-                <span class="subject-chip-meta" th:unless="${card.enrolled}">
-                  <span class="subject-chip-hint">수강 전</span>
                 </span>
               </a>
             </li>
           </ul>
+          <p th:if="${#lists.isEmpty(enrolledCards) and !#lists.isEmpty(subjectCards)}" class="console-empty">
+            아직 담은 과목이 없어요. 아래에서 과목을 추가해 보세요.
+          </p>
+
+          <!-- 과목 추가: 아직 담지 않은 과목만 보여 준다(이미 담은 과목은 목록에 없으므로 중복 추가가 생기지 않는다). -->
+          <details class="subject-add" th:unless="${#lists.isEmpty(availableCards)}">
+            <summary class="subject-add-toggle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+              <span>과목 추가</span>
+            </summary>
+            <ul class="subject-switcher subject-add-list">
+              <li th:each="card : ${availableCards}" class="subject-chip is-locked">
+                <a class="subject-chip-link" th:href="@{/learning/subjects/{id}(id=${card.subjectId})}">
+                  <span class="subject-chip-head">
+                    <img class="subject-chip-icon" aria-hidden="true"
+                         th:src="@{'/assets/images/icons/subject/' + ${#strings.toLowerCase(card.subjectCode)} + '.png'}"
+                         alt="" loading="lazy" decoding="async">
+                    <span class="subject-chip-name" th:text="${card.subjectName}">과목명</span>
+                  </span>
+                  <span class="subject-chip-meta">
+                    <span class="subject-chip-hint">담기</span>
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </details>
         </section>
 
         <!-- ProgressSummary: 링 = 선택 과목 전체 진행률, 아래 3줄 = 레벨별 진행률.
@@ -330,7 +368,9 @@
                th:with="gateLocked=${gateState == 'locked'}">
             <svg th:if="${gateLocked}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
             <svg th:unless="${gateLocked}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
-            <span th:if="${gateLocked}" th:text="'행성 ' + ${planetCount - completedPlanets} + '개 더 완료 시 코딩테스트 unlock'">행성 N개 더 완료 시 unlock</span>
+            <span th:if="${gateLocked and levelLocked}"
+                  th:text="${needsStart} ? '학습을 시작하면 관문이 열려요' : '이 레벨이 열리면 응시할 수 있어요'">학습을 시작하면 관문이 열려요</span>
+            <span th:if="${gateLocked and !levelLocked}" th:text="'행성 ' + ${planetCount - completedPlanets} + '개 더 완료 시 코딩테스트 unlock'">행성 N개 더 완료 시 unlock</span>
             <span th:unless="${gateLocked}" th:text="${gateState == 'passed' ? '이미 통과한 레벨이에요 · 재응시 가능' : '지금 코딩테스트에 응시할 수 있어요'}">지금 코딩테스트에 응시할 수 있어요</span>
           </div>
         </section>
