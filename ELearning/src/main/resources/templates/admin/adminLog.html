@@ -36,6 +36,7 @@
         <option value="COMMENT" th:selected="${selectedTargetType == 'COMMENT'}">댓글</option>
         <option value="REPORT" th:selected="${selectedTargetType == 'REPORT'}">신고</option>
         <option value="USER" th:selected="${selectedTargetType == 'USER'}">사용자</option>
+        <option value="CONTENT_RECOMMENDATION" th:selected="${selectedTargetType == 'CONTENT_RECOMMENDATION'}">추천 콘텐츠</option>
       </select>
       <select name="actionCategory" aria-label="작업 유형">
         <option value="">작업 유형</option>
@@ -61,7 +62,19 @@
         <tr th:each="log, stat : ${operationLogPage.items}">
           <td th:text="${log.logId}">1</td>
           <td th:text="${log.adminNickname != null ? log.adminNickname + ' (' + log.adminEmail + ')' : (log.adminEmail ?: '-')}">관리자</td>
-          <td th:text="${log.targetType == 'SUBJECT' ? '과목' : (log.targetType == 'CURRICULUM_NODE' ? '커리큘럼' : (log.targetType == 'LESSON' ? '이론' : (log.targetType == 'PROBLEM' ? '문제' : (log.targetType == 'NOTICE' ? '공지사항' : (log.targetType == 'POST' ? '게시글' : (log.targetType == 'COMMENT' ? '댓글' : (log.targetType == 'REPORT' ? '신고' : (log.targetType == 'USER' ? '사용자' : log.targetType))))))))}">과목</td>
+          <td th:switch="${log.targetType}">
+            <span th:case="'SUBJECT'">과목</span>
+            <span th:case="'CURRICULUM_NODE'">커리큘럼</span>
+            <span th:case="'LESSON'">이론</span>
+            <span th:case="'PROBLEM'">문제</span>
+            <span th:case="'NOTICE'">공지사항</span>
+            <span th:case="'POST'">게시글</span>
+            <span th:case="'COMMENT'">댓글</span>
+            <span th:case="'REPORT'">신고</span>
+            <span th:case="'USER'">사용자</span>
+            <span th:case="'CONTENT_RECOMMENDATION'">추천 콘텐츠</span>
+            <span th:case="*" th:text="${log.targetType}">과목</span>
+          </td>
           <td th:text="${log.actionType == 'USER_ROLE_UPDATE' ? '권한 변경' : (log.actionType == 'HANDLE_REPORT' ? '신고 처리' : (#strings.endsWith(log.actionType, '_CREATE') or log.actionType == 'CREATE_NOTICE' ? '등록' : (#strings.endsWith(log.actionType, '_DELETE') ? '삭제' : (#strings.endsWith(log.actionType, '_STATUS_UPDATE') ? '상태 변경' : (#strings.endsWith(log.actionType, '_UPDATE') ? '수정' : log.actionType)))))}">등록</td>
           <td th:text="${log.targetId ?: '-'}">1</td>
           <td th:text="${log.resultStatus == 'SUCCESS' ? '성공' : log.resultStatus}"
@@ -118,7 +131,7 @@
 </main>
 
 <script>
-  const targetTypeLabels = { SUBJECT: "과목", CURRICULUM_NODE: "커리큘럼", LESSON: "이론", PROBLEM: "문제", NOTICE: "공지사항", POST: "게시글", COMMENT: "댓글", REPORT: "신고", USER: "사용자" };
+  const targetTypeLabels = { SUBJECT: "과목", CURRICULUM_NODE: "커리큘럼", LESSON: "이론", PROBLEM: "문제", NOTICE: "공지사항", POST: "게시글", COMMENT: "댓글", REPORT: "신고", USER: "사용자", CONTENT_RECOMMENDATION: "추천 콘텐츠" };
   const actionTypeLabels = { USER_ROLE_UPDATE: "권한 변경", HANDLE_REPORT: "신고 처리", CREATE_NOTICE: "등록" };
 
   function actionLabel(actionType) {

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.admin.mapper.AdminRecommendationMapper">
+
+
+    <resultMap id="RecommendationResultMap"
+               type="com.acorn.elearning.admin.dto.response.AdminRecommendationManageRowResponse">
+        <constructor>
+            <idArg name="contentId" column="content_id" javaType="java.lang.Long"/>
+            <arg name="subjectId" column="subject_id" javaType="java.lang.Long"/>
+            <arg name="subjectName" column="subject_name" javaType="java.lang.String"/>
+            <arg name="title" column="title" javaType="java.lang.String"/>
+            <arg name="url" column="url" javaType="java.lang.String"/>
+            <arg name="contentType" column="content_type" javaType="java.lang.String"/>
+            <arg name="recommendationSlot" column="recommendation_slot" javaType="java.lang.String"/>
+            <arg name="isActive" column="is_active" javaType="java.lang.Boolean"/>
+            <arg name="updatedAt" column="updated_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+
+    <resultMap id="RecommendationDetailResultMap"
+               type="com.acorn.elearning.admin.dto.response.AdminRecommendationDetailResponse">
+        <constructor>
+            <idArg name="contentId" column="content_id" javaType="java.lang.Long"/>
+            <arg name="subjectId" column="subject_id" javaType="java.lang.Long"/>
+            <arg name="subjectName" column="subject_name" javaType="java.lang.String"/>
+            <arg name="title" column="title" javaType="java.lang.String"/>
+            <arg name="url" column="url" javaType="java.lang.String"/>
+            <arg name="contentType" column="content_type" javaType="java.lang.String"/>
+            <arg name="recommendationSlot" column="recommendation_slot" javaType="java.lang.String"/>
+            <arg name="isActive" column="is_active" javaType="java.lang.Boolean"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findPage" resultMap="RecommendationResultMap">
+        SELECT
+            R.content_id,
+            R.subject_id,
+            S.subject_name,
+            R.title,
+            R.url,
+            R.content_type,
+            R.recommendation_slot,
+            R.is_active,
+            R.updated_at
+        FROM content_recommendations R
+        LEFT JOIN subjects S
+            ON R.subject_id = S.subject_id
+        <include refid="RecommendationFilterWhere" />
+        ORDER BY R.content_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM content_recommendations R
+        <include refid="RecommendationFilterWhere" />
+    </select>
+
+    <select id="findById" resultMap="RecommendationDetailResultMap">
+        SELECT
+            R.content_id,
+            R.subject_id,
+            S.subject_name,
+            R.title,
+            R.url,
+            R.content_type,
+            R.recommendation_slot,
+            R.is_active
+        FROM content_recommendations R
+        LEFT JOIN subjects S
+            ON R.subject_id = S.subject_id
+        WHERE
+            R.content_id = #{contentId}
+    </select>
+
+    <insert id="insert" parameterType="com.acorn.elearning.admin.form.RecommendationForm" useGeneratedKeys="true" keyProperty="contentId">
+        INSERT INTO content_recommendations(subject_id, title, url, content_type,
+                    recommendation_slot, is_active)
+        VALUES
+        (#{subjectId}, #{title}, #{url}, #{contentType}, #{recommendationSlot}, #{isActive})
+
+    </insert>
+
+    <update id="update">
+        UPDATE content_recommendations
+        SET subject_id = #{form.subjectId},
+            title = #{form.title},
+            url = #{form.url},
+            content_type = #{form.contentType},
+            recommendation_slot = #{form.recommendationSlot},
+            is_active = #{form.isActive},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE content_id = #{contentId}
+    </update>
+
+    <delete id="deleteById" >
+        DELETE FROM content_recommendations
+        WHERE content_id = #{contentId}
+    </delete>
+
+
+    <sql id="RecommendationFilterWhere">
+        <where>
+            <if test="subjectId != null">
+                AND R.subject_id = #{subjectId}
+            </if>
+
+            <if test="contentType != null and contentType != ''">
+                AND R.content_type = #{contentType}
+            </if>
+
+            <if test="isActive != null">
+                AND R.is_active = #{isActive}
+            </if>
+
+            <if test="keyword != null and keyword != ''">
+                AND (
+                R.title LIKE CONCAT('%', #{keyword}, '%')
+                OR R.url LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+    </sql>
+
+</mapper>
