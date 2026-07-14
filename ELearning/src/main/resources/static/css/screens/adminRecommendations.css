@@ -1,0 +1,55 @@
+.admin-recommendation-screen { padding: 22px 28px 28px; background: #f6f7f9; min-height: 100vh; }
+.admin-recommendation-header { padding: 0 0 14px; }
+.admin-recommendation-header h1 { margin: 0; color: #111827; font-size: 19px; font-weight: 800; }
+.admin-recommendation-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.admin-recommendation-filter { display: grid; grid-template-columns: 200px repeat(3, 145px) 80px; gap: 12px; max-width: none; }
+.admin-recommendation-filter input,
+.admin-recommendation-filter select { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; color: #111827; font-size: 14px; }
+.admin-recommendation-filter-button,
+.admin-recommendation-primary { border-radius: 7px; border: 1px solid #111827; background: #111827; color: #fff; cursor: pointer; font-weight: 700; white-space: nowrap; }
+.admin-recommendation-filter-button { height: 36px; padding: 0 12px; }
+.admin-recommendation-primary { height: 38px; padding: 0 18px; }
+.admin-recommendation-panel { width: 100%; margin: 0 0 30px; padding: 0; border: 0; background: transparent; }
+.admin-recommendation-section-head { padding-bottom: 6px; }
+.admin-recommendation-section-head h2 { margin: 0; color: #111827; font-size: 14px; font-weight: 800; }
+.admin-recommendation-primary:disabled { opacity: 1; cursor: not-allowed; }
+.admin-recommendation-table-wrap { overflow-x: auto; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04); }
+.admin-recommendation-table { width: 100%; min-width: 1050px; border-collapse: collapse; }
+.admin-recommendation-table thead { background: #eef0f2; }
+.admin-recommendation-table th,
+.admin-recommendation-table td { padding: 11px 14px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; white-space: nowrap; font-size: 13px; }
+.admin-recommendation-table th { color: #374151; font-weight: 800; }
+.admin-recommendation-table td { color: #1f2937; }
+.admin-recommendation-table tbody tr:hover { background: #fafafa; }
+.admin-recommendation-table td a { color: #1d4ed8; text-decoration: underline; }
+.admin-recommendation-table td.is-active { color: #15803d; font-weight: 700; }
+.admin-recommendation-table td.is-inactive { color: #64748b; font-weight: 700; }
+.admin-recommendation-action { min-width: 46px; height: 28px; padding: 0; border: 1px solid #d1d5db; border-radius: 7px; background: #fff; color: #111827; cursor: pointer; font-size: 12px; font-weight: 700; transition: background-color .15s ease, transform .1s ease; }
+.admin-recommendation-action:hover,
+.admin-recommendation-secondary:hover { background: #f3f4f6; }
+.admin-recommendation-action:active,
+.admin-recommendation-secondary:active,
+.admin-recommendation-primary:active,
+.admin-recommendation-filter-button:active { transform: translateY(1px); }
+.admin-recommendation-actions { display: flex; align-items: center; gap: 8px; }
+.admin-recommendation-actions form { margin: 0; }
+.admin-recommendation-empty { height: 76px; text-align: center !important; color: #6b7280; }
+.admin-recommendation-pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 14px 0 0; }
+.admin-recommendation-pagination a,
+.admin-recommendation-pagination strong { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 9px; border: 1px solid #cbd5e1; border-radius: 999px; color: #334155; }
+.admin-recommendation-pagination strong { border-color: #111827; background: #111827; color: #fff; }
+.admin-recommendation-form-panel { width: min(720px, 100%); margin-top: 30px; padding: 18px 14px 16px; border: 1px solid #d1d5db; border-radius: 8px; background: #eef0f2; }
+.admin-recommendation-form-panel h2 { margin: 0 0 16px; color: #111827; font-size: 14px; font-weight: 800; }
+.admin-recommendation-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+.admin-recommendation-form-grid label { display: grid; gap: 7px; color: #374151; font-size: 13px; font-weight: 700; }
+.admin-recommendation-form-grid input,
+.admin-recommendation-form-grid select { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; color: #111827; font-size: 14px; }
+.admin-recommendation-form-actions { display: flex; justify-content: flex-start; gap: 8px; margin-top: 22px; }
+.admin-recommendation-secondary { height: 38px; padding: 0 18px; border: 1px solid #d1d5db; border-radius: 7px; background: #fff; color: #111827; cursor: pointer; font-weight: 700; }
+@media (max-width: 720px) {
+  .admin-recommendation-screen { padding: 18px 14px 28px; }
+  .admin-recommendation-toolbar { align-items: stretch; flex-direction: column; }
+  .admin-recommendation-filter { grid-template-columns: 1fr; }
+  .admin-recommendation-primary { align-self: flex-start; }
+  .admin-recommendation-form-grid { grid-template-columns: 1fr; }
+}
