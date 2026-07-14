@@ -36,7 +36,9 @@ public class TossPaymentService {
     private static final String PAYMENT_STATUS_FAILED = "FAILED";
     private static final String PAYMENT_STATUS_CANCELED = "CANCELED";
     private static final String TOSS_STATUS_DONE = "DONE";
+    private static final String TOSS_STATUS_CANCELED = "CANCELED";
     private static final String CONFIRM_PATH = "/v1/payments/confirm";
+    private static final String CANCEL_PATH = "/v1/payments/";
 
     private final DummyPaymentMapper dummyPaymentMapper;
     private final PaymentProductMapper paymentProductMapper;
@@ -144,6 +146,20 @@ public class TossPaymentService {
         dummyPaymentMapper.markFailed(payment.getPaymentId());
     }
 
+    public String cancel(
+            String paymentKey,
+            BigDecimal refundAmount,
+            String refundReason,
+            String idempotencyKey
+    ) {
+        requireText(paymentKey, ErrorCode.COMMON_VALIDATION_FAILED, "토스페이먼츠 결제키가 필요합니다.");
+        requireText(refundReason, ErrorCode.COMMON_VALIDATION_FAILED, "환불 사유가 필요합니다.");
+        requireText(idempotencyKey, ErrorCode.COMMON_IDEMPOTENCY_KEY_REQUIRED, "환불 중복 방지 키가 필요합니다.");
+        int amount = refundAmount(refundAmount);
+        TossPaymentCancelResponse response = postCancel(paymentKey, amount, refundReason, idempotencyKey);
+        return cancelTransactionId(response, paymentKey);
+    }
+
     private DummyPayment createPendingOrder(Long userId, PaymentProduct product, String orderNo) {
         DummyPayment payment = new DummyPayment();
         payment.setOrderNo(orderNo);
@@ -204,6 +220,33 @@ public class TossPaymentService {
         }
     }
 
+    private TossPaymentCancelResponse postCancel(String paymentKey, int amount, String refundReason, String idempotencyKey) {
+        requireText(tossPaymentsProperties.getSecretKey(), ErrorCode.COMMON_VALIDATION_FAILED, "TOSS_PAYMENTS_SECRET_KEY 환경변수가 필요합니다.");
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("cancelReason", refundReason);
+        body.put("cancelAmount", amount);
+
+        try {
+            return restClient.post()
+                    .uri(apiUrl(CANCEL_PATH + paymentKey + "/cancel"))
+                    .header(HttpHeaders.AUTHORIZATION, basicAuthorization())
+                    .header("Idempotency-Key", idempotencyKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .body(TossPaymentCancelResponse.class);
+        } catch (RestClientResponseException ex) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_INTERNAL_ERROR,
+                    "토스페이먼츠 결제 취소 요청에 실패했습니다. status=" + ex.getStatusCode().value()
+            );
+        } catch (RestClientException ex) {
+            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "토스페이먼츠 취소 API와 통신하지 못했습니다.");
+        }
+    }
+
     private void validateApprovedResponse(
             TossPaymentApproveResponse response,
             String paymentKey,
@@ -219,6 +262,18 @@ public class TossPaymentService {
         if (!valid) {
             throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "토스페이먼츠 승인 응답이 주문 정보와 일치하지 않습니다.");
         }
+    }
+
+    private String cancelTransactionId(TossPaymentCancelResponse response, String paymentKey) {
+        if (response == null
+                || !paymentKey.equals(response.paymentKey())
+                || !TOSS_STATUS_CANCELED.equals(response.status())) {
+            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "토스페이먼츠 취소 응답이 결제 정보와 일치하지 않습니다.");
+        }
+
+        String transactionId = response.lastTransactionKey();
+        requireText(transactionId, ErrorCode.COMMON_INTERNAL_ERROR, "토스페이먼츠 취소 거래번호를 받지 못했습니다.");
+        return transactionId;
     }
 
     private String basicAuthorization() {
@@ -259,6 +314,13 @@ public class TossPaymentService {
         }
     }
 
+    private int refundAmount(BigDecimal amount) {
+        if (amount == null || amount.signum() <= 0) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "환불 금액이 필요합니다.");
+        }
+        return amount(amount);
+    }
+
     private boolean sameAmount(BigDecimal expected, BigDecimal actual) {
         return expected != null && actual != null && expected.compareTo(actual) == 0;
     }
@@ -297,4 +359,10 @@ public class TossPaymentService {
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
     }
+
+    private record TossPaymentCancelResponse(
+            String paymentKey,
+            String status,
+            String lastTransactionKey
+    ) {}
 }

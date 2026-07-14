@@ -1,6 +1,7 @@
 package com.acorn.elearning.analysis.mapper;
 
 import com.acorn.elearning.analysis.model.AiAnalysisReport;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.apache.ibatis.annotations.Param;
@@ -13,6 +14,10 @@ public interface AiAnalysisReportMapper {
     Optional<AiAnalysisReport> findByExamIdAndUserIdForUpdate(
             @Param("examId") Long examId,
             @Param("userId") Long userId);
+    boolean existsSuccessfulReportCreatedAfter(
+            @Param("userId") Long userId,
+            @Param("paidAt") LocalDateTime paidAt
+    );
     List<AiAnalysisReport> findByUserId(Long userId);
     List<AiAnalysisReport> findAll();
     int insert(AiAnalysisReport model);

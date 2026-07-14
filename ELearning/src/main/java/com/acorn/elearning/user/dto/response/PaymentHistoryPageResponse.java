@@ -60,6 +60,8 @@ public record PaymentHistoryPageResponse(
             String productName,
             String paymentMethod,
             String paymentStatus,
+            String pgProvider,
+            String pgTransactionId,
             BigDecimal amount,
             LocalDateTime paidAt,
             LocalDateTime paymentCreatedAt,
@@ -68,7 +70,17 @@ public record PaymentHistoryPageResponse(
             String grantStatus,
             boolean premiumActive,
             LocalDateTime grantedAt,
-            LocalDateTime expiresAt
+            LocalDateTime expiresAt,
+            Long refundId,
+            String refundStatus,
+            BigDecimal refundAmount,
+            String refundReason,
+            String refundPgProvider,
+            String pgRefundTransactionId,
+            LocalDateTime refundRequestedAt,
+            LocalDateTime refundCompletedAt,
+            LocalDateTime refundFailedAt,
+            String refundFailureCode
     ) {
         private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
 
@@ -81,6 +93,8 @@ public record PaymentHistoryPageResponse(
                     item.getProductName(),
                     item.getPaymentMethod(),
                     item.getPaymentStatus(),
+                    item.getPgProvider(),
+                    item.getPgTransactionId(),
                     item.getAmount(),
                     item.getPaidAt(),
                     item.getPaymentCreatedAt(),
@@ -89,7 +103,17 @@ public record PaymentHistoryPageResponse(
                     item.getGrantStatus(),
                     "ACTIVE".equals(item.getGrantStatus()),
                     item.getGrantedAt(),
-                    item.getExpiresAt()
+                    item.getExpiresAt(),
+                    item.getRefundId(),
+                    item.getRefundStatus(),
+                    item.getRefundAmount(),
+                    item.getRefundReason(),
+                    item.getRefundPgProvider(),
+                    item.getPgRefundTransactionId(),
+                    item.getRefundRequestedAt(),
+                    item.getRefundCompletedAt(),
+                    item.getRefundFailedAt(),
+                    item.getRefundFailureCode()
             );
         }
 
@@ -118,7 +142,7 @@ public record PaymentHistoryPageResponse(
                 return "무통장 입금 더미 승인";
             }
             if ("KAKAO_PAY".equals(paymentMethod)) {
-                return "카카오페이 승인";
+                return "카카오페이";
             }
             return paymentMethodLabel();
         }
@@ -133,12 +157,51 @@ public record PaymentHistoryPageResponse(
             if ("FAILED".equals(paymentStatus)) {
                 return "결제 실패";
             }
+            if ("CANCELED".equals(paymentStatus)) {
+                return "결제 취소";
+            }
+            if ("REFUNDED".equals(paymentStatus)) {
+                return "환불 완료";
+            }
             return hasText(paymentStatus) ? paymentStatus : "-";
+        }
+
+        public String historyStatusLabel() {
+            if (hasRefund()) {
+                return refundStatusLabel();
+            }
+            return paymentStatusLabel();
+        }
+
+        public String historyStatusTone() {
+            if ("COMPLETED".equals(refundStatus) || "REFUNDED".equals(paymentStatus)) {
+                return "refunded";
+            }
+            if ("FAILED".equals(refundStatus)
+                    || "FAILED".equals(paymentStatus)
+                    || "CANCELED".equals(paymentStatus)) {
+                return "danger";
+            }
+            if ("PENDING".equals(refundStatus) || "READY".equals(paymentStatus)) {
+                return "pending";
+            }
+            return "success";
+        }
+
+        public String pgProviderLabel() {
+            return pgProviderLabel(pgProvider);
+        }
+
+        public String pgTransactionIdLabel() {
+            return hasText(pgTransactionId) ? pgTransactionId : "-";
         }
 
         public String premiumStatusLabel() {
             if ("ACTIVE".equals(grantStatus)) {
                 return "Premium 활성";
+            }
+            if ("REVOKED".equals(grantStatus)) {
+                return "Premium 해제";
             }
             if (hasText(grantStatus)) {
                 return grantStatus;
@@ -161,7 +224,7 @@ public record PaymentHistoryPageResponse(
         }
 
         public String paidAtLabel() {
-            return formatDateTime(paidAt);
+            return formatDateTime(paidAt != null ? paidAt : paymentCreatedAt);
         }
 
         public String paymentCreatedAtLabel() {
@@ -173,10 +236,75 @@ public record PaymentHistoryPageResponse(
         }
 
         public String expiresAtLabel() {
+            if ("REVOKED".equals(grantStatus)) {
+                return "권한 해제";
+            }
             if (expiresAt == null && grantId != null) {
                 return "무제한";
             }
             return formatDateTime(expiresAt);
+        }
+
+        public boolean hasRefund() {
+            return refundId != null;
+        }
+
+        public String refundStatusLabel() {
+            if ("PENDING".equals(refundStatus)) {
+                return "환불 처리 중";
+            }
+            if ("COMPLETED".equals(refundStatus)) {
+                return "환불 완료";
+            }
+            if ("FAILED".equals(refundStatus)) {
+                return "환불 실패";
+            }
+            return hasText(refundStatus) ? refundStatus : "-";
+        }
+
+        public String refundAmountLabel() {
+            if (refundAmount == null) {
+                return "-";
+            }
+            return NumberFormat.getNumberInstance(Locale.KOREA).format(refundAmount) + "원";
+        }
+
+        public String refundReasonLabel() {
+            return hasText(refundReason) ? refundReason : "-";
+        }
+
+        public String refundPgProviderLabel() {
+            return pgProviderLabel(refundPgProvider);
+        }
+
+        public String pgRefundTransactionIdLabel() {
+            return hasText(pgRefundTransactionId) ? pgRefundTransactionId : "-";
+        }
+
+        public String refundRequestedAtLabel() {
+            return formatDateTime(refundRequestedAt);
+        }
+
+        public String refundCompletedAtLabel() {
+            return formatDateTime(refundCompletedAt);
+        }
+
+        public String refundFailedAtLabel() {
+            return formatDateTime(refundFailedAt);
+        }
+
+        public String refundFailureCodeLabel() {
+            return hasText(refundFailureCode) ? refundFailureCode : "-";
+        }
+
+        private String pgProviderLabel(String value) {
+            if ("TOSS_PAYMENTS".equals(value)) {
+                return "토스페이먼츠";
+            }
+            if ("KAKAO_PAY".equals(value)) {
+                return "카카오페이";
+            }
+            return hasText(value) ? value : "-";
         }
 
         private String formatDateTime(LocalDateTime value) {

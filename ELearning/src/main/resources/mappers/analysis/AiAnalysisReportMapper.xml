@@ -72,6 +72,16 @@
         FOR UPDATE
     </select>
 
+    <select id="existsSuccessfulReportCreatedAfter" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM ai_analysis_reports
+            WHERE user_id = #{userId}
+              AND status = 'SUCCESS'
+              AND created_at >= #{paidAt}
+        )
+    </select>
+
     <select id="findByUserId" parameterType="long" resultMap="AiAnalysisReportResultMap">
         SELECT
         <include refid="AiAnalysisReportColumns" />

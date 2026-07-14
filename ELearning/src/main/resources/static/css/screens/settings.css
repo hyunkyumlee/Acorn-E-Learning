@@ -591,6 +591,38 @@ textarea.figma-field {
   grid-template-columns: 130px minmax(0, 1fr) auto auto auto;
 }
 
+.figma-payment-history-product {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.figma-payment-history-status {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  border-radius: 999px;
+  background: var(--settings-primary-soft);
+  color: var(--accent) !important;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 6px 8px;
+}
+
+.figma-payment-history-status.is-refunded,
+.figma-payment-history-status.is-danger {
+  border-color: color-mix(in srgb, var(--danger) 36%, var(--line));
+  background: var(--settings-danger-soft);
+  color: var(--danger) !important;
+}
+
+.figma-payment-history-status.is-pending {
+  border-color: color-mix(in srgb, var(--muted) 24%, var(--line));
+  background: color-mix(in srgb, var(--muted) 9%, var(--surface));
+  color: var(--muted) !important;
+}
+
 .figma-payment-history b {
   justify-self: end;
   color: var(--text);
