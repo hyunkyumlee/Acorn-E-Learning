@@ -31,10 +31,6 @@ public class OnboardingController {
     /** 레벨 테스트 없이 시작할 때 부여하는 기본 레벨. */
     private static final String DEFAULT_LEVEL_CODE = "BRONZE";
 
-    /** 세션 미구현 구간에서 사용하는 fallback learner(샘플데이터 userId=2). */
-    private static final SessionUser DEV_FALLBACK_USER =
-            new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
-
     private final LearningService learningService;
     private final LearningProfileWriteMapper profileWriteMapper;
     private final UserLearningProfileMapper userLearningProfileMapper;
@@ -89,7 +85,10 @@ public class OnboardingController {
             return "redirect:/learning/onboarding?step=subject";
         }
         String learningGoal = (String) session.getAttribute(SESSION_GOAL);
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
         // 온보딩에서 고른 과목/목표를 프로필에 확정(BASIC·SCAN 공통).
         userLearningProfileMapper.updateOnboarding(user.userId(), subjectId, learningGoal);
         // 문항이 등록되지 않은 과목은 레벨 테스트로 시작할 수 없어 기초 시작으로 처리한다.

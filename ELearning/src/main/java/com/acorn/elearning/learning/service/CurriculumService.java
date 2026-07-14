@@ -81,6 +81,32 @@ public class CurriculumService {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * 특정 과목의 해금 기록 전체(레벨 코드 + 해금 사유).
+     * 한 화면에서 해금 레벨과 해금 사유를 둘 다 봐야 할 때 조회를 두 번 하지 않으려고 행을 그대로 돌려준다.
+     */
+    public List<UserLevelUnlock> getUnlocks(Long userId, Long subjectId) {
+        return userLevelUnlockMapper.findByUserAndSubject(userId, subjectId);
+    }
+
+    /** 해금 기록에서 레벨 코드만. */
+    public static Set<String> levelCodesOf(List<UserLevelUnlock> unlocks) {
+        return unlocks.stream()
+                .map(UserLevelUnlock::getLevelCode)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * 해금 기록 중 관문(AI 코딩테스트)을 통과해 열린 레벨.
+     * 수강 등록이나 레벨 테스트 배정으로 열린 레벨은 스스로 관문을 넘은 것이 아니므로 제외한다.
+     */
+    public static Set<String> examUnlockedLevelCodesOf(List<UserLevelUnlock> unlocks) {
+        return unlocks.stream()
+                .filter(unlock -> UnlockService.SOURCE_AI_EXAM_PASS.equals(unlock.getUnlockSource()))
+                .map(UserLevelUnlock::getLevelCode)
+                .collect(Collectors.toSet());
+    }
+
     /** 단일 lesson 상세 조회. 없으면 null을 반환한다. */
     public Lesson getLessonDetail(Long lessonId) {
         return lessonMapper.findById(lessonId).orElse(null);

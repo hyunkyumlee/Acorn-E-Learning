@@ -1,5 +1,7 @@
 package com.acorn.elearning.learning.controller;
 
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.common.response.ApiResponse;
 import com.acorn.elearning.learning.dto.request.LevelTestSubmitRequest;
 import com.acorn.elearning.learning.dto.response.CurriculumResponse;
@@ -43,10 +45,6 @@ public class LearningApiController {
     /** 로드맵 fallback 기본 과목(JAVA, subject_id=1). 선택 과목·주 과목이 모두 없을 때만 사용. */
     private static final Long DEFAULT_SUBJECT_ID = 1L;
 
-    /** 로그인/세션 미연결 구간 dev fallback 사용자(샘플 learner). 세션이 붙으면 자연히 미사용. */
-    private static final SessionUser DEV_FALLBACK_USER =
-            new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
-
     private final LearningService learningService;
     private final CurriculumService curriculumService;
     private final LessonService lessonService;
@@ -76,7 +74,9 @@ public class LearningApiController {
 
     @GetMapping("/api/subjects")
     public ApiResponse<SubjectListResponse> subjects(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(name = "activeOnly", defaultValue = "true") boolean activeOnly) {
+        resolve(sessionUser);
         List<Subject> source = activeOnly
                 ? learningService.getActiveSubjects()
                 : learningService.getAllSubjects();
@@ -168,7 +168,9 @@ public class LearningApiController {
 
     @GetMapping("/api/level-tests/questions")
     public ApiResponse<LevelTestQuestionListResponse> levelQuestions(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(name = "subjectId") Long subjectId) {
+        resolve(sessionUser);
         return ApiResponse.success(
                 LevelTestQuestionListResponse.of(levelTestService.getQuestions(subjectId)));
     }
@@ -189,8 +191,16 @@ public class LearningApiController {
         return ApiResponse.success(LevelTestResultResponse.of(result, unlockedLevels));
     }
 
+    /**
+     * 로그인 세션이 없으면 401로 끊는다.
+     * 이 API들은 화면 경로와 달리 로그인 인터셉터가 지키지 않으므로, 여기서 세션을 요구하지 않으면
+     * 로그인하지 않은 요청이 특정 사용자의 학습 데이터를 읽고 그 사용자 이름으로 진행 기록을 남긴다.
+     */
     private SessionUser resolve(SessionUser sessionUser) {
-        return (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            throw new BusinessException(ErrorCode.AUTH_REQUIRED);
+        }
+        return sessionUser;
     }
 
     private SubjectListResponse.Item toSubjectItem(Subject subject) {

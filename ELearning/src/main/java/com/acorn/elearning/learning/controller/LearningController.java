@@ -2,6 +2,7 @@ package com.acorn.elearning.learning.controller;
 
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.Subject;
+import com.acorn.elearning.learning.model.UserLevelUnlock;
 import com.acorn.elearning.learning.service.AttendanceService;
 import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.learning.service.EnrollmentService;
@@ -9,11 +10,14 @@ import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.ProgressService;
 import com.acorn.elearning.learning.support.PlanetCatalog;
 import com.acorn.elearning.learning.support.PlanetCatalog.PlanetView;
+import com.acorn.elearning.learning.view.CelebrationView;
 import com.acorn.elearning.learning.view.LearningDashboardView;
 import com.acorn.elearning.learning.view.RoadmapLevelTab;
 import com.acorn.elearning.learning.view.SubjectCardView;
 import com.acorn.elearning.ranking.service.RankingService;
 import com.acorn.elearning.security.SessionUser;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,19 +38,20 @@ public class LearningController {
     /** 로드맵 레벨 탭 표시 순서(낮은 난이도 → 높은 난이도). 표시 레벨 기본값도 첫 원소. */
     private static final List<String> LEVEL_ORDER = List.of("BRONZE", "SILVER", "GOLD");
 
-    /**
-     * 개발용 fallback 사용자: 로그인/세션은 1번(auth) 담당이라 구현 전까지 세션이 비어 있다.
-     * 세션이 없으면 샘플데이터의 learner(userId=2, 누비학습자)로 대시보드를 확인한다.
-     * 로그인/세션이 붙으면 이 fallback은 자연히 사용되지 않는다.
-     */
-    private static final SessionUser DEV_FALLBACK_USER =
-            new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
-
     ////subjectid session정보저장
     public static final String SESSION_LEARNING_SUBJECT_ID = "LEARNING_SUBJECT_ID";
 
     /** 시작 선택 화면으로 되돌린 적이 있는지. 되돌리기는 세션당 한 번만 해야 로드맵 열람이 막히지 않는다. */
     private static final String SESSION_START_GUIDE_SHOWN = "LEARNING_START_GUIDE_SHOWN";
+
+    /**
+     * 축하 연출의 기준선: 직전에 로드맵을 봤을 때의 상태.
+     * PLANETS = (과목:레벨)별로 그때 완료돼 있던 행성 수, LEVELS = 과목별로 그때 관문을 넘어 열려 있던 레벨.
+     * 지금 상태가 기준선보다 늘었을 때만 축하하고, 기준선을 다시 지금 상태로 덮는다(같은 성취를 두 번 축하하지 않는다).
+     * 처음 보는 (과목:레벨)·과목은 기준선만 세우고 축하하지 않는다 — 안 그러면 로그인할 때마다 지난 성취가 전부 터진다.
+     */
+    private static final String SESSION_CELEBRATED_PLANETS = "LEARNING_CELEBRATED_PLANETS";
+    private static final String SESSION_CELEBRATED_LEVELS = "LEARNING_CELEBRATED_LEVELS";
 
     private final LearningService learningService;
     private final CurriculumService curriculumService;
@@ -77,7 +82,10 @@ public class LearningController {
             ////subjectid session정보저장
             jakarta.servlet.http.HttpSession session,
             Model model) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
 
         // 수강신청 도입 이전부터 학습해 온 사용자가 자기 과목에서 잠기지 않도록 1회 보정한다.
         enrollmentService.ensureBackfill(user.userId());
@@ -147,8 +155,11 @@ public class LearningController {
                 : (dashboard.currentLevelCode() != null ? dashboard.currentLevelCode() : LEVEL_ORDER.get(0));
         model.addAttribute("selectedLevel", selectedLevel);
 
+        // 해금 기록은 한 번만 읽는다 — 레벨 탭(어떤 레벨이 열렸나)과 축하 연출(무엇으로 열렸나)이 같은 기록을 본다.
+        List<UserLevelUnlock> unlocks = curriculumService.getUnlocks(user.userId(), roadmapSubjectId);
+
         // 레벨 탭: 해금된 레벨만 선택 가능, 현재 표시 레벨은 항상 활성으로 둔다.
-        Set<String> unlockedLevels = curriculumService.getUnlockedLevelCodes(user.userId(), roadmapSubjectId);
+        Set<String> unlockedLevels = CurriculumService.levelCodesOf(unlocks);
         List<RoadmapLevelTab> levelTabs = LEVEL_ORDER.stream()
                 .map(code -> new RoadmapLevelTab(
                         code,
@@ -249,8 +260,95 @@ public class LearningController {
                 (Map<String, Object>) rankingService.myRanking(user, null).data().get("mySummary");
         model.addAttribute("myRanking", myRanking);
 
+        // 직전에 본 로드맵보다 성취가 늘었으면 축하 연출을 한 번 띄운다.
+        model.addAttribute("celebration", resolveCelebration(session, roadmapSubjectId, selectedLevel,
+                CurriculumService.examUnlockedLevelCodesOf(unlocks),
+                roadmap, nodePlanets, completedPlanets, planetCount));
+
         model.addAttribute("screen", "learning/main");
         return "learning/main";
+    }
+
+    /**
+     * 직전에 본 로드맵 상태와 지금을 비교해 이번에 새로 생긴 성취를 찾는다. 새로 생긴 게 없으면 null.
+     * 레벨 달성은 관문(AI 코딩테스트)을 넘어 열린 레벨만 축하한다 — 레벨 테스트로 배정된 레벨은
+     * 스스로 넘은 관문이 아니고, 결과 화면이 이미 등급을 알려준다.
+     */
+    @SuppressWarnings("unchecked")
+    private CelebrationView resolveCelebration(jakarta.servlet.http.HttpSession session,
+                                               Long subjectId, String levelCode,
+                                               Set<String> examUnlocked,
+                                               List<CurriculumNode> roadmap,
+                                               Map<Long, PlanetView> nodePlanets,
+                                               int completedPlanets, int planetCount) {
+        // 표시 레벨은 요청 파라미터에서 온다. 아는 레벨일 때만 기준선을 기록해야 임의의 levelCode로
+        // 세션에 키가 무한히 쌓이지 않는다.
+        if (!LEVEL_ORDER.contains(levelCode)) {
+            return null;
+        }
+
+        Map<String, Integer> seenPlanets =
+                (Map<String, Integer>) session.getAttribute(SESSION_CELEBRATED_PLANETS);
+        if (seenPlanets == null) {
+            seenPlanets = new HashMap<>();
+            session.setAttribute(SESSION_CELEBRATED_PLANETS, seenPlanets);
+        }
+        Map<String, Set<String>> seenLevels =
+                (Map<String, Set<String>>) session.getAttribute(SESSION_CELEBRATED_LEVELS);
+        if (seenLevels == null) {
+            seenLevels = new HashMap<>();
+            session.setAttribute(SESSION_CELEBRATED_LEVELS, seenLevels);
+        }
+
+        String subjectKey = String.valueOf(subjectId);
+        Set<String> seenLevelCodes = seenLevels.get(subjectKey);
+
+        String reachedLevel = null;
+        if (seenLevelCodes == null) {
+            // 이 세션에서 이 과목을 처음 본다 → 기준선만 세운다.
+            seenLevels.put(subjectKey, new HashSet<>(examUnlocked));
+        } else {
+            // 한 번에 여러 레벨이 늘어날 일은 없지만, 늘어났다면 가장 높은 레벨 하나만 축하한다.
+            reachedLevel = LEVEL_ORDER.stream()
+                    .filter(examUnlocked::contains)
+                    .filter(code -> !seenLevelCodes.contains(code))
+                    .reduce((lower, higher) -> higher)
+                    .orElse(null);
+            seenLevelCodes.addAll(examUnlocked);
+        }
+
+        String planetKey = subjectKey + ":" + levelCode;
+        Integer seenCount = seenPlanets.get(planetKey);
+        seenPlanets.put(planetKey, completedPlanets);
+
+        // 관문을 넘은 것이 행성 하나를 마친 것보다 큰 성취라 레벨 쪽을 먼저 보여 준다.
+        if (reachedLevel != null) {
+            return new CelebrationView("LEVEL", "레벨 달성", reachedLevel + " 레벨에 올랐어요",
+                    "관문을 통과해 다음 레벨의 행성이 열렸어요.", null, reachedLevel);
+        }
+        if (seenCount == null || completedPlanets <= seenCount) {
+            return null;
+        }
+
+        // 행성은 앞에서부터 연속으로 완료되므로 방금 마친 행성 번호 = 지금의 완료 행성 수.
+        CurriculumNode completed = roadmap.stream()
+                .filter(node -> !"GATE".equals(node.getNodeType()))
+                .filter(node -> node.getPlanetNo() != null && node.getPlanetNo() == completedPlanets)
+                .findFirst()
+                .orElse(null);
+        if (completed == null) {
+            return null;
+        }
+
+        PlanetView planet = nodePlanets.get(completed.getNodeId());
+        String message = (completedPlanets >= planetCount)
+                ? "이 레벨의 행성을 모두 마쳤어요. 이제 관문에 도전할 수 있어요."
+                : "다음 행성으로 가는 길이 열렸어요.";
+        return new CelebrationView("PLANET", "행성 완료",
+                (planet != null) ? planet.name() : completed.getTitle(),
+                message,
+                (planet != null) ? planet.file() : null,
+                completed.getLevelCode());
     }
 
     /** 선택된 로드맵 과목의 코드(로드맵 제목 표시용). 목록에 없으면 '-'. */

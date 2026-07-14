@@ -17,9 +17,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 @Controller
 public class LessonSelectionController {
 
-    private static final SessionUser DEV_FALLBACK_USER =
-            new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
-
     private final CurriculumService curriculumService;
 
     public LessonSelectionController(CurriculumService curriculumService) {
@@ -30,7 +27,10 @@ public class LessonSelectionController {
     public String lessonList(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long nodeId, Model model) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
         CurriculumNode node = curriculumService.getNodeDetail(nodeId);
         model.addAttribute("node", node);
         // 행성 히어로용 표시 메타(이름 · 테마 스토리). GATE/행성 아님 노드는 히어로 미표시.
