@@ -1062,9 +1062,9 @@ INSERT INTO community_posts (
   post_id, writer_id, subject_id, board_type, title, content, view_count, like_count, comment_count, scrap_count, status, created_at, updated_at, deleted_at
 )
 VALUES
-  (1, 2, @java_subject_id, 'QUESTION', '조건문에서 else if를 언제 쓰나요?', '점수 구간별로 다른 메시지를 보여주고 싶습니다.', 28, 1, 2, 1, 'ACTIVE', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP, NULL),
-  (2, 3, @java_subject_id, 'STUDY_LOG', 'Bronze 5개 행성 완료 기록', '오늘 Java Bronze 행성을 모두 완료하고 AI 시험까지 통과했습니다.', 21, 1, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (3, 1, @java_subject_id, 'FREE', '샘플 데이터 안내', '로컬 개발용 샘플 게시글입니다. 관리자 화면 검수에 사용합니다.', 12, 0, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
+  (1, 2, @java_subject_id, 'QUESTION', '조건문에서 else if를 언제 쓰나요?', '점수 구간별로 다른 메시지를 보여주고 싶습니다.', 28, 4, 2, 1, 'ACTIVE', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY), CURRENT_TIMESTAMP, NULL),
+  (2, 3, @java_subject_id, 'STUDY_LOG', 'Bronze 5개 행성 완료 기록', '오늘 Java Bronze 행성을 모두 완료하고 AI 시험까지 통과했습니다.', 21, 3, 1, 1, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (3, 1, @java_subject_id, 'FREE', '샘플 데이터 안내', '로컬 개발용 샘플 게시글입니다. 관리자 화면 검수에 사용합니다.', 12, 3, 0, 0, 'ACTIVE', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 14 DAY), CURRENT_TIMESTAMP, NULL)
 ON DUPLICATE KEY UPDATE
   writer_id = VALUES(writer_id),
   subject_id = VALUES(subject_id),
@@ -1111,14 +1111,23 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO post_likes (like_id, post_id, user_id, created_at)
 VALUES
   (1, 1, 3, CURRENT_TIMESTAMP),
-  (2, 2, 2, CURRENT_TIMESTAMP)
+  (2, 2, 2, CURRENT_TIMESTAMP),
+  (3, 1, 1, CURRENT_TIMESTAMP),
+  (4, 1, 4, CURRENT_TIMESTAMP),
+  (5, 1, 5, CURRENT_TIMESTAMP),
+  (6, 2, 1, CURRENT_TIMESTAMP),
+  (7, 2, 4, CURRENT_TIMESTAMP),
+  (8, 3, 2, CURRENT_TIMESTAMP),
+  (9, 3, 3, CURRENT_TIMESTAMP),
+  (10, 3, 4, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   post_id = VALUES(post_id),
   user_id = VALUES(user_id);
 
 INSERT INTO post_scraps (scrap_id, post_id, user_id, created_at)
 VALUES
-  (1, 1, 2, CURRENT_TIMESTAMP)
+  (1, 1, 2, CURRENT_TIMESTAMP),
+  (2, 2, 5, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   post_id = VALUES(post_id),
   user_id = VALUES(user_id);

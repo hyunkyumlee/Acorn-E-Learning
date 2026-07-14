@@ -7,9 +7,9 @@ import com.acorn.elearning.learning.service.LearningService;
 import com.acorn.elearning.learning.service.LevelTestService;
 import com.acorn.elearning.learning.view.LevelTestQuestionView;
 import com.acorn.elearning.learning.view.LevelTestResultView;
+import com.acorn.elearning.learning.view.OnboardingProfileView;
 import com.acorn.elearning.learning.view.OnboardingResultView;
 import com.acorn.elearning.security.SessionUser;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.stereotype.Controller;
@@ -51,7 +51,7 @@ public class LevelTestController {
     public String questions(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(name = "subjectId", required = false) Long subjectId,
-            HttpSession session, Model model) {
+            Model model) {
         Long targetSubjectId = (subjectId != null) ? subjectId : DEFAULT_SUBJECT_ID;
 
         LevelTestForm form = new LevelTestForm();
@@ -71,7 +71,7 @@ public class LevelTestController {
         model.addAttribute("questions", questions);
         model.addAttribute("subjectId", targetSubjectId);
         model.addAttribute("levelTestForm", form);
-        model.addAttribute("profile", OnboardingController.buildProfile(session, sessionUser, learningService));
+        model.addAttribute("profile", levelTestProfile(sessionUser, targetSubjectId));
         return "learning/onboarding";
     }
 
@@ -81,14 +81,14 @@ public class LevelTestController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @Valid @ModelAttribute("levelTestForm") LevelTestForm form,
             BindingResult bindingResult,
-            HttpSession session, Model model) {
+            Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("step", "test");
             model.addAttribute("questions", levelTestService.getQuestions(form.getSubjectId()));
             model.addAttribute("subjectId", form.getSubjectId());
-            model.addAttribute("profile", OnboardingController.buildProfile(session, sessionUser, learningService));
+            model.addAttribute("profile", levelTestProfile(sessionUser, form.getSubjectId()));
             return "learning/onboarding";
         }
 
@@ -101,15 +101,23 @@ public class LevelTestController {
     public String result(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long attemptId,
-            HttpSession session, Model model) {
+            Model model) {
         SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
 
         LevelTestResultView r = levelTestService.getResult(user, attemptId);
         model.addAttribute("step", "result");
         model.addAttribute("result", new OnboardingResultView(
                 r.resultLevelCode(), r.correctCount(), r.totalCount(), true, startPlanetNo(r.resultLevelCode())));
-        model.addAttribute("profile", OnboardingController.buildProfile(session, sessionUser, learningService));
+        // 결과 화면의 이동 링크는 방금 응시한 과목으로 돌아가야 한다(주 과목이 아닌 과목도 응시할 수 있다).
+        model.addAttribute("subjectId", r.subjectId());
+        model.addAttribute("profile", levelTestProfile(sessionUser, r.subjectId()));
         return "learning/onboarding";
+    }
+
+    /** 화면 요약(과목명·목표). 세션 값이 아니라 응시 대상 과목으로 만든다. */
+    private OnboardingProfileView levelTestProfile(SessionUser sessionUser, Long subjectId) {
+        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        return learningService.getLevelTestProfile(user, subjectId);
     }
 
     private static int startPlanetNo(String levelCode) {

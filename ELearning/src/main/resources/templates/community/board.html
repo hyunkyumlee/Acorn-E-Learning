@@ -38,7 +38,7 @@
                th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='latest')}">전체</a>
             <a th:classappend="${activeBoardType == '' and condition.sort == 'hot'} ? ' is-active'"
                th:attr="aria-current=${activeBoardType == '' and condition.sort == 'hot'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='hot')}">인기글</a>
+               th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='hot',period='week')}">인기글</a>
             <a th:classappend="${activeBoardType == 'FREE'} ? ' is-active'"
                th:attr="aria-current=${activeBoardType == 'FREE'} ? 'page' : null"
                th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE',keyword=${condition.keyword},sort=${condition.sort})}">자유</a>
@@ -62,6 +62,7 @@
             <input type="hidden" name="subjectId" th:value="${condition.subjectId}">
             <input type="hidden" name="boardType" th:value="${condition.boardType}">
             <input type="hidden" name="sort" th:value="${condition.sort}">
+            <input type="hidden" name="period" th:value="${condition.period}">
             <input name="keyword" th:value="${condition.keyword}" placeholder="검색어를 입력하세요" aria-label="게시글 검색">
             <button class="button" type="submit">검색</button>
           </form>
@@ -80,7 +81,10 @@
 
           <ul class="community-post-list community-listing-post-list">
             <li th:each="post : ${view.posts}">
-              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+              <div class="community-post-title-row">
+                <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+                <span class="community-popular-badge" th:if="${post.popular}" th:text="${post.popularLabel}">주간 인기</span>
+              </div>
               <span>
                 작성자: <b th:text="${writerNicknames.get(post.writerId)}">nova_learner</b>
                 · <b th:text="${post.boardType == 'FREE' ? '자유' : (post.boardType == 'QUESTION' ? '질문' : (post.boardType == 'STUDY_LOG' ? '공부 일지' : post.boardType))}">자유</b>

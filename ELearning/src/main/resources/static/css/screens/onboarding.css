@@ -298,6 +298,8 @@
 }
 .onb-footer-inner { max-width: 660px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .onb-footer-hint { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.onb-footer-link { margin-left: auto; font-size: 13px; font-weight: 750; color: var(--muted); }
+.onb-footer-link:hover { color: var(--text); text-decoration: underline; }
 .onb-footer .button[disabled] { opacity: 0.55; cursor: not-allowed; filter: grayscale(0.3); }
 
 /* ===== 이동 오버레이 (학습 메인으로 로딩) — 우주 배경 아님, 로고 + 로딩바만 ==== */
@@ -325,6 +327,7 @@
 .onb-empty-icon svg { width: 26px; height: 26px; }
 .onb-empty-title { margin: 0; font-size: 18px; font-weight: 800; color: var(--text); word-break: keep-all; }
 .onb-empty-desc { margin: 0; max-width: 42ch; font-size: 14px; color: var(--muted); font-weight: 600; line-height: 1.6; word-break: keep-all; }
+.onb-empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }
 
 @media (max-width: 640px) {
   .onboarding-screen { gap: var(--space-5); }

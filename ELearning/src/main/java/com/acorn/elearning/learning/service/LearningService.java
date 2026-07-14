@@ -10,6 +10,7 @@ import com.acorn.elearning.learning.model.AttendanceRecord;
 import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.learning.model.UserLevelUnlock;
 import com.acorn.elearning.learning.view.LearningDashboardView;
+import com.acorn.elearning.learning.view.OnboardingProfileView;
 import com.acorn.elearning.learning.view.SubjectCardView;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.model.UserLearningProfile;
@@ -56,6 +57,20 @@ public class LearningService {
         return subjectMapper.findById(subjectId)
                 .filter(subject -> Boolean.TRUE.equals(subject.getIsActive()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "과목 정보를 찾을 수 없습니다."));
+    }
+
+    /**
+     * 레벨 테스트 화면(문항·결과)에 표시할 요약. 대상 과목과 저장된 학습 목표로 만든다.
+     * 화면에 담긴 값이 아니라 실제 과목을 기준으로 해야 과목 소개 화면에서 바로 들어온 경우에도 과목명이 나온다.
+     */
+    public OnboardingProfileView getLevelTestProfile(SessionUser user, Long subjectId) {
+        String subjectName = subjectMapper.findById(subjectId)
+                .map(Subject::getSubjectName)
+                .orElse(null);
+        String learningGoal = learningProfileReadMapper.findByUserId(user.userId())
+                .map(UserLearningProfile::getLearningGoal)
+                .orElse(null);
+        return new OnboardingProfileView(user.nickname(), subjectId, subjectName, learningGoal);
     }
 
     /**
