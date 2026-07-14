@@ -26,13 +26,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-
 @Controller
 public class ExamController {
     private static final String CREATE_FORM_TYPE = "EXAM_CREATE";
     private static final String ANSWER_FORM_TYPE = "EXAM_ANSWER";
-    private static final List<String> LEVEL_CODES = List.of("BRONZE", "SILVER", "GOLD");
 
     private final AiExamService aiExamService;
     private final IdempotencyTokenService idempotencyTokenService;
@@ -62,24 +59,6 @@ public class ExamController {
         return "exam/coding-test";
     }
 
-    @GetMapping("/exams/coding-test/dev")
-    public String codingTestDev(
-            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
-            @RequestParam(name = "subjectId", required = false) Long subjectId,
-            @RequestParam(name = "levelCode", required = false) String levelCode,
-            HttpSession httpSession,
-            Model model
-    ) {
-        String redirect = learnerRedirect(sessionUser);
-        if (!redirect.isBlank()) { return redirect; }
-        CreateExamForm form = new CreateExamForm();
-        form.setSubjectId(subjectId == null ? defaultSubjectId() : subjectId);
-        form.setLevelCode(defaultLevelCode(levelCode));
-        form.setIdempotencyToken(idempotencyTokenService.issue(CREATE_FORM_TYPE, httpSession, sessionUser.userId()).token());
-        prepareCodingTestModel(sessionUser, model, form, true);
-        return "exam/coding-test";
-    }
-
     @PostMapping("/exams")
     public String create(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
@@ -95,25 +74,7 @@ public class ExamController {
             prepareCodingTestModel(sessionUser, model, form);
             return "exam/coding-test";
         }
-        return createExam(sessionUser, form, httpSession, model, redirectAttributes, false);
-    }
-
-    @PostMapping("/exams/coding-test/dev")
-    public String createDev(
-            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
-            @Valid CreateExamForm form,
-            BindingResult bindingResult,
-            HttpSession httpSession,
-            Model model,
-            RedirectAttributes redirectAttributes
-    ) {
-        String redirect = learnerRedirect(sessionUser);
-        if (!redirect.isBlank()) { return redirect; }
-        if (bindingResult.hasErrors()) {
-            prepareCodingTestModel(sessionUser, model, form, true);
-            return "exam/coding-test";
-        }
-        return createExam(sessionUser, form, httpSession, model, redirectAttributes, true);
+        return createExam(sessionUser, form, httpSession, model, redirectAttributes);
     }
 
     private String createExam(
@@ -121,8 +82,7 @@ public class ExamController {
             CreateExamForm form,
             HttpSession httpSession,
             Model model,
-            RedirectAttributes redirectAttributes,
-            boolean manualSelectionMode
+            RedirectAttributes redirectAttributes
     ) {
         try {
             idempotencyTokenService.requireAndConsume(form.getIdempotencyToken(), "", httpSession);
@@ -131,7 +91,7 @@ public class ExamController {
             return "redirect:/exams/{examId}/problems/1";
         } catch (BusinessException exception) {
             form.setIdempotencyToken(idempotencyTokenService.issue(CREATE_FORM_TYPE, httpSession, sessionUser.userId()).token());
-            prepareCodingTestModel(sessionUser, model, form, manualSelectionMode);
+            prepareCodingTestModel(sessionUser, model, form);
             model.addAttribute("errorMessage", exception.getMessage());
             return "exam/coding-test";
         }
@@ -281,10 +241,6 @@ public class ExamController {
     }
 
     private void prepareCodingTestModel(SessionUser sessionUser, Model model, CreateExamForm form) {
-        prepareCodingTestModel(sessionUser, model, form, false);
-    }
-
-    private void prepareCodingTestModel(SessionUser sessionUser, Model model, CreateExamForm form, boolean manualSelectionMode) {
         boolean hasGateContext = form.getSubjectId() != null && form.getLevelCode() != null && !form.getLevelCode().isBlank();
         model.addAttribute("screen", "exam/coding-test");
         model.addAttribute("form", form);
@@ -293,31 +249,8 @@ public class ExamController {
                                                 ? aiExamService.eligibility(sessionUser, form.getSubjectId(), form.getLevelCode())
                                                 : null);
         model.addAttribute("hasGateContext", hasGateContext);
-        model.addAttribute("manualSelectionMode", manualSelectionMode);
-        model.addAttribute("subjectOptions", activeSubjects());
-        model.addAttribute("levelOptions", LEVEL_CODES);
         model.addAttribute("selectedSubjectName", subjectDisplayName(form.getSubjectId()));
         model.addAttribute("selectedLevelCode", form.getLevelCode());
-    }
-
-    private List<Subject> activeSubjects() {
-        return subjectMapper.findAll().stream()
-                .filter(subject -> !Boolean.FALSE.equals(subject.getIsActive()))
-                .toList();
-    }
-
-    private Long defaultSubjectId() {
-        return activeSubjects().stream()
-                .findFirst()
-                .map(Subject::getSubjectId)
-                .orElse(null);
-    }
-
-    private String defaultLevelCode(String levelCode) {
-        if (levelCode != null && LEVEL_CODES.contains(levelCode)) {
-            return levelCode;
-        }
-        return "BRONZE";
     }
 
     private String subjectDisplayName(Long subjectId) {

@@ -419,7 +419,7 @@ public record MyPageSummaryResponse(
 
         private static String paymentMethodLabel(String paymentMethod) {
             if ("CARD".equals(paymentMethod)) {
-                return "신용카드";
+                return "일반 카드";
             }
             if ("BANK_TRANSFER".equals(paymentMethod)) {
                 return "무통장 입금";
