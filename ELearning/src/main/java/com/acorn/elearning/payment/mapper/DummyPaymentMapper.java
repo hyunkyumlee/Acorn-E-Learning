@@ -11,6 +11,10 @@ public interface DummyPaymentMapper {
     Optional<DummyPayment> findByOrderNo(String orderNo);
     Optional<DummyPayment> findByOrderNoForUpdate(String orderNo);
     Optional<DummyPayment> findByIdAndUserId(@Param("paymentId") Long paymentId, @Param("userId") Long userId);
+    Optional<DummyPayment> findByIdAndUserIdForUpdate(
+            @Param("paymentId") Long paymentId,
+            @Param("userId") Long userId
+    );
     List<DummyPayment> findAll();
     List<DummyPayment> findByUserId(Long userId);
     Optional<DummyPayment> findLatestByUserId(Long userId);

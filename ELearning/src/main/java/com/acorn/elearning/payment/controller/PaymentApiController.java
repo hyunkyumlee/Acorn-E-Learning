@@ -12,9 +12,12 @@ import com.acorn.elearning.payment.dto.response.PremiumAccessResponse;
 import com.acorn.elearning.payment.dto.response.TossPaymentOrderResponse;
 import com.acorn.elearning.payment.service.DummyPaymentService;
 import com.acorn.elearning.payment.service.PaymentAccessService;
+import com.acorn.elearning.payment.service.PaymentRefundService;
 import com.acorn.elearning.payment.service.TossPaymentService;
 import com.acorn.elearning.security.SessionUser;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,15 +30,18 @@ public class PaymentApiController {
     private final PaymentAccessService paymentAccessService;
     private final DummyPaymentService dummyPaymentService;
     private final TossPaymentService tossPaymentService;
+    private final PaymentRefundService paymentRefundService;
 
     public PaymentApiController(
             PaymentAccessService paymentAccessService,
             DummyPaymentService dummyPaymentService,
-            TossPaymentService tossPaymentService
+            TossPaymentService tossPaymentService,
+            PaymentRefundService paymentRefundService
     ) {
         this.paymentAccessService = paymentAccessService;
         this.dummyPaymentService = dummyPaymentService;
         this.tossPaymentService = tossPaymentService;
+        this.paymentRefundService = paymentRefundService;
     }
 
     @GetMapping("/api/payments/products")
@@ -75,6 +81,31 @@ public class PaymentApiController {
             @PathVariable Long paymentId
     ) {
         return ApiResponse.success(dummyPaymentService.detail(requireSessionUser(sessionUser), paymentId));
+    }
+
+    @PostMapping("/api/payments/{paymentId}/refund")
+    public ApiResponse<Map<String, Object>> refund(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long paymentId,
+            HttpSession httpSession
+    ) {
+        SessionUser currentUser = requireSessionUser(sessionUser);
+        paymentRefundService.refund(currentUser, paymentId);
+        httpSession.setAttribute(
+                SessionUser.SESSION_KEY,
+                new SessionUser(
+                        currentUser.userId(),
+                        currentUser.email(),
+                        currentUser.nickname(),
+                        currentUser.role(),
+                        false,
+                        currentUser.profileImageUrl()
+                )
+        );
+        return ApiResponse.success(
+                "결제가 취소되었습니다.",
+                Map.of("paymentId", paymentId, "refundStatus", "COMPLETED")
+        );
     }
 
     private SessionUser requireSessionUser(SessionUser sessionUser) {

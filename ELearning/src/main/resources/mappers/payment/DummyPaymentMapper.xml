@@ -25,6 +25,8 @@
         <result property="productName" column="product_name" />
         <result property="paymentMethod" column="payment_method" />
         <result property="paymentStatus" column="payment_status" />
+        <result property="pgProvider" column="pg_provider" />
+        <result property="pgTransactionId" column="pg_transaction_id" />
         <result property="amount" column="amount" />
         <result property="paidAt" column="paid_at" />
         <result property="paymentCreatedAt" column="payment_created_at" />
@@ -34,6 +36,16 @@
         <result property="grantStatus" column="grant_status" />
         <result property="grantedAt" column="granted_at" />
         <result property="expiresAt" column="expires_at" />
+        <result property="refundId" column="refund_id" />
+        <result property="refundStatus" column="refund_status" />
+        <result property="refundAmount" column="refund_amount" />
+        <result property="refundReason" column="refund_reason" />
+        <result property="refundPgProvider" column="refund_pg_provider" />
+        <result property="pgRefundTransactionId" column="pg_refund_transaction_id" />
+        <result property="refundRequestedAt" column="refund_requested_at" />
+        <result property="refundCompletedAt" column="refund_completed_at" />
+        <result property="refundFailedAt" column="refund_failed_at" />
+        <result property="refundFailureCode" column="refund_failure_code" />
     </resultMap>
 
     <sql id="DummyPaymentColumns">
@@ -81,6 +93,15 @@
           AND user_id = #{userId}
     </select>
 
+    <select id="findByIdAndUserIdForUpdate" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        WHERE payment_id = #{paymentId}
+          AND user_id = #{userId}
+        FOR UPDATE
+    </select>
+
     <select id="findAll" resultMap="DummyPaymentResultMap">
         SELECT
         <include refid="DummyPaymentColumns" />
@@ -115,6 +136,8 @@
             pp.product_name,
             dp.payment_method,
             dp.payment_status,
+            dp.pg_provider,
+            dp.pg_transaction_id,
             dp.amount,
             dp.paid_at,
             dp.created_at AS payment_created_at,
@@ -123,15 +146,28 @@
             pg.grant_type,
             pg.status AS grant_status,
             pg.granted_at,
-            pg.expires_at
+            pg.expires_at,
+            pr.refund_id,
+            pr.refund_status,
+            pr.refund_amount,
+            pr.refund_reason,
+            pr.pg_provider AS refund_pg_provider,
+            pr.pg_refund_transaction_id,
+            pr.requested_at AS refund_requested_at,
+            pr.completed_at AS refund_completed_at,
+            pr.failed_at AS refund_failed_at,
+            pr.failure_code AS refund_failure_code
         FROM dummy_payments dp
         LEFT JOIN payment_products pp ON pp.product_id = dp.product_id
         LEFT JOIN premium_grants pg
                ON pg.payment_id = dp.payment_id
               AND pg.user_id = dp.user_id
+        LEFT JOIN payment_refunds pr
+               ON pr.payment_id = dp.payment_id
+              AND pr.user_id = dp.user_id
         WHERE dp.user_id = #{userId}
-          AND dp.payment_status = 'PAID'
-        ORDER BY dp.paid_at DESC, dp.payment_id DESC
+          AND dp.payment_status IN ('PAID', 'REFUNDED', 'FAILED', 'CANCELED')
+        ORDER BY COALESCE(dp.paid_at, dp.created_at) DESC, dp.payment_id DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
@@ -139,7 +175,7 @@
         SELECT COUNT(*)
         FROM dummy_payments
         WHERE user_id = #{userId}
-          AND payment_status = 'PAID'
+          AND payment_status IN ('PAID', 'REFUNDED', 'FAILED', 'CANCELED')
     </select>
 
     <insert id="insert" parameterType="com.acorn.elearning.payment.model.DummyPayment" useGeneratedKeys="true" keyProperty="paymentId">

@@ -42,11 +42,21 @@ public class DummyPaymentService {
 
     @Transactional
     public PaymentResultResponse pay(SessionUser sessionUser, DummyPaymentForm form) {
-        return pay(requireUserId(sessionUser), form);
+        return pay(requireUserId(sessionUser), form, null, null);
     }
 
     @Transactional
     public PaymentResultResponse pay(Long userId, DummyPaymentForm form) {
+        return pay(userId, form, null, null);
+    }
+
+    @Transactional
+    public PaymentResultResponse pay(
+            Long userId,
+            DummyPaymentForm form,
+            String pgProvider,
+            String pgTransactionId
+    ) {
         requireUserId(userId);
         requireForm(form);
 
@@ -69,6 +79,8 @@ public class DummyPaymentService {
         payment.setUserId(userId);
         payment.setProductId(product.getProductId());
         payment.setPaymentMethod(form.getPaymentMethod());
+        payment.setPgProvider(pgProvider);
+        payment.setPgTransactionId(pgTransactionId);
         payment.setAmount(product.getPrice());
         dummyPaymentMapper.insertPaid(payment);
 
