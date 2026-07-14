@@ -16,7 +16,7 @@
         <h1>설정</h1>
         <nav aria-label="설정 메뉴">
           <a th:href="@{/settings/profile}">회원 정보</a>
-          <a th:href="@{/settings/security}">이메일 / 비밀번호</a>
+          <a th:href="@{/settings/security}">비밀번호 설정</a>
           <a th:href="@{/settings/social}">연동된 소셜 계정</a>
           <a th:href="@{/settings/system}">시스템 설정</a>
           <a class="is-active" th:href="@{/settings/payment}">결제 정보</a>
@@ -50,6 +50,9 @@
                   <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
                   <b th:text="${payment.amountLabel()}">9,900원</b>
                   <button class="figma-button figma-payment-detail-button" type="button" th:attr="data-payment-modal-open=${payment.paymentId()}">결제 상세</button>
+                  <button class="figma-button danger figma-payment-refund-button" type="button"
+                          th:if="${payment.paymentStatus() == 'PAID'}"
+                          th:attr="data-refund-modal-open=${payment.paymentId()}">결제 취소</button>
                 </div>
                 <section class="figma-payment-modal-backdrop" hidden th:attr="data-payment-modal=${payment.paymentId()}">
                   <article class="figma-payment-modal" role="dialog" aria-modal="true" th:attr="aria-labelledby=|payment-detail-title-${payment.paymentId()}|">
@@ -68,7 +71,7 @@
                       </div>
                       <div>
                         <dt>결제수단</dt>
-                        <dd th:text="${payment.paymentMethodDetailLabel()}">신용카드 더미 승인</dd>
+                        <dd th:text="${payment.paymentMethodDetailLabel()}">일반 카드</dd>
                       </div>
                       <div>
                         <dt>결제금액</dt>
@@ -97,6 +100,32 @@
                     </dl>
                   </article>
                 </section>
+                <section class="figma-payment-modal-backdrop" hidden th:if="${payment.paymentStatus() == 'PAID'}"
+                         th:attr="data-refund-modal=${payment.paymentId()}">
+                  <article class="figma-payment-modal figma-payment-refund-modal" role="dialog" aria-modal="true"
+                           th:attr="aria-labelledby=|payment-refund-title-${payment.paymentId()}|">
+                    <header>
+                      <h2 th:id="|payment-refund-title-${payment.paymentId()}|">결제 취소</h2>
+                      <button class="figma-payment-modal-close" type="button" data-refund-modal-close aria-label="닫기">×</button>
+                    </header>
+                    <p class="figma-payment-refund-copy">결제를 취소하면 Premium 권한이 해제됩니다.</p>
+                    <dl class="figma-payment-detail-list">
+                      <div>
+                        <dt>상품명</dt>
+                        <dd th:text="${payment.productNameLabel()}">Premium Lifetime</dd>
+                      </div>
+                      <div>
+                        <dt>결제금액</dt>
+                        <dd th:text="${payment.amountLabel()}">9,900원</dd>
+                      </div>
+                    </dl>
+                    <p class="figma-payment-refund-notice">분석 기능을 사용한 결제는 취소할 수 없습니다.</p>
+                    <div class="figma-payment-refund-actions">
+                      <button class="figma-button" type="button" data-refund-modal-close>돌아가기</button>
+                      <button class="figma-button danger" type="button" disabled aria-disabled="true">환불 요청</button>
+                    </div>
+                  </article>
+                </section>
               </th:block>
             </th:block>
           </section>
@@ -106,9 +135,10 @@
   </main>
   <script>
     (function () {
-      var openButtons = document.querySelectorAll("[data-payment-modal-open]");
-      var modals = document.querySelectorAll("[data-payment-modal]");
-      var closeButtons = document.querySelectorAll("[data-payment-modal-close]");
+      var detailOpenButtons = document.querySelectorAll("[data-payment-modal-open]");
+      var refundOpenButtons = document.querySelectorAll("[data-refund-modal-open]");
+      var modals = document.querySelectorAll("[data-payment-modal], [data-refund-modal]");
+      var closeButtons = document.querySelectorAll("[data-payment-modal-close], [data-refund-modal-close]");
 
       function openModal(paymentId) {
         var modal = document.querySelector("[data-payment-modal='" + paymentId + "']");
@@ -132,15 +162,26 @@
         }
       }
 
-      openButtons.forEach(function (button) {
+      detailOpenButtons.forEach(function (button) {
         button.addEventListener("click", function () {
           openModal(button.getAttribute("data-payment-modal-open"));
         });
       });
 
+      refundOpenButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          var modal = document.querySelector("[data-refund-modal='" + button.getAttribute("data-refund-modal-open") + "']");
+          if (!modal) {
+            return;
+          }
+          modal.hidden = false;
+          document.body.classList.add("modal-open");
+        });
+      });
+
       closeButtons.forEach(function (button) {
         button.addEventListener("click", function () {
-          closeModal(button.closest("[data-payment-modal]"));
+          closeModal(button.closest("[data-payment-modal], [data-refund-modal]"));
         });
       });
 
