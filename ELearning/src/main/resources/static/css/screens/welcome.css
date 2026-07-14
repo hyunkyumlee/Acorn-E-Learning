@@ -278,6 +278,25 @@ body.welcome-bg {
 .tut-media img { width: 100%; height: 100%; object-fit: cover; }
 .tut-media-label { font-size: 15px; font-weight: 800; }
 
+.tut-nuvi {
+  position: absolute;
+  width: clamp(64px, 14vw, 104px);
+  aspect-ratio: 1 / 1;
+  background-image: url("/assets/images/characters/nuvi-poses.png");
+  background-size: 300% 200%;
+  background-repeat: no-repeat;
+  transform: translate(-50%, -50%);
+  transition: left 480ms cubic-bezier(0.2, 0.7, 0.2, 1), top 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  pointer-events: none;
+}
+.tut-nuvi[hidden] { display: none; }
+.tut-nuvi[data-pose="IDLE"]      { background-position: 0% 0%; }
+.tut-nuvi[data-pose="GREETING"]  { background-position: 50% 0%; }
+.tut-nuvi[data-pose="THINKING"]  { background-position: 100% 0%; }
+.tut-nuvi[data-pose="STUDYING"]  { background-position: 0% 100%; }
+.tut-nuvi[data-pose="EXPLORING"] { background-position: 50% 100%; }
+.tut-nuvi[data-pose="RESTING"]   { background-position: 100% 100%; }
+
 .tut-body { display: grid; gap: var(--space-3); min-width: 0; }
 
 .tut-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -312,6 +331,7 @@ body.welcome-bg {
 }
 @media (prefers-reduced-motion: reduce) {
   .tut-view, .tut-slide { animation: none; }
+  .tut-nuvi { transition: none; }
 }
 
 /* ===== [추가] 밤하늘 별(반짝임) + 별똥별 배경 ===== */

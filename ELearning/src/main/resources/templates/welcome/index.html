@@ -71,6 +71,7 @@
                 <div class="tut-media">
                     <img data-tut-img alt="" hidden>
                     <span class="tut-media-label" data-tut-media-label>서비스 이미지</span>
+                    <div class="tut-nuvi" data-tut-nuvi aria-hidden="true" hidden></div>
                 </div>
 
                 <div class="tut-body">
@@ -81,7 +82,9 @@
                     <!-- [수정] 슬라이드 5장 하드코딩 → tutorialSteps 반복 렌더 -->
                     <article class="tut-slide" th:each="s, it : ${tutorialSteps}"
                              th:classappend="${it.first} ? ' is-active' : ''"
-                             th:attr="data-step=${s.step}, data-img=${s.imageUrl}"
+                             th:attr="data-step=${s.step}, data-img=${s.imageUrl},
+                                      data-nuvi-x=${s.nuviXPercent}, data-nuvi-y=${s.nuviYPercent},
+                                      data-nuvi-pose=${s.nuviPose}"
                              th:hidden="${!it.first}">
                         <h2 class="tut-title" th:text="${s.title}">로드맵 기반 학습</h2>
                         <p class="tut-desc" th:text="${s.description}">학습 순서를 따라가며 목표를 하나씩 달성하고 실력을 쌓아보세요</p>

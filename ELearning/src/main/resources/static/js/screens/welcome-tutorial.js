@@ -22,6 +22,7 @@
         var indexLabel = root.querySelector('[data-tut-index]');
         var mediaImg = root.querySelector('[data-tut-img]');
         var mediaLabel = root.querySelector('[data-tut-media-label]');
+        var nuviEl = root.querySelector('[data-tut-nuvi]');
         if (!slides.length || !prevBtn || !nextBtn) return;
 
         var total = slides.length;
@@ -41,6 +42,22 @@
                 mediaImg.hidden = true;
                 if (mediaLabel) mediaLabel.hidden = false;
             }
+        }
+
+        // 단계별 누비 좌표/포즈 갱신 (data-nuvi-x/y/pose 없으면 숨김)
+        function updateNuvi(activeSlide) {
+            if (!nuviEl) return;
+            var x = activeSlide.getAttribute('data-nuvi-x');
+            var y = activeSlide.getAttribute('data-nuvi-y');
+            var pose = activeSlide.getAttribute('data-nuvi-pose');
+            if (!x || !y || !pose) {
+                nuviEl.hidden = true;
+                return;
+            }
+            nuviEl.hidden = false;
+            nuviEl.style.left = x + '%';
+            nuviEl.style.top = y + '%';
+            nuviEl.setAttribute('data-pose', pose);
         }
 
         function render() {
@@ -66,6 +83,7 @@
             if (indexLabel) indexLabel.textContent = String(current);
             if (liveRegion) liveRegion.textContent = current + ' / ' + total + '단계';
             updateMedia(activeSlide);
+            updateNuvi(activeSlide);
         }
 
         function goTo(step) {
