@@ -4,6 +4,8 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>결제 정보 | Knowva</title>
   <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}">
+  <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}">
   <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/settings.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
@@ -47,7 +49,12 @@
               <th:block th:each="payment : ${view.payments()}">
                 <div class="figma-payment-history">
                   <span th:text="${payment.paidAtLabel()}">2026.06.05</span>
-                  <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
+                  <div class="figma-payment-history-product">
+                    <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
+                    <span class="figma-payment-history-status"
+                          th:classappend="${' is-' + payment.historyStatusTone()}"
+                          th:text="${payment.historyStatusLabel()}">결제 완료</span>
+                  </div>
                   <b th:text="${payment.amountLabel()}">9,900원</b>
                   <button class="figma-button figma-payment-detail-button" type="button" th:attr="data-payment-modal-open=${payment.paymentId()}">결제 상세</button>
                   <button class="figma-button danger figma-payment-refund-button" type="button"
@@ -62,7 +69,7 @@
                     </header>
                     <div class="figma-payment-modal-summary">
                       <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
-                      <span th:text="${payment.paymentStatusLabel()}">결제 완료</span>
+                      <span th:text="${payment.historyStatusLabel()}">결제 완료</span>
                     </div>
                     <dl class="figma-payment-detail-list">
                       <div>
@@ -72,6 +79,14 @@
                       <div>
                         <dt>결제수단</dt>
                         <dd th:text="${payment.paymentMethodDetailLabel()}">일반 카드</dd>
+                      </div>
+                      <div>
+                        <dt>PG사</dt>
+                        <dd th:text="${payment.pgProviderLabel()}">토스페이먼츠</dd>
+                      </div>
+                      <div>
+                        <dt>PG 거래 식별번호</dt>
+                        <dd th:text="${payment.pgTransactionIdLabel()}">paymentKey</dd>
                       </div>
                       <div>
                         <dt>결제금액</dt>
@@ -97,6 +112,44 @@
                         <dt>권한 만료</dt>
                         <dd th:text="${payment.expiresAtLabel()}">무제한</dd>
                       </div>
+                      <th:block th:if="${payment.hasRefund()}">
+                        <div>
+                          <dt>환불 상태</dt>
+                          <dd th:text="${payment.refundStatusLabel()}">환불 완료</dd>
+                        </div>
+                        <div>
+                          <dt>환불 금액</dt>
+                          <dd th:text="${payment.refundAmountLabel()}">9,900원</dd>
+                        </div>
+                        <div>
+                          <dt>환불 요청일시</dt>
+                          <dd th:text="${payment.refundRequestedAtLabel()}">2026.07.14 12:00</dd>
+                        </div>
+                        <div th:if="${payment.refundCompletedAt() != null}">
+                          <dt>환불 완료일시</dt>
+                          <dd th:text="${payment.refundCompletedAtLabel()}">2026.07.14 12:01</dd>
+                        </div>
+                        <div th:if="${payment.refundFailedAt() != null}">
+                          <dt>환불 실패일시</dt>
+                          <dd th:text="${payment.refundFailedAtLabel()}">2026.07.14 12:01</dd>
+                        </div>
+                        <div>
+                          <dt>환불 PG사</dt>
+                          <dd th:text="${payment.refundPgProviderLabel()}">토스페이먼츠</dd>
+                        </div>
+                        <div th:if="${payment.pgRefundTransactionId() != null}">
+                          <dt>PG 환불 거래번호</dt>
+                          <dd th:text="${payment.pgRefundTransactionIdLabel()}">transactionKey</dd>
+                        </div>
+                        <div>
+                          <dt>환불 사유</dt>
+                          <dd th:text="${payment.refundReasonLabel()}">사용자 환불 요청</dd>
+                        </div>
+                        <div th:if="${payment.refundStatus() == 'FAILED'}">
+                          <dt>환불 실패 사유</dt>
+                          <dd th:text="${payment.refundFailureCodeLabel()}">PG_CANCEL_FAILED</dd>
+                        </div>
+                      </th:block>
                     </dl>
                   </article>
                 </section>
@@ -122,7 +175,8 @@
                     <p class="figma-payment-refund-notice">분석 기능을 사용한 결제는 취소할 수 없습니다.</p>
                     <div class="figma-payment-refund-actions">
                       <button class="figma-button" type="button" data-refund-modal-close>돌아가기</button>
-                      <button class="figma-button danger" type="button" disabled aria-disabled="true">환불 요청</button>
+                      <button class="figma-button danger" type="button"
+                              th:attr="data-refund-request=${payment.paymentId()}">환불 요청</button>
                     </div>
                   </article>
                 </section>
@@ -137,8 +191,34 @@
     (function () {
       var detailOpenButtons = document.querySelectorAll("[data-payment-modal-open]");
       var refundOpenButtons = document.querySelectorAll("[data-refund-modal-open]");
+      var refundRequestButtons = document.querySelectorAll("[data-refund-request]");
       var modals = document.querySelectorAll("[data-payment-modal], [data-refund-modal]");
       var closeButtons = document.querySelectorAll("[data-payment-modal-close], [data-refund-modal-close]");
+
+      function requestHeaders() {
+        var headers = { "Content-Type": "application/json" };
+        var csrfToken = document.querySelector("meta[name='_csrf']");
+        var csrfHeader = document.querySelector("meta[name='_csrf_header']");
+        if (csrfToken && csrfHeader && csrfToken.content && csrfHeader.content) {
+          headers[csrfHeader.content] = csrfToken.content;
+        }
+        return headers;
+      }
+
+      async function requestRefund(paymentId) {
+        var response = await window.fetch("/api/payments/" + encodeURIComponent(paymentId) + "/refund", {
+          method: "POST",
+          headers: requestHeaders()
+        });
+        var payload = await response.json().catch(function () { return null; });
+        if (!response.ok || !payload || !payload.success) {
+          var message = payload && payload.error && payload.error.detail
+            ? payload.error.detail
+            : (payload && payload.message ? payload.message : "결제 취소에 실패했습니다. 다시 시도해주세요.");
+          throw new Error(message);
+        }
+        return payload;
+      }
 
       function openModal(paymentId) {
         var modal = document.querySelector("[data-payment-modal='" + paymentId + "']");
@@ -176,6 +256,28 @@
           }
           modal.hidden = false;
           document.body.classList.add("modal-open");
+        });
+      });
+
+      refundRequestButtons.forEach(function (button) {
+        button.addEventListener("click", async function () {
+          var paymentId = button.getAttribute("data-refund-request");
+          if (!paymentId || button.disabled) {
+            return;
+          }
+
+          var initialLabel = button.textContent;
+          button.disabled = true;
+          button.textContent = "환불 처리 중...";
+          try {
+            await requestRefund(paymentId);
+            window.alert("결제가 취소되었습니다. Premium 권한이 해제되었습니다.");
+            window.location.reload();
+          } catch (error) {
+            window.alert(error && error.message ? error.message : "결제 취소에 실패했습니다. 다시 시도해주세요.");
+            button.disabled = false;
+            button.textContent = initialLabel;
+          }
         });
       });
 

@@ -29,6 +29,8 @@ public class KakaoPayService {
     private static final String SESSION_KEY = "KAKAO_PAY_READY";
     private static final String READY_PATH = "/online/v1/payment/ready";
     private static final String APPROVE_PATH = "/online/v1/payment/approve";
+    private static final String CANCEL_PATH = "/online/v1/payment/cancel";
+    private static final String PG_PROVIDER = "KAKAO_PAY";
     private static final int QUANTITY = 1;
     private static final int ZERO_AMOUNT = 0;
 
@@ -102,9 +104,40 @@ public class KakaoPayService {
         paymentForm.setMemo("카카오페이 단건 결제 승인");
         paymentForm.setIdempotencyToken(readySession.idempotencyToken());
 
-        PaymentResultResponse result = dummyPaymentService.pay(userId, paymentForm);
+        PaymentResultResponse result = dummyPaymentService.pay(
+                userId,
+                paymentForm,
+                PG_PROVIDER,
+                approveResponse.tid()
+        );
         clear(httpSession);
         return result;
+    }
+
+    public String cancel(String tid, BigDecimal refundAmount) {
+        requireKakaoPaySecret();
+        requireText(tid, ErrorCode.COMMON_VALIDATION_FAILED, "카카오페이 결제 고유번호가 필요합니다.");
+        if (refundAmount == null || refundAmount.signum() <= 0) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "환불 금액이 필요합니다.");
+        }
+
+        int amount = amount(refundAmount);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("cid", kakaoPayProperties.getCid());
+        body.put("tid", tid);
+        body.put("cancel_amount", amount);
+        body.put("cancel_tax_free_amount", ZERO_AMOUNT);
+
+        KakaoPayCancelResponse response = post(CANCEL_PATH, body, KakaoPayCancelResponse.class);
+        boolean valid = response != null
+                && "CANCEL_PAYMENT".equals(response.status());
+        if (!valid) {
+            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "카카오페이 취소 응답이 결제 정보와 일치하지 않습니다.");
+        }
+
+        String refundTransactionId = response.aid();
+        requireText(refundTransactionId, ErrorCode.COMMON_INTERNAL_ERROR, "카카오페이 취소 거래번호를 받지 못했습니다.");
+        return refundTransactionId;
     }
 
     public void clear(HttpSession httpSession) {
@@ -227,4 +260,9 @@ public class KakaoPayService {
             String productCode,
             String idempotencyToken
     ) implements Serializable {}
+
+    private record KakaoPayCancelResponse(
+            String aid,
+            String status
+    ) {}
 }
