@@ -14,13 +14,22 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
+import com.acorn.elearning.learning.mapper.LessonMapper;
+import com.acorn.elearning.learning.model.CurriculumNode;
+import com.acorn.elearning.learning.model.Lesson;
+
 @Controller
 public class ReviewController {
 
-    final WrongAnswerService wrongAnswerService;
+    private final WrongAnswerService wrongAnswerService;
+    private final LessonMapper lessonMapper;
+    private final CurriculumNodeMapper curriculumNodeMapper;
 
-    public ReviewController(WrongAnswerService wrongAnswerService) {
+    public ReviewController(WrongAnswerService wrongAnswerService, LessonMapper lessonMapper, CurriculumNodeMapper curriculumNodeMapper) {
         this.wrongAnswerService = wrongAnswerService;
+        this.lessonMapper = lessonMapper;
+        this.curriculumNodeMapper = curriculumNodeMapper;
     }
 
     // 1. 오답 요약 페이지
@@ -42,20 +51,71 @@ public class ReviewController {
                        @RequestParam(name = "nodeId", required = false) Long nodeId,
                        @RequestParam(name = "lessonId", required = false) Long lessonId,
                        Model model) {
+
         WrongAnswerPageView view = wrongAnswerService.list(sessionUser, nodeId, lessonId);
+
+        Lesson lesson = null;
+        CurriculumNode node = null;
+
+        if (lessonId != null) {
+            lesson = lessonMapper.findById(lessonId).orElse(null);
+
+            if (lesson != null && lesson.getNodeId() != null) {
+                node = curriculumNodeMapper.findById(lesson.getNodeId()).orElse(null);
+            }
+        } else if (nodeId != null) {
+            node = curriculumNodeMapper.findById(nodeId).orElse(null);
+        }
+
         model.addAttribute("view", view);
         model.addAttribute("nodeId", nodeId);
         model.addAttribute("lessonId", lessonId);
+        model.addAttribute("lesson", lesson);
+        model.addAttribute("node", node);
+
         return "learning/review-list";
-}
+    }
 
     @GetMapping("/learning/review/{wrongAnswerId}")
     public String detail(@PathVariable Long wrongAnswerId,
                          @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
                          Model model) {
+
         WrongAnswerDetailView view = wrongAnswerService.detail(sessionUser, wrongAnswerId);
+
+        Long lessonId = null;
+        Long nodeId = null;
+
+        Object lessonIdValue = view.attributes().get("lessonId");
+        if (lessonIdValue instanceof Long longValue) {
+            lessonId = longValue;
+        } else if (lessonIdValue instanceof Number numberValue) {
+            lessonId = numberValue.longValue();
+        }
+
+        Object nodeIdValue = view.attributes().get("nodeId");
+        if (nodeIdValue instanceof Long longValue) {
+            nodeId = longValue;
+        } else if (nodeIdValue instanceof Number numberValue) {
+            nodeId = numberValue.longValue();
+        }
+
+        Lesson lesson = null;
+        CurriculumNode node = null;
+
+        if (lessonId != null) {
+            lesson = lessonMapper.findById(lessonId).orElse(null);
+        }
+
+        if (nodeId != null) {
+            node = curriculumNodeMapper.findById(nodeId).orElse(null);
+        }
+
         model.addAttribute("view", view);
+        model.addAttribute("lesson", lesson);
+        model.addAttribute("node", node);
         model.addAttribute("screen", "learning/review");
+
         return "learning/review";
     }
 
@@ -80,7 +140,7 @@ public class ReviewController {
         boolean correct = wrongAnswerService.retry(sessionUser, form, wrongAnswerId);
         redirectAttributes.addFlashAttribute(
         "retryResultMessage",
-        correct ? "정답입니다." : "오답입니다."
+        correct ? "대단해요! 스스로 부족한 점을 찾아 채워가는 모습이 정말 멋집니다!" : "다시 한번 도전해 볼까요?"
         );
         if (lessonId != null) {
             redirectAttributes.addFlashAttribute("lessonId", lessonId);
