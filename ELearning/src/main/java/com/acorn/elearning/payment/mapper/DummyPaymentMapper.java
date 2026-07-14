@@ -30,5 +30,9 @@ public interface DummyPaymentMapper {
     );
     int markFailed(@Param("paymentId") Long paymentId);
     int markCanceled(@Param("paymentId") Long paymentId);
+    int markRefunded(
+            @Param("paymentId") Long paymentId,
+            @Param("userId") Long userId
+    );
     int update(DummyPayment model);
 }

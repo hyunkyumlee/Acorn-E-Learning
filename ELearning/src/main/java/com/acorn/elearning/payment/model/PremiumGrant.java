@@ -14,6 +14,8 @@ public class PremiumGrant {
     private String status;
     private LocalDateTime grantedAt;
     private LocalDateTime expiresAt;
+    private LocalDateTime revokedAt;
+    private String revokeReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

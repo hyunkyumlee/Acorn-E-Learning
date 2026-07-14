@@ -245,6 +245,16 @@
           AND payment_status = 'PENDING'
     </update>
 
+    <update id="markRefunded">
+        UPDATE dummy_payments
+        SET
+            payment_status = 'REFUNDED',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE payment_id = #{paymentId}
+          AND user_id = #{userId}
+          AND payment_status = 'PAID'
+    </update>
+
     <update id="update" parameterType="com.acorn.elearning.payment.model.DummyPayment">
         UPDATE dummy_payments
         SET
