@@ -77,6 +77,62 @@
     );
   });
 
+  const examStartForm = document.querySelector("[data-exam-start-form]");
+  const resumeDialog = document.querySelector("[data-exam-resume-dialog]");
+
+  if (examStartForm && resumeDialog) {
+    const restartInput = examStartForm.querySelector("[data-exam-restart-input]");
+    const resumeExamId = examStartForm.dataset.resumableExamId;
+    const cancelButton = resumeDialog.querySelector("[data-exam-resume-cancel]");
+    const startNewButton = resumeDialog.querySelector("[data-exam-start-new]");
+
+    const closeResumeDialog = () => {
+      if (typeof resumeDialog.close === "function") {
+        resumeDialog.close();
+        return;
+      }
+      resumeDialog.removeAttribute("open");
+    };
+
+    const openResumeDialog = () => {
+      if (typeof resumeDialog.showModal === "function") {
+        resumeDialog.showModal();
+        return;
+      }
+      resumeDialog.setAttribute("open", "");
+    };
+
+    examStartForm.addEventListener("submit", (event) => {
+      if (!resumeExamId || restartInput?.value === "true") {
+        return;
+      }
+
+      event.preventDefault();
+      openResumeDialog();
+    });
+
+    cancelButton?.addEventListener("click", () => {
+      if (restartInput) {
+        restartInput.value = "false";
+      }
+      closeResumeDialog();
+    });
+
+    resumeDialog.addEventListener("cancel", () => {
+      if (restartInput) {
+        restartInput.value = "false";
+      }
+    });
+
+    startNewButton?.addEventListener("click", () => {
+      if (restartInput) {
+        restartInput.value = "true";
+      }
+      closeResumeDialog();
+      examStartForm.requestSubmit();
+    });
+  }
+
   document.querySelectorAll("form[data-loading-form]").forEach((form) => {
     form.addEventListener("submit", (event) => {
       if (event.defaultPrevented) {

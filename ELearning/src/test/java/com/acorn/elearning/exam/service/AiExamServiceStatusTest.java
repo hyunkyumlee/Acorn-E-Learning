@@ -25,6 +25,7 @@ import com.acorn.elearning.exam.model.ExamLearningScopeItem;
 import com.acorn.elearning.exam.model.ExamSession;
 import com.acorn.elearning.security.SessionUser;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DuplicateKeyException;
@@ -84,6 +85,22 @@ class AiExamServiceStatusTest {
         assertEquals(1, sessionMapper.insertCount);
     }
 
+    @Test
+    void restart_abandons_active_exam_before_generating_a_new_exam() {
+        ExamSession activeSession = readySession();
+        FakeExamSessionMapper sessionMapper = new FakeExamSessionMapper(activeSession);
+        sessionMapper.activeSession = activeSession;
+        AiExamService service = failingGenerationService(sessionMapper);
+
+        assertThrows(
+                BusinessException.class,
+                () -> service.restart(user(), new CreateExamRequest(1L, "BRONZE")));
+
+        assertEquals(ExamSessionStatusPolicy.ABANDONED, activeSession.getStatus());
+        assertEquals(List.of(ExamSessionStatusPolicy.ABANDONED, ExamSessionStatusPolicy.FAILED), sessionMapper.statusUpdates);
+        assertEquals(1, sessionMapper.insertCount);
+    }
+
     private static AiExamService service(
             ExamSessionMapper sessionMapper,
             AiExamProblemMapper problemMapper,
@@ -96,6 +113,29 @@ class AiExamServiceStatusTest {
                 problemMapper,
                 answerMapper,
                 unusedChatGptApiClient(objectMapper),
+                logService,
+                new TestCaseExecutionService(objectMapper),
+                new AiReviewService(unusedChatGptApiClient(objectMapper), logService),
+                new ExamLearningScopeService(new LearnedExamLearningScopeMapper()),
+                objectMapper,
+                new UnlockService(unusedMapper(UserLevelUnlockMapper.class)));
+    }
+
+    private static AiExamService failingGenerationService(ExamSessionMapper sessionMapper) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        AiRequestLogService logService = new AiRequestLogService(new NoOpAiRequestLogMapper(), objectMapper);
+        ChatGptApiClient failedChatGptApiClient = new ChatGptApiClient(
+                "openai", true, "test-key", "https://example.com", "gpt-test", 1, objectMapper) {
+            @Override
+            public ChatGptResponse send(ChatGptRequest request) {
+                throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "문제 생성 실패");
+            }
+        };
+        return new AiExamService(
+                sessionMapper,
+                unusedMapper(AiExamProblemMapper.class),
+                unusedMapper(ExamAnswerMapper.class),
+                failedChatGptApiClient,
                 logService,
                 new TestCaseExecutionService(objectMapper),
                 new AiReviewService(unusedChatGptApiClient(objectMapper), logService),
@@ -245,12 +285,40 @@ class AiExamServiceStatusTest {
         }
     }
 
+    private static class NoOpAiRequestLogMapper implements AiRequestLogMapper {
+        @Override
+        public Optional<com.acorn.elearning.exam.model.AiRequestLog> findById(Long id) {
+            return Optional.empty();
+        }
+
+        @Override
+        public List<com.acorn.elearning.exam.model.AiRequestLog> findByTarget(String targetType, Long targetId) {
+            return List.of();
+        }
+
+        @Override
+        public List<com.acorn.elearning.exam.model.AiRequestLog> findAll() {
+            return List.of();
+        }
+
+        @Override
+        public int insert(com.acorn.elearning.exam.model.AiRequestLog model) {
+            return 1;
+        }
+
+        @Override
+        public int update(com.acorn.elearning.exam.model.AiRequestLog model) {
+            return 1;
+        }
+    }
+
     private static class FakeExamSessionMapper implements ExamSessionMapper {
         private final ExamSession session;
         private ExamSession activeSession;
         private ExamSession duplicateSession;
         private int insertCount;
         private int updateResultCount;
+        private final List<String> statusUpdates = new ArrayList<>();
 
         FakeExamSessionMapper(ExamSession session) {
             this.session = session;
@@ -314,6 +382,7 @@ class AiExamServiceStatusTest {
 
         @Override
         public int updateStatus(ExamSession model) {
+            statusUpdates.add(model.getStatus());
             return 0;
         }
 
