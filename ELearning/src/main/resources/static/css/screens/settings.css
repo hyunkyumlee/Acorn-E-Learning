@@ -588,7 +588,7 @@ textarea.figma-field {
 }
 
 .figma-payment-history {
-  grid-template-columns: 130px minmax(0, 1fr) auto auto;
+  grid-template-columns: 130px minmax(0, 1fr) auto auto auto;
 }
 
 .figma-payment-history b {
@@ -598,6 +598,13 @@ textarea.figma-field {
 }
 
 .figma-payment-detail-button {
+  min-width: 92px;
+  min-height: 38px;
+  justify-self: end;
+  padding: 0 14px;
+}
+
+.figma-payment-refund-button {
   min-width: 92px;
   min-height: 38px;
   justify-self: end;
@@ -713,6 +720,36 @@ textarea.figma-field {
   color: var(--text);
 }
 
+.figma-payment-refund-copy {
+  margin: 0 0 16px;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.figma-payment-refund-notice {
+  margin: 16px 0 0;
+  border: 1px solid color-mix(in srgb, var(--danger) 34%, var(--line));
+  border-radius: var(--radius-sm);
+  background: var(--settings-danger-soft);
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+  padding: 12px 14px;
+}
+
+.figma-payment-refund-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.figma-payment-refund-actions .figma-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 @media (max-width: 1180px) {
   .settings-screen {
     width: min(100% - 28px, 1080px);
@@ -782,6 +819,10 @@ textarea.figma-field {
   }
 
   .figma-payment-detail-button {
+    justify-self: start;
+  }
+
+  .figma-payment-refund-button {
     justify-self: start;
   }
 
