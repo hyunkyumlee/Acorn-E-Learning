@@ -27,7 +27,10 @@
       <section class="panel community-panel" th:if="${view != null}">
         <div class="community-panel-header">
           <div>
-            <span class="community-badge" th:text="${view.post.boardType == 'FREE' ? '자유' : (view.post.boardType == 'QUESTION' ? '질문' : (view.post.boardType == 'STUDY_LOG' ? '공부 일지' : view.post.boardType))}">자유</span>
+            <div class="community-post-label-row">
+              <span class="community-badge" th:text="${view.post.boardType == 'FREE' ? '자유' : (view.post.boardType == 'QUESTION' ? '질문' : (view.post.boardType == 'STUDY_LOG' ? '공부 일지' : view.post.boardType))}">자유</span>
+              <span class="community-popular-badge" th:if="${view.post.popular}" th:text="${view.post.popularLabel}">주간 인기</span>
+            </div>
             <h2 th:text="${view.post.title}">제목</h2>
             <p>작성자: <span th:text="${writerNicknames.get(view.post.writerId)}">nova_learner</span></p>
           </div>

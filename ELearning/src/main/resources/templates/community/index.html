@@ -50,7 +50,10 @@
 
           <ul class="community-post-list">
             <li th:each="post : ${view.posts}">
-              <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+              <div class="community-post-title-row">
+                <a th:href="@{/community/posts/{id}(id=${post.postId})}" th:text="${post.title}">게시글 제목</a>
+                <span class="community-popular-badge" th:if="${post.popular}" th:text="${post.popularLabel}">주간 인기</span>
+              </div>
               <span>
                 <b th:text="${post.boardType == 'FREE' ? '자유' : (post.boardType == 'QUESTION' ? '질문' : (post.boardType == 'STUDY_LOG' ? '공부 일지' : post.boardType))}">자유</b>
                 · 조회수 <b th:text="${post.viewCount}">0</b>
@@ -76,7 +79,7 @@
             <section class="community-hot-period" aria-label="주간 인기 게시글">
               <div class="community-hot-period-heading">
                 <h3>주간</h3>
-                <span>공감순</span>
+                <span>공감 3개 이상 · 상위 5건</span>
               </div>
               <ul class="community-post-list">
                 <li th:each="post : ${weeklyHotView.posts}">
@@ -90,7 +93,7 @@
             <section class="community-hot-period" aria-label="월간 인기 게시글">
               <div class="community-hot-period-heading">
                 <h3>월간</h3>
-                <span>공감순</span>
+                <span>공감 3개 이상 · 상위 5건</span>
               </div>
               <ul class="community-post-list">
                 <li th:each="post : ${monthlyHotView.posts}">

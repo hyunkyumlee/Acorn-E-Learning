@@ -15,6 +15,7 @@ import com.acorn.elearning.community.mapper.PostScrapMapper;
 import com.acorn.elearning.community.model.Comment;
 import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.security.SessionUser;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
     private static final String STATUS_ACTIVE = "ACTIVE";
     private static final String STATUS_DELETED = "DELETED";
+    private static final String WEEKLY_POPULAR_LABEL = "주간 인기";
+    private static final String MONTHLY_POPULAR_LABEL = "월간 인기";
     private static final Set<String> ALLOWED_BOARD_TYPES = Set.of("FREE", "QUESTION", "STUDY_LOG");
 
     private final CommunityPostMapper communityPostMapper;
@@ -57,8 +60,10 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostPageResponse page(PostSearchCondition condition) {
         PostSearchCondition searchCondition = condition == null ? new PostSearchCondition() : condition;
+        List<CommunityPost> posts = communityPostMapper.findPage(searchCondition);
+        applyPopularity(posts);
         return PostPageResponse.of(
-                communityPostMapper.findPage(searchCondition),
+                posts,
                 communityPostMapper.countPage(searchCondition),
                 searchCondition
         );
@@ -69,6 +74,7 @@ public class PostService {
         CommunityPost post = requireActivePost(postId);
         communityPostMapper.incrementViewCount(postId);
         post.setViewCount(safeCount(post.getViewCount()) + 1);
+        applyPopularity(List.of(post));
         Long userId = sessionUser == null ? null : sessionUser.userId();
         boolean liked = userId != null && postLikeMapper.findByPostIdAndUserId(postId, userId).isPresent();
         boolean scraped = userId != null && postScrapMapper.findByPostIdAndUserId(postId, userId).isPresent();
@@ -142,6 +148,23 @@ public class PostService {
     private CommunityPost requireActivePost(Long postId) {
         return communityPostMapper.findActiveById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+    }
+
+    private void applyPopularity(List<CommunityPost> posts) {
+        Set<Long> weeklyPopularPostIds = new HashSet<>(communityPostMapper.findWeeklyPopularPostIds());
+        Set<Long> monthlyPopularPostIds = new HashSet<>(communityPostMapper.findMonthlyPopularPostIds());
+        for (CommunityPost post : posts) {
+            if (weeklyPopularPostIds.contains(post.getPostId())) {
+                post.setPopular(true);
+                post.setPopularLabel(WEEKLY_POPULAR_LABEL);
+            } else if (monthlyPopularPostIds.contains(post.getPostId())) {
+                post.setPopular(true);
+                post.setPopularLabel(MONTHLY_POPULAR_LABEL);
+            } else {
+                post.setPopular(false);
+                post.setPopularLabel(null);
+            }
+        }
     }
 
     private List<Comment> visibleComments(Long postId) {
