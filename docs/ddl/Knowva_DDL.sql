@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.2
+  Source: Notion DB 명세 v2.3
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -80,6 +80,7 @@ DROP TABLE IF EXISTS lessons;
 DROP TABLE IF EXISTS user_learning_profiles;
 DROP TABLE IF EXISTS user_settings;
 DROP TABLE IF EXISTS social_accounts;
+DROP TABLE IF EXISTS password_reset_tokens;
 DROP TABLE IF EXISTS user_credentials;
 DROP TABLE IF EXISTS curriculum_nodes;
 DROP TABLE IF EXISTS subjects;
@@ -149,6 +150,20 @@ CREATE TABLE payment_products (
   PRIMARY KEY (product_id),
   UNIQUE KEY uk_payment_products_code (product_code),
   KEY idx_payment_products_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE password_reset_tokens (
+  token_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id BIGINT UNSIGNED NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  used_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (token_id),
+  UNIQUE KEY uk_password_reset_tokens_hash (token_hash),
+  KEY idx_password_reset_tokens_user (user_id),
+  KEY idx_password_reset_tokens_expires (expires_at),
+  CONSTRAINT fk_password_reset_tokens_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE user_credentials (

@@ -127,11 +127,11 @@
 <body>
   <section class="page">
     <h1>Knowva ERD</h1>
-    <p class="source">Source: Notion DB 명세 v2.2 Mermaid ERD. Premium 환불 이력과 PG 성공 기준 권한 회수 계약을 현재 DDL과 동기화한 HTML 원본.</p>
+    <p class="source">Source: Notion DB 명세 v2.3 Mermaid ERD. 비밀번호 재설정 token hash, 만료, 1회 사용 계약을 현재 DDL과 동기화한 HTML 원본.</p>
     <div class="summary">
-      <div class="summary-card"><strong>Version</strong><span>v2.2</span></div>
-      <div class="summary-card"><strong>Tables</strong><span>45</span></div>
-      <div class="summary-card"><strong>Foreign Keys</strong><span>82</span></div>
+      <div class="summary-card"><strong>Version</strong><span>v2.3</span></div>
+      <div class="summary-card"><strong>Tables</strong><span>46</span></div>
+      <div class="summary-card"><strong>Foreign Keys</strong><span>83</span></div>
       <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
     </div>
     <table class="inventory compact">
@@ -140,6 +140,7 @@
 <tr><td>subjects</td><td>BIGINT subject_id PK</td><td>0</td></tr>
 <tr><td>curriculum_nodes</td><td>BIGINT node_id PK</td><td>2</td></tr>
 <tr><td>payment_products</td><td>BIGINT product_id PK</td><td>0</td></tr>
+<tr><td>password_reset_tokens</td><td>BIGINT token_id PK</td><td>1</td></tr>
 <tr><td>user_credentials</td><td>BIGINT credential_id PK</td><td>1</td></tr>
 <tr><td>social_accounts</td><td>BIGINT social_account_id PK</td><td>1</td></tr>
 <tr><td>user_settings</td><td>BIGINT setting_id PK</td><td>1</td></tr>
@@ -239,6 +240,14 @@
         DATETIME locked_until
         DATETIME created_at
         DATETIME updated_at
+    }
+    password_reset_tokens {
+        BIGINT token_id PK
+        BIGINT user_id FK
+        CHAR token_hash UK
+        DATETIME expires_at
+        DATETIME used_at
+        DATETIME created_at
     }
     social_accounts {
         BIGINT social_account_id PK
@@ -659,6 +668,7 @@
     subjects ||--o{ curriculum_nodes : subject
     curriculum_nodes ||--o{ curriculum_nodes : parent_node
     users ||--o{ user_credentials : user
+    users ||--o{ password_reset_tokens : reset_token
     users ||--o{ social_accounts : user
     users ||--o{ user_settings : user
     users ||--o{ user_learning_profiles : user
@@ -768,6 +778,14 @@
         DATETIME created_at
         DATETIME updated_at
     }
+    password_reset_tokens {
+        BIGINT token_id PK
+        BIGINT user_id FK
+        CHAR token_hash UK
+        DATETIME expires_at
+        DATETIME used_at
+        DATETIME created_at
+    }
     social_accounts {
         BIGINT social_account_id PK
         BIGINT user_id FK
@@ -821,6 +839,7 @@
         DATETIME updated_at
     }
     users ||--o{ user_credentials : user
+    users ||--o{ password_reset_tokens : reset_token
     users ||--o{ social_accounts : user
     users ||--o{ user_settings : user
     users ||--o{ user_learning_profiles : user
@@ -833,6 +852,7 @@
               <table class="inventory fk-table">
                 <thead><tr><th>Child Table</th><th>FK Column</th><th>Parent Table</th><th>Parent PK</th></tr></thead>
                 <tbody><tr><td>user_credentials</td><td>user_id</td><td>users</td><td>user_id</td></tr>
+<tr><td>password_reset_tokens</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>social_accounts</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>user_settings</td><td>user_id</td><td>users</td><td>user_id</td></tr>
 <tr><td>user_learning_profiles</td><td>user_id</td><td>users</td><td>user_id</td></tr>
@@ -872,6 +892,19 @@
 <tr><td>locked_until</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
 <tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
 <tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr></tbody>
+                  </table>
+                </section>
+
+                <section class="table-card">
+                  <h3>password_reset_tokens</h3>
+                  <table class="small-table">
+                    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>NN</th></tr></thead>
+                    <tbody><tr><td>token_id</td><td>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</td><td>PK</td><td>NN</td></tr>
+<tr><td>user_id</td><td>BIGINT UNSIGNED NOT NULL</td><td>FK</td><td>NN</td></tr>
+<tr><td>token_hash</td><td>CHAR(64) NOT NULL</td><td>UK</td><td>NN</td></tr>
+<tr><td>expires_at</td><td>DATETIME NOT NULL</td><td>IDX</td><td>NN</td></tr>
+<tr><td>used_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr></tbody>
                   </table>
                 </section>
 
@@ -2619,6 +2652,15 @@
             
 
   <section class="page">
+    <h2>v2.3 변경 요약</h2>
+    <section class="callout">
+      <h2>비밀번호 재설정 token</h2>
+      <ul>
+        <li><code>password_reset_tokens</code>: 이메일/비밀번호 계정의 재설정 token hash, 만료 시각, 1회 사용 시각을 보관한다.</li>
+        <li><code>token_hash</code>: SHA-256 hash만 unique로 저장한다. raw token은 DB, sample data, application log에 저장하지 않는다.</li>
+        <li><code>expires_at</code>, <code>used_at</code>: 만료되지 않았고 사용되지 않은 token만 비밀번호 변경에 사용할 수 있다.</li>
+      </ul>
+    </section>
     <h2>v2.2 변경 요약</h2>
     <section class="callout">
       <h2>Premium 환불과 권한 회수</h2>
