@@ -127,9 +127,9 @@
 <body>
   <section class="page">
     <h1>Knowva ERD</h1>
-    <p class="source">Source: Notion DB 명세 v2.3 Mermaid ERD. 비밀번호 재설정 token hash, 만료, 1회 사용 계약을 현재 DDL과 동기화한 HTML 원본.</p>
+    <p class="source">Source: Notion DB 명세 v2.4 Mermaid ERD. 관리자 댓글 삭제 주체와 비밀번호 재설정 token hash, 만료, 1회 사용 계약을 현재 DDL과 동기화한 HTML 원본.</p>
     <div class="summary">
-      <div class="summary-card"><strong>Version</strong><span>v2.3</span></div>
+      <div class="summary-card"><strong>Version</strong><span>v2.4</span></div>
       <div class="summary-card"><strong>Tables</strong><span>46</span></div>
       <div class="summary-card"><strong>Foreign Keys</strong><span>83</span></div>
       <div class="summary-card"><strong>DBMS</strong><span>MySQL 8</span></div>
@@ -563,6 +563,7 @@
         DATETIME created_at
         DATETIME updated_at
         DATETIME deleted_at
+        BIGINT deleted_by_admin_id
     }
     post_likes {
         BIGINT like_id PK
@@ -2090,6 +2091,7 @@
         DATETIME created_at
         DATETIME updated_at
         DATETIME deleted_at
+        BIGINT deleted_by_admin_id
     }
     post_likes {
         BIGINT like_id PK
@@ -2227,7 +2229,8 @@
 <tr><td>status</td><td>VARCHAR(30) NOT NULL DEFAULT &#x27;ACTIVE&#x27;</td><td></td><td>NN</td></tr>
 <tr><td>created_at</td><td>DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP</td><td></td><td>NN</td></tr>
 <tr><td>updated_at</td><td>DATETIME NULL DEFAULT NULL</td><td></td><td>NULL</td></tr>
-<tr><td>deleted_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr></tbody>
+<tr><td>deleted_at</td><td>DATETIME NULL</td><td></td><td>NULL</td></tr>
+<tr><td>deleted_by_admin_id</td><td>BIGINT NULL</td><td></td><td>NULL</td></tr></tbody>
                   </table>
                 </section>
                 
@@ -2652,6 +2655,15 @@
             
 
   <section class="page">
+    <h2>v2.4 변경 요약</h2>
+    <section class="callout">
+      <h2>관리자 댓글 삭제 주체</h2>
+      <ul>
+        <li><code>comments.deleted_by_admin_id</code>: 관리자 삭제 처리 시 처리자 ID를 저장한다. 사용자 직접 삭제와 관리자 숨김은 <code>NULL</code>로 유지한다.</li>
+        <li>댓글 상태가 <code>DELETED</code>일 때 이 값이 있으면 “관리자에 의해 삭제된 댓글입니다.”, 없으면 “삭제된 댓글입니다.”로 표시한다.</li>
+        <li>관리자 공개 복구 시 <code>deleted_at</code>과 <code>deleted_by_admin_id</code>를 함께 <code>NULL</code>로 초기화한다.</li>
+      </ul>
+    </section>
     <h2>v2.3 변경 요약</h2>
     <section class="callout">
       <h2>비밀번호 재설정 token</h2>
