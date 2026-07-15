@@ -102,7 +102,9 @@ public class AdminCommunityService {
                         "상태를 변경할 댓글을 찾을 수 없습니다."
                 ));
 
-        int updated = cm.updateCommentStatus(commentId, status);
+        Long adminId = requireAdminId(sessionUser);
+
+        int updated = cm.updateCommentStatus(commentId, status, adminId);
         if (updated == 1) {
             adminLogService.insert(operationLog(
                     sessionUser,
