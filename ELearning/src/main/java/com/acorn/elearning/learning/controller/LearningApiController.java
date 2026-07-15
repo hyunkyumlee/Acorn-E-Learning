@@ -111,7 +111,7 @@ public class LearningApiController {
                         progress.planetCount(), progress.completedPlanets()),
                 new LearningDashboardResponse.ProgressSummary(progress.progressPercent()),
                 new LearningDashboardResponse.Attendance(home.streakCount(), home.attendedToday(), weekly),
-                rankingService.myRanking(user, null).data().get("mySummary"), // rankingSummary: 주간 통합 내 랭킹
+                rankingService.myRanking(user, null,"WEEKLY").data().get("mySummary"), // rankingSummary: 주간 통합 내 랭킹
                 wrongAnswerService.summary(user));      // wrongAnswerSummary: 별도 도메인 read 호출
         return ApiResponse.success(response);
     }

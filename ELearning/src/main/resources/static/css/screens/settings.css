@@ -658,12 +658,14 @@ textarea.figma-field {
 }
 
 .figma-payment-modal {
-  width: min(100%, 560px);
+  width: min(100%, 680px);
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
   border: 1px solid var(--settings-line);
   border-radius: var(--radius-lg);
   background: var(--settings-panel-strong);
   box-shadow: var(--shadow-soft);
-  padding: 24px;
+  padding: 28px;
 }
 
 .figma-payment-modal header {
@@ -697,24 +699,85 @@ textarea.figma-field {
 
 .figma-payment-modal-summary {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
-  border-radius: var(--radius);
+  gap: 20px;
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--settings-line));
+  border-radius: 10px;
   background: var(--settings-soft);
-  padding: 14px 16px;
+  padding: 18px 20px;
 }
 
-.figma-payment-modal-summary strong,
-.figma-payment-modal-summary span {
+.figma-payment-modal-summary-copy,
+.figma-payment-modal-summary-state {
+  display: grid;
+  gap: 8px;
+}
+
+.figma-payment-modal-summary-copy > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.figma-payment-modal-summary-copy strong {
   color: var(--text);
+  font-size: 21px;
   font-weight: 950;
 }
 
-.figma-payment-modal-summary span {
-  color: var(--accent);
+.figma-payment-modal-summary-state {
+  justify-items: end;
+}
+
+.figma-payment-modal-summary-state > strong {
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.figma-payment-modal-status {
+  padding: 7px 10px;
+}
+
+.figma-payment-detail-section {
+  margin-top: 24px;
+}
+
+.figma-payment-detail-section h3 {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.figma-payment-detail-section.is-refund h3 {
+  color: var(--danger);
+}
+
+.figma-payment-detail-list.is-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.figma-payment-detail-list.is-grid div {
+  display: grid;
+  min-height: 74px;
+  grid-template-columns: 1fr;
+  align-content: center;
+  gap: 5px;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  border-radius: 8px;
+  background: var(--settings-soft);
+  padding: 12px 14px;
+}
+
+.figma-payment-detail-list.is-grid div.is-wide {
+  grid-column: 1 / -1;
+}
+
+.figma-payment-detail-list.is-grid div:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
 .figma-payment-detail-list {
@@ -750,6 +813,26 @@ textarea.figma-field {
   min-width: 0;
   overflow-wrap: anywhere;
   color: var(--text);
+}
+
+.figma-payment-detail-list.is-grid dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.figma-payment-detail-list.is-grid dd {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.figma-payment-detail-list.is-grid dd.is-code {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
 }
 
 .figma-payment-refund-copy {
@@ -869,6 +952,14 @@ textarea.figma-field {
 
   .figma-payment-modal-summary {
     display: grid;
+  }
+
+  .figma-payment-detail-list.is-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .figma-payment-detail-list.is-grid div.is-wide {
+    grid-column: auto;
   }
 
   .figma-system-row {
