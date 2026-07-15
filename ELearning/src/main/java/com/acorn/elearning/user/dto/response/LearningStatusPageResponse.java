@@ -59,10 +59,9 @@ public record LearningStatusPageResponse(
                         ).stream())
                         .toList()
                 : subjects.stream()
-                        .map(meta -> LearningStatusItem.from(
+                        .map(meta -> LearningStatusItem.overview(
                                 meta,
-                                progressBySubject.getOrDefault(meta.subjectId(), List.of()),
-                                currentLevelProgress(progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId()))
+                                progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId())
                         ))
                         .toList();
 
@@ -321,6 +320,36 @@ public record LearningStatusPageResponse(
                     currentLevel,
                     statusLabel(locked, currentLevel),
                     continueUrl(subject, levelProgress)
+            );
+        }
+
+        /** 전체 과목 화면에서는 Bronze, Silver, Gold 진행률을 하나의 100%로 합산한다. */
+        public static LearningStatusItem overview(
+                SubjectMeta subject,
+                List<SubjectLevelProgress> levelProgressItems
+        ) {
+            List<SubjectLevelProgress> levels = normalizedLevelProgresses(levelProgressItems);
+            SubjectLevelProgress currentLevel = currentLevelProgress(levels);
+            boolean locked = levels.stream().noneMatch(SubjectLevelProgress::unlocked);
+            int progressRate = (int) Math.round(levels.stream()
+                    .mapToInt(SubjectLevelProgress::progressRate)
+                    .average()
+                    .orElse(0d));
+
+            return new LearningStatusItem(
+                    subject.subjectId(),
+                    subject.code(),
+                    subject.name(),
+                    subject.thumbLabel(),
+                    subject.thumbClass(),
+                    subject.thumbIconPath(),
+                    levelLabel(currentLevel),
+                    progressRate,
+                    progressRate + "%",
+                    locked,
+                    false,
+                    null,
+                    continueUrl(subject, currentLevel)
             );
         }
 
