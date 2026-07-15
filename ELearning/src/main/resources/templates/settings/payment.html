@@ -67,52 +67,80 @@
                       <h2 th:id="|payment-detail-title-${payment.paymentId()}|">결제 상세</h2>
                       <button class="figma-payment-modal-close" type="button" data-payment-modal-close aria-label="닫기">×</button>
                     </header>
-                    <div class="figma-payment-modal-summary">
-                      <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
-                      <span th:text="${payment.historyStatusLabel()}">결제 완료</span>
-                    </div>
-                    <dl class="figma-payment-detail-list">
-                      <div>
-                        <dt>주문번호</dt>
-                        <dd th:text="${payment.orderNo() == null || #strings.isEmpty(payment.orderNo()) ? '-' : payment.orderNo()}">ORDER-001</dd>
+                    <section class="figma-payment-modal-summary">
+                      <div class="figma-payment-modal-summary-copy">
+                        <span>Premium 이용권</span>
+                        <strong th:text="${payment.productNameLabel()}">상세 분석 이용권</strong>
                       </div>
-                      <div>
-                        <dt>결제수단</dt>
-                        <dd th:text="${payment.paymentMethodDetailLabel()}">일반 카드</dd>
+                      <div class="figma-payment-modal-summary-state">
+                        <span class="figma-payment-history-status figma-payment-modal-status"
+                              th:classappend="${' is-' + payment.historyStatusTone()}"
+                              th:text="${payment.historyStatusLabel()}">결제 완료</span>
+                        <strong th:text="${payment.amountLabel()}">9,900원</strong>
                       </div>
-                      <div>
-                        <dt>PG사</dt>
-                        <dd th:text="${payment.pgProviderLabel()}">토스페이먼츠</dd>
-                      </div>
-                      <div>
-                        <dt>PG 거래 식별번호</dt>
-                        <dd th:text="${payment.pgTransactionIdLabel()}">paymentKey</dd>
-                      </div>
-                      <div>
-                        <dt>결제금액</dt>
-                        <dd th:text="${payment.amountLabel()}">9,900원</dd>
-                      </div>
-                      <div>
-                        <dt>결제일시</dt>
-                        <dd th:text="${payment.paidAtLabel()}">2026.06.05 12:00</dd>
-                      </div>
-                      <div>
-                        <dt>요청일시</dt>
-                        <dd th:text="${payment.paymentCreatedAtLabel()}">2026.06.05 12:00</dd>
-                      </div>
-                      <div>
-                        <dt>Premium 권한</dt>
-                        <dd th:text="|${payment.premiumStatusLabel()} · ${payment.grantTypeLabel()}|">Premium 활성 · Lifetime</dd>
-                      </div>
-                      <div>
-                        <dt>권한 시작</dt>
-                        <dd th:text="${payment.grantedAtLabel()}">2026.06.05 12:00</dd>
-                      </div>
-                      <div>
-                        <dt>권한 만료</dt>
-                        <dd th:text="${payment.expiresAtLabel()}">무제한</dd>
-                      </div>
-                      <th:block th:if="${payment.hasRefund()}">
+                    </section>
+
+                    <section class="figma-payment-detail-section">
+                      <h3>결제 정보</h3>
+                      <dl class="figma-payment-detail-list is-grid">
+                        <div>
+                          <dt>결제수단</dt>
+                          <dd th:text="${payment.paymentMethodDetailLabel()}">일반 카드</dd>
+                        </div>
+                        <div>
+                          <dt>PG사</dt>
+                          <dd th:text="${payment.pgProviderLabel()}">토스페이먼츠</dd>
+                        </div>
+                        <div>
+                          <dt>결제금액</dt>
+                          <dd th:text="${payment.amountLabel()}">9,900원</dd>
+                        </div>
+                        <div>
+                          <dt>결제일시</dt>
+                          <dd th:text="${payment.paidAtLabel()}">2026.06.05 12:00</dd>
+                        </div>
+                      </dl>
+                    </section>
+
+                    <section class="figma-payment-detail-section">
+                      <h3>거래 정보</h3>
+                      <dl class="figma-payment-detail-list is-grid">
+                        <div class="is-wide">
+                          <dt>주문번호</dt>
+                          <dd class="is-code" th:text="${payment.orderNo() == null || #strings.isEmpty(payment.orderNo()) ? '-' : payment.orderNo()}">ORDER-001</dd>
+                        </div>
+                        <div class="is-wide">
+                          <dt>PG 거래 식별번호</dt>
+                          <dd class="is-code" th:text="${payment.pgTransactionIdLabel()}">paymentKey</dd>
+                        </div>
+                        <div>
+                          <dt>요청일시</dt>
+                          <dd th:text="${payment.paymentCreatedAtLabel()}">2026.06.05 12:00</dd>
+                        </div>
+                      </dl>
+                    </section>
+
+                    <section class="figma-payment-detail-section">
+                      <h3>Premium 권한</h3>
+                      <dl class="figma-payment-detail-list is-grid">
+                        <div class="is-wide">
+                          <dt>권한 상태</dt>
+                          <dd th:text="|${payment.premiumStatusLabel()} · ${payment.grantTypeLabel()}|">Premium 활성 · Lifetime</dd>
+                        </div>
+                        <div>
+                          <dt>권한 시작</dt>
+                          <dd th:text="${payment.grantedAtLabel()}">2026.06.05 12:00</dd>
+                        </div>
+                        <div>
+                          <dt>권한 만료</dt>
+                          <dd th:text="${payment.expiresAtLabel()}">무제한</dd>
+                        </div>
+                      </dl>
+                    </section>
+
+                    <section class="figma-payment-detail-section is-refund" th:if="${payment.hasRefund()}">
+                      <h3>환불 정보</h3>
+                      <dl class="figma-payment-detail-list is-grid">
                         <div>
                           <dt>환불 상태</dt>
                           <dd th:text="${payment.refundStatusLabel()}">환불 완료</dd>
@@ -137,20 +165,20 @@
                           <dt>환불 PG사</dt>
                           <dd th:text="${payment.refundPgProviderLabel()}">토스페이먼츠</dd>
                         </div>
-                        <div th:if="${payment.pgRefundTransactionId() != null}">
+                        <div class="is-wide" th:if="${payment.pgRefundTransactionId() != null}">
                           <dt>PG 환불 거래번호</dt>
-                          <dd th:text="${payment.pgRefundTransactionIdLabel()}">transactionKey</dd>
+                          <dd class="is-code" th:text="${payment.pgRefundTransactionIdLabel()}">transactionKey</dd>
                         </div>
-                        <div>
+                        <div class="is-wide">
                           <dt>환불 사유</dt>
                           <dd th:text="${payment.refundReasonLabel()}">사용자 환불 요청</dd>
                         </div>
-                        <div th:if="${payment.refundStatus() == 'FAILED'}">
+                        <div class="is-wide" th:if="${payment.refundStatus() == 'FAILED'}">
                           <dt>환불 실패 사유</dt>
                           <dd th:text="${payment.refundFailureCodeLabel()}">PG_CANCEL_FAILED</dd>
                         </div>
-                      </th:block>
-                    </dl>
+                      </dl>
+                    </section>
                   </article>
                 </section>
                 <section class="figma-payment-modal-backdrop" hidden th:if="${payment.paymentStatus() == 'PAID'}"
