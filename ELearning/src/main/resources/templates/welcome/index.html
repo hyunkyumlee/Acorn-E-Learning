@@ -71,7 +71,13 @@
                 <div class="tut-media">
                     <img data-tut-img alt="" hidden>
                     <span class="tut-media-label" data-tut-media-label>서비스 이미지</span>
-                    <div class="tut-nuvi" data-tut-nuvi aria-hidden="true" hidden></div>
+                </div>
+                <!-- [추가] 하이라이트 박스/누비/말풍선은 .tut-media(overflow:hidden) 밖의 별도 레이어에 둬서 잘리지 않게 함 -->
+                <div class="tut-overlay" aria-hidden="true">
+                    <div class="tut-highlight" data-tut-highlight hidden></div>
+                    <div class="tut-nuvi" data-tut-nuvi hidden>
+                        <div class="tut-bubble" data-tut-bubble hidden><p data-tut-bubble-text></p></div>
+                    </div>
                 </div>
 
                 <div class="tut-body">
@@ -84,7 +90,10 @@
                              th:classappend="${it.first} ? ' is-active' : ''"
                              th:attr="data-step=${s.step}, data-img=${s.imageUrl},
                                       data-nuvi-x=${s.nuviXPercent}, data-nuvi-y=${s.nuviYPercent},
-                                      data-nuvi-pose=${s.nuviPose}"
+                                      data-nuvi-pose=${s.nuviPose},
+                                      data-hl-left=${s.highlightLeftPercent}, data-hl-top=${s.highlightTopPercent},
+                                      data-hl-width=${s.highlightWidthPercent}, data-hl-height=${s.highlightHeightPercent},
+                                      data-bubble-text=${s.bubbleText}"
                              th:hidden="${!it.first}">
                         <h2 class="tut-title" th:text="${s.title}">로드맵 기반 학습</h2>
                         <p class="tut-desc" th:text="${s.description}">학습 순서를 따라가며 목표를 하나씩 달성하고 실력을 쌓아보세요</p>

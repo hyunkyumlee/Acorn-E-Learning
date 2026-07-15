@@ -23,6 +23,9 @@
         var mediaImg = root.querySelector('[data-tut-img]');
         var mediaLabel = root.querySelector('[data-tut-media-label]');
         var nuviEl = root.querySelector('[data-tut-nuvi]');
+        var highlightEl = root.querySelector('[data-tut-highlight]');
+        var bubbleEl = root.querySelector('[data-tut-bubble]');
+        var bubbleTextEl = root.querySelector('[data-tut-bubble-text]');
         if (!slides.length || !prevBtn || !nextBtn) return;
 
         var total = slides.length;
@@ -60,6 +63,36 @@
             nuviEl.setAttribute('data-pose', pose);
         }
 
+        // 단계별 포인트 영역 표시 박스 갱신 (data-hl-* 없으면 숨김)
+        function updateHighlight(activeSlide) {
+            if (!highlightEl) return;
+            var left = activeSlide.getAttribute('data-hl-left');
+            var top = activeSlide.getAttribute('data-hl-top');
+            var width = activeSlide.getAttribute('data-hl-width');
+            var height = activeSlide.getAttribute('data-hl-height');
+            if (!left || !top || !width || !height) {
+                highlightEl.hidden = true;
+                return;
+            }
+            highlightEl.hidden = false;
+            highlightEl.style.left = left + '%';
+            highlightEl.style.top = top + '%';
+            highlightEl.style.width = width + '%';
+            highlightEl.style.height = height + '%';
+        }
+
+        // 단계별 누비 말풍선 문구 갱신 (data-bubble-text 없으면 숨김)
+        function updateBubble(activeSlide) {
+            if (!bubbleEl) return;
+            var text = activeSlide.getAttribute('data-bubble-text');
+            if (!text) {
+                bubbleEl.hidden = true;
+                return;
+            }
+            bubbleEl.hidden = false;
+            if (bubbleTextEl) bubbleTextEl.textContent = text;
+        }
+
         function render() {
             var activeSlide = slides[0];
             slides.forEach(function (slide) {
@@ -84,6 +117,8 @@
             if (liveRegion) liveRegion.textContent = current + ' / ' + total + '단계';
             updateMedia(activeSlide);
             updateNuvi(activeSlide);
+            updateHighlight(activeSlide);
+            updateBubble(activeSlide);
         }
 
         function goTo(step) {
