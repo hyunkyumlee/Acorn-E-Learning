@@ -38,8 +38,8 @@
           </span>
           <div class="learning-full-main">
             <strong th:text="${item.subjectName()}">Java</strong>
-            <dl>
-              <dt th:text="${view.levelDetail()} ? '단계' : '현재 레벨'">현재 레벨</dt>
+            <dl th:if="${view.levelDetail()}">
+              <dt>단계</dt>
               <dd th:text="${item.currentLevelLabel()}">BRONZE</dd>
               <span class="learning-level-badge"
                     th:if="${item.currentLevel() and item.locked() == false}"
