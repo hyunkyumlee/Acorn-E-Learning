@@ -249,7 +249,9 @@ body.welcome-bg {
   display: grid;
   gap: var(--space-6);
   width: 100%;
-  max-width: 900px;
+  max-width: 1100px;   /* [수정] 튜토리얼 박스 확대 (900 → 1100). 내부 요소 크기는 그대로 */
+  min-height: min(640px, calc(100vh - 220px));   /* [추가] 세로 확대 */
+  grid-template-rows: 1fr auto auto;             /* [추가] 남는 세로 공간을 스테이지 행에 몰아줌 (footer/skip은 하단 고정) */
   margin: 0 auto;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -261,22 +263,93 @@ body.welcome-bg {
 
 .tut-stage {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  grid-template-columns: min(370px, 40%) minmax(0, 560px);   /* [수정] 이미지 칸 크기 유지 + 텍스트 칸 폭 제한 */
+  justify-content: center;                                    /* [추가] 이미지·제목·내용을 박스 가운데로 모음 */
   align-items: center;
   gap: clamp(20px, 4vw, 40px);
 }
+
+/* [추가] .tut-media와 .tut-overlay를 같은 grid 칸에 겹쳐 배치 (overlay는 잘리지 않는 레이어) */
+.tut-media { grid-column: 1; grid-row: 1; }
+.tut-overlay { grid-column: 1; grid-row: 1; }
+.tut-body { grid-column: 2; grid-row: 1; }
 
 .tut-media {
   position: relative;
   display: grid; place-items: center;
   aspect-ratio: 1 / 1;
-  border-radius: var(--radius);
-  background: var(--surface-soft);
+  background: var(--surface);
   color: var(--muted);
   overflow: hidden;
 }
-.tut-media img { width: 100%; height: 100%; object-fit: cover; }
+.tut-media img { width: 100%; height: 100%; object-fit: contain; }
 .tut-media-label { font-size: 15px; font-weight: 800; }
+
+/* [추가] 하이라이트 박스/누비/말풍선 레이어 — .tut-media와 같은 칸에 겹치지만 overflow 제한 없음 */
+.tut-overlay {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  pointer-events: none;
+}
+
+/* [추가] 캡쳐본 위 포인트 영역 표시 박스 */
+.tut-highlight {
+  position: absolute;
+  border: 2px solid red;
+  background: transparent;
+  transition: left 480ms cubic-bezier(0.2, 0.7, 0.2, 1), top 480ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              width 480ms cubic-bezier(0.2, 0.7, 0.2, 1), height 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tut-highlight[hidden] { display: none; }
+
+.tut-nuvi {
+  position: absolute;
+  width: clamp(64px, 14vw, 104px);
+  aspect-ratio: 1 / 1;
+  background-image: url("/assets/images/characters/nuvi-poses.png");
+  background-size: 500% 100%;
+  background-repeat: no-repeat;
+  transform: translate(-50%, -50%);
+  transition: left 480ms cubic-bezier(0.2, 0.7, 0.2, 1), top 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tut-nuvi[hidden] { display: none; }
+.tut-nuvi[data-pose="WAVING"]    { background-position: 0% 0%; }
+.tut-nuvi[data-pose="READING"]   { background-position: 25% 0%; }
+.tut-nuvi[data-pose="TELESCOPE"] { background-position: 50% 0%; }
+.tut-nuvi[data-pose="IDEA"]      { background-position: 75% 0%; }
+.tut-nuvi[data-pose="PAINTING"]  { background-position: 100% 0%; }
+
+/* [추가] 누비 오른쪽 위 말풍선 — 누비 기준 상대 위치라 누비가 움직이면 같이 따라감 */
+.tut-bubble {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  transform: translate(8px, -100%);
+  width: max-content;
+  max-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-elevated);
+  padding: 10px 14px;
+}
+.tut-bubble[hidden] { display: none; }
+.tut-bubble p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text);
+  word-break: keep-all;
+}
+.tut-bubble::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  bottom: -8px;
+  border: 8px solid transparent;
+  border-top-color: var(--surface);
+}
 
 .tut-body { display: grid; gap: var(--space-3); min-width: 0; }
 
@@ -306,12 +379,14 @@ body.welcome-bg {
 
 @media (max-width: 720px) {
   .tut-stage { grid-template-columns: 1fr; }
-  .tut-media { aspect-ratio: 16 / 10; }
+  .tut-media, .tut-overlay { grid-column: 1; grid-row: 1; aspect-ratio: 16 / 10; }
+  .tut-body { grid-column: 1; grid-row: 2; }   /* [추가] 1열이 되면 본문은 이미지 아래(2행)로 */
   .tut-footer { flex-wrap: wrap; justify-content: center; }
   .tut-dots { order: 3; width: 100%; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) {
   .tut-view, .tut-slide { animation: none; }
+  .tut-nuvi, .tut-highlight { transition: none; }
 }
 
 /* ===== [추가] 밤하늘 별(반짝임) + 별똥별 배경 ===== */

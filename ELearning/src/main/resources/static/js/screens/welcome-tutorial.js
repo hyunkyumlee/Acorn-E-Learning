@@ -22,6 +22,10 @@
         var indexLabel = root.querySelector('[data-tut-index]');
         var mediaImg = root.querySelector('[data-tut-img]');
         var mediaLabel = root.querySelector('[data-tut-media-label]');
+        var nuviEl = root.querySelector('[data-tut-nuvi]');
+        var highlightEl = root.querySelector('[data-tut-highlight]');
+        var bubbleEl = root.querySelector('[data-tut-bubble]');
+        var bubbleTextEl = root.querySelector('[data-tut-bubble-text]');
         if (!slides.length || !prevBtn || !nextBtn) return;
 
         var total = slides.length;
@@ -41,6 +45,52 @@
                 mediaImg.hidden = true;
                 if (mediaLabel) mediaLabel.hidden = false;
             }
+        }
+
+        // 단계별 누비 좌표/포즈 갱신 (data-nuvi-x/y/pose 없으면 숨김)
+        function updateNuvi(activeSlide) {
+            if (!nuviEl) return;
+            var x = activeSlide.getAttribute('data-nuvi-x');
+            var y = activeSlide.getAttribute('data-nuvi-y');
+            var pose = activeSlide.getAttribute('data-nuvi-pose');
+            if (!x || !y || !pose) {
+                nuviEl.hidden = true;
+                return;
+            }
+            nuviEl.hidden = false;
+            nuviEl.style.left = x + '%';
+            nuviEl.style.top = y + '%';
+            nuviEl.setAttribute('data-pose', pose);
+        }
+
+        // 단계별 포인트 영역 표시 박스 갱신 (data-hl-* 없으면 숨김)
+        function updateHighlight(activeSlide) {
+            if (!highlightEl) return;
+            var left = activeSlide.getAttribute('data-hl-left');
+            var top = activeSlide.getAttribute('data-hl-top');
+            var width = activeSlide.getAttribute('data-hl-width');
+            var height = activeSlide.getAttribute('data-hl-height');
+            if (!left || !top || !width || !height) {
+                highlightEl.hidden = true;
+                return;
+            }
+            highlightEl.hidden = false;
+            highlightEl.style.left = left + '%';
+            highlightEl.style.top = top + '%';
+            highlightEl.style.width = width + '%';
+            highlightEl.style.height = height + '%';
+        }
+
+        // 단계별 누비 말풍선 문구 갱신 (data-bubble-text 없으면 숨김)
+        function updateBubble(activeSlide) {
+            if (!bubbleEl) return;
+            var text = activeSlide.getAttribute('data-bubble-text');
+            if (!text) {
+                bubbleEl.hidden = true;
+                return;
+            }
+            bubbleEl.hidden = false;
+            if (bubbleTextEl) bubbleTextEl.textContent = text;
         }
 
         function render() {
@@ -66,6 +116,9 @@
             if (indexLabel) indexLabel.textContent = String(current);
             if (liveRegion) liveRegion.textContent = current + ' / ' + total + '단계';
             updateMedia(activeSlide);
+            updateNuvi(activeSlide);
+            updateHighlight(activeSlide);
+            updateBubble(activeSlide);
         }
 
         function goTo(step) {
