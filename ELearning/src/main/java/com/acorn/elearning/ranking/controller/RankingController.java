@@ -34,13 +34,14 @@ public class RankingController {
     public String index(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(name = "subjectId", required = false) Long subjectId,
+            @RequestParam(name = "periodType", defaultValue = "WEEKLY") String periodType,
             Model model
     ) {
         if (sessionUser == null) {
             return "redirect:/login";
         }
 
-        RankingPageView view = rankingService.index(sessionUser, subjectId);
+        RankingPageView view = rankingService.index(sessionUser, subjectId, periodType);
         model.addAttribute("view", view);
         model.addAttribute("screen", "ranking/index");
         return "ranking/index";

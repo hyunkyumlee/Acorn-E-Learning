@@ -26,26 +26,28 @@ public class RankingApiController {
     @GetMapping("/api/rankings")
     public ApiResponse<Map<String, Object>> rankings(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
-            @RequestParam(name = "subjectId", required = false) Long subjectId
+            @RequestParam(name = "subjectId", required = false) Long subjectId,
+            @RequestParam(name = "periodType", defaultValue = "WEEKLY") String periodType
     ) {
         if (sessionUser == null) {
             throw new BusinessException(ErrorCode.AUTH_REQUIRED);
         }
 
-        RankingPageResponse response = rankingService.rankings(sessionUser, subjectId);
+        RankingPageResponse response = rankingService.rankings(sessionUser, subjectId, periodType);
         return ApiResponse.success(response.data());
     }
 
     @GetMapping("/api/rankings/me")
     public ApiResponse<Map<String, Object>> myRanking(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
-            @RequestParam(name = "subjectId", required = false) Long subjectId
+            @RequestParam(name = "subjectId", required = false) Long subjectId,
+            @RequestParam(name = "periodType", defaultValue = "WEEKLY") String periodType
     ) {
         if (sessionUser == null) {
             throw new BusinessException(ErrorCode.AUTH_REQUIRED);
         }
 
-        MyRankingResponse response = rankingService.myRanking(sessionUser, subjectId);
+        MyRankingResponse response = rankingService.myRanking(sessionUser, subjectId, periodType);
         return ApiResponse.success(response.data());
     }
 }

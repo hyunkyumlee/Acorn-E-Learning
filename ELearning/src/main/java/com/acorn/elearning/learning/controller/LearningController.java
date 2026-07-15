@@ -255,9 +255,9 @@ public class LearningController {
                                     || Boolean.TRUE.equals(pr.getPracticePassed())));
         model.addAttribute("currentPlanetStarted", currentPlanetStarted);
 
-        // 내 랭킹(주간 통합 기준) = ranking 도메인 read. 출석/streak 점수는 랭킹에서 제외됨.
+        // 내 랭킹(주간 통합 기준) = ranking 도메인 read. 출석/streak 점수는 랭킹에서 제외됨. //
         Map<String, Object> myRanking =
-                (Map<String, Object>) rankingService.myRanking(user, null).data().get("mySummary");
+                (Map<String, Object>) rankingService.myRanking(user, null, "WEEKLY").data().get("mySummary");
         model.addAttribute("myRanking", myRanking);
 
         // 직전에 본 로드맵보다 성취가 늘었으면 축하 연출을 한 번 띄운다.
