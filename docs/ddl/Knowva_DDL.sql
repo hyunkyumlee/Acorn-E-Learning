@@ -1,6 +1,6 @@
 /*
   Knowva DDL - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.3
+  Source: Notion DB 명세 v2.4 / 관리자 댓글 삭제 주체
 
   MySQL Workbench connection 설정
   1. MySQL Connections 화면에서 + 버튼 클릭
@@ -746,6 +746,7 @@ CREATE TABLE comments (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NULL DEFAULT NULL,
   deleted_at DATETIME NULL,
+  deleted_by_admin_id BIGINT NULL COMMENT '관리자 삭제 처리자 ID',
   PRIMARY KEY (comment_id),
   KEY idx_comments_post (post_id),
   KEY idx_comments_parent (parent_comment_id),

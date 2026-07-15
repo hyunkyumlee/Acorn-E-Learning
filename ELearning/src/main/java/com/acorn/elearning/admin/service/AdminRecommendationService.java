@@ -95,7 +95,7 @@ public class AdminRecommendationService {
 
         String contentType = statusChanged ? "RECOMMENDATION_STATUS_UPDATE" : "RECOMMENDATION_UPDATE";
         String changeDetail = statusChanged
-                ? (Boolean.TRUE.equals(form.getIsActive()) ? "콘텐츠를 활성화" : "콘텐츠를 비활성화:")
+                ? (Boolean.TRUE.equals(form.getIsActive()) ? "콘텐츠를 활성화" : "콘텐츠를 비활성화")
                 : "콘텐츠를 수정";
 
         if(updated == 1){

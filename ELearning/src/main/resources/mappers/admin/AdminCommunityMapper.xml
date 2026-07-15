@@ -233,6 +233,11 @@
                 WHEN #{status} = 'ACTIVE' THEN NULL
                 ELSE deleted_at
             END,
+            deleted_by_admin_id = CASE
+                WHEN #{status} = 'DELETED' THEN #{adminId}
+                WHEN #{status} = 'ACTIVE' THEN NULL
+                ELSE deleted_by_admin_id
+            END,
             updated_at = NOW()
         WHERE comment_id = #{commentId}
     </update>

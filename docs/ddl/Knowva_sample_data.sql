@@ -1,6 +1,6 @@
 /*
   Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.3 / 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정
+  Source: Notion DB 명세 v2.4 / 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정 / 관리자 댓글 삭제 주체
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Execution contract
@@ -57,7 +57,8 @@ BEGIN
       ('user_subject_enrollments', 'status'),
       ('user_subject_enrollments', 'start_mode'),
       ('admin_operation_logs', 'target_name'),
-      ('admin_operation_logs', 'change_detail')
+      ('admin_operation_logs', 'change_detail'),
+      ('comments', 'deleted_by_admin_id')
     );
 
   SELECT COUNT(*)
@@ -75,7 +76,7 @@ BEGIN
     AND table_name = 'ai_analysis_reports'
     AND index_name = 'idx_ai_analysis_reports_refund_eligibility';
 
-  IF required_column_count <> 19
+  IF required_column_count <> 20
       OR pending_status_default_count <> 1
       OR refund_eligibility_index_count <> 2 THEN
     SIGNAL SQLSTATE '45000'
@@ -1093,12 +1094,13 @@ ON DUPLICATE KEY UPDATE
   file_size = VALUES(file_size);
 
 INSERT INTO comments (
-  comment_id, post_id, parent_comment_id, writer_id, content, status, created_at, updated_at, deleted_at
+  comment_id, post_id, parent_comment_id, writer_id, content, status, created_at, updated_at, deleted_at, deleted_by_admin_id
 )
 VALUES
-  (1, 1, NULL, 3, '조건이 여러 구간으로 나뉘면 else if를 쓰면 됩니다.', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (2, 1, 1, 2, '예시 감사합니다. 점수 구간으로 적용해보겠습니다.', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-  (3, 2, NULL, 2, '축하합니다. 저도 Bronze부터 따라가겠습니다.', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
+  (1, 1, NULL, 3, '조건이 여러 구간으로 나뉘면 else if를 쓰면 됩니다.', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, NULL),
+  (2, 1, 1, 2, '예시 감사합니다. 점수 구간으로 적용해보겠습니다.', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, NULL),
+  (3, 2, NULL, 2, '축하합니다. 저도 Bronze부터 따라가겠습니다.', 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, NULL),
+  (4, 3, NULL, 3, '운영 정책 검수용 관리자 삭제 댓글입니다.', 'DELETED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1)
 ON DUPLICATE KEY UPDATE
   post_id = VALUES(post_id),
   parent_comment_id = VALUES(parent_comment_id),
@@ -1106,7 +1108,8 @@ ON DUPLICATE KEY UPDATE
   content = VALUES(content),
   status = VALUES(status),
   updated_at = CURRENT_TIMESTAMP,
-  deleted_at = VALUES(deleted_at);
+  deleted_at = VALUES(deleted_at),
+  deleted_by_admin_id = VALUES(deleted_by_admin_id);
 
 INSERT INTO post_likes (like_id, post_id, user_id, created_at)
 VALUES

@@ -25,10 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PostService {
     private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final String STATUS_HIDDEN = "HIDDEN";
     private static final String STATUS_DELETED = "DELETED";
     private static final String WEEKLY_POPULAR_LABEL = "주간 인기";
     private static final String MONTHLY_POPULAR_LABEL = "월간 인기";
     private static final Set<String> ALLOWED_BOARD_TYPES = Set.of("FREE", "QUESTION", "STUDY_LOG");
+
+
 
     private final CommunityPostMapper communityPostMapper;
     private final PostAttachmentMapper postAttachmentMapper;
@@ -71,7 +74,7 @@ public class PostService {
 
     @Transactional
     public PostDetailResponse detail(SessionUser sessionUser, Long postId) {
-        CommunityPost post = requireActivePost(postId);
+        CommunityPost post = requireViewablePost(postId);
         communityPostMapper.incrementViewCount(postId);
         post.setViewCount(safeCount(post.getViewCount()) + 1);
         applyPopularity(List.of(post));
@@ -139,7 +142,9 @@ public class PostService {
         Long userId = requireUserId(sessionUser);
         return new CommunityProfileResponse(
                 communityPostMapper.findByWriterId(userId),
-                commentMapper.findByWriterId(userId),
+                commentMapper.findByWriterId(userId).stream()
+                        .map(this::maskIfDeleted)
+                        .toList(),
                 postLikeMapper.findPostsByUserId(userId),
                 postScrapMapper.findPostsByUserId(userId)
         );
@@ -148,6 +153,25 @@ public class PostService {
     private CommunityPost requireActivePost(Long postId) {
         return communityPostMapper.findActiveById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+    }
+
+    private CommunityPost requireViewablePost(Long postId){
+        CommunityPost post = communityPostMapper.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+
+        if(STATUS_HIDDEN.equals(post.getStatus())){
+            throw new BusinessException(
+                    ErrorCode.COMMON_NOT_FOUND, "관리자에 의해 숨겨진 게시글입니다."
+            );
+        }
+        
+        if(STATUS_DELETED.equals(post.getStatus()) || post.getDeletedAt() != null){
+            throw new BusinessException(
+                    ErrorCode.COMMON_NOT_FOUND, "관리자에 의해 삭제된 게시글입니다."
+            );
+        }
+
+        return post;
     }
 
     private void applyPopularity(List<CommunityPost> posts) {
@@ -174,8 +198,15 @@ public class PostService {
     }
 
     private Comment maskIfDeleted(Comment comment) {
-        if (STATUS_DELETED.equals(comment.getStatus())) {
-            comment.setContent("삭제된 댓글입니다.");
+        if(STATUS_DELETED.equals(comment.getStatus())) {
+            if (comment.getDeletedByAdminId() != null) {
+                comment.setContent("관리자에 의해 삭제된 댓글입니다.");
+            } else {
+                comment.setContent("삭제된 댓글입니다.");
+            }
+        }
+        if(STATUS_HIDDEN.equals(comment.getStatus())){
+            comment.setContent("관리자에 의해 숨김 처리된 댓글입니다.");
         }
         return comment;
     }
