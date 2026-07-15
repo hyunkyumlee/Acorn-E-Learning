@@ -104,10 +104,11 @@
 
       <div th:if="${subjectId != null and nodeId != null and lessonId != null}" class="practice-intro-layout">
         <div class="practice-intro-copy">
-          <p>문제풀이를 시작해보세요.</p>
+          <div class="practice-intro-heading">
+            <h2>"지금 바로 문제 풀이에 도전해 보세요! <br> 10문제 중 7문제를 통과해 다음 레슨으로 넘어가 볼까요?"</h2>
+          </div>
 
           <ul class="practice-intro-guide">
-            <li>"당신의 실력을 보여주세요! 10문제 중 7문제를 맞히면 다음 레슨으로 넘어갈 수 있어요."</li>
             <li>이미 푼 문제들은 '이전/다음' 버튼으로 언제든 다시 살펴볼 수 있어요.</li>
             <li>모르는 문제는 잠시 건너뛰어도 괜찮아요! </li>
             <li>제출 버튼을 누르기 전이라면 언제든지 다시 돌아가 정답을 작성할 수 있습니다. 화이팅!</li>
@@ -127,7 +128,7 @@
 
         <div class="practice-intro-visual">
           <!-- 여기에 이미지 넣기 -->
-          <img th:src="@{/assets/images/learning/practice-intro.png}" alt="문제풀이 안내 이미지">
+          <img th:src="@{/assets/images/characters/practice-intro.png}" alt="문제풀이 안내 이미지">
         </div>
       </div>
     </div>

@@ -42,18 +42,39 @@
     <div class="ranking-overview-grid">
       <article class="ranking-card ranking-card--summary">
         <h2 class="ranking-card__title">내정보</h2>
-        <p th:text="|현재순위 : ${view.attributes()['mySummary']['rankNo']}위|"></p>
-        <p th:text="|현재 점수 : ${view.attributes()['mySummary']['score']}점|"></p>
-        <p th:text="|선순위와 차이 : ${view.attributes()['mySummary']['gapToPrev']}점|"></p>
+
+        <div class="ranking-mini-stats">
+          <article class="ranking-mini-stat">
+            <span class="ranking-mini-label">현재순위</span>
+            <strong class="ranking-mini-value" th:text="|${view.attributes()['mySummary']['rankNo']}위|">1위</strong>
+          </article>
+
+          <article class="ranking-mini-stat">
+            <span class="ranking-mini-label">현재 점수</span>
+            <strong class="ranking-mini-value" th:text="|${view.attributes()['mySummary']['score']}점|">0점</strong>
+          </article>
+
+          <article class="ranking-mini-stat">
+            <span class="ranking-mini-label">선순위와 차이</span>
+            <strong class="ranking-mini-value" th:text="|${view.attributes()['mySummary']['gapToPrev']}점|">0점</strong>
+          </article>
+        </div>
       </article>
 
       <article class="ranking-card ranking-card--top3">
         <h2 class="ranking-card__title">TOP3</h2>
-        <div th:each="item : ${view.attributes()['top3']}" class="ranking-top3-item">
-          <p>
-            <strong th:text="|${item['rankNo']}위 ${item['nickname']}|"></strong>
-          </p>
-          <p th:text="|${item['score']}점|"></p>
+
+        <div class="ranking-top3-list">
+          <article th:each="item : ${view.attributes()['top3']}"
+                   class="ranking-top3-item"
+                   th:classappend="${
+               item['rankNo'] == 1 ? ' is-first' :
+               (item['rankNo'] == 2 ? ' is-second' : ' is-third')
+             }">
+            <span class="ranking-top3-badge" th:text="${item['rankNo']}">1</span>
+            <p class="ranking-top3-name" th:text="${item['nickname']}">닉네임</p>
+            <p class="ranking-top3-score" th:text="|${item['score']}점|">0점</p>
+          </article>
         </div>
       </article>
     </div>
@@ -81,9 +102,23 @@
 
     <article class="ranking-card ranking-card--breakdown">
       <h2 class="ranking-card__title">점수구성</h2>
-      <p th:text="|문제풀이 ${view.attributes()['scoreBreakdown']['practiceScore']}점|"></p>
-      <p th:text="|시험점수 ${view.attributes()['scoreBreakdown']['examScore']}점|"></p>
-      <p th:text="|일일학습 ${view.attributes()['scoreBreakdown']['dailyScore']}점|"></p>
+
+      <div class="ranking-mini-stats">
+        <article class="ranking-mini-stat">
+          <span class="ranking-mini-label">문제풀이</span>
+          <strong class="ranking-mini-value" th:text="|${view.attributes()['scoreBreakdown']['practiceScore']}점|">0점</strong>
+        </article>
+
+        <article class="ranking-mini-stat">
+          <span class="ranking-mini-label">시험점수</span>
+          <strong class="ranking-mini-value" th:text="|${view.attributes()['scoreBreakdown']['examScore']}점|">0점</strong>
+        </article>
+
+        <article class="ranking-mini-stat">
+          <span class="ranking-mini-label">일일학습</span>
+          <strong class="ranking-mini-value" th:text="|${view.attributes()['scoreBreakdown']['dailyScore']}점|">0점</strong>
+        </article>
+      </div>
     </article>
   </section>
 </main>

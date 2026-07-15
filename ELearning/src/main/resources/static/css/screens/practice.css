@@ -8,6 +8,9 @@
 .practice-body {
     display: grid;
     gap: var(--space-4);
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
 }
 
 .practice-header {
@@ -21,9 +24,10 @@
 }
 
 .practice-header h1 {
-    font-size: 42px;
-    font-weight: 900;
-    line-height: 1.15;
+    font-size: clamp(30px, 4vw, 36px);
+    font-weight: 850;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
 }
 
 .practice-header p:not(.practice-eyebrow) {
@@ -31,9 +35,11 @@
     line-height: 1.6;
 }
 
-/* practice 본문 폭을 카드형 레이아웃에 맞게 조정 */
+/* practice 본문 폭을 lesson과 통일감있게 조정 */
 .practice-body {
-    max-width: 1280px;
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
 }
 
 /* 시작 / 문제 / 완료 화면 공통 카드 */
@@ -46,7 +52,7 @@
     border-radius: 14px;
     background: color-mix(in srgb, var(--surface) 96%, transparent);
     box-shadow: var(--shadow-soft);
-    padding: var(--space-8);
+    padding: clamp(22px, 3vw, 32px);
 }
 
 /* 문제 메타 */
@@ -69,9 +75,9 @@
 .practice-problem-card h2,
 .practice-intro h2,
 .practice-complete h2 {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 850;
-    line-height: 1.4;
+    line-height: 1.45;
     word-break: keep-all;
 }
 
@@ -154,6 +160,7 @@
 .practice-complete p,
 .practice-intro p {
     line-height: 1.6;
+
 }
 
 .practice-result strong,
@@ -272,7 +279,7 @@
 /* 문제풀이 안내 */
 .practice-intro-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+    grid-template-columns: minmax(0, 1.5fr) minmax(240px, 0.5fr);
     gap: var(--space-6);
     align-items: center;
 }
@@ -280,6 +287,17 @@
 .practice-intro-copy {
     display: grid;
     gap: var(--space-4);
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+}
+
+.practice-intro-heading {
+    display: grid;
+    gap: var(--space-2);
+    font-weight: 1000;
+    justify-items: center;
+    text-align: center;
 }
 
 .practice-intro-guide {
@@ -288,34 +306,57 @@
     padding-left: 18px;
     color: var(--muted);
     line-height: 1.6;
+    text-align: left;
+    justify-items: start;
 }
 
 .practice-intro-guide li::marker {
     color: var(--primary);
 }
-/**/
-.practice-intro-guide li:first-child {
-    list-style: none;
-    margin-left: -18px;
-    color: var(--text);
-    font-weight: 800;
-}
 
-.practice-intro-guide li:first-child::marker {
-    content: "";
-}
 
 .practice-intro-visual {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-end;
+    align-items: flex-end;
+    align-self: end;
+    min-height: 100%;
+    padding-right: 8px;
+    padding-bottom: 4px;
 }
 
 .practice-intro-visual img {
     width: 100%;
-    max-width: 320px;
+    max-width: 150px;
     height: auto;
     object-fit: contain;
+    opacity: 0.3;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.16));
+    animation: practice-character-float-corner 3.4s ease-in-out infinite;
+}
+
+@keyframes practice-character-float-corner {
+    0% {
+        transform: translateY(0);
+        opacity: 0.88;
+        filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.16));
+    }
+    50% {
+        transform: translateY(-8px);
+        opacity: 0.96;
+        filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.12));
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 0.88;
+        filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.16));
+    }
+}
+
+@media (max-width: 760px) {
+    .practice-intro-visual {
+        display: none;
+    }
 }
 
 @media (max-width: 760px) {

@@ -8,16 +8,28 @@
 .practice-body {
     display: grid;
     gap: var(--space-4);
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
 }
 
 /* 제목 */
-.practice-header h1 {
-    font-size: 30px;
+.practice-eyebrow {
+    color: var(--primary);
+    font-size: 14px;
     font-weight: 850;
-    line-height: 1.2;
+    letter-spacing: 0.02em;
 }
 
-.practice-header p {
+.practice-header h1 {
+    color: var(--text);
+    font-size: clamp(30px, 4vw, 36px);
+    font-weight: 850;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.practice-header p:not(.practice-eyebrow) {
     color: var(--muted);
     line-height: 1.6;
 }
