@@ -11,5 +11,6 @@ public record AdminRecommendationManageRowResponse(
         String contentType,
         String recommendationSlot,
         Boolean isActive,
+        LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}

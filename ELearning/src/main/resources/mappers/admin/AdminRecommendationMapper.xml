@@ -14,6 +14,7 @@
             <arg name="contentType" column="content_type" javaType="java.lang.String"/>
             <arg name="recommendationSlot" column="recommendation_slot" javaType="java.lang.String"/>
             <arg name="isActive" column="is_active" javaType="java.lang.Boolean"/>
+            <arg name="createdAt" column="created_at" javaType="java.time.LocalDateTime"/>
             <arg name="updatedAt" column="updated_at" javaType="java.time.LocalDateTime"/>
         </constructor>
     </resultMap>
@@ -42,6 +43,7 @@
             R.content_type,
             R.recommendation_slot,
             R.is_active,
+            R.created_at,
             R.updated_at
         FROM content_recommendations R
         LEFT JOIN subjects S
