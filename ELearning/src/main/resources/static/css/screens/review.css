@@ -294,3 +294,91 @@
     border-radius: var(--radius);
     padding: var(--space-4);
 }
+
+.practice-header h1,
+.practice-body h2,
+.practice-body h3,
+.review-list-item h2 {
+    color: var(--text);
+}
+
+.practice-header p:not(.practice-eyebrow),
+.practice-body p,
+.review-list-item p,
+.review-empty {
+    color: var(--muted);
+}
+
+.practice-body strong,
+.review-detail-card strong,
+.review-answer-section strong {
+    color: var(--accent);
+}
+
+
+.review-summary-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+    width: 100%;
+}
+
+.review-summary-stat {
+    display: grid;
+    gap: var(--space-2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-soft);
+}
+
+.review-summary-label {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    justify-self: center;
+}
+
+.review-summary-value {
+    color: var(--text);
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+    justify-self: center;
+}
+
+.review-summary-actions {
+    display: grid;
+    margin-top: var(--space-2);
+}
+
+.review-summary-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    color: var(--text);
+    font-weight: 800;
+    transition: background 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
+}
+
+.review-summary-actions a:hover {
+    border-color: color-mix(in srgb, var(--primary) 36%, var(--line));
+    background: var(--surface-soft);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 15%, transparent);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 760px) {
+    .review-summary-stats {
+        grid-template-columns: 1fr;
+    }
+}

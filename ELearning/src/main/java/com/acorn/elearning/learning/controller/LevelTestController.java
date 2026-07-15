@@ -32,10 +32,6 @@ public class LevelTestController {
     /** 과목 미지정 시 기본 과목(JAVA, subject_id=1). */
     private static final Long DEFAULT_SUBJECT_ID = 1L;
 
-    /** 세션 미구현 구간에서 사용하는 fallback learner(샘플데이터 userId=2). */
-    private static final SessionUser DEV_FALLBACK_USER =
-            new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
-
     private static final String ATTEMPT_STATUS_SUBMITTED = "SUBMITTED";
 
     private final LevelTestService levelTestService;
@@ -52,6 +48,9 @@ public class LevelTestController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(name = "subjectId", required = false) Long subjectId,
             Model model) {
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
         Long targetSubjectId = (subjectId != null) ? subjectId : DEFAULT_SUBJECT_ID;
 
         LevelTestForm form = new LevelTestForm();
@@ -82,7 +81,10 @@ public class LevelTestController {
             @Valid @ModelAttribute("levelTestForm") LevelTestForm form,
             BindingResult bindingResult,
             Model model) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("step", "test");
@@ -102,7 +104,10 @@ public class LevelTestController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long attemptId,
             Model model) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
 
         LevelTestResultView r = levelTestService.getResult(user, attemptId);
         model.addAttribute("step", "result");
@@ -116,8 +121,7 @@ public class LevelTestController {
 
     /** 화면 요약(과목명·목표). 세션 값이 아니라 응시 대상 과목으로 만든다. */
     private OnboardingProfileView levelTestProfile(SessionUser sessionUser, Long subjectId) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
-        return learningService.getLevelTestProfile(user, subjectId);
+        return learningService.getLevelTestProfile(sessionUser, subjectId);
     }
 
     private static int startPlanetNo(String levelCode) {

@@ -25,7 +25,21 @@
 <main class="page-shell learning-screen">
   <section class="practice-header">
     <p class="practice-eyebrow">Review</p>
-    <h1 th:text="${view.title()}">오답 복습</h1>
+
+    <h1 th:text="${lesson != null ? lesson.title : view.title()}"></h1>
+
+    <div class="lesson-context" th:if="${node != null}">
+    <span class="lesson-context-level"
+          th:classappend="${'level-' + #strings.toLowerCase(node.levelCode)}"
+          th:text="${node.levelCode}">
+      LEVEL
+    </span>
+      <span class="lesson-context-node" th:text="${node.title}">
+      단원
+    </span>
+    </div>
+
+    <p th:if="${lesson == null and node == null}">다시 확인이 필요한 문제들만 모았어요!</p>
   </section>
 
   <section class="practice-body">
@@ -42,23 +56,24 @@
     <div th:if="${view.attributes()['totalWrongCount'] != null}" class="review-summary-card">
       <h2>오답 복습 요약</h2>
 
-      <p>
-        전체 오답 수:
-        <span th:text="${view.attributes()['totalWrongCount']}">0</span>
-      </p>
+      <div class="review-summary-stats">
+        <article class="review-summary-stat">
+          <span class="review-summary-label">전체 오답 수</span>
+          <strong class="review-summary-value" th:text="${view.attributes()['totalWrongCount']}">0</strong>
+        </article>
 
-      <p>
-        복습 대기:
-        <span th:text="${view.attributes()['pendingCount']}">0</span>
-      </p>
+        <article class="review-summary-stat">
+          <span class="review-summary-label">복습 대기</span>
+          <strong class="review-summary-value" th:text="${view.attributes()['pendingCount']}">0</strong>
+        </article>
 
-      <p>
-        해결 완료:
-        <span th:text="${view.attributes()['solvedCount']}">0</span>
-      </p>
+        <article class="review-summary-stat">
+          <span class="review-summary-label">해결 완료</span>
+          <strong class="review-summary-value" th:text="${view.attributes()['solvedCount']}">0</strong>
+        </article>
+      </div>
 
-      <div class="practice-footer">
-        <!--전체오답-->
+      <div class="review-summary-actions">
         <a th:href="@{/learning/review/list}">오답 목록</a>
       </div>
     </div>
@@ -84,7 +99,6 @@
                 th:classappend="${view.attributes()['reviewStatus'] == 'SOLVED'} ? ' is-solved' : ' is-pending'"
                 th:text="${view.attributes()['reviewStatus']}">PENDING</span>
         </p>
-        <!-- -->
         <p>
           재시도 보상 지급 여부:
           <span th:text="${view.attributes()['retryBonusAwarded']}">false</span>
@@ -110,7 +124,7 @@
       </section>
 
       <section th:if="${retryResultMessage != null}" class="review-answer-section">
-        <h3 th:text="${retryResultMessage}">정답입니다.</h3>
+        <h3 th:text="${retryResultMessage}">대단해요! 스스로 부족한 점을 찾아 채워가는 모습이 정말 멋집니다!</h3>
 
         <p>
           정답:
@@ -118,16 +132,16 @@
         </p>
 
         <section th:if="${view.attributes()['explanation'] != null}">
-          <h3>해설</h3>
-          <p th:text="${view.attributes()['explanation']}">해설 내용</p>
+          <h3>함께 살펴보기</h3>
+          <p th:text="${view.attributes()['explanation']}">이 문제는 이렇게 생각하면 더 쉬워요.</p>
         </section>
 
-        <div th:if="${retryResultMessage == '오답입니다.'}" class="practice-footer">
+        <div th:if="${retryResultMessage == '다시 한번 도전해 볼까요?'}" class="practice-footer">
           <a th:href="@{|/learning/review/${view.attributes()['wrongAnswerId']}|}" class="practice-footer-a">다시풀기</a>
         </div>
 
       </section>
-<!-- -->
+
       <hr>
 
       <section class="review-complete-section">

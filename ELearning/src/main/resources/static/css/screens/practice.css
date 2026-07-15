@@ -268,3 +268,66 @@
         justify-content: stretch;
     }
 }
+
+/* 문제풀이 안내 */
+.practice-intro-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+    gap: var(--space-6);
+    align-items: center;
+}
+
+.practice-intro-copy {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.practice-intro-guide {
+    display: grid;
+    gap: var(--space-2);
+    padding-left: 18px;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.practice-intro-guide li::marker {
+    color: var(--primary);
+}
+/**/
+.practice-intro-guide li:first-child {
+    list-style: none;
+    margin-left: -18px;
+    color: var(--text);
+    font-weight: 800;
+}
+
+.practice-intro-guide li:first-child::marker {
+    content: "";
+}
+
+.practice-intro-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.practice-intro-visual img {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    object-fit: contain;
+}
+
+@media (max-width: 760px) {
+    .practice-intro-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .practice-intro-visual {
+        order: -1;
+    }
+
+    .practice-intro-visual img {
+        max-width: 240px;
+    }
+}

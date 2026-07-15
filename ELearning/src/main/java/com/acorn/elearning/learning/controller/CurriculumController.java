@@ -23,10 +23,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class CurriculumController {
 
-    // 로그인/세션 미연결 구간 dev fallback 사용자(샘플 learner)
-    private static final SessionUser DEV_FALLBACK_USER =
-            new SessionUser(2L, "learner@knowva.local", "누비학습자", SessionUser.ROLE_USER, false);
-
     private final CurriculumService curriculumService;
     private final LessonService lessonService;
 
@@ -39,7 +35,10 @@ public class CurriculumController {
     public String lessonDetail(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long lessonId, Model model) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
         var lesson = curriculumService.getLessonDetail(lessonId);
         model.addAttribute("lesson", lesson);
         model.addAttribute("bookmarked", lessonService.isBookmarked(user, lessonId));
@@ -76,7 +75,10 @@ public class CurriculumController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long lessonId,
             RedirectAttributes redirectAttributes) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
 
         // 화면 폼 제출이므로 실패 시에도 JSON(전역 핸들러) 대신 같은 상세로 안내 메시지와 함께 redirect.
         try {
@@ -95,7 +97,10 @@ public class CurriculumController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long lessonId,
             RedirectAttributes redirectAttributes) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
         LessonBookmarkResponse result = lessonService.toggleBookmark(user, lessonId);
         redirectAttributes.addFlashAttribute("message",
                 result.bookmarked() ? "북마크에 추가했어요." : "북마크를 해제했어요.");
@@ -108,7 +113,10 @@ public class CurriculumController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             Model model) {
-        SessionUser user = (sessionUser != null) ? sessionUser : DEV_FALLBACK_USER;
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        SessionUser user = sessionUser;
         LessonBookmarkPageResponse bookmarks = lessonService.getBookmarks(user, null, page, 20);
         model.addAttribute("bookmarks", bookmarks);
         model.addAttribute("screen", "learning/bookmarks");

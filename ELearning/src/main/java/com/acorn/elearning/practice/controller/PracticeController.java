@@ -18,6 +18,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.acorn.elearning.learning.controller.LearningController;
+import com.acorn.elearning.learning.mapper.CurriculumNodeMapper;
+import com.acorn.elearning.learning.mapper.LessonMapper;
+import com.acorn.elearning.learning.model.CurriculumNode;
+import com.acorn.elearning.learning.model.Lesson;
+
+import java.util.Optional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +35,18 @@ public class PracticeController {
     private static final String PRACTICE_VIEW_SESSION_KEY = "practiceView";
     private static final String PRACTICE_ANSWERS_SESSION_KEY = "practiceAnswers";
     private static final String PRACTICE_COMPLETE_RESULT_SESSION_KEY = "practiceCompleteResult";
+    private static final String PRACTICE_LESSON_ID_SESSION_KEY = "practiceLessonId";
 
     private final ProblemService problemService;
     private final PracticeService practiceService;
+    private final LessonMapper lessonMapper;
+    private final CurriculumNodeMapper curriculumNodeMapper;
 
-    public PracticeController(ProblemService problemService, PracticeService practiceService) {
+    public PracticeController(ProblemService problemService, PracticeService practiceService, LessonMapper lessonMapper, CurriculumNodeMapper curriculumNodeMapper) {
         this.problemService = problemService;
         this.practiceService = practiceService;
+        this.lessonMapper = lessonMapper;
+        this.curriculumNodeMapper = curriculumNodeMapper;
     }
 
     @GetMapping("/learning/practice")
@@ -65,6 +76,22 @@ public class PracticeController {
         model.addAttribute("nodeId", nodeId);
         model.addAttribute("lessonId", lessonId);
         model.addAttribute("difficultyCode", difficultyCode);
+
+        Long practiceLessonId = (Long) session.getAttribute(PRACTICE_LESSON_ID_SESSION_KEY);
+
+        Lesson lesson = null;
+        CurriculumNode node = null;
+
+        if (practiceLessonId != null) {
+            lesson = lessonMapper.findById(practiceLessonId).orElse(null);
+
+            if (lesson != null && lesson.getNodeId() != null) {
+                node = curriculumNodeMapper.findById(lesson.getNodeId()).orElse(null);
+            }
+        }
+
+        model.addAttribute("lesson", lesson);
+        model.addAttribute("node", node);
 
         if (completeResult != null) {
             model.addAttribute("completeResult", completeResult);
@@ -109,6 +136,7 @@ public class PracticeController {
 
         session.setAttribute(PRACTICE_VIEW_SESSION_KEY, view);
         session.setAttribute(PRACTICE_ANSWERS_SESSION_KEY, new ArrayList<PracticeAnswerForm.SingleAnswer>());
+        session.setAttribute(PRACTICE_LESSON_ID_SESSION_KEY, form.getLessonId());
         session.removeAttribute(PRACTICE_COMPLETE_RESULT_SESSION_KEY);
 
         redirectAttributes.addAttribute("setAttemptId", view.attributes().get("setAttemptId"));
@@ -194,6 +222,22 @@ public class PracticeController {
 
         boolean answered = restoredResult != null;
 
+        Long lessonId = (Long) session.getAttribute(PRACTICE_LESSON_ID_SESSION_KEY);
+
+        Lesson lesson = null;
+        CurriculumNode node = null;
+
+        if (lessonId != null) {
+            lesson = lessonMapper.findById(lessonId).orElse(null);
+
+            if (lesson != null && lesson.getNodeId() != null) {
+                node = curriculumNodeMapper.findById(lesson.getNodeId()).orElse(null);
+            }
+        }
+
+        model.addAttribute("lesson", lesson);
+        model.addAttribute("node", node);
+
         model.addAttribute("view", view);
         model.addAttribute("problem", currentProblem);
         model.addAttribute("setAttemptId", setAttemptId);
@@ -259,7 +303,7 @@ public class PracticeController {
                         "submittedAnswer", submittedAnswer,
                         "correct", correct,
                         "correctAnswer", problem.getAnswerText(),
-                        "explanation", "",
+                        "explanation", problem.getExplanation(),
                         "scoreDelta", 0,
                         "wrongAnswerUpdated", !correct
                 )

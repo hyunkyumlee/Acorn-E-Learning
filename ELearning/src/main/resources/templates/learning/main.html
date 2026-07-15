@@ -8,6 +8,8 @@
   <script defer th:src="@{/js/common/theme.js}"></script>
   <!-- 로드맵 등장 애니메이션 + 현재 노드 스크롤 (learning 화면 전용, transform/opacity·reduced-motion 대응) -->
   <script defer th:src="@{/js/screens/learning-roadmap.js}"></script>
+  <!-- 축하 연출 닫기(버튼·바깥 클릭·ESC) -->
+  <script defer th:src="@{/js/screens/learning-celebration.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
@@ -406,6 +408,34 @@
           <p class="status-sub">주간 기준 · 출석은 랭킹 점수 제외.</p>
         </section>
       </aside>
+    </div>
+
+    <!--
+      축하 연출: 직전에 본 로드맵보다 성취가 늘었을 때만 컨트롤러가 celebration을 채운다(같은 성취는 다시 뜨지 않는다).
+      행성 완료면 방금 마친 행성 아트를, 관문을 넘어 레벨이 오르면 티어 배지를 보여 준다.
+    -->
+    <div class="celebrate" th:if="${celebration != null}"
+         th:classappend="${'is-' + #strings.toLowerCase(celebration.type)}"
+         role="dialog" aria-modal="true" aria-labelledby="celebrateTitle" data-celebrate>
+      <div class="celebrate-card">
+        <div class="celebrate-sparks" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="celebrate-art" aria-hidden="true">
+          <img th:if="${celebration.planetFile != null}"
+               th:src="@{'/assets/images/planets/' + ${celebration.planetFile} + '.svg'}" alt="">
+          <span th:if="${celebration.planetFile == null}" class="celebrate-badge"
+                th:classappend="${'level-' + #strings.toLowerCase(celebration.levelCode)}"
+                th:text="${celebration.levelCode}">SILVER</span>
+        </div>
+        <p class="celebrate-eyebrow" th:text="${celebration.eyebrow}">행성 완료</p>
+        <h2 class="celebrate-title" id="celebrateTitle" th:text="${celebration.title}">Fruition Planet</h2>
+        <p class="celebrate-message" th:text="${celebration.message}">다음 행성으로 가는 길이 열렸어요.</p>
+        <!-- 링크로 두는 이유: 이 오버레이는 화면 전체를 덮는다. 닫기를 JS에만 맡기면 스크립트가 실패했을 때
+             빠져나갈 길이 없다. JS가 살아 있으면 이동 없이 그 자리에서 닫는다. -->
+        <a class="celebrate-cta" data-celebrate-close
+           th:href="@{/learning(subjectId=${roadmapSubjectId})}">계속 학습하기</a>
+      </div>
     </div>
   </main>
 </body>

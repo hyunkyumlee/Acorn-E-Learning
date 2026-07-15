@@ -24,9 +24,22 @@
 <main class="page-shell learning-screen">
 
   <section class="practice-header">
-    <!-- 추가: 상단 작은 라벨 -->
     <p class="practice-eyebrow">Practice</p>
-    <h1>연습 문제</h1>
+    <h1 th:text="${lesson != null ? lesson.title : '문제 풀이'}">문제 풀이</h1>
+
+    <div class="lesson-context" th:if="${lesson != null}">
+    <span class="lesson-context-level"
+          th:if="${node != null}"
+          th:classappend="${'level-' + #strings.toLowerCase(node.levelCode)}"
+          th:text="${node.levelCode}">
+          LEVEL
+        </span>
+              <span class="lesson-context-node"
+                    th:if="${node != null}"
+                    th:text="${node.title}">
+          단원
+        </span>
+    </div>
   </section>
 
   <section class="practice-body">
@@ -34,11 +47,11 @@
     <!-- 수정: 완료 화면 styling용 class 추가 -->
     <div th:if="${completed}" class="practice-complete">
 
-      <h2>연습이 완료되었습니다.</h2>
+      <h2>정말 수고했어요! 이제 결과를 확인해 볼까요?</h2>
 
       <p th:if="${completeResult != null}">
-        <span th:text="${completeResult.data()['passed']} ? '통과했습니다.' : '아쉽게도 통과하지 못했습니다.'">
-          통과했습니다.
+        <span th:text="${completeResult.data()['passed']} ? '실력이 정말 많이 늘었네요! 다음 레슨도 바로 시작해 보세요.' : '이번엔 조금 어려웠나요? 다시 도전해서 완벽하게 마스터해 봐요!'">
+          실력이 정말 많이 늘었네요! 다음 레슨도 바로 시작해 보세요.
         </span>
       </p>
 
@@ -64,7 +77,7 @@
            nodeId=${completeResult.data()['nodeId']},
            lessonId=${completeResult.data()['lessonId']}
            )}">
-          오답노트 보기
+          오답노트
         </a>
         <a th:if="${completeResult != null and completeResult.data()['primaryPath'] != null}"
            th:href="${completeResult.data()['primaryPath']}"
@@ -86,26 +99,37 @@
     <div th:if="${!completed and problem == null}" class="practice-intro">
 
       <p th:if="${subjectId == null or nodeId == null or lessonId == null}">
-        문제풀이 시작에 필요한 학습 정보가 없습니다. 학습 화면에서 다시 진입해 주세요.
+        문제풀이를 시작하려면 학습 정보를 먼저 선택해주세요.
       </p>
 
-      <p th:if="${subjectId != null and nodeId != null}">
-        문제풀이를 시작해보세요.
-      </p>
+      <div th:if="${subjectId != null and nodeId != null and lessonId != null}" class="practice-intro-layout">
+        <div class="practice-intro-copy">
+          <p>문제풀이를 시작해보세요.</p>
 
-      <form th:if="${subjectId != null and nodeId != null and lessonId != null}"
-            th:action="@{/learning/practice/sets}"
-            method="post">
-        <input type="hidden" name="subjectId" th:value="${subjectId}">
-        <input type="hidden" name="nodeId" th:value="${nodeId}">
-        <input type="hidden" name="lessonId" th:value="${lessonId}">
-        <input type="hidden" name="difficultyCode" th:value="${difficultyCode}">
+          <ul class="practice-intro-guide">
+            <li>"당신의 실력을 보여주세요! 10문제 중 7문제를 맞히면 다음 레슨으로 넘어갈 수 있어요."</li>
+            <li>이미 푼 문제들은 '이전/다음' 버튼으로 언제든 다시 살펴볼 수 있어요.</li>
+            <li>모르는 문제는 잠시 건너뛰어도 괜찮아요! </li>
+            <li>제출 버튼을 누르기 전이라면 언제든지 다시 돌아가 정답을 작성할 수 있습니다. 화이팅!</li>
+          </ul>
 
-        <div class="practice-footer">
+          <form th:action="@{/learning/practice/sets}" method="post">
+            <input type="hidden" name="subjectId" th:value="${subjectId}">
+            <input type="hidden" name="nodeId" th:value="${nodeId}">
+            <input type="hidden" name="lessonId" th:value="${lessonId}">
+            <input type="hidden" name="difficultyCode" th:value="${difficultyCode}">
 
-          <button type="submit">문제풀이 시작</button>
+            <div class="practice-footer">
+              <button type="submit">문제풀이 시작</button>
+            </div>
+          </form>
         </div>
-      </form>
+
+        <div class="practice-intro-visual">
+          <!-- 여기에 이미지 넣기 -->
+          <img th:src="@{/assets/images/learning/practice-intro.png}" alt="문제풀이 안내 이미지">
+        </div>
+      </div>
     </div>
 
     <!-- 문제 화면 전체-->
@@ -202,41 +226,10 @@
           </div>
         </section>
       </div>
-      <!--
-      <div th:if="${skipped and !showFinalSkipConfirm}">
-        <section class="practice-result">
-          <p>이 문제는 건너뛴 상태입니다.</p>
-          <p>다음 문제로 이동했으며, 필요하면 이전 버튼으로 다시 조회할 수 있습니다.</p>
-        </section>
-
-        <section class="practice-footer practice-footer--split">
-          <div class="practice-footer-group">
-          </div>
-
-          <div class="practice-footer-group practice-footer-group--nav">
-            <form th:if="${!isFirstProblem}"
-                  th:action="@{|/learning/practice/problems/${prevProblemId}|}"
-                  method="get">
-              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
-              <input type="hidden" name="index" th:value="${currentIndex - 1}">
-              <button type="submit">이전</button>
-            </form>
-
-            <form th:if="${!isLastProblem and canGoNext}"
-                  th:action="@{|/learning/practice/problems/${nextProblemId}|}"
-                  method="get">
-              <input type="hidden" name="setAttemptId" th:value="${setAttemptId}">
-              <input type="hidden" name="index" th:value="${currentIndex + 1}">
-              <button type="submit">다음</button>
-            </form>
-          </div>
-        </section>
-      </div>
-      -->
 
       <div th:if="${showFinalSkipConfirm}" class="practice-result">
-        <p>이 문제를 건너뛴 채 최종 제출하시겠습니까?</p>
-        <p>건너뛴 문제는 정답 처리되지 않습니다.</p>
+        <p>아직 풀지 않은 문제가 있어요!</p>
+        <p>건너뛴 문제는 이번 결과 점수에 포함되지 않아요.</p>
 
         <div class="practice-footer practice-footer--split">
           <div class="practice-footer-group">
@@ -244,7 +237,7 @@
               <input type="hidden" name="problemId" th:value="${problem['problemId']}">
               <input type="hidden" name="index" th:value="${currentIndex}">
               <input type="hidden" name="confirmFinalSkip" value="true">
-              <button type="submit">건너뛰기 확정 후 최종 제출</button>
+              <button type="submit">건너뛴 후 최종완료</button>
             </form>
           </div>
 
@@ -262,22 +255,22 @@
 
       <div th:if="${answered and lastResult != null}">
         <section class="practice-result">
-          <p th:if="${lastResult.data()['correct']}">정답입니다.</p>
-          <p th:if="${!lastResult.data()['correct']}">오답입니다.</p>
+          <p th:if="${lastResult.data()['correct']}">대단해요! 다음 문제도 자신 있게 도전해 볼까요? </p>
+          <p th:if="${!lastResult.data()['correct']}">앗, 살짝 빗나갔어요! 다음번엔 분명히 맞힐 수 있을 거예요. </p>
 
           <p>
-            제출 답안:
+            작성한 답변:
             <strong th:text="${lastResult.data()['submittedAnswer']}">A</strong>
           </p>
 
           <p>
-            정답:
+            올바른 정답:
             <strong th:text="${lastResult.data()['correctAnswer']}">B</strong>
           </p>
 
           <p th:if="${lastResult.data()['explanation'] != null and lastResult.data()['explanation'] != ''}">
-            해설:
-            <span th:text="${lastResult.data()['explanation']}">해설 내용</span>
+            함께 살펴보기:
+            <span th:text="${lastResult.data()['explanation']}">이 문제는 이렇게 생각하면 더 쉬워요.</span>
           </p>
         </section>
 
