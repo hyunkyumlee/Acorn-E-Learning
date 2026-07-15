@@ -8,12 +8,13 @@
     @Setter
     public class Comment {
         private Long commentId;
-private Long postId;
-private Long parentCommentId;
-private Long writerId;
-private String content;
-private String status;
-private LocalDateTime createdAt;
-private LocalDateTime updatedAt;
-private LocalDateTime deletedAt;
+        private Long postId;
+        private Long parentCommentId;
+        private Long writerId;
+        private Long deletedByAdminId;
+        private String content;
+        private String status;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private LocalDateTime deletedAt;
     }

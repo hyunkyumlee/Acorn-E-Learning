@@ -31,5 +31,5 @@ public interface AdminCommunityMapper {
     long countComments(@Param("status") String status,
                        @Param("keyword") String keyword);
     int updatePostStatus(@Param("postId") Long postId, @Param("status") String status);
-    int updateCommentStatus(@Param("commentId") Long commentId, @Param("status") String status);
+    int updateCommentStatus(@Param("commentId") Long commentId, @Param("status") String status, @Param("adminId") Long adminId);
 }

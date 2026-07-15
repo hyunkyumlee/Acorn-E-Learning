@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CommentService {
     private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final String STATUS_HIDDEN = "HIDDEN";
     private static final String STATUS_DELETED = "DELETED";
 
     private final CommentMapper commentMapper;
@@ -63,6 +64,13 @@ public class CommentService {
         requireCommentForm(form);
         Comment comment = requireComment(commentId);
         requireOwner(comment, userId);
+
+        if(STATUS_HIDDEN.equals(comment.getStatus())){
+            throw new BusinessException(
+                    ErrorCode.COMMON_NOT_FOUND, "관리자에 의해 숨김 처리된 댓글은 수정할 수 없습니다."
+            );
+        }
+
         comment.setContent(form.getContent().trim());
         int updated = commentMapper.update(comment);
         if (updated == 0) {
@@ -76,6 +84,13 @@ public class CommentService {
         Long userId = requireUserId(sessionUser);
         Comment comment = requireComment(commentId);
         requireOwner(comment, userId);
+
+        if(STATUS_HIDDEN.equals(comment.getStatus())){
+            throw new BusinessException(
+                    ErrorCode.COMMON_NOT_FOUND, "관리자에 의해 숨김 처리된 댓글은 삭제할 수 없습니다."
+            );
+        }
+
         int updated = commentMapper.softDelete(commentId, userId);
         if (updated == 0) {
             throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "삭제할 댓글을 찾을 수 없습니다.");
@@ -88,14 +103,22 @@ public class CommentService {
             return;
         }
         Comment parent = requireComment(parentCommentId);
-        if (!postId.equals(parent.getPostId()) || parent.getParentCommentId() != null || STATUS_DELETED.equals(parent.getStatus())) {
+        if (!postId.equals(parent.getPostId()) || parent.getParentCommentId() != null || !STATUS_ACTIVE.equals(parent.getStatus())) {
             throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "대댓글은 같은 게시글의 댓글에만 작성할 수 있습니다.");
         }
     }
 
     private Comment maskIfDeleted(Comment comment) {
         if (STATUS_DELETED.equals(comment.getStatus())) {
-            comment.setContent("삭제된 댓글입니다.");
+            if (comment.getDeletedByAdminId() != null) {
+                comment.setContent("관리자에 의해 삭제된 댓글입니다.");
+            } else {
+                comment.setContent("삭제된 댓글입니다.");
+            }
+        }
+
+        if (STATUS_HIDDEN.equals(comment.getStatus())){
+            comment.setContent("관리자에 의해 숨겨진 댓글입니다.");
         }
         return comment;
     }
