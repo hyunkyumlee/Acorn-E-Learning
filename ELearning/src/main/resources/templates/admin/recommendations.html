@@ -63,6 +63,7 @@
           <th>콘텐츠 유형</th>
           <th>추천 슬롯</th>
           <th>활성 상태</th>
+          <th>등록일</th>
           <th>수정일</th>
           <th>관리</th>
         </tr>
@@ -89,7 +90,8 @@
           <td th:text="${content.recommendationSlot}">MAIN</td>
           <td th:text="${content.isActive ? '활성' : '비활성'}"
               th:classappend="${content.isActive} ? ' is-active' : ' is-inactive'">활성</td>
-          <td th:text="${content.updatedAt != null ? #temporals.format(content.updatedAt, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+          <td th:text="${content.createdAt != null ? #temporals.format(content.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+          <td th:text="${content.updatedAt != null and content.updatedAt.isAfter(content.createdAt) ? #temporals.format(content.updatedAt, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
           <td class="admin-recommendation-actions">
             <button type="button" class="admin-recommendation-action recommendation-edit-button">수정</button>
             <form method="post"
@@ -100,7 +102,7 @@
           </td>
         </tr>
         <tr th:if="${#lists.isEmpty(recommendationPage.items)}">
-          <td colspan="8" class="admin-recommendation-empty">등록된 추천 콘텐츠가 없습니다.</td>
+          <td colspan="9" class="admin-recommendation-empty">등록된 추천 콘텐츠가 없습니다.</td>
         </tr>
         </tbody>
       </table>
