@@ -225,6 +225,11 @@ body {
   background: color-mix(in srgb, var(--surface-soft) 84%, #000);
 }
 
+.content-video-card .content-video-thumbnail {
+  width: min(100%, 92%);
+  margin: 0 auto;
+}
+
 .content-video-thumbnail img,
 .content-video-placeholder {
   display: block;
@@ -297,6 +302,212 @@ body {
   font-size: 13px;
   font-weight: 800;
   line-height: 1.4;
+}
+
+.content-install-card {
+  gap: 16px;
+}
+
+.content-install-video-link {
+  align-content: start;
+  min-height: 156px;
+  padding: 16px 18px;
+}
+
+.content-install-downloads {
+  display: grid;
+  gap: 14px;
+}
+
+.content-install-downloads section {
+  display: grid;
+  gap: 10px;
+}
+
+.content-install-downloads h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.content-install-downloads a {
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.content-install-steps {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-soft) 58%, transparent);
+  padding: 12px 14px 12px 30px;
+}
+
+.content-install-steps li {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.content-install-step-action {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+  list-style: none;
+}
+
+.content-install-detail-button {
+  width: fit-content;
+  min-height: 34px;
+  border: 1px solid color-mix(in srgb, var(--primary) 58%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface-soft));
+  color: var(--text);
+  cursor: pointer;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.content-install-detail-button:hover {
+  background: color-mix(in srgb, var(--primary) 18%, var(--surface-soft));
+}
+
+.content-install-note {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface-soft) 72%, transparent);
+  padding: 16px 18px;
+}
+
+.content-install-note strong {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.content-install-note p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.content-install-command {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.content-install-command code {
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--primary) 52%, var(--line));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, #050b11 82%, var(--surface));
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.content-copy-command-button {
+  min-width: 64px;
+  border: 1px solid color-mix(in srgb, var(--primary) 60%, var(--line));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 78%, #ffffff);
+  color: #06131c;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.content-copy-command-button:hover {
+  filter: brightness(1.05);
+}
+
+.content-detail-modal {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: rgba(4, 12, 18, 0.58);
+  padding: 24px;
+}
+
+.content-detail-modal.is-open {
+  display: grid;
+}
+
+.content-detail-dialog {
+  display: grid;
+  width: min(420px, 100%);
+  max-height: min(70vh, 520px);
+  gap: 16px;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--primary) 52%, var(--line));
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 18px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.36);
+}
+
+.content-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.content-detail-head h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.content-detail-close-button {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-soft) 74%, transparent);
+  color: var(--text);
+  cursor: pointer;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.content-detail-steps {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0 0 0 22px;
+}
+
+.content-detail-steps li {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.content-install-note small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 @media (max-width: 1120px) {
