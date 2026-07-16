@@ -35,10 +35,14 @@
             <p>작성자: <span th:text="${writerNicknames.get(view.post.writerId)}">nova_learner</span></p>
           </div>
           <div class="community-actions">
-            <button class="button community-back-button" type="button" aria-label="뒤로 가기" title="뒤로 가기"
-                    onclick="window.history.length > 1 ? window.history.back() : window.location.assign('/community/board')">
-              &lt;
-            </button>
+            <a class="button community-back-button" th:href="@{/community/board(subjectId=${activeSubjectId},boardType=${activeBoardType})}"
+               aria-label="게시글 목록으로 돌아가기" title="게시글 목록으로 돌아가기">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"></path>
+                <path d="M19 12H5"></path>
+              </svg>
+              <span>게시글 목록으로</span>
+            </a>
             <a class="button" th:href="@{/community/board}">목록</a>
             <a class="button" th:if="${view.owner}" th:href="@{/community/posts/{id}/edit(id=${view.post.postId})}">수정</a>
             <form method="post" th:if="${view.owner}" th:action="@{/community/posts/{id}/delete(id=${view.post.postId})}">
@@ -48,16 +52,24 @@
         </div>
 
         <article class="community-post-body">
-          <p th:text="${view.post.content}">내용</p>
-          <div class="community-post-inline-attachments" th:if="${!#lists.isEmpty(view.attachments)}">
-            <div class="community-post-inline-attachment" th:each="file : ${view.attachments}" th:with="fileUrl=${file.fileUrl}">
+          <textarea hidden
+                    data-community-markdown-source
+                    th:data-target="${'#community-post-content-' + view.post.postId}"
+                    th:text="${view.post.content}"></textarea>
+          <div class="community-markdown-content" th:id="${'community-post-content-' + view.post.postId}">
+            <p th:text="${view.post.content}">내용</p>
+          </div>
+          <div class="community-post-legacy-attachments" th:if="${!#lists.isEmpty(view.attachments)}">
+            <div class="community-post-legacy-attachment" th:each="file : ${view.attachments}"
+                 th:if="${!file.image or !#strings.contains(view.post.content, file.fileUrl)}">
               <a class="community-attachment-preview"
                  th:if="${file.image}"
-                 th:href="${fileUrl}"
+                 th:href="${file.fileUrl}"
                  target="_blank"
                  rel="noopener">
-                <img th:src="${fileUrl}" th:alt="${file.originalName}">
+                <img th:src="${file.fileUrl}" th:alt="${file.originalName}">
               </a>
+              <a class="community-legacy-file-link" th:unless="${file.image}" th:href="${file.fileUrl}" th:text="${file.originalName}">file.txt</a>
             </div>
           </div>
         </article>
@@ -84,32 +96,47 @@
             </form>
           </div>
         </div>
-<div class="community-subsection">
-          <h3>댓글</h3>
+        <section class="community-subsection community-comments-section">
+          <div class="community-subsection-heading">
+            <div>
+              <h3>댓글 <span th:text="${view.post.commentCount}">0</span></h3>
+              <p>서로의 학습을 돕는 내용으로 대화해 주세요.</p>
+            </div>
+          </div>
           <form method="post" th:action="@{/community/posts/{id}/comments(id=${view.post.postId})}" th:object="${commentForm}" class="community-comment-form">
-            <textarea th:field="*{content}" rows="3" placeholder="여러 사람들이 있는 곳이므로 욕설 및 비하하는 댓글은 삼가하여 주시기 바랍니다" required></textarea>
-            <button class="button primary" type="submit">댓글 등록</button>
+            <label class="sr-only" for="content">댓글 내용</label>
+            <textarea th:field="*{content}" rows="3" placeholder="학습에 도움이 되는 댓글을 남겨 주세요." required></textarea>
+            <div class="community-comment-compose-footer">
+              <span>욕설·비하·개인정보가 포함된 댓글은 제한될 수 있습니다.</span>
+              <button class="button primary" type="submit">댓글 등록</button>
+            </div>
           </form>
 
-          <ul class="community-comments">
-            <li th:each="comment : ${view.comments}" th:classappend="${comment.parentCommentId != null} ? ' is-reply'">
-              <div class="community-comment-main">
-                <div>
-                  <span class="community-badge" th:if="${comment.parentCommentId != null}">답글</span>
+            <ul class="community-comments">
+            <li class="community-comment" th:each="comment : ${view.comments}" th:classappend="${comment.parentCommentId != null} ? ' is-reply'">
+              <article class="community-comment-main">
+                <div class="community-comment-avatar" aria-hidden="true" th:text="${#strings.substring(writerNicknames.get(comment.writerId), 0, 1)}">C</div>
+                <div class="community-comment-content">
+                  <header class="community-comment-header">
+                    <div>
+                      <strong th:text="${writerNicknames.get(comment.writerId)}">code_haru</strong>
+                      <span class="community-comment-reply-label" th:if="${comment.parentCommentId != null}">답글</span>
+                      <time th:if="${comment.createdAt != null}" th:text="${#temporals.format(comment.createdAt, 'yyyy.MM.dd HH:mm')}">2026.07.16 09:00</time>
+                    </div>
+                  </header>
                   <p th:text="${comment.content}">댓글</p>
-                  <small>작성자: <span th:text="${writerNicknames.get(comment.writerId)}">code_haru</span></small>
                 </div>
-                <div class="community-actions">
+                <div class="community-comment-actions">
                   <details th:if="${comment.status == 'ACTIVE' and comment.parentCommentId == null}" class="community-inline-form">
-                    <summary class="button">답글</summary>
+                    <summary class="community-comment-action">답글</summary>
                     <form method="post" th:action="@{/community/posts/{id}/comments(id=${view.post.postId})}">
                       <input type="hidden" name="parentCommentId" th:value="${comment.commentId}">
-                      <textarea name="content" rows="2" placeholder="여러 사람들이 있는 곳이므로 욕설 및 비하하는 댓글은 삼가하여 주시기 바랍니다" required></textarea>
+                      <textarea name="content" rows="2" placeholder="답글을 남겨 주세요." required></textarea>
                       <button class="button primary" type="submit">답글 등록</button>
                     </form>
                   </details>
                   <details th:if="${comment.status == 'ACTIVE' and currentUserId != null and currentUserId == comment.writerId}" class="community-inline-form">
-                    <summary class="button">수정</summary>
+                    <summary class="community-comment-action">수정</summary>
                     <form method="post" th:action="@{/community/comments/{id}/update(id=${comment.commentId})}">
                       <input type="hidden" name="postId" th:value="${view.post.postId}">
                       <textarea name="content" rows="2" required th:text="${comment.content}"></textarea>
@@ -118,20 +145,20 @@
                   </details>
                   <form method="post" th:if="${comment.status == 'ACTIVE' and currentUserId != null and currentUserId == comment.writerId}" th:action="@{/community/comments/{id}/delete(id=${comment.commentId})}">
                     <input type="hidden" name="postId" th:value="${view.post.postId}">
-                    <button class="button danger" type="submit">삭제</button>
+                    <button class="community-comment-action danger" type="submit">삭제</button>
                   </form>
                   <form method="post" th:if="${comment.status == 'ACTIVE'}" th:action="@{/community/reports}">
                     <input type="hidden" name="targetType" value="COMMENT">
                     <input type="hidden" name="targetId" th:value="${comment.commentId}">
                     <input type="hidden" name="reasonCode" value="INAPPROPRIATE">
                     <input type="hidden" name="redirectPostId" th:value="${view.post.postId}">
-                    <button class="button" type="submit">신고</button>
+                    <button class="community-comment-action" type="submit">신고</button>
                   </form>
                 </div>
-              </div>
+              </article>
             </li>
           </ul>
-        </div>
+        </section>
 
         <form method="post" th:action="@{/community/reports}" class="community-report-form">
           <input type="hidden" name="targetType" value="POST">
@@ -143,5 +170,6 @@
       </section>
     </section>
   </main>
+  <script type="module" th:src="@{/js/vendor/community-markdown-viewer.bundle.js}"></script>
 </body>
 </html>

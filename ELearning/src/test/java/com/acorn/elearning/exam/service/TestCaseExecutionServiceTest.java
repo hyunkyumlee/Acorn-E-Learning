@@ -42,6 +42,71 @@ class TestCaseExecutionServiceTest {
     }
 
     @Test
+    void executeRaw_returns_system_output_for_standard_input() {
+        TestCaseExecutionService.CodeExecutionResult result = service.executeRaw("""
+                import java.util.Scanner;
+
+                public class Solution {
+                    public static void main(String[] args) {
+                        Scanner scanner = new Scanner(System.in);
+                        System.out.println(scanner.nextInt() + scanner.nextInt());
+                    }
+                }
+                """, "10 32");
+
+        assertTrue(result.success());
+        assertEquals("SUCCESS", result.status());
+        assertEquals("42\n", result.output());
+    }
+
+    @Test
+    void executeRaw_blocks_file_access_before_compilation() {
+        TestCaseExecutionService.CodeExecutionResult result = service.executeRaw("""
+                import java.nio.file.Files;
+
+                public class Solution {
+                    public static void main(String[] args) {
+                        System.out.println(Files.exists(null));
+                    }
+                }
+                """, "");
+
+        assertFalse(result.success());
+        assertEquals("SECURITY_VIOLATION", result.status());
+        assertTrue(result.output().contains("허용되지 않는 API"));
+    }
+
+    @Test
+    void executeRaw_blocks_method_handle_api_before_compilation() {
+        TestCaseExecutionService.CodeExecutionResult result = service.executeRaw("""
+                public class Solution {
+                    public static void main(String[] args) {
+                        java.lang.invoke.MethodHandles.lookup();
+                    }
+                }
+                """, "");
+
+        assertFalse(result.success());
+        assertEquals("SECURITY_VIOLATION", result.status());
+        assertTrue(result.output().contains("허용되지 않는 API"));
+    }
+
+    @Test
+    void executeRaw_blocks_repeated_u_unicode_escape_before_compilation() {
+        TestCaseExecutionService.CodeExecutionResult result = service.executeRaw("""
+                public class Solution {
+                    public static void main(String[] args) {
+                        java.lang.invoke.\\uu004dethodHandles.lookup();
+                    }
+                }
+                """, "");
+
+        assertFalse(result.success());
+        assertEquals("SECURITY_VIOLATION", result.status());
+        assertTrue(result.output().contains("허용되지 않는 API"));
+    }
+
+    @Test
     void execute_blocks_file_access_api_before_compilation() {
         AiExamProblem problem = new AiExamProblem();
         problem.setTestCaseSpec(twoCaseSpec());

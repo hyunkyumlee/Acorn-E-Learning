@@ -203,6 +203,20 @@
           AND deleted_at IS NULL
     </update>
 
+    <update id="publishDraft" parameterType="com.acorn.elearning.community.model.CommunityPost">
+        UPDATE community_posts
+        SET subject_id = #{subjectId},
+            board_type = #{boardType},
+            title = #{title},
+            content = #{content},
+            status = 'ACTIVE',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE post_id = #{postId}
+          AND writer_id = #{writerId}
+          AND status = 'DRAFT'
+          AND deleted_at IS NULL
+    </update>
+
     <update id="softDelete">
         UPDATE community_posts
         SET status = 'DELETED',

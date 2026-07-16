@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Knowva에서 Java 코드를 표준 입력과 함께 실행하고 시스템 출력을 확인하는 자유 코딩 연습 화면입니다.">
+  <title>자유 코딩 | Knowva</title>
+  <link rel="icon" type="image/png" th:href="@{/assets/images/icons/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/common/tokens.css}"><link rel="stylesheet" th:href="@{/css/common/reset.css}"><link rel="stylesheet" th:href="@{/css/common/base.css}"><link rel="stylesheet" th:href="@{/css/common/components.css}"><link rel="stylesheet" th:href="@{/css/common/themes.css}"><link rel="stylesheet" th:href="@{/css/screens/exam.css}"><link rel="stylesheet" th:href="@{/css/screens/free-coding.css}">
+  <script defer th:src="@{/js/common/theme.js}"></script>
+  <script type="module" th:src="@{/js/practice/free-coding.js}"></script>
+</head>
+<body>
+  <div th:replace="~{fragments/topbar :: topbar}"></div>
+  <main class="page-shell exam-screen free-coding-screen">
+    <section class="exam-workbench-head free-coding-head">
+      <div>
+        <span class="eyebrow">Java Playground</span>
+        <h1>자유 코딩</h1>
+        <p>Java 코드를 바로 실행하고 시스템 출력을 확인하세요. 작성 내용은 저장·제출·채점에 반영되지 않습니다.</p>
+      </div>
+      <div class="free-coding-runtime-card" aria-label="실행 환경">
+        <span>실행 환경</span>
+        <strong>Java 17 · 표준 입출력</strong>
+      </div>
+    </section>
+
+    <section class="exam-studio free-coding-studio" aria-label="자유 코딩 작업 공간">
+      <aside class="exam-problem-pane free-coding-guide">
+        <span class="exam-state-badge">연습 전용</span>
+        <h2>실행 방법</h2>
+        <p>클래스 이름은 <code>Solution</code>으로 작성하고, 입력이 필요하면 아래 표준 입력 영역에 값을 넣으세요.</p>
+        <ul class="free-coding-guide-list">
+          <li>
+            <strong>입력</strong>
+            <span><code>System.in</code>으로 전달됩니다.</span>
+          </li>
+          <li>
+            <strong>출력</strong>
+            <span><code>System.out</code> 결과와 오류를 바로 표시합니다.</span>
+          </li>
+          <li>
+            <strong>제한</strong>
+            <span>파일·네트워크·프로세스 API는 실행 환경에서 차단됩니다.</span>
+          </li>
+        </ul>
+      </aside>
+
+      <section class="exam-editor-pane free-coding-editor-pane">
+        <div class="free-coding-editor-head">
+          <div>
+            <h2>코드 작성</h2>
+            <p id="free-coding-source-help">Tab은 4칸 들여쓰기입니다. 다음 입력 필드로 이동하려면 Esc를 누른 뒤 Tab을 누르세요. <span class="free-coding-shortcut">Cmd/Ctrl + Enter로</span> 실행할 수 있습니다.</p>
+          </div>
+          <span class="exam-state-badge">작성 중</span>
+        </div>
+
+        <form class="free-coding-form"
+              data-free-coding-form
+              th:attr="data-run-url=@{/api/practice/free-coding/run}"
+              novalidate>
+          <div class="exam-code-field">
+            <label id="free-coding-source-label" for="free-coding-source">Java 코드</label>
+            <textarea class="exam-code-source free-coding-source" id="free-coding-source" name="source" rows="18" spellcheck="false" autocomplete="off" aria-labelledby="free-coding-source-label" aria-describedby="free-coding-source-help">public class Solution {
+    public static void main(String[] args) {
+        // Write your code here.
+    }
+}</textarea>
+            <div class="exam-code-editor" data-free-coding-editor aria-labelledby="free-coding-source-label"></div>
+          </div>
+
+          <div class="free-coding-input-field">
+            <label for="free-coding-input">표준 입력</label>
+            <textarea id="free-coding-input" data-free-coding-input rows="5" spellcheck="false" autocomplete="off" placeholder="예: 10 20"></textarea>
+          </div>
+
+          <section class="exam-run-result free-coding-output" data-free-coding-output hidden aria-live="polite" aria-labelledby="free-coding-output-label">
+            <div>
+              <span>상태</span>
+              <strong data-free-coding-status>대기</strong>
+            </div>
+            <div>
+              <span>실행 시간</span>
+              <strong data-free-coding-time>-</strong>
+            </div>
+            <div class="free-coding-output-label" id="free-coding-output-label">시스템 출력</div>
+            <pre data-free-coding-output-text>실행 결과가 여기에 표시됩니다.</pre>
+          </section>
+
+          <div class="free-coding-action-row">
+            <button type="submit" class="button primary" data-free-coding-run>실행</button>
+            <p class="free-coding-editor-help">실행 결과는 현재 화면에서만 확인할 수 있습니다.</p>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

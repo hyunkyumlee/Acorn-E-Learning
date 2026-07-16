@@ -34,10 +34,14 @@
             <p>작성자: <span th:text="${notice.writerNickname}">관리자</span></p>
           </div>
           <div class="community-actions">
-            <button class="button community-back-button" type="button" aria-label="뒤로 가기" title="뒤로 가기"
-                    onclick="window.history.length > 1 ? window.history.back() : window.location.assign('/community/board')">
-              &lt;
-            </button>
+            <a class="button community-back-button" th:href="@{/community/board(subjectId=${activeSubjectId})}"
+               aria-label="게시글 목록으로 돌아가기" title="게시글 목록으로 돌아가기">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"></path>
+                <path d="M19 12H5"></path>
+              </svg>
+              <span>게시글 목록으로</span>
+            </a>
             <a class="button" th:href="@{/community/board(subjectId=${activeSubjectId})}">목록</a>
           </div>
         </div>

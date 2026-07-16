@@ -3,18 +3,22 @@ package com.acorn.elearning.practice.controller;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.common.response.ApiResponse;
+import com.acorn.elearning.practice.dto.request.FreeCodingRunRequest;
+import com.acorn.elearning.practice.dto.response.FreeCodingRunResponse;
 import com.acorn.elearning.practice.dto.response.PracticeSetResponse;
 import com.acorn.elearning.practice.form.CreatePracticeSetForm;
 import com.acorn.elearning.practice.form.PracticeSetCompleteForm;
 import com.acorn.elearning.practice.form.ReviewWrongAnswerForm;
 import com.acorn.elearning.practice.form.WrongAnswerRetryForm;
 import com.acorn.elearning.practice.service.PracticeService;
+import com.acorn.elearning.practice.service.FreeCodingService;
 import com.acorn.elearning.practice.service.WrongAnswerService;
 import com.acorn.elearning.practice.view.PracticeSetView;
 import com.acorn.elearning.practice.view.WrongAnswerDetailView;
 import com.acorn.elearning.practice.view.WrongAnswerPageView;
 import com.acorn.elearning.security.SessionUser;
 
+import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +31,22 @@ public class PracticeApiController {
 
     private final PracticeService practiceService;
     private final WrongAnswerService wrongAnswerService;
+    private final FreeCodingService freeCodingService;
 
     public PracticeApiController(PracticeService practiceService,
-                                 WrongAnswerService wrongAnswerService) {
+                                 WrongAnswerService wrongAnswerService,
+                                 FreeCodingService freeCodingService) {
         this.practiceService = practiceService;
         this.wrongAnswerService = wrongAnswerService;
+        this.freeCodingService = freeCodingService;
+    }
+
+    @PostMapping("/api/practice/free-coding/run")
+    public ApiResponse<FreeCodingRunResponse> runFreeCoding(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @Valid @RequestBody FreeCodingRunRequest request
+    ) {
+        return ApiResponse.success(freeCodingService.run(sessionUser, request));
     }
 
     @PostMapping("/api/practice/sets")

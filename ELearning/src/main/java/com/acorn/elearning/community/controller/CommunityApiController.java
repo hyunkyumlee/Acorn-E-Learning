@@ -83,6 +83,14 @@ public class CommunityApiController {
         return ApiResponse.success(postService.detail(sessionUser, postService.create(sessionUser, request.toForm()).getPostId(), false));
     }
 
+    @PostMapping("/api/community/drafts")
+    public ApiResponse<Map<String, Object>> createDraft(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+    ) {
+        Long postId = postService.createDraft(sessionUser).getPostId();
+        return ApiResponse.success(Map.of("postId", postId));
+    }
+
     @PatchMapping("/api/community/posts/{postId}")
     public ApiResponse<PostDetailResponse> updatePost(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
@@ -110,6 +118,19 @@ public class CommunityApiController {
         return ApiResponse.success(new AttachmentListResponse(attachmentService.addMetadata(sessionUser, postId, files)));
     }
 
+    @PostMapping("/api/community/posts/{postId}/inline-images")
+    public ApiResponse<Map<String, Object>> inlineImage(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long postId,
+            @RequestParam("image") MultipartFile image
+    ) {
+        var attachment = attachmentService.addInlineImage(sessionUser, postId, image);
+        return ApiResponse.success(Map.of(
+                "attachmentId", attachment.getAttachmentId(),
+                "url", attachment.getFileUrl()
+        ));
+    }
+
     @DeleteMapping("/api/community/attachments/{attachmentId}")
     public ApiResponse<Map<String, Object>> deleteAttachment(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
@@ -120,8 +141,11 @@ public class CommunityApiController {
     }
 
     @GetMapping("/community/attachments/{attachmentId}/file")
-    public ResponseEntity<Resource> attachmentFile(@PathVariable Long attachmentId) {
-        AttachmentService.AttachmentFile file = attachmentService.attachmentFile(attachmentId);
+    public ResponseEntity<Resource> attachmentFile(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            @PathVariable Long attachmentId
+    ) {
+        AttachmentService.AttachmentFile file = attachmentService.attachmentFile(sessionUser, attachmentId);
         ContentDisposition disposition = ContentDisposition.inline()
                 .filename(file.attachment().getOriginalName(), StandardCharsets.UTF_8)
                 .build();

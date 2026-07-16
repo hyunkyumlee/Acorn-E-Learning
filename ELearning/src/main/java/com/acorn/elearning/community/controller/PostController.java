@@ -120,7 +120,9 @@ public class PostController {
             addCommunityShell(model, sessionUser, conditionFromForm(form));
             return "community/write";
         }
-        CommunityPost post = postService.create(sessionUser, form);
+        CommunityPost post = form.getDraftPostId() == null
+                ? postService.create(sessionUser, form)
+                : postService.publishDraft(sessionUser, form);
         redirectAttributes.addFlashAttribute("message", "게시글이 등록되었습니다.");
         return "redirect:/community/posts/" + post.getPostId() + "?skipView=true";
     }

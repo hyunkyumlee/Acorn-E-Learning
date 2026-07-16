@@ -633,6 +633,80 @@
   color: var(--muted);
 }
 
+.free-coding-entry {
+  padding: 0;
+  overflow: hidden;
+}
+
+.free-coding-entry-link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 78px;
+  padding: var(--space-4);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.free-coding-entry-link:hover {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.free-coding-entry-link:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+.free-coding-entry-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+}
+
+.free-coding-entry-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.free-coding-entry-copy strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.free-coding-entry-copy small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.free-coding-entry-arrow {
+  color: var(--muted);
+  transition: transform 160ms ease, color 160ms ease;
+}
+
+.free-coding-entry-link:hover .free-coding-entry-arrow {
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .free-coding-entry-link,
+  .free-coding-entry-arrow,
+  .free-coding-entry-link:hover .free-coding-entry-arrow {
+    transition: none;
+    transform: none;
+  }
+}
+
 /* StatusPanel 내부 구분선 */
 .status-divider {
   width: 100%;

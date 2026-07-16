@@ -7,6 +7,7 @@ import com.acorn.elearning.practice.form.PracticeAnswerForm;
 import com.acorn.elearning.practice.form.PracticeSetCompleteForm;
 import com.acorn.elearning.practice.model.PracticeProblem;
 import com.acorn.elearning.practice.service.PracticeService;
+import com.acorn.elearning.practice.service.FreeCodingService;
 import com.acorn.elearning.practice.service.ProblemService;
 import com.acorn.elearning.practice.view.PracticeSetView;
 import com.acorn.elearning.security.SessionUser;
@@ -37,14 +38,27 @@ public class PracticeController {
 
     private final ProblemService problemService;
     private final PracticeService practiceService;
+    private final FreeCodingService freeCodingService;
     private final LessonMapper lessonMapper;
     private final CurriculumNodeMapper curriculumNodeMapper;
 
-    public PracticeController(ProblemService problemService, PracticeService practiceService, LessonMapper lessonMapper, CurriculumNodeMapper curriculumNodeMapper) {
+    public PracticeController(ProblemService problemService,
+                              PracticeService practiceService,
+                              FreeCodingService freeCodingService,
+                              LessonMapper lessonMapper,
+                              CurriculumNodeMapper curriculumNodeMapper) {
         this.problemService = problemService;
         this.practiceService = practiceService;
+        this.freeCodingService = freeCodingService;
         this.lessonMapper = lessonMapper;
         this.curriculumNodeMapper = curriculumNodeMapper;
+    }
+
+    @GetMapping("/practice/free-coding")
+    public String freeCoding(
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser) {
+        freeCodingService.requireLearner(sessionUser);
+        return "practice/free-coding";
     }
 
     @GetMapping("/learning/practice")

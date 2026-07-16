@@ -38,6 +38,10 @@ public class AttachmentService {
             "application/zip",
             "application/x-zip-compressed"
     );
+    private static final Set<String> IMAGE_EXTENSIONS = Set.of("png", "jpg", "jpeg", "webp");
+    private static final Set<String> IMAGE_CONTENT_TYPES = Set.of("image/png", "image/jpeg", "image/webp");
+    private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final String STATUS_DRAFT = "DRAFT";
 
     private final PostAttachmentMapper postAttachmentMapper;
     private final CommunityPostMapper communityPostMapper;
@@ -72,21 +76,34 @@ public class AttachmentService {
     }
 
     @Transactional
+    public PostAttachment addInlineImage(SessionUser sessionUser, Long postId, MultipartFile image) {
+        Long userId = requireUserId(sessionUser);
+        CommunityPost post = requireWritablePost(postId);
+        requireOwner(post, userId);
+        validateInlineImage(image);
+        ensureAttachmentCapacity(postId, 1, image.getSize());
+
+        PostAttachment attachment = new PostAttachment();
+        attachment.setPostId(postId);
+        attachment.setUploaderId(userId);
+        attachment.setOriginalName(originalName(image));
+        attachment.setStoredName(storedName(image));
+        attachment.setFilePath("community/" + postId + "/inline/" + attachment.getStoredName());
+        attachment.setFileSize(image.getSize());
+        saveFile(image, attachment.getFilePath());
+        postAttachmentMapper.insert(attachment);
+        return attachment;
+    }
+
+    @Transactional
     public void saveMetadata(Long postId, Long uploaderId, List<MultipartFile> files) {
         List<MultipartFile> uploadFiles = nonEmptyFiles(files);
         if (uploadFiles.isEmpty()) {
             return;
         }
 
-        int existingCount = postAttachmentMapper.countByPostId(postId);
-        if (existingCount + uploadFiles.size() > MAX_FILES_PER_POST) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일은 게시글당 최대 5개까지 가능합니다.");
-        }
-
         long totalSize = uploadFiles.stream().mapToLong(MultipartFile::getSize).sum();
-        if (totalSize > MAX_TOTAL_SIZE) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 전체 크기는 20MB를 넘을 수 없습니다.");
-        }
+        ensureAttachmentCapacity(postId, uploadFiles.size(), totalSize);
 
         for (MultipartFile file : uploadFiles) {
             validateFile(file);
@@ -103,10 +120,17 @@ public class AttachmentService {
     }
 
     @Transactional(readOnly = true)
-    public AttachmentFile attachmentFile(Long attachmentId) {
+    public AttachmentFile attachmentFile(SessionUser sessionUser, Long attachmentId) {
         PostAttachment attachment = postAttachmentMapper.findById(attachmentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다."));
-        requireActivePost(attachment.getPostId());
+        CommunityPost post = communityPostMapper.findById(attachment.getPostId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다."));
+        if (!STATUS_ACTIVE.equals(post.getStatus()) || post.getDeletedAt() != null) {
+            Long userId = requireUserId(sessionUser);
+            if (!STATUS_DRAFT.equals(post.getStatus()) || !userId.equals(post.getWriterId())) {
+                throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다.");
+            }
+        }
 
         Path targetPath = resolveStoragePath(attachment.getFilePath());
         if (!Files.exists(targetPath) || !Files.isRegularFile(targetPath)) {
@@ -131,6 +155,18 @@ public class AttachmentService {
         deleteFile(attachment.getFilePath());
     }
 
+    @Transactional
+    public void removeUnreferencedInlineImages(Long postId, String markdown) {
+        String renderedMarkdown = markdown == null ? "" : markdown;
+        postAttachmentMapper.findByPostId(postId).stream()
+                .filter(this::isInlineImage)
+                .filter(attachment -> !renderedMarkdown.contains(attachment.getFileUrl()))
+                .forEach(attachment -> {
+                    postAttachmentMapper.deleteById(attachment.getAttachmentId());
+                    deleteFile(attachment.getFilePath());
+                });
+    }
+
     private List<MultipartFile> nonEmptyFiles(List<MultipartFile> files) {
         if (files == null) {
             return List.of();
@@ -151,6 +187,37 @@ public class AttachmentService {
         String contentType = file.getContentType();
         if (contentType != null && !contentType.isBlank() && !ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "지원하지 않는 첨부파일 MIME type입니다.");
+        }
+    }
+
+    private void validateInlineImage(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "이미지 파일이 필요합니다.");
+        }
+        if (image.getSize() > MAX_FILE_SIZE) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "이미지 1개 크기는 10MB를 넘을 수 없습니다.");
+        }
+        String extension = extension(originalName(image));
+        if (!IMAGE_EXTENSIONS.contains(extension)) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "PNG, JPG, WEBP 이미지만 본문에 넣을 수 있습니다.");
+        }
+        String contentType = image.getContentType();
+        if (contentType == null || contentType.isBlank() || !IMAGE_CONTENT_TYPES.contains(contentType)) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "지원하지 않는 이미지 MIME type입니다.");
+        }
+    }
+
+    private void ensureAttachmentCapacity(Long postId, int additionalCount, long additionalSize) {
+        List<PostAttachment> existingAttachments = postAttachmentMapper.findByPostId(postId);
+        int existingCount = existingAttachments.size();
+        if (existingCount + additionalCount > MAX_FILES_PER_POST) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일은 게시글당 최대 5개까지 가능합니다.");
+        }
+        long existingSize = existingAttachments.stream()
+                .mapToLong(attachment -> attachment.getFileSize() == null ? 0L : attachment.getFileSize())
+                .sum();
+        if (existingSize + additionalSize > MAX_TOTAL_SIZE) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 전체 크기는 20MB를 넘을 수 없습니다.");
         }
     }
 
@@ -224,6 +291,22 @@ public class AttachmentService {
     private CommunityPost requireActivePost(Long postId) {
         return communityPostMapper.findActiveById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+    }
+
+    private CommunityPost requireWritablePost(Long postId) {
+        CommunityPost post = communityPostMapper.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+        if ((!STATUS_ACTIVE.equals(post.getStatus()) && !STATUS_DRAFT.equals(post.getStatus()))
+                || post.getDeletedAt() != null) {
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다.");
+        }
+        return post;
+    }
+
+    private boolean isInlineImage(PostAttachment attachment) {
+        return attachment.isImage()
+                && attachment.getFilePath() != null
+                && attachment.getFilePath().contains("/inline/");
     }
 
     private void requireOwner(CommunityPost post, Long userId) {

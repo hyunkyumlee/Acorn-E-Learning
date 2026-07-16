@@ -59,6 +59,46 @@ public class TestCaseExecutionService {
         }
     }
 
+    public CodeExecutionResult executeRaw(String source, String input) {
+        String violationMessage = securityPolicy.violationMessage(source);
+        if (!violationMessage.isBlank()) {
+            return new CodeExecutionResult("SECURITY_VIOLATION", false, violationMessage);
+        }
+
+        Path workDir = createWorkDir();
+        try {
+            Files.writeString(workDir.resolve("Solution.java"), source, StandardCharsets.UTF_8);
+            ProcessResult compile = runProcess(workDir, COMPILE_TIMEOUT, "javac", "--limit-modules", "java.base", "Solution.java");
+            if (compile.exitCode() != 0) {
+                return new CodeExecutionResult(compile.timedOut() ? "TIMEOUT" : "COMPILE_ERROR", false, compile.output());
+            }
+
+            ProcessResult run = runProcessWithInput(
+                    workDir,
+                    input == null ? "" : input,
+                    RUN_TIMEOUT,
+                    "java",
+                    "--limit-modules",
+                    "java.base",
+                    "-Xms16m",
+                    "-Xmx64m",
+                    "-Dfile.encoding=UTF-8",
+                    "-Duser.home=" + workDir,
+                    "-Djava.io.tmpdir=" + workDir,
+                    "-cp",
+                    workDir.toString(),
+                    "Solution");
+            if (run.exitCode() == 0) {
+                return new CodeExecutionResult("SUCCESS", true, run.output());
+            }
+            return new CodeExecutionResult(run.timedOut() ? "TIMEOUT" : "RUNTIME_ERROR", false, run.output());
+        } catch (IOException exception) {
+            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "코드 실행 파일을 만들 수 없습니다.");
+        } finally {
+            deleteWorkDir(workDir);
+        }
+    }
+
     private List<TestCase> parseCases(String testCaseSpec) {
         try {
             JsonNode root = objectMapper.readTree(testCaseSpec);
@@ -163,14 +203,14 @@ public class TestCaseExecutionService {
             if (!completed) {
                 process.destroyForcibly();
                 process.waitFor(1, TimeUnit.SECONDS);
-                return new ProcessResult(-1, "실행 시간이 초과되었습니다.");
+                return new ProcessResult(-1, "실행 시간이 초과되었습니다.", true);
             }
-            return new ProcessResult(process.exitValue(), output.join());
+            return new ProcessResult(process.exitValue(), output.join(), false);
         } catch (IOException exception) {
-            return new ProcessResult(-1, "코드 실행 도구를 사용할 수 없습니다.");
+            return new ProcessResult(-1, "코드 실행 도구를 사용할 수 없습니다.", false);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            return new ProcessResult(-1, "코드 실행이 중단되었습니다.");
+            return new ProcessResult(-1, "코드 실행이 중단되었습니다.", false);
         }
     }
 
@@ -230,6 +270,8 @@ public class TestCaseExecutionService {
         return value == null ? "" : value.strip().replace("\r\n", "\n");
     }
 
+    public record CodeExecutionResult(String status, boolean success, String output) {}
+
     private record TestCase(String input, String expectedOutput) {}
-    private record ProcessResult(int exitCode, String output) {}
+    private record ProcessResult(int exitCode, String output, boolean timedOut) {}
 }

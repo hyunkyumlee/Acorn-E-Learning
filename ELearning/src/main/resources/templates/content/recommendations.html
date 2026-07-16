@@ -214,6 +214,14 @@
                   </ol>
                 </div>
               </div>
+
+              <div class="content-detail-modal content-copy-modal" data-copy-modal aria-hidden="true">
+                <div class="content-detail-dialog content-copy-dialog" role="dialog" aria-modal="true" aria-labelledby="content-copy-modal-title">
+                  <span class="content-copy-modal-icon" aria-hidden="true">✓</span>
+                  <h3 id="content-copy-modal-title">복사되었습니다.</h3>
+                  <button type="button" class="content-copy-confirm-button" data-copy-modal-close>확인</button>
+                </div>
+              </div>
             </article>
           </section>
         </section>
@@ -228,6 +236,36 @@
       }
       modal.classList.remove("is-open");
       modal.setAttribute("aria-hidden", "true");
+    };
+
+    const copyModal = document.querySelector("[data-copy-modal]");
+    let copyModalTrigger = null;
+
+    const closeCopyModal = () => {
+      if (!copyModal) {
+        return;
+      }
+      copyModal.classList.remove("is-open");
+      copyModal.setAttribute("aria-hidden", "true");
+      copyModalTrigger?.focus();
+      copyModalTrigger = null;
+    };
+
+    const openCopyModal = (trigger) => {
+      if (!copyModal) {
+        return;
+      }
+      copyModalTrigger = trigger;
+      copyModal.classList.add("is-open");
+      copyModal.setAttribute("aria-hidden", "false");
+      copyModal.querySelector("[data-copy-modal-close]")?.focus();
+    };
+
+    const getCopyModalFocusables = () => {
+      if (!copyModal) {
+        return [];
+      }
+      return Array.from(copyModal.querySelectorAll("button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"));
     };
 
     document.querySelectorAll("[data-detail-target]").forEach((button) => {
@@ -245,17 +283,45 @@
       button.addEventListener("click", () => closeDetailModal(button.closest(".content-detail-modal")));
     });
 
+    document.querySelectorAll("[data-copy-modal-close]").forEach((button) => {
+      button.addEventListener("click", closeCopyModal);
+    });
+
     document.querySelectorAll(".content-detail-modal").forEach((modal) => {
       modal.addEventListener("click", (event) => {
         if (event.target === modal) {
-          closeDetailModal(modal);
+          if (modal === copyModal) {
+            closeCopyModal();
+          } else {
+            closeDetailModal(modal);
+          }
         }
       });
     });
 
     document.addEventListener("keydown", (event) => {
+      if (copyModal?.classList.contains("is-open") && event.key === "Tab") {
+        const focusables = getCopyModalFocusables();
+        const firstFocusable = focusables[0];
+        const lastFocusable = focusables[focusables.length - 1];
+        if (!firstFocusable || !lastFocusable) {
+          event.preventDefault();
+          return;
+        }
+        const activeElement = document.activeElement;
+        if (!copyModal.contains(activeElement)
+            || (event.shiftKey && activeElement === firstFocusable)
+            || (!event.shiftKey && activeElement === lastFocusable)) {
+          event.preventDefault();
+          (event.shiftKey ? lastFocusable : firstFocusable).focus();
+        }
+        return;
+      }
       if (event.key === "Escape") {
-        document.querySelectorAll(".content-detail-modal.is-open").forEach(closeDetailModal);
+        document.querySelectorAll(".content-detail-modal.is-open:not([data-copy-modal])").forEach(closeDetailModal);
+        if (copyModal?.classList.contains("is-open")) {
+          closeCopyModal();
+        }
       }
     });
 
@@ -275,7 +341,7 @@
           document.execCommand("copy");
           textarea.remove();
         }
-        window.alert("복사가 되었습니다");
+        openCopyModal(button);
       });
     });
   </script>

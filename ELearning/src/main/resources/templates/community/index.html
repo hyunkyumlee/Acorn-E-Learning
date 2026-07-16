@@ -36,10 +36,6 @@
       </aside>
 
       <div class="community-home-main">
-        <div class="community-home-main-actions">
-          <a class="button primary community-home-write-button" th:href="@{/community/write}">글쓰기</a>
-        </div>
-
         <section class="community-notice-strip" th:if="${notices != null and !#lists.isEmpty(notices)}" aria-label="공지사항">
           <div class="community-notice-strip-heading">
             <span>NOTICE</span>
@@ -57,6 +53,10 @@
             </li>
           </ul>
         </section>
+
+        <div class="community-home-main-actions">
+          <a class="button primary community-home-write-button" th:href="@{/community/write}">글쓰기</a>
+        </div>
 
         <section class="panel community-feed-card community-home-feed-card">
           <div class="community-feed-heading">

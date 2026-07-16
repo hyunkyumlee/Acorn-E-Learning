@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class PostForm {
+    private Long draftPostId;
+
     @NotBlank
     @Size(max = 200)
     private String title;

@@ -49,15 +49,9 @@
                th:attr="aria-current=${activeBoardType == 'STUDY_LOG'} ? 'page' : null"
                th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG',keyword=${condition.keyword},sort='latest')}">공부 일지</a>
           </nav>
-          <a class="button primary community-write-button" th:href="@{/community/write}">글쓰기</a>
         </div>
 
         <section class="panel community-listing-panel">
-          <div class="community-listing-heading">
-            <h1>게시글 목록</h1>
-            <span th:text="${view.total + '개'}">0개</span>
-          </div>
-
           <section class="community-notice-strip" th:if="${notices != null and !#lists.isEmpty(notices)}" aria-label="공지사항">
             <div class="community-notice-strip-heading">
               <span>NOTICE</span>
@@ -76,6 +70,11 @@
             </ul>
           </section>
 
+          <div class="community-listing-heading">
+            <h1>게시글 목록</h1>
+            <span th:text="${view.total + '개'}">0개</span>
+          </div>
+
           <form method="get" th:action="@{/community/board}" class="community-search-form">
             <input type="hidden" name="subjectId" th:value="${condition.subjectId}">
             <input type="hidden" name="boardType" th:value="${condition.boardType}">
@@ -85,17 +84,20 @@
             <button class="button" type="submit">검색</button>
           </form>
 
-          <nav class="community-sort-tabs" aria-label="게시글 정렬">
-            <a th:classappend="${condition.sort == 'latest'} ? ' is-active'"
-               th:attr="aria-current=${condition.sort == 'latest'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='latest')}">최신순</a>
-            <a th:classappend="${condition.sort == 'likes'} ? ' is-active'"
-               th:attr="aria-current=${condition.sort == 'likes'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='likes')}">공감순</a>
-            <a th:classappend="${condition.sort == 'views'} ? ' is-active'"
-               th:attr="aria-current=${condition.sort == 'views'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='views')}">조회수 순</a>
-          </nav>
+          <div class="community-listing-sort-row">
+            <nav class="community-sort-tabs" aria-label="게시글 정렬">
+              <a th:classappend="${condition.sort == 'latest'} ? ' is-active'"
+                 th:attr="aria-current=${condition.sort == 'latest'} ? 'page' : null"
+                 th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='latest')}">최신순</a>
+              <a th:classappend="${condition.sort == 'likes'} ? ' is-active'"
+                 th:attr="aria-current=${condition.sort == 'likes'} ? 'page' : null"
+                 th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='likes')}">공감순</a>
+              <a th:classappend="${condition.sort == 'views'} ? ' is-active'"
+                 th:attr="aria-current=${condition.sort == 'views'} ? 'page' : null"
+                 th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort='views')}">조회수 순</a>
+            </nav>
+            <a class="button primary community-write-button" th:href="@{/community/write}">글쓰기</a>
+          </div>
 
           <ul class="community-post-list community-listing-post-list">
             <li th:each="post : ${view.posts}">

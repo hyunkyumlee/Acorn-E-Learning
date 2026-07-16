@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PostService {
     private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final String STATUS_DRAFT = "DRAFT";
     private static final String STATUS_HIDDEN = "HIDDEN";
     private static final String STATUS_DELETED = "DELETED";
     private static final String WEEKLY_POPULAR_LABEL = "주간 인기";
@@ -118,6 +119,40 @@ public class PostService {
     }
 
     @Transactional
+    public CommunityPost createDraft(SessionUser sessionUser) {
+        Long userId = requireUserId(sessionUser);
+        CommunityPost draft = new CommunityPost();
+        draft.setWriterId(userId);
+        draft.setSubjectId(1L);
+        draft.setBoardType("FREE");
+        draft.setTitle("임시 작성 글");
+        draft.setContent("");
+        draft.setStatus(STATUS_DRAFT);
+        communityPostMapper.insert(draft);
+        return draft;
+    }
+
+    @Transactional
+    public CommunityPost publishDraft(SessionUser sessionUser, PostForm form) {
+        Long userId = requireUserId(sessionUser);
+        requirePostForm(form);
+        if (form.getDraftPostId() == null) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "임시 작성 글 정보가 필요합니다.");
+        }
+
+        CommunityPost draft = requireOwnedDraft(form.getDraftPostId(), userId);
+        draft.setSubjectId(form.getSubjectId());
+        draft.setBoardType(normalizeBoardType(form.getBoardType()));
+        draft.setTitle(form.getTitle().trim());
+        draft.setContent(form.getContent().trim());
+        if (communityPostMapper.publishDraft(draft) == 0) {
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "발행할 임시 작성 글을 찾을 수 없습니다.");
+        }
+        attachmentService.removeUnreferencedInlineImages(draft.getPostId(), draft.getContent());
+        return requireActivePost(draft.getPostId());
+    }
+
+    @Transactional
     public CommunityPost update(SessionUser sessionUser, Long postId, PostForm form) {
         Long userId = requireUserId(sessionUser);
         requirePostForm(form);
@@ -131,6 +166,7 @@ public class PostService {
         communityPostMapper.update(post);
         deleteSelectedAttachments(sessionUser, form.getDeleteAttachmentIds());
         attachmentService.saveMetadata(postId, userId, form.getFiles());
+        attachmentService.removeUnreferencedInlineImages(postId, post.getContent());
         return requireActivePost(postId);
     }
 
@@ -179,6 +215,20 @@ public class PostService {
             );
         }
 
+        if (!STATUS_ACTIVE.equals(post.getStatus())) {
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다.");
+        }
+
+        return post;
+    }
+
+    private CommunityPost requireOwnedDraft(Long postId, Long userId) {
+        CommunityPost post = communityPostMapper.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "임시 작성 글을 찾을 수 없습니다."));
+        requireOwner(post, userId);
+        if (!STATUS_DRAFT.equals(post.getStatus()) || post.getDeletedAt() != null) {
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "임시 작성 글을 찾을 수 없습니다.");
+        }
         return post;
     }
 

@@ -466,7 +466,8 @@
   line-height: 1.55;
 }
 
-.exam-answer-form {
+.exam-answer-form,
+.free-coding-form {
   display: grid;
   max-width: none;
   gap: var(--space-4);
@@ -480,7 +481,8 @@
   width: 100%;
 }
 
-.exam-answer-form textarea {
+.exam-answer-form textarea,
+.free-coding-form .free-coding-source {
   width: 100%;
   min-height: 420px;
   border-color: color-mix(in srgb, var(--primary) 28%, var(--line));
@@ -497,7 +499,8 @@
   white-space: pre;
 }
 
-.exam-answer-form.is-enhanced .exam-code-source {
+.exam-answer-form.is-enhanced .exam-code-source,
+.free-coding-form.is-enhanced .exam-code-source {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -518,7 +521,8 @@
     var(--header-bg);
 }
 
-.exam-answer-form.is-enhanced .exam-code-editor {
+.exam-answer-form.is-enhanced .exam-code-editor,
+.free-coding-form.is-enhanced .exam-code-editor {
   display: block;
 }
 
@@ -555,13 +559,15 @@
   box-shadow: var(--focus-ring);
 }
 
-.exam-answer-form textarea:focus {
+.exam-answer-form textarea:focus,
+.free-coding-form .free-coding-source:focus {
   border-color: var(--primary);
   box-shadow: var(--focus-ring);
   outline: none;
 }
 
-.exam-answer-form textarea::selection {
+.exam-answer-form textarea::selection,
+.free-coding-form .free-coding-source::selection {
   background: color-mix(in srgb, var(--primary) 34%, transparent);
   color: white;
 }

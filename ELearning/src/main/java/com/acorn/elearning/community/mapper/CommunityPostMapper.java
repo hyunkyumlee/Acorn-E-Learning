@@ -17,6 +17,7 @@ public interface CommunityPostMapper {
     List<CommunityPost> findByWriterId(@Param("writerId") Long writerId);
     int insert(CommunityPost model);
     int update(CommunityPost model);
+    int publishDraft(CommunityPost model);
     int softDelete(@Param("postId") Long postId, @Param("writerId") Long writerId);
     int incrementLikeCount(@Param("postId") Long postId);
     int decrementLikeCount(@Param("postId") Long postId);

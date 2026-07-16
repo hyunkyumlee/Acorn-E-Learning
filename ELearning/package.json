@@ -1,12 +1,16 @@
 {
   "scripts": {
-    "build:codemirror": "esbuild src/main/frontend/codemirror-bundle.js --bundle --format=esm --target=es2020 --minify --outfile=src/main/resources/static/js/vendor/codemirror.bundle.js"
+    "build:codemirror": "esbuild src/main/frontend/codemirror-bundle.js --bundle --format=esm --target=es2020 --minify --outfile=src/main/resources/static/js/vendor/codemirror.bundle.js",
+    "build:community-editor": "esbuild src/main/frontend/community-editor-bundle.js --bundle --format=esm --target=es2020 --minify --outfile=src/main/resources/static/js/vendor/community-editor.bundle.js && esbuild src/main/frontend/community-markdown-viewer-bundle.js --bundle --format=esm --target=es2020 --minify --outfile=src/main/resources/static/js/vendor/community-markdown-viewer.bundle.js"
   },
   "dependencies": {
     "@codemirror/commands": "6.10.4",
     "@codemirror/lang-java": "6.0.2",
     "@codemirror/theme-one-dark": "6.1.3",
-    "codemirror": "6.0.2"
+    "@milkdown/kit": "^7.21.3",
+    "codemirror": "6.0.2",
+    "dompurify": "^3.3.3",
+    "marked": "^17.0.3"
   },
   "devDependencies": {
     "esbuild": "0.28.1"

@@ -1,4 +1,4 @@
-import {basicSetup, EditorView, indentLess, indentMore, java, oneDark} from "../vendor/codemirror.bundle.js";
+import {createJavaCodeEditor} from "./code-editor.js";
 
 const form = document.querySelector("[data-code-run-form]");
 const runButton = document.querySelector("[data-code-run-button]");
@@ -26,69 +26,15 @@ if (form && runButton && resultPanel) {
     submitButton.disabled = alreadySubmitted && !changed;
     submitButton.textContent = alreadySubmitted && !changed ? "제출됨" : (alreadySubmitted ? "다시 제출" : "제출");
   };
-  const insertSoftTab = (view) => {
-    const hasSelection = view.state.selection.ranges.some((range) => !range.empty);
-    if (hasSelection) {
-      return indentMore(view);
-    }
-    view.dispatch(view.state.replaceSelection("    "));
-    return true;
-  };
-  const handleEditorTab = (event) => {
-    if (event.key !== "Tab" || !editorView) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.shiftKey) {
-      indentLess(editorView);
-      return;
-    }
-    insertSoftTab(editorView);
-  };
-
-  const knowvaEditorTheme = EditorView.theme({
-    "&": {
-      minHeight: "420px",
-    },
-    ".cm-scroller": {
-      fontFamily: "\"SFMono-Regular\", Consolas, \"Liberation Mono\", monospace",
-      lineHeight: "1.55",
-    },
-    ".cm-content": {
-      minHeight: "420px",
-      padding: "16px",
-      caretColor: "var(--primary)",
-    },
-    ".cm-gutters": {
-      borderRight: "1px solid rgba(148, 163, 184, 0.22)",
-    },
-    "&.cm-focused": {
-      outline: "none",
-    },
-  });
-
   if (textarea && editorHost) {
     try {
-      editorView = new EditorView({
-        doc: textarea.value,
-        extensions: [
-          basicSetup,
-          java(),
-          oneDark,
-          knowvaEditorTheme,
-          EditorView.updateListener.of((update) => {
-            if (update.docChanged) {
-              textarea.value = update.state.doc.toString();
-              updateSubmitState(textarea.value);
-            }
-          }),
-        ],
-        parent: editorHost,
-      });
-      editorHost.addEventListener("keydown", handleEditorTab, true);
-      editorHost.addEventListener("mousedown", () => {
-        requestAnimationFrame(() => editorView?.focus());
+      editorView = createJavaCodeEditor({
+        textarea,
+        editorHost,
+        onChange: (code) => {
+          textarea.value = code;
+          updateSubmitState(code);
+        },
       });
       form.classList.add("is-enhanced");
       requestAnimationFrame(() => requestAnimationFrame(notifyEditorReady));
@@ -104,7 +50,7 @@ if (form && runButton && resultPanel) {
 
   const syncTextarea = () => {
     if (editorView && textarea) {
-      textarea.value = editorView.state.doc.toString();
+      textarea.value = editorView.getValue();
     }
     return textarea?.value || "";
   };

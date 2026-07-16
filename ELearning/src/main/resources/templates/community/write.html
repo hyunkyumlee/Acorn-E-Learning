@@ -10,6 +10,7 @@
   <link rel="stylesheet" th:href="@{/css/common/base.css}">
   <link rel="stylesheet" th:href="@{/css/common/components.css}">
   <link rel="stylesheet" th:href="@{/css/common/themes.css}">
+  <link rel="stylesheet" th:href="@{/js/vendor/community-editor.bundle.css}">
   <link rel="stylesheet" th:href="@{/css/screens/community.css}">
   <script defer th:src="@{/js/common/theme.js}"></script>
 </head>
@@ -32,7 +33,8 @@
           <a class="button" th:href="@{/community/board}">목록</a>
         </div>
 
-        <form method="post" th:action="@{/community/posts}" th:object="${form}" enctype="multipart/form-data" class="community-form">
+        <form method="post" th:action="@{/community/posts}" th:object="${form}" class="community-form">
+          <input type="hidden" th:field="*{draftPostId}">
           <div class="community-form-grid">
             <label class="wide">제목
               <input th:field="*{title}" maxlength="200" required>
@@ -52,12 +54,18 @@
                 <option value="STUDY_LOG">공부 일지</option>
               </select>
             </label>
-            <label class="wide">내용
-              <textarea th:field="*{content}" rows="12" required></textarea>
-            </label>
-            <label class="wide">첨부 파일
-              <input th:field="*{files}" type="file" multiple>
-            </label>
+            <div class="wide community-editor-field">
+              <label for="content">내용</label>
+              <p class="community-editor-help" id="community-editor-help">기본 모드에서는 위 옵션 메뉴를 눌러 본문 서식을 적용할 수 있습니다.</p>
+              <div class="community-editor-shell"
+                   data-community-editor
+                   th:data-create-draft-url="@{/api/community/drafts}"
+                   th:data-upload-url-template="@{/api/community/posts/POST_ID_PLACEHOLDER/inline-images}"
+                   aria-describedby="community-editor-help">
+                <textarea th:field="*{content}" class="community-editor-source" rows="12" required></textarea>
+                <div class="community-editor-mount" aria-label="게시글 내용 편집기"></div>
+              </div>
+            </div>
           </div>
           <div class="community-actions right">
             <a class="button" th:href="@{/community/board}">취소</a>
@@ -67,5 +75,6 @@
       </section>
     </div>
   </main>
+  <script type="module" th:src="@{/js/vendor/community-editor.bundle.js}"></script>
 </body>
 </html>

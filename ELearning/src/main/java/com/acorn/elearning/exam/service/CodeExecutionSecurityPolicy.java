@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 final class CodeExecutionSecurityPolicy {
     private static final int MAX_SOURCE_LENGTH = 20_000;
     private static final String BLOCKED_MESSAGE = "허용되지 않는 API 또는 패키지가 포함되어 코드 실행을 차단했습니다.";
-    private static final Pattern UNICODE_ESCAPE = Pattern.compile("\\\\u[0-9a-fA-F]{4}");
+    private static final Pattern UNICODE_ESCAPE = Pattern.compile("\\\\u+[0-9a-fA-F]{4}");
     private static final Pattern PACKAGE_DECLARATION = Pattern.compile("\\bpackage\\b");
     private static final Pattern IMPORT_DECLARATION = Pattern.compile("\\bimport\\s+(?:static\\s+)?([^;]+);");
     private static final Set<String> ALLOWED_IMPORTS = Set.of(
@@ -25,11 +25,11 @@ final class CodeExecutionSecurityPolicy {
             "java.util.Set",
             "java.util.StringTokenizer");
     private static final List<Pattern> BLOCKED_PATTERNS = List.of(
-            Pattern.compile("\\bjava\\s*\\.\\s*(?:io|nio|net|lang\\s*\\.\\s*reflect)\\b", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("\\bjava\\s*\\.\\s*(?:io|nio|net|lang\\s*\\.\\s*(?:reflect|invoke))\\b", Pattern.CASE_INSENSITIVE),
             Pattern.compile("\\bjavax\\s*\\.", Pattern.CASE_INSENSITIVE),
             Pattern.compile("\\bsun\\s*\\.", Pattern.CASE_INSENSITIVE),
             Pattern.compile("\\bcom\\s*\\.\\s*sun\\s*\\.", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("\\b(?:Runtime|Process|ProcessBuilder|ProcessHandle|Class|ClassLoader|Thread|Executor|Socket|ServerSocket|File|Files|Path|Paths|URL|URI|RandomAccessFile|FileInputStream|FileOutputStream)\\b"),
+            Pattern.compile("\\b(?:Runtime|Process|ProcessBuilder|ProcessHandle|Class|ClassLoader|Thread|Executor|Socket|ServerSocket|File|Files|Path|Paths|URL|URI|RandomAccessFile|FileInputStream|FileOutputStream|MethodHandle(?:s)?|VarHandle)\\b"),
             Pattern.compile("\\bSystem\\s*\\.\\s*(?!(?:out\\s*\\.\\s*(?:print|println|printf)\\s*\\()|(?:in\\b))"),
             Pattern.compile("\\b(?:exec|getenv|getProperties|getProperty|load|loadLibrary|setSecurityManager)\\s*\\("),
             Pattern.compile("\\.\\s*getClass\\s*\\("));

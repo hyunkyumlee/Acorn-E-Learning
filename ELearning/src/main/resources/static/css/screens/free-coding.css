@@ -1,0 +1,163 @@
+.page-shell.free-coding-screen {
+  max-width: 1320px;
+}
+
+.free-coding-head {
+  align-items: center;
+}
+
+.free-coding-head p {
+  max-width: 720px;
+  overflow-wrap: break-word;
+  word-break: keep-all;
+}
+
+.free-coding-runtime-card {
+  display: grid;
+  min-width: 180px;
+  gap: var(--space-1);
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--line));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  padding: var(--space-4);
+}
+
+.free-coding-runtime-card span,
+.free-coding-input-field label,
+.free-coding-output-label,
+.free-coding-guide-list strong {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.free-coding-runtime-card strong {
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.free-coding-guide {
+  grid-auto-rows: max-content;
+}
+
+.free-coding-guide h2,
+.free-coding-editor-pane h2 {
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.free-coding-guide > p,
+.free-coding-editor-head p,
+.free-coding-guide-list span,
+.free-coding-editor-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.free-coding-editor-head p,
+.free-coding-editor-help {
+  overflow-wrap: break-word;
+  word-break: keep-all;
+}
+
+.free-coding-shortcut {
+  white-space: nowrap;
+}
+
+.free-coding-guide-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.free-coding-guide-list li {
+  display: grid;
+  gap: var(--space-1);
+  border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  padding-top: var(--space-3);
+}
+
+.free-coding-guide-list strong {
+  color: var(--text);
+}
+
+.free-coding-editor-pane {
+  min-width: 0;
+}
+
+.free-coding-editor-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.free-coding-editor-head > div {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.free-coding-input-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.free-coding-input-field textarea {
+  min-height: 136px;
+  resize: vertical;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  line-height: 1.55;
+  tab-size: 4;
+}
+
+.free-coding-input-field textarea:focus {
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.free-coding-output {
+  margin: 0;
+}
+
+.free-coding-output-label {
+  grid-column: 1 / -1;
+}
+
+.free-coding-output pre {
+  min-height: 132px;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.free-coding-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.free-coding-editor-help {
+  flex: 1 1 220px;
+}
+
+@media (max-width: 640px) {
+  .free-coding-head,
+  .free-coding-editor-head {
+    display: grid;
+  }
+
+  .free-coding-runtime-card {
+    min-width: 0;
+  }
+
+  .free-coding-action-row .button {
+    width: 100%;
+  }
+}

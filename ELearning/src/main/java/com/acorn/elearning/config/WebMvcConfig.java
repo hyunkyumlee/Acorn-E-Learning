@@ -31,8 +31,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(guestOnlyInterceptor).addPathPatterns("/login", "/signup", "/password/forgot", "/password/reset");
         registry.addInterceptor(loginRequiredInterceptor).addPathPatterns(
                 "/learning/**",
+                "/practice/**",
                 "/exams/**",
                 "/analysis/**",
+                "/api/practice/**",
                 "/api/analyses",
                 "/api/analyses/**",
                 "/community/**",
