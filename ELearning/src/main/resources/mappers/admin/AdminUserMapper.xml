@@ -230,7 +230,15 @@
             SELECT
                 writer_id,
                 COUNT(*) AS post_count
-            FROM community_posts
+            FROM (
+                SELECT writer_id
+                FROM community_posts
+
+                UNION ALL
+
+                SELECT writer_id
+                FROM notices
+            ) WRITTEN_CONTENTS
             GROUP BY writer_id
         ) POSTS
             ON U.user_id = POSTS.writer_id
