@@ -38,10 +38,15 @@ body.welcome-bg {
   background-attachment: fixed;
 }
 
+/* [추가] 웰컴만 기본 page-shell(1120px)보다 넓게 — 왼쪽 텍스트 폭은 그대로 두고 오른쪽 박스만 더 길어질 공간 확보 */
+.welcome-screen.page-shell {
+  max-width: 1360px;
+}
+
 /* --- hero layout --- */
 .welcome-launch {
   display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+  grid-template-columns: minmax(0, 1.02fr) minmax(460px, 0.98fr);
   align-items: center;
   gap: clamp(24px, 5vw, 48px);
   min-height: calc(100vh - var(--header-height) - var(--space-10));
@@ -89,7 +94,7 @@ body.welcome-bg {
 
 .welcome-visual {
   position: relative;
-  min-height: clamp(420px, 42vw, 560px);
+  min-height: clamp(400px, 28vw, 500px);
 }
 
 .welcome-orbit {
@@ -110,17 +115,15 @@ body.welcome-bg {
   animation: welcomeOrbitCenterFloat 8s ease-in-out infinite;
 }
 
-.welcome-orbit-center .big-planet {
+.welcome-orbit-center .welcome-demo-video {
   position: absolute;
   left: 50%;
-  top: 46%;
-  width: clamp(160px, 18vw, 210px);
-  height: clamp(160px, 18vw, 210px);
+  top: 50%;
+  width: clamp(260px, 26vw, 340px);
+  height: clamp(260px, 26vw, 340px);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  background:
-    radial-gradient(circle at 35% 30%, #ffffff 0 9%, transparent 10%),
-    linear-gradient(135deg, var(--success), var(--primary));
+  object-fit: cover;
   box-shadow: 0 0 46px color-mix(in srgb, var(--primary) 28%, transparent);
 }
 
@@ -150,33 +153,12 @@ body.welcome-bg {
   transform: rotate(-20deg);
 }
 
-.welcome-moon {
-  position: absolute;
-  border-radius: 50%;
-}
-
-.welcome-moon.one {
-  left: 8%;
-  top: 15%;
-  width: 72px;
-  height: 72px;
-  background: linear-gradient(135deg, #efffbd, var(--success));
-}
-
-.welcome-moon.two {
-  right: 9%;
-  bottom: 16%;
-  width: 96px;
-  height: 96px;
-  background: linear-gradient(135deg, #d8f4ff, var(--primary));
-}
-
 .welcome-guide {
   position: absolute;
-  right: 28px;
-  top: 72px;
-  z-index: 2;
-  width: min(268px, 48%);
+  right: -12px;
+  top: 16px;
+  z-index: 5;
+  width: min(230px, 42%);
   border: 1px solid var(--welcome-guide-line);
   border-radius: var(--radius);
   background: var(--welcome-guide-bg);
@@ -292,19 +274,13 @@ body.welcome-bg {
   pointer-events: none;
 }
 
-/* [추가] 캡쳐본 위 포인트 영역 표시 박스 */
-.tut-highlight {
-  position: absolute;
-  border: 2px solid red;
-  background: transparent;
-  transition: left 480ms cubic-bezier(0.2, 0.7, 0.2, 1), top 480ms cubic-bezier(0.2, 0.7, 0.2, 1),
-              width 480ms cubic-bezier(0.2, 0.7, 0.2, 1), height 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
-}
+/* [수정] 캡쳐본 위 빨간 포인트 영역 박스는 제거 — JS는 계속 위치를 계산해 넣지만 항상 숨김 처리 */
+.tut-highlight,
 .tut-highlight[hidden] { display: none; }
 
 .tut-nuvi {
   position: absolute;
-  width: clamp(64px, 14vw, 104px);
+  width: clamp(80px, 17vw, 128px);
   aspect-ratio: 1 / 1;
   background-image: url("/assets/images/characters/nuvi-poses.png");
   background-size: 500% 100%;
@@ -389,35 +365,98 @@ body.welcome-bg {
   .tut-nuvi, .tut-highlight { transition: none; }
 }
 
+/* [수정] 오로라: login/signup과 같은 .bg-fx .blob(components.css)을 베이스로 재사용하되,
+   웰컴에서만 더 은은하고(투명도↓, 블러↑, screen 블렌드로 별빛과 섞임) 원형 궤도 대신
+   물결처럼 흐르는 다방향 드리프트로 덮어씀. login/signup의 원래 .blob은 그대로 유지. */
+@keyframes auroraDrift {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(3%, -4%) scale(1.05); }
+  50%  { transform: translate(-2%, 3%) scale(0.96); }
+  75%  { transform: translate(-4%, -2%) scale(1.04); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+body.welcome-bg .bg-fx .blob {
+  opacity: 0.2;
+  filter: blur(95px);
+  mix-blend-mode: screen;
+}
+body.welcome-bg .bg-fx .blob-1 { animation: auroraDrift 23s ease-in-out infinite, blobMorph 14s ease-in-out infinite; }
+body.welcome-bg .bg-fx .blob-2 { animation: auroraDrift 28s ease-in-out infinite reverse, blobMorph 18s ease-in-out infinite -6s; }
+body.welcome-bg .bg-fx .blob-3 { animation: auroraDrift 19s ease-in-out infinite -8s, blobMorph 12s ease-in-out infinite -3s; }
+@media (prefers-reduced-motion: reduce) {
+  body.welcome-bg .bg-fx .blob { animation: none; }
+}
+
 /* ===== [추가] 밤하늘 별(반짝임) + 별똥별 배경 ===== */
 /* 별 색: 라이트=은은한 남색, 다크=밝은 흰색 (bg-fx는 welcome-screen 밖이라 body에 변수 정의) */
 body.welcome-bg {
   --star-color: rgba(38, 58, 120, 0.55);
+  --star-color-bright: rgba(20, 32, 90, 0.85);
+  --star-color-warm: rgba(90, 70, 40, 0.55);
+  --star-color-cool: rgba(40, 70, 130, 0.55);
   --shoot-color: rgba(70, 90, 165, 0.9);
 }
 :root[data-theme="knowva-ion-dark"] body.welcome-bg {
   --star-color: rgba(255, 255, 255, 0.6);   /* [수정] 별 밝기 낮춤 (0.92 → 0.6) */
+  --star-color-bright: rgba(255, 255, 255, 0.95);   /* [추가] 히어로 별용 최고 밝기 */
+  --star-color-warm: rgba(255, 224, 168, 0.75);      /* [추가] 색온도 변화: 약간 따뜻한 별 */
+  --star-color-cool: rgba(180, 210, 255, 0.75);      /* [추가] 색온도 변화: 약간 차가운 별 */
   --shoot-color: rgba(255, 255, 255, 0.95);
 }
 
-/* 별밭: (1) 항상 켜진 밝은 베이스 + (2)(3) 서로 다른 위치·위상으로 '부분만' 깜빡이는 레이어 */
+/* [추가] 별 전체를 살짝 부드럽게 — 위치/모양은 그대로 두고 filter만 정적으로 얹은 거라
+   (opacity만 애니메이션되고 blur 값 자체는 안 바뀜) 레이어당 1회 래스터라이즈면 끝, 프레임마다 다시 계산 안 됨.
+   전에 없앤 필터(예전 SVG 워프)와는 다름: 그건 모양 자체가 매 프레임 바뀌어서 매번 다시 블러해야 했던 경우. */
+.welcome-bg .starfield,
+.welcome-bg .starfield::before,
+.welcome-bg .starfield::after,
+.welcome-bg .starfield-flicker {
+  filter: blur(0.7px);
+}
+
+/* 별밭: (1) 항상 켜진 밝은 베이스 + (2)(3) 서로 다른 위치·위상으로 '부분만' 깜빡이는 레이어
+   [수정] 더 실감나게: 크기·밝기·색온도를 섞고, 큰 별은 코어+헤일로 이중 그라디언트로 은은한 광채를 줌.
+   타일을 정사각형이 아닌 큼직한 비율(320x268 등)로 잡아 눈에 띄는 격자 반복을 최대한 숨김. */
 .welcome-bg .starfield {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background-image:
-    radial-gradient(2px 2px at 25px 35px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 80px 120px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 140px 60px, var(--star-color), transparent),
-    radial-gradient(2.6px 2.6px at 190px 150px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 60px 180px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 110px 90px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 170px 20px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 30px 140px, var(--star-color), transparent);
+    /* 헤일로가 있는 밝은 '히어로' 별 2개 */
+    radial-gradient(9px 9px at 58px 44px, color-mix(in srgb, var(--star-color) 55%, transparent), transparent 70%),
+    radial-gradient(3.5px 3.5px at 58px 44px, var(--star-color-bright) 0%, color-mix(in srgb, var(--star-color-bright) 55%, transparent) 45%, transparent 100%),
+    radial-gradient(10px 10px at 262px 190px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent 70%),
+    radial-gradient(3.8px 3.8px at 262px 190px, var(--star-color-bright) 0%, color-mix(in srgb, var(--star-color-bright) 55%, transparent) 45%, transparent 100%),
+    /* 자잘한 별들: 크기·밝기 섞어서 원근감 */
+    radial-gradient(1.2px 1.2px at 22px 118px, color-mix(in srgb, var(--star-color) 55%, transparent), transparent),
+    radial-gradient(1.6px 1.6px at 96px 92px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 140px 30px, color-mix(in srgb, var(--star-color) 45%, transparent), transparent),
+    radial-gradient(1.8px 1.8px at 176px 150px, var(--star-color-warm), transparent),
+    radial-gradient(1.2px 1.2px at 210px 66px, color-mix(in srgb, var(--star-color) 60%, transparent), transparent),
+    radial-gradient(1.5px 1.5px at 12px 220px, var(--star-color-cool), transparent),
+    radial-gradient(1px 1px at 118px 210px, color-mix(in srgb, var(--star-color) 40%, transparent), transparent),
+    radial-gradient(1.6px 1.6px at 244px 30px, var(--star-color), transparent),
+    radial-gradient(1.2px 1.2px at 296px 96px, color-mix(in srgb, var(--star-color) 55%, transparent), transparent),
+    radial-gradient(1px 1px at 78px 254px, color-mix(in srgb, var(--star-color) 42%, transparent), transparent),
+    radial-gradient(1.4px 1.4px at 200px 246px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 306px 232px, color-mix(in srgb, var(--star-color) 48%, transparent), transparent),
+    /* [추가] 별 밀도 보강 */
+    radial-gradient(1px 1px at 150px 110px, color-mix(in srgb, var(--star-color) 46%, transparent), transparent),
+    radial-gradient(1.3px 1.3px at 270px 60px, var(--star-color-cool), transparent),
+    radial-gradient(1px 1px at 34px 190px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent),
+    radial-gradient(1.4px 1.4px at 190px 92px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 250px 224px, color-mix(in srgb, var(--star-color) 40%, transparent), transparent),
+    radial-gradient(1.2px 1.2px at 10px 60px, var(--star-color-warm), transparent),
+    radial-gradient(1px 1px at 100px 252px, color-mix(in srgb, var(--star-color) 44%, transparent), transparent),
+    radial-gradient(1.5px 1.5px at 60px 10px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 220px 140px, color-mix(in srgb, var(--star-color) 52%, transparent), transparent),
+    radial-gradient(1.2px 1.2px at 300px 150px, var(--star-color-cool), transparent),
+    radial-gradient(1px 1px at 130px 18px, color-mix(in srgb, var(--star-color) 38%, transparent), transparent),
+    radial-gradient(1.3px 1.3px at 40px 240px, var(--star-color-warm), transparent);
   background-repeat: repeat;
-  background-size: 200px 200px;
+  background-size: 320px 268px;
   /* [수정] 성능: 매 프레임 재계산되던 blur+drop-shadow 필터 제거 (렉 주범).
-     별 글로우는 아래 그라디언트 자체를 살짝 크고 부드럽게 그려서 대체 */
+     별 글로우는 위 헤일로 그라디언트 자체로 대체(정적 레이어, 애니메이션 비용 없음) */
   /* 베이스 층은 애니메이션 없이 항상 켜둠 → 하늘 전체가 밝게 유지 */
 }
 /* 깜빡이는 두 층: 서로 다른 별 위치·주기·위상 → 여기저기 부분부분 사라졌다 나타남 */
@@ -430,32 +469,114 @@ body.welcome-bg {
 }
 .welcome-bg .starfield::before {
   background-image:
-    radial-gradient(2px 2px at 45px 25px, var(--star-color), transparent),
-    radial-gradient(2.6px 2.6px at 120px 70px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 205px 110px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 75px 205px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 155px 175px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 15px 95px, var(--star-color), transparent);
-  background-size: 240px 240px;
-  animation: welcome-twinkle 4.5s ease-in-out infinite;
+    radial-gradient(7px 7px at 214px 96px, color-mix(in srgb, var(--star-color) 45%, transparent), transparent 70%),
+    radial-gradient(3.4px 3.4px at 214px 96px, var(--star-color-bright) 0%, color-mix(in srgb, var(--star-color-bright) 55%, transparent) 45%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 40px 30px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 108px 64px, color-mix(in srgb, var(--star-color) 45%, transparent), transparent),
+    radial-gradient(1.6px 1.6px at 168px 20px, var(--star-color-warm), transparent),
+    radial-gradient(1px 1px at 20px 150px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent),
+    radial-gradient(1.5px 1.5px at 130px 172px, var(--star-color), transparent),
+    radial-gradient(1.2px 1.2px at 258px 40px, color-mix(in srgb, var(--star-color) 55%, transparent), transparent),
+    radial-gradient(1px 1px at 70px 196px, var(--star-color-cool), transparent),
+    radial-gradient(1px 1px at 60px 110px, color-mix(in srgb, var(--star-color) 42%, transparent), transparent),
+    radial-gradient(1.2px 1.2px at 240px 160px, var(--star-color-warm), transparent),
+    radial-gradient(1px 1px at 180px 100px, color-mix(in srgb, var(--star-color) 48%, transparent), transparent),
+    radial-gradient(1.3px 1.3px at 10px 80px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 270px 190px, color-mix(in srgb, var(--star-color) 40%, transparent), transparent),
+    radial-gradient(1.1px 1.1px at 100px 10px, var(--star-color-cool), transparent);
+  background-size: 300px 220px;
+  animation: welcome-twinkle-a 5s ease-in-out infinite;
 }
 .welcome-bg .starfield::after {
   background-image:
-    radial-gradient(2px 2px at 50px 90px, var(--star-color), transparent),
-    radial-gradient(2.6px 2.6px at 160px 40px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 100px 160px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 20px 60px, var(--star-color), transparent),
-    radial-gradient(3.2px 3.2px at 130px 120px, var(--star-color), transparent),
-    radial-gradient(2px 2px at 190px 190px, var(--star-color), transparent);
-  background-size: 300px 300px;
-  animation: welcome-twinkle 7s ease-in-out infinite;
+    radial-gradient(8px 8px at 92px 210px, color-mix(in srgb, var(--star-color) 45%, transparent), transparent 70%),
+    radial-gradient(3.6px 3.6px at 92px 210px, var(--star-color-bright) 0%, color-mix(in srgb, var(--star-color-bright) 55%, transparent) 45%, transparent 100%),
+    radial-gradient(1.6px 1.6px at 40px 46px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 150px 90px, color-mix(in srgb, var(--star-color) 42%, transparent), transparent),
+    radial-gradient(1.2px 1.2px at 250px 150px, var(--star-color-warm), transparent),
+    radial-gradient(1px 1px at 190px 250px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent),
+    radial-gradient(1.5px 1.5px at 14px 130px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 280px 40px, color-mix(in srgb, var(--star-color) 46%, transparent), transparent),
+    radial-gradient(1.3px 1.3px at 320px 200px, var(--star-color-cool), transparent),
+    radial-gradient(1px 1px at 200px 60px, color-mix(in srgb, var(--star-color) 44%, transparent), transparent),
+    radial-gradient(1.2px 1.2px at 60px 180px, var(--star-color-warm), transparent),
+    radial-gradient(1px 1px at 300px 100px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent),
+    radial-gradient(1.1px 1.1px at 10px 220px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 160px 230px, color-mix(in srgb, var(--star-color) 40%, transparent), transparent),
+    radial-gradient(1.3px 1.3px at 130px 60px, var(--star-color-cool), transparent);
+  background-size: 340px 280px;
+  animation: welcome-twinkle-b 7s ease-in-out infinite;
   animation-delay: -3s;
 }
 
-/* 깜빡이는 층만 깊게 사라졌다 나타남 (베이스가 켜져 있어 하늘은 계속 밝음) */
-@keyframes welcome-twinkle {
+/* [추가] ::before/::after 2개로는 항상 두 그룹만 같이 맥동해서 '여러 군데가 제각각' 깜빡이는 느낌이
+   안 남 → 별도 div 3개를 더 얹어 서로 다른 위치·주기·모양의 깜빡임 레이어를 5개로 늘림 */
+.welcome-bg .starfield-flicker {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+}
+.welcome-bg .starfield-flicker-c {
+  background-image:
+    radial-gradient(1.6px 1.6px at 36px 58px, var(--star-color-bright), transparent),
+    radial-gradient(1px 1px at 112px 140px, color-mix(in srgb, var(--star-color) 46%, transparent), transparent),
+    radial-gradient(1.3px 1.3px at 190px 60px, var(--star-color-warm), transparent),
+    radial-gradient(1px 1px at 230px 170px, color-mix(in srgb, var(--star-color) 42%, transparent), transparent),
+    radial-gradient(1.4px 1.4px at 10px 190px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 150px 20px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent);
+  background-size: 260px 210px;
+  animation: welcome-twinkle-pop 3.2s ease-in-out infinite;
+}
+.welcome-bg .starfield-flicker-d {
+  background-image:
+    radial-gradient(1.3px 1.3px at 90px 30px, var(--star-color-cool), transparent),
+    radial-gradient(1px 1px at 20px 110px, color-mix(in srgb, var(--star-color) 44%, transparent), transparent),
+    radial-gradient(1.6px 1.6px at 170px 130px, var(--star-color-bright), transparent),
+    radial-gradient(1px 1px at 240px 50px, color-mix(in srgb, var(--star-color) 48%, transparent), transparent),
+    radial-gradient(1.2px 1.2px at 130px 190px, var(--star-color-warm), transparent),
+    radial-gradient(1px 1px at 60px 220px, color-mix(in srgb, var(--star-color) 40%, transparent), transparent),
+    radial-gradient(1.4px 1.4px at 280px 160px, var(--star-color), transparent);
+  background-size: 310px 250px;
+  animation: welcome-twinkle-pop 4.6s ease-in-out infinite -1.6s;
+}
+.welcome-bg .starfield-flicker-e {
+  background-image:
+    radial-gradient(1.4px 1.4px at 50px 150px, var(--star-color), transparent),
+    radial-gradient(1px 1px at 140px 70px, color-mix(in srgb, var(--star-color) 45%, transparent), transparent),
+    radial-gradient(1.2px 1.2px at 210px 200px, var(--star-color-cool), transparent),
+    radial-gradient(1px 1px at 270px 40px, color-mix(in srgb, var(--star-color) 42%, transparent), transparent),
+    radial-gradient(1.5px 1.5px at 8px 40px, var(--star-color-bright), transparent),
+    radial-gradient(1px 1px at 100px 230px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent);
+  background-size: 290px 240px;
+  animation: welcome-twinkle-pop 6.5s ease-in-out infinite -3.4s;
+}
+
+/* 깜빡이는 층만 깊게 사라졌다 나타남 (베이스가 켜져 있어 하늘은 계속 밝음)
+   [수정] 서로 다른 위상 곡선을 줘서 기계적으로 똑같이 맥동하는 느낌을 줄임 */
+@keyframes welcome-twinkle-a {
+  0%, 100% { opacity: 0.12; }
+  30%      { opacity: 0.85; }
+  55%      { opacity: 0.25; }
+  80%      { opacity: 1; }
+}
+@keyframes welcome-twinkle-b {
   0%, 100% { opacity: 0.1; }
-  50%      { opacity: 1; }
+  20%      { opacity: 0.9; }
+  50%      { opacity: 0.15; }
+  75%      { opacity: 0.8; }
+}
+/* [추가] '뿅' 하고 순간적으로 튀는 느낌의 깜빡임 — 한 주기 안에서 두 번 반짝였다 완전히 꺼짐,
+   부드럽게 숨쉬는 a/b와 섞이면 화면 곳곳이 제각각 깜빡이는 것처럼 보임(생동감) */
+@keyframes welcome-twinkle-pop {
+  0%, 100% { opacity: 0; }
+  4%       { opacity: 1; }
+  10%      { opacity: 0.15; }
+  16%      { opacity: 0.9; }
+  26%      { opacity: 0; }
+  70%      { opacity: 0; }
+  78%      { opacity: 0.75; }
+  86%      { opacity: 0; }
 }
 
 /* 별똥별: 오른쪽 대각선 아래(↘)로 하나씩 흘러감 */
@@ -506,9 +627,11 @@ body.welcome-bg {
 @media (prefers-reduced-motion: reduce) {
   .welcome-bg .starfield::before,
   .welcome-bg .starfield::after,
+  .welcome-bg .starfield-flicker,
   .welcome-bg .shoot { animation: none; }
   .welcome-bg .starfield::before,
-  .welcome-bg .starfield::after { opacity: 1; }
+  .welcome-bg .starfield::after,
+  .welcome-bg .starfield-flicker { opacity: 1; }
   .welcome-bg .shoot { opacity: 0; }
 }
 
