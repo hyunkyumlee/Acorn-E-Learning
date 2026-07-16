@@ -20,9 +20,17 @@
 </head>
 <body class="welcome-bg">
 <div class="bg-fx" aria-hidden="true">
-  <!-- [삭제] 오로라(SVG 워프 필터)는 렉 주범이라 제거. 밤하늘 별 + 별똥별만 유지 -->
+  <!-- [수정] 오로라: login/signup에서 이미 쓰는 검증된 blob 배경(.bg-fx .blob, components.css) 재사용 -->
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <span class="blob blob-3"></span>
   <!-- 밤하늘 별(반짝임) + 별똥별(오른쪽 대각선 아래로) -->
   <div class="starfield"></div>
+  <!-- [추가] 별밭 ::before/::after 2개 + 이 div 3개 = 총 5개의 독립적인 깜빡임 레이어.
+       주기·위상이 다 달라서 한 화면에서 여러 군데가 동시에 아니라 제각각 사라졌다 나타남 -->
+  <div class="starfield-flicker starfield-flicker-c"></div>
+  <div class="starfield-flicker starfield-flicker-d"></div>
+  <div class="starfield-flicker starfield-flicker-e"></div>
   <div class="shooting-stars">
     <span class="shoot"></span>
     <span class="shoot"></span>
@@ -50,13 +58,11 @@
             <div class="welcome-orbit">
                 <div class="welcome-comet" aria-hidden="true"></div>
                 <div class="welcome-orbit-center" aria-hidden="true">
-                    <div class="big-planet"></div>
+                    <video class="welcome-demo-video" th:src="@{/assets/videos/nuvi-3d.mp4}" autoplay muted loop playsinline></video>
                     <div class="orbit"></div>
                     <div class="orbit orbit-alt"></div>
                 </div>
             </div>
-            <div class="welcome-moon one" aria-hidden="true"></div>
-            <div class="welcome-moon two" aria-hidden="true"></div>
             <aside class="welcome-guide">
                 <strong>Nova Guide</strong>
                 <span>Knowva에 오신 것을 환영해요. 과목별 로드맵을 따라 학습하고, 오답 복습과 시험으로 실력을 확인할 수 있어요. 학습 기록을 저장하려면 로그인해 주세요.</span>
