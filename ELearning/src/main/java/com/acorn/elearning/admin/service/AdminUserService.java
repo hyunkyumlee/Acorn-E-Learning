@@ -7,9 +7,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.acorn.elearning.admin.dto.response.AdminPageResponse;
+import com.acorn.elearning.admin.dto.response.AdminRecommendationDetailResponse;
+import com.acorn.elearning.admin.dto.response.AdminUserDetailResponse;
 import com.acorn.elearning.admin.dto.response.AdminUserManageRowResponse;
 import com.acorn.elearning.admin.mapper.AdminUserMapper;
 import com.acorn.elearning.admin.model.AdminOperationLog;
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +27,15 @@ public class AdminUserService {
 
     public List<AdminUserManageRowResponse> findAll(){
         return mapper.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminUserDetailResponse findDetailById(Long userId) {
+        return mapper.findDetailById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "사용자 정보를 찾을 수 없습니다."
+                ));
     }
 
     public AdminPageResponse<AdminUserManageRowResponse> findPage(
