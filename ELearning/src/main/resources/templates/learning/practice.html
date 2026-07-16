@@ -48,7 +48,7 @@
     <!-- 수정: 완료 화면 styling용 class 추가 -->
     <div th:if="${completed}" class="practice-complete">
 
-      <div id="practiceCompleteIntro" class="practice-complete-intro">
+      <div id="practiceCompleteIntro">
         <div class="practice-complete-layout">
           <div class="practice-complete-visual">
             <img th:src="@{/assets/images/characters/nuvi-celebrate.png}" alt="문제풀이 완료 안내 캐릭터">
@@ -80,21 +80,21 @@
           <div class="practice-complete-summary-row">
             <span class="practice-complete-summary-label">정답</span>
             <p class="practice-complete-summary-value">
-              <strong th:text="${completeResult.data()['correctCount']}">0</strong>문제
+              <strong th:text="${completeResult.data()['correctCount']}">0</strong><span> 문제</span>
             </p>
           </div>
 
           <div class="practice-complete-summary-row">
             <span class="practice-complete-summary-label">오답</span>
             <p class="practice-complete-summary-value">
-              <strong th:text="${completeResult.data()['wrongCount']}">0</strong>문제
+              <strong th:text="${completeResult.data()['wrongCount']}">0</strong><span> 문제</span>
             </p>
           </div>
 
           <div class="practice-complete-summary-row">
             <span class="practice-complete-summary-label">건너뛰기</span>
             <p class="practice-complete-summary-value">
-              <strong th:text="${completeResult.data()['skippedCount']}">0</strong>문제
+              <strong th:text="${completeResult.data()['skippedCount']}">0</strong><span> 문제</span>
             </p>
           </div>
         </div>
