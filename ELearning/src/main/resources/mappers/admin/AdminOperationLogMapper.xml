@@ -43,7 +43,7 @@
             target_name,
             change_detail
         FROM admin_operation_logs
-        ORDER BY log_id DESC
+        ORDER BY log_id ASC
     </select>
 
     <insert id="insert" parameterType="com.acorn.elearning.admin.model.AdminOperationLog" useGeneratedKeys="true" keyProperty="logId">
@@ -108,7 +108,7 @@
         LEFT JOIN users u
             ON u.user_id = l.admin_id
         <include refid="OperationLogFilterWhere" />
-        ORDER BY l.created_at DESC, l.log_id DESC
+        ORDER BY l.log_id ASC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
