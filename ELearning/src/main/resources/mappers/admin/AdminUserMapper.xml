@@ -22,6 +22,28 @@
         <result property="averageProgressRate" column="average_progress_rate"/>
     </resultMap>
 
+    <resultMap id="AdminUserDetailResultMap"
+               type="com.acorn.elearning.admin.dto.response.AdminUserDetailResponse">
+        <constructor>
+            <idArg name="userId" column="user_id" javaType="java.lang.Long"/>
+            <arg name="email" column="email" javaType="java.lang.String"/>
+            <arg name="nickname" column="nickname" javaType="java.lang.String"/>
+            <arg name="subjectName" column="subject_name" javaType="java.lang.String"/>
+            <arg name="gradeCode" column="grade_code" javaType="java.lang.String"/>
+            <arg name="totalScore" column="total_score" javaType="java.lang.Integer"/>
+            <arg name="role" column="role" javaType="java.lang.String"/>
+            <arg name="status" column="status" javaType="java.lang.String"/>
+            <arg name="createdAt" column="created_at" javaType="java.time.LocalDateTime"/>
+            <arg name="progressCount" column="progress_count" javaType="java.lang.Integer"/>
+            <arg name="completedCount" column="completed_count" javaType="java.lang.Integer"/>
+            <arg name="averageProgressRate" column="average_progress_rate" javaType="java.lang.Double"/>
+            <arg name="postCount" column="post_count" javaType="java.lang.Integer"/>
+            <arg name="commentCount" column="comment_count" javaType="java.lang.Integer"/>
+            <arg name="reportedCount" column="reported_count" javaType="java.lang.Integer"/>
+            <arg name="receivedReportCount" column="received_report_count" javaType="java.lang.Integer"/>
+        </constructor>
+    </resultMap>
+
     <select id="findAll" resultMap="AdminUserManageRowResultMap">
         SELECT
             U.user_id,
@@ -151,6 +173,113 @@
         ) P
             ON U.user_id = P.user_id
         WHERE U.user_id = #{userId}
+    </select>
+
+    <select id="findDetailById"
+            parameterType="long"
+            resultMap="AdminUserDetailResultMap">
+
+        SELECT
+            U.user_id,
+            U.email,
+            U.nickname,
+            S.subject_name,
+            L.grade_code,
+            L.total_score,
+            U.role,
+            U.status,
+            U.created_at,
+
+            COALESCE(P.progress_count, 0) AS progress_count,
+            COALESCE(P.completed_count, 0) AS completed_count,
+            COALESCE(P.average_progress_rate, 0) AS average_progress_rate,
+
+            COALESCE(POSTS.post_count, 0) AS post_count,
+            COALESCE(COMMENTS.comment_count, 0) AS comment_count,
+            COALESCE(REPORTED.reported_count, 0) AS reported_count,
+            COALESCE(RECEIVED.received_report_count, 0) AS received_report_count
+
+        FROM users U
+
+        LEFT JOIN user_learning_profiles L
+            ON U.user_id = L.user_id
+
+        LEFT JOIN subjects S
+            ON L.primary_subject_id = S.subject_id
+
+        LEFT JOIN (
+            SELECT
+                user_id,
+                COUNT(progress_id) AS progress_count,
+                SUM(
+            CASE
+                WHEN lesson_completed = 1
+                    OR practice_passed = 1
+                    OR completed_at IS NOT NULL
+                THEN 1
+                ELSE 0
+            END
+        ) AS completed_count,
+        AVG(progress_rate) AS average_progress_rate
+            FROM learning_progress
+            GROUP BY user_id
+        ) P
+            ON U.user_id = P.user_id
+
+        LEFT JOIN (
+            SELECT
+                writer_id,
+                COUNT(*) AS post_count
+            FROM community_posts
+            GROUP BY writer_id
+        ) POSTS
+            ON U.user_id = POSTS.writer_id
+
+        LEFT JOIN (
+            SELECT
+                writer_id,
+                COUNT(*) AS comment_count
+            FROM comments
+            GROUP BY writer_id
+        ) COMMENTS
+            ON U.user_id = COMMENTS.writer_id
+
+        LEFT JOIN (
+            SELECT
+                reporter_id,
+                COUNT(*) AS reported_count
+            FROM reports
+            GROUP BY reporter_id
+        ) REPORTED
+            ON U.user_id = REPORTED.reporter_id
+
+        LEFT JOIN (
+            SELECT
+                target_writer_id,
+                COUNT(*) AS received_report_count
+            FROM (
+            SELECT
+            P.writer_id AS target_writer_id
+        FROM reports R
+        JOIN community_posts P
+        ON R.target_type = 'POST'
+        AND R.target_id = P.post_id
+
+        UNION ALL
+
+        SELECT
+        C.writer_id AS target_writer_id
+        FROM reports R
+        JOIN comments C
+        ON R.target_type = 'COMMENT'
+        AND R.target_id = C.comment_id
+        ) REPORT_TARGETS
+        GROUP BY target_writer_id
+        ) RECEIVED
+        ON U.user_id = RECEIVED.target_writer_id
+
+        WHERE U.user_id = #{userId}
+
     </select>
 
     <update id="updateStatus">

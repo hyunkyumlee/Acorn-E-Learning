@@ -1,15 +1,7 @@
 package com.acorn.elearning.admin.controller;
 
 import com.acorn.elearning.admin.dto.request.UpdateUserStatusRequest;
-import com.acorn.elearning.admin.dto.response.AdminCommunityPageResponse;
-import com.acorn.elearning.admin.dto.response.AdminLessonManageRowResponse;
-import com.acorn.elearning.admin.dto.response.AdminPageResponse;
-import com.acorn.elearning.admin.dto.response.AdminProblemManageRowResponse;
-import com.acorn.elearning.admin.dto.response.AdminStatsResponse;
-import com.acorn.elearning.admin.dto.response.AdminUserManageRowResponse;
-import com.acorn.elearning.admin.dto.response.CurriculumNodeManageResponse;
-import com.acorn.elearning.admin.dto.response.ReportPageResponse;
-import com.acorn.elearning.admin.dto.response.SubjectManageResponse;
+import com.acorn.elearning.admin.dto.response.*;
 import com.acorn.elearning.admin.form.CommunityStatusForm;
 import com.acorn.elearning.admin.form.CurriculumNodeForm;
 import com.acorn.elearning.admin.form.LessonForm;
@@ -63,6 +55,12 @@ public class AdminApiController {
     @GetMapping("/api/admin/users")
     public ApiResponse<List<AdminUserManageRowResponse>> users() {
         return ApiResponse.success(adminUserService.findAll());
+    }
+
+    @GetMapping("/api/admin/users/{userId}/detail")
+    public ApiResponse<AdminUserDetailResponse> userDetail(@PathVariable Long userId)
+    {
+        return ApiResponse.success(adminUserService.findDetailById(userId));
     }
 
     @PatchMapping("/api/admin/users/{userId}/status")

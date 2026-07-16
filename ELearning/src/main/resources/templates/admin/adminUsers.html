@@ -217,7 +217,28 @@
     </div>
 
     <input type="text" id="userLearningSummary" readonly placeholder="학습 진행률 요약">
-    <textarea id="userActivitySummary" readonly placeholder="작성 글 수 / 신고-제재 이력"></textarea>
+    <section class="admin-user-activity-section" aria-live="polite">
+      <h3>커뮤니티 활동 요약</h3>
+      <div class="admin-user-activity-grid">
+        <article class="admin-user-activity-card">
+          <span>작성 게시글</span>
+          <strong id="userPostCount">-</strong><em>건</em>
+        </article>
+        <article class="admin-user-activity-card">
+          <span>작성 댓글</span>
+          <strong id="userCommentCount">-</strong><em>건</em>
+        </article>
+        <article class="admin-user-activity-card">
+          <span>신고한 건수</span>
+          <strong id="userReportedCount">-</strong><em>건</em>
+        </article>
+        <article class="admin-user-activity-card">
+          <span>신고받은 건수</span>
+          <strong id="userReceivedReportCount">-</strong><em>건</em>
+        </article>
+      </div>
+      <p id="userDetailMessage" class="admin-user-detail-message">상세보기를 선택하면 최신 활동 요약을 조회합니다.</p>
+    </section>
   </section>
 </main>
 
@@ -231,6 +252,55 @@
     }
   });
 
+  const userDetailMessage = document.querySelector("#userDetailMessage");
+
+  const setActivityCount = (id, value) => {
+    document.querySelector(id).textContent = value ?? "-";
+  };
+
+  const showDetailMessage = (message, isError = false) => {
+    userDetailMessage.textContent = message;
+    userDetailMessage.classList.toggle("is-error", isError);
+  };
+
+  const applyDetailResponse = (user) => {
+    const averageProgressRate = Math.round(Number(user.averageProgressRate || 0));
+
+    document.querySelector("#userProfileSummary").value =
+        `${user.email || "-"} / ${user.nickname || "-"} / ${user.subjectName || "-"} / ${(user.createdAt || "-").replace("T", " ")}`;
+    document.querySelector("#userLearningSummary").value =
+        `진행 ${user.progressCount || 0}개 / 완료 ${user.completedCount || 0}개 / 평균 ${averageProgressRate}%`;
+
+    setActivityCount("#userPostCount", user.postCount);
+    setActivityCount("#userCommentCount", user.commentCount);
+    setActivityCount("#userReportedCount", user.reportedCount);
+    setActivityCount("#userReceivedReportCount", user.receivedReportCount);
+    showDetailMessage("최신 사용자 활동 요약입니다.");
+  };
+
+  const loadUserDetail = async (userId) => {
+    showDetailMessage("상세 활동 정보를 불러오는 중입니다.");
+    setActivityCount("#userPostCount", "-");
+    setActivityCount("#userCommentCount", "-");
+    setActivityCount("#userReportedCount", "-");
+    setActivityCount("#userReceivedReportCount", "-");
+
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/detail`, {
+        headers: { "Accept": "application/json" }
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.success || !result.data) {
+        throw new Error(result.message || "상세 정보를 불러오지 못했습니다.");
+      }
+
+      applyDetailResponse(result.data);
+    } catch (error) {
+      showDetailMessage(error.message || "상세 활동 정보를 불러오지 못했습니다.", true);
+    }
+  };
+
   document.querySelectorAll(".admin-user-detail-button").forEach((button) => {
     button.addEventListener("click", () => {
       const progressCount = button.dataset.progressCount || "0";
@@ -242,9 +312,6 @@
 
       document.querySelector("#userLearningSummary").value =
               `진행 ${progressCount}개 / 완료 ${completedCount}개 / 평균 ${averageProgressRate}%`;
-
-      document.querySelector("#userActivitySummary").value =
-          "작성 글 수, 신고 내역, 관리자 제재 이력은 후속 데이터 연결 예정";
 
       const statusForm = document.querySelector("#userStatusForm");
       const statusValue = document.querySelector("#userStatusValue");
@@ -279,6 +346,7 @@
       userRoleButton.disabled = false;
 
       roleForm.onsubmit = () => confirm("권한을 변경하시겠습니까?");
+      loadUserDetail(userId);
       document.querySelector(".admin-user-detail-panel").scrollIntoView({ behavior: "smooth", block: "center" });
     });
   });

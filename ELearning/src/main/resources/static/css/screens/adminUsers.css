@@ -222,11 +222,60 @@
     padding: 0 12px;
 }
 
-.admin-user-detail-panel textarea {
-    box-sizing: border-box;
-    min-height: 88px;
-    padding: 11px 12px;
-    resize: vertical;
+.admin-user-activity-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 2px;
+}
+
+.admin-user-activity-section h3 {
+    margin: 0;
+    font-size: 13px;
+    color: #374151;
+}
+
+.admin-user-activity-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.admin-user-activity-card {
+    min-height: 72px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+}
+
+.admin-user-activity-card span {
+    display: block;
+    margin-bottom: 8px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.admin-user-activity-card strong {
+    color: #111827;
+    font-size: 20px;
+}
+
+.admin-user-activity-card em {
+    margin-left: 3px;
+    color: #6b7280;
+    font-size: 12px;
+    font-style: normal;
+}
+
+.admin-user-detail-message {
+    margin: 0;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.admin-user-detail-message.is-error {
+    color: #dc2626;
 }
 
 @media (max-width: 1024px) {
@@ -238,6 +287,10 @@
     .admin-user-filter,
     .admin-user-detail-top {
         grid-template-columns: 1fr;
+    }
+
+    .admin-user-activity-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .admin-user-detail-actions {
@@ -257,5 +310,9 @@
     .admin-user-detail-actions {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .admin-user-activity-grid {
+        grid-template-columns: 1fr;
     }
 }
