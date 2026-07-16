@@ -1135,6 +1135,216 @@ ON DUPLICATE KEY UPDATE
   post_id = VALUES(post_id),
   user_id = VALUES(user_id);
 
+-- Community expansion: Python/WEB/SQL 게시글 81건과 집계 카운트에 대응하는 정규화 상호작용 데이터
+-- 고정 ID 범위(사용자 6~53, 게시글 1001~1081)를 사용해 반복 실행해도 같은 seed 상태를 유지한다.
+INSERT INTO users (
+  user_id, email, nickname, role, status, profile_image_url, last_login_at, withdrawn_at, created_at, updated_at
+)
+WITH RECURSIVE community_seed_numbers (n) AS (
+  SELECT 1
+  UNION ALL
+  SELECT n + 1
+  FROM community_seed_numbers
+  WHERE n < 48
+)
+SELECT
+  5 + n,
+  CONCAT('community-seed-', LPAD(n, 2, '0'), '@example.invalid'),
+  CONCAT('커뮤니티샘플', LPAD(n, 2, '0')),
+  'ROLE_USER',
+  'ACTIVE',
+  NULL,
+  NULL,
+  NULL,
+  CURRENT_TIMESTAMP,
+  CURRENT_TIMESTAMP
+FROM community_seed_numbers
+ON DUPLICATE KEY UPDATE
+  email = VALUES(email),
+  nickname = VALUES(nickname),
+  role = VALUES(role),
+  status = VALUES(status),
+  profile_image_url = VALUES(profile_image_url),
+  last_login_at = VALUES(last_login_at),
+  withdrawn_at = VALUES(withdrawn_at),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO community_posts (
+  post_id, writer_id, subject_id, board_type, title, content,
+  view_count, like_count, comment_count, scrap_count, status,
+  created_at, updated_at, deleted_at
+)
+VALUES
+(1001, 5, @python_subject_id, 'STUDY_LOG', 'Python 예외 처리 학습 기록', 'try except else finally 흐름을 직접 실행해보며 정리했습니다.', 31, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1002, 4, @python_subject_id, 'FREE', 'Python list comprehension 복습', '반복문을 한 줄로 줄이는 기준을 예제로 정리했습니다.', 25, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1003, 1, @python_subject_id, 'FREE', 'Python list slicing 복습', '시작 인덱스와 끝 인덱스를 다르게 줬을 때 결과가 어떻게 나오는지 정리했습니다.', 70, 5, 0, 1, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1004, 2, @python_subject_id, 'QUESTION', 'dict get과 setdefault 차이', '기본값을 읽기만 할 때와 실제로 넣을 때의 차이를 비교했습니다.', 99, 12, 0, 3, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1005, 3, @python_subject_id, 'STUDY_LOG', '함수를 작게 나누는 기준', '한 함수가 너무 길어졌을 때 어디서 분리하면 좋은지 고민했습니다.', 128, 19, 0, 5, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1006, 4, @python_subject_id, 'FREE', '파일 읽기 with 구문 정리', '파일을 닫는 처리를 자동으로 맡기는 with 구문을 다시 복습했습니다.', 157, 26, 0, 7, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1007, 5, @python_subject_id, 'QUESTION', '예외 처리 try except 흐름', '어떤 예외를 잡고 어떤 예외는 그대로 올릴지 기준을 세워봤습니다.', 186, 33, 0, 9, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1008, 1, @python_subject_id, 'STUDY_LOG', '리스트 정렬 key lambda 연습', '게시글 데이터를 좋아요 수 기준으로 정렬하는 예제를 만들어봤습니다.', 215, 40, 0, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1009, 2, @python_subject_id, 'FREE', '문자열 split과 join 활용', '검색어를 분리하고 다시 합치는 간단한 전처리를 연습했습니다.', 244, 47, 0, 4, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1010, 3, @python_subject_id, 'QUESTION', '가상환경 requirements 관리', '팀 프로젝트에서 dependency를 맞추기 위해 requirements 파일을 정리했습니다.', 273, 6, 0, 6, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1011, 4, @python_subject_id, 'STUDY_LOG', '간단한 로그 파일 분석', '텍스트 로그에서 특정 키워드가 몇 번 나오는지 세는 코드를 작성했습니다.', 302, 13, 0, 8, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1012, 5, @python_subject_id, 'FREE', 'dataclass를 써보면 좋은 경우', '단순 데이터 묶음은 class보다 dataclass가 깔끔한 상황을 봤습니다.', 71, 20, 0, 1, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1013, 3, @python_subject_id, 'FREE', 'Python 자유에서 오늘 정리한 핵심 포인트', 'Python 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 25, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1014, 1, @python_subject_id, 'QUESTION', 'Python에서 None 체크 기준', '빈 문자열, 0, None을 구분해서 조건문을 쓰는 연습을 했습니다.', 100, 27, 0, 3, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1015, 2, @python_subject_id, 'STUDY_LOG', '반복문을 comprehension으로 바꾸기', '가독성이 좋아지는 경우와 오히려 복잡해지는 경우를 비교했습니다.', 129, 34, 0, 5, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1016, 3, @python_subject_id, 'FREE', '간단한 테스트 코드 작성', '입력과 결과가 명확한 함수부터 테스트를 붙이는 연습을 했습니다.', 158, 41, 0, 7, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1017, 4, @python_subject_id, 'QUESTION', 'API 응답 데이터 가공 연습', 'JSON 형태의 응답에서 필요한 값만 뽑아 화면용 데이터로 바꿔봤습니다.', 187, 48, 0, 9, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1018, 5, @python_subject_id, 'STUDY_LOG', '학습 루틴 자동화 아이디어', '매일 푼 문제와 복습 내용을 파일로 남기는 작은 자동화를 생각해봤습니다.', 219, 7, 0, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1019, 4, @python_subject_id, 'QUESTION', 'Python 질문에서 오늘 정리한 핵심 포인트', 'Python 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 26, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1020, 5, @python_subject_id, 'STUDY_LOG', 'Python 공부 일지에서 오늘 정리한 핵심 포인트', 'Python 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 27, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1021, 3, @python_subject_id, 'FREE', 'Python 자유 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 32, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1022, 4, @python_subject_id, 'QUESTION', 'Python 질문 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 33, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1023, 5, @python_subject_id, 'STUDY_LOG', 'Python 공부 일지 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 34, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1024, 3, @python_subject_id, 'FREE', 'Python 자유 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 129, 7, 3, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1025, 4, @python_subject_id, 'QUESTION', 'Python 질문 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 138, 8, 4, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1026, 5, @python_subject_id, 'STUDY_LOG', 'Python 공부 일지 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 147, 9, 5, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1027, 3, @python_subject_id, 'QUESTION', 'Python 월간 질문 정리', 'None 처리와 기본값 설정에서 자주 헷갈리는 패턴을 모았습니다.', 134, 7, 3, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1028, 3, @web_subject_id, 'QUESTION', 'HTML form 전송 방식 질문', 'multipart form을 쓸 때 enctype을 빠뜨리면 어떤 문제가 생기는지 확인 중입니다.', 27, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1029, 2, @web_subject_id, 'FREE', 'CSS grid 간격 조정 기록', '반응형에서 카드 간격이 무너지는 부분을 minmax로 정리했습니다.', 23, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1030, 1, @web_subject_id, 'FREE', 'HTML semantic tag 사용 기준', 'section, article, aside를 어디에 쓰면 좋을지 게시판 화면 기준으로 정리했습니다.', 70, 5, 0, 1, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1031, 2, @web_subject_id, 'QUESTION', 'CSS grid로 게시판 레이아웃 맞추기', '왼쪽 메뉴, 본문, 오른쪽 대시보드를 grid로 나누는 방식을 복습했습니다.', 99, 12, 0, 3, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1032, 3, @web_subject_id, 'STUDY_LOG', '버튼 간격을 일정하게 맞추는 방법', 'margin 대신 gap을 기준으로 버튼 그룹을 정리해봤습니다.', 128, 19, 0, 5, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1033, 4, @web_subject_id, 'FREE', '반응형에서 글씨가 잘릴 때 해결', 'min-width와 white-space를 조정해서 카드 안 텍스트가 깨지지 않게 했습니다.', 157, 26, 0, 7, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1034, 5, @web_subject_id, 'QUESTION', 'sticky와 fixed 차이 복습', '사이드바가 스크롤을 따라올 때 어떤 속성이 더 자연스러운지 비교했습니다.', 186, 33, 0, 9, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1035, 2, @web_subject_id, 'FREE', 'HTML/CSS/JS 자유에서 오늘 정리한 핵심 포인트', 'HTML/CSS/JS 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 25, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1036, 1, @web_subject_id, 'STUDY_LOG', '폼 placeholder 문구 정리', '입력창 안내 문구가 실제 사용자에게 부담스럽지 않게 보이도록 바꿔봤습니다.', 215, 40, 0, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1037, 2, @web_subject_id, 'FREE', '다크모드 버튼 색상 대비', '배경색과 버튼 글자색 대비가 낮을 때 가독성이 떨어지는 문제를 확인했습니다.', 244, 47, 0, 4, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1038, 3, @web_subject_id, 'QUESTION', '카드 hover 효과를 줄 때 기준', '과한 움직임보다 살짝 밝아지는 정도가 게시판에는 더 어울렸습니다.', 273, 6, 0, 6, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1039, 4, @web_subject_id, 'STUDY_LOG', '이미지 아이콘 object-fit 정리', '과목 아이콘이 잘리지 않도록 contain과 크기 기준을 맞췄습니다.', 302, 13, 0, 8, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1040, 5, @web_subject_id, 'FREE', '스크롤 영역을 나눌 때 UX 고민', '페이지 전체 스크롤과 패널 내부 스크롤을 어떻게 나눌지 정리했습니다.', 71, 20, 0, 1, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1041, 1, @web_subject_id, 'QUESTION', 'JS 이벤트 위임 연습', '동적으로 생기는 댓글 버튼에 event delegation을 적용하는 방법을 복습했습니다.', 100, 27, 0, 3, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1042, 2, @web_subject_id, 'STUDY_LOG', 'aria-label을 넣어야 하는 버튼', '화살표나 아이콘만 있는 버튼에는 접근성 이름이 필요하다는 걸 확인했습니다.', 129, 34, 0, 5, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1043, 3, @web_subject_id, 'FREE', 'CSS animation 속도 조절', 'HOT 표시처럼 반복되는 효과는 너무 빠르면 시선을 빼앗는 것 같습니다.', 158, 41, 0, 7, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1044, 4, @web_subject_id, 'QUESTION', 'textarea 자동 높이 조절 고민', '댓글 입력창이 내용에 맞게 커지는 UI를 적용할지 고민 중입니다.', 187, 48, 0, 9, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1045, 5, @web_subject_id, 'STUDY_LOG', '게시글 목록 카드 높이 맞추기', '제목 길이가 달라도 목록 간격이 흔들리지 않게 정리하는 방법을 봤습니다.', 219, 7, 2, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1046, 3, @web_subject_id, 'QUESTION', 'HTML/CSS/JS 질문에서 오늘 정리한 핵심 포인트', 'HTML/CSS/JS 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 26, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1047, 4, @web_subject_id, 'STUDY_LOG', 'HTML/CSS/JS 공부 일지에서 오늘 정리한 핵심 포인트', 'HTML/CSS/JS 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 27, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1048, 2, @web_subject_id, 'FREE', 'HTML/CSS/JS 자유 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 32, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1049, 3, @web_subject_id, 'QUESTION', 'HTML/CSS/JS 질문 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 33, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1050, 4, @web_subject_id, 'STUDY_LOG', 'HTML/CSS/JS 공부 일지 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 34, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1051, 2, @web_subject_id, 'FREE', 'HTML/CSS/JS 자유 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 129, 7, 3, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1052, 3, @web_subject_id, 'QUESTION', 'HTML/CSS/JS 질문 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 138, 8, 4, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1053, 4, @web_subject_id, 'STUDY_LOG', 'HTML/CSS/JS 공부 일지 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 147, 9, 5, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1054, 2, @web_subject_id, 'STUDY_LOG', 'HTML/CSS 월간 회고', '레이아웃을 잡을 때 반복해서 틀린 부분을 체크리스트로 정리했습니다.', 128, 6, 2, 1, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1055, 1, @sql_subject_id, 'FREE', 'SQL JOIN 조건 위치 정리', 'ON 절과 WHERE 절에 조건을 둘 때 결과가 달라지는 경우를 정리했습니다.', 70, 5, 0, 1, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1056, 5, @sql_subject_id, 'STUDY_LOG', 'SQL 실행계획 읽어본 기록', '인덱스가 잡히는 조건과 풀스캔이 나는 조건을 비교했습니다.', 29, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1057, 4, @sql_subject_id, 'FREE', 'SQL JOIN 복습 메모', 'INNER JOIN과 LEFT JOIN 결과 차이를 작은 테이블로 다시 확인했습니다.', 24, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1058, 2, @sql_subject_id, 'QUESTION', '인덱스를 탔는지 확인하는 기본 순서', '실행계획에서 type, key, rows를 먼저 보고 병목을 찾는 연습을 했습니다.', 99, 12, 0, 3, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1059, 3, @sql_subject_id, 'STUDY_LOG', 'GROUP BY 결과가 예상과 다를 때', '집계 기준 컬럼을 잘못 잡았을 때 생기는 문제를 예제로 정리했습니다.', 128, 19, 0, 5, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1060, 4, @sql_subject_id, 'FREE', '서브쿼리와 JOIN 중 어떤 걸 쓸까요?', '읽기 쉬움과 성능을 같이 고려해서 선택하는 기준을 고민했습니다.', 157, 26, 0, 7, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1061, 5, @sql_subject_id, 'QUESTION', 'MyBatis foreach insert 복습', '여러 row를 한 번에 넣는 batch insert 문법을 다시 확인했습니다.', 186, 33, 0, 9, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1062, 1, @sql_subject_id, 'STUDY_LOG', '날짜별 게시글 통계 쿼리', 'created_at을 기준으로 일자별 게시글 수를 집계하는 쿼리를 연습했습니다.', 215, 40, 0, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1063, 2, @sql_subject_id, 'FREE', 'NULL 비교에서 실수한 부분', '= NULL이 아니라 IS NULL을 써야 하는 이유를 다시 정리했습니다.', 244, 47, 0, 4, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1064, 3, @sql_subject_id, 'QUESTION', 'LIKE 검색에서 와일드카드 위치', '앞쪽 와일드카드가 index 사용에 미치는 영향을 확인했습니다.', 273, 6, 0, 6, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1065, 4, @sql_subject_id, 'STUDY_LOG', 'COUNT와 EXISTS 선택 기준', '존재 여부만 확인할 때 EXISTS가 더 어울리는 상황을 정리했습니다.', 302, 13, 0, 8, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1066, 5, @sql_subject_id, 'FREE', '게시판 정렬 쿼리 개선 메모', '좋아요순과 조회수순 정렬에서 함께 볼 보조 정렬 기준을 정했습니다.', 71, 20, 0, 1, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1067, 1, @sql_subject_id, 'QUESTION', '트랜잭션 처리 흐름 질문', '댓글 등록 후 게시글 댓글 수를 갱신할 때 트랜잭션 범위를 어디까지 잡을지 궁금합니다.', 100, 27, 0, 3, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1068, 2, @sql_subject_id, 'STUDY_LOG', '중복 데이터 방지 unique key', '좋아요와 스크랩 테이블에서 중복 row를 막는 방법을 정리했습니다.', 130, 34, 0, 5, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1069, 3, @sql_subject_id, 'FREE', '페이징 offset이 커질 때 고민', '데이터가 많아질 때 offset pagination의 한계를 확인했습니다.', 158, 41, 0, 7, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1070, 5, @sql_subject_id, 'FREE', 'SQL 자유에서 오늘 정리한 핵심 포인트', 'SQL 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 25, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1071, 4, @sql_subject_id, 'QUESTION', 'CASE WHEN으로 상태 표시하기', '게시글 상태를 화면용 문구로 바꿔 보여주는 쿼리를 연습했습니다.', 188, 48, 0, 9, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1072, 5, @sql_subject_id, 'STUDY_LOG', 'SQL 작성 순서 개인 루틴', 'SELECT보다 FROM과 WHERE를 먼저 생각하면 쿼리 흐름이 더 잘 잡혔습니다.', 218, 8, 0, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1073, 2, @sql_subject_id, 'QUESTION', 'SQL 질문에서 오늘 정리한 핵심 포인트', 'SQL 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 26, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1074, 3, @sql_subject_id, 'STUDY_LOG', 'SQL 공부 일지에서 오늘 정리한 핵심 포인트', 'SQL 학습 중 헷갈렸던 부분을 짧게 정리했습니다. 비슷한 부분을 공부하는 분들 의견도 궁금합니다.', 27, 1, 0, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1075, 5, @sql_subject_id, 'FREE', 'SQL 자유 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 32, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1076, 2, @sql_subject_id, 'QUESTION', 'SQL 질문 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 33, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1077, 3, @sql_subject_id, 'STUDY_LOG', 'SQL 공부 일지 복습하면서 체크한 부분', '처음에는 어렵게 느껴졌는데 예제를 직접 따라가니 흐름이 조금씩 잡혔습니다. 다음에는 관련 문제도 같이 풀어볼 예정입니다.', 34, 2, 1, 0, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1078, 5, @sql_subject_id, 'FREE', 'SQL 자유 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 129, 7, 3, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1079, 2, @sql_subject_id, 'QUESTION', 'SQL 질문 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 138, 8, 4, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1080, 5, @sql_subject_id, 'QUESTION', 'SQL 월간 질문 모음', '서브쿼리와 JOIN 중 어떤 쪽이 읽기 쉬운지 사례별로 비교했습니다.', 136, 6, 2, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
+  (1081, 3, @sql_subject_id, 'STUDY_LOG', 'SQL 공부 일지 월간 인기 후보 정리', '이번 달 동안 반복해서 본 개념을 모아봤습니다. 나중에 다시 보기 좋도록 기준과 예외 상황을 함께 남겨둡니다.', 147, 9, 5, 2, 'ACTIVE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
+ON DUPLICATE KEY UPDATE
+  writer_id = VALUES(writer_id),
+  subject_id = VALUES(subject_id),
+  board_type = VALUES(board_type),
+  title = VALUES(title),
+  content = VALUES(content),
+  view_count = VALUES(view_count),
+  like_count = VALUES(like_count),
+  comment_count = VALUES(comment_count),
+  scrap_count = VALUES(scrap_count),
+  status = VALUES(status),
+  updated_at = VALUES(updated_at),
+  deleted_at = VALUES(deleted_at);
+
+INSERT INTO comments (
+  comment_id, post_id, parent_comment_id, writer_id, content, status, created_at, updated_at, deleted_at, deleted_by_admin_id
+)
+WITH RECURSIVE community_seed_numbers (n) AS (
+  SELECT 1
+  UNION ALL
+  SELECT n + 1
+  FROM community_seed_numbers
+  WHERE n < 48
+)
+SELECT
+  100000 + (community_post.post_id - 1000) * 10 + community_seed_numbers.n,
+  community_post.post_id,
+  NULL,
+  5 + community_seed_numbers.n,
+  CONCAT('커뮤니티 샘플 댓글 ', community_seed_numbers.n, ' · ', community_post.title, ' 내용을 참고해 다음 학습에 활용해 보세요.'),
+  'ACTIVE',
+  community_post.created_at,
+  community_post.updated_at,
+  NULL,
+  NULL
+FROM community_posts AS community_post
+JOIN community_seed_numbers ON community_seed_numbers.n <= community_post.comment_count
+WHERE community_post.post_id BETWEEN 1001 AND 1081
+ON DUPLICATE KEY UPDATE
+  post_id = VALUES(post_id),
+  parent_comment_id = VALUES(parent_comment_id),
+  writer_id = VALUES(writer_id),
+  content = VALUES(content),
+  status = VALUES(status),
+  updated_at = VALUES(updated_at),
+  deleted_at = VALUES(deleted_at),
+  deleted_by_admin_id = VALUES(deleted_by_admin_id);
+
+INSERT INTO post_likes (like_id, post_id, user_id, created_at)
+WITH RECURSIVE community_seed_numbers (n) AS (
+  SELECT 1
+  UNION ALL
+  SELECT n + 1
+  FROM community_seed_numbers
+  WHERE n < 48
+)
+SELECT
+  200000 + (community_post.post_id - 1000) * 100 + community_seed_numbers.n,
+  community_post.post_id,
+  5 + community_seed_numbers.n,
+  community_post.created_at
+FROM community_posts AS community_post
+JOIN community_seed_numbers ON community_seed_numbers.n <= community_post.like_count
+WHERE community_post.post_id BETWEEN 1001 AND 1081
+ON DUPLICATE KEY UPDATE
+  post_id = VALUES(post_id),
+  user_id = VALUES(user_id);
+
+INSERT INTO post_scraps (scrap_id, post_id, user_id, created_at)
+WITH RECURSIVE community_seed_numbers (n) AS (
+  SELECT 1
+  UNION ALL
+  SELECT n + 1
+  FROM community_seed_numbers
+  WHERE n < 48
+)
+SELECT
+  300000 + (community_post.post_id - 1000) * 100 + community_seed_numbers.n,
+  community_post.post_id,
+  5 + community_seed_numbers.n,
+  community_post.created_at
+FROM community_posts AS community_post
+JOIN community_seed_numbers ON community_seed_numbers.n <= community_post.scrap_count
+WHERE community_post.post_id BETWEEN 1001 AND 1081
+ON DUPLICATE KEY UPDATE
+  post_id = VALUES(post_id),
+  user_id = VALUES(user_id);
+
+
 INSERT INTO reports (
   report_id, target_type, target_id, reporter_id, reason_code, status, handled_by, handled_at, created_at, updated_at
 )
