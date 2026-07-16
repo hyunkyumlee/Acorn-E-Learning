@@ -35,13 +35,6 @@
     line-height: 1.6;
 }
 
-/* practice 본문 폭을 lesson과 통일감있게 조정 */
-.practice-body {
-    max-width: 980px;
-    width: 100%;
-    margin: 0 auto;
-}
-
 /* 시작 / 문제 / 완료 화면 공통 카드 */
 .practice-problem-card,
 .practice-intro,
@@ -237,7 +230,6 @@
 }
 
 /* 건너뛰기 관련 추가 */
-
 .practice-footer--split {
     justify-content: space-between;
     align-items: flex-end;
@@ -355,18 +347,12 @@
 }
 
 @media (max-width: 760px) {
-    .practice-intro-visual {
-        display: none;
-    }
-}
-
-@media (max-width: 760px) {
     .practice-intro-layout {
         grid-template-columns: 1fr;
     }
 
     .practice-intro-visual {
-        order: -1;
+        display: none;
     }
 
     .practice-intro-visual img {

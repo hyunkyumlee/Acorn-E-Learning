@@ -23,8 +23,6 @@ import com.acorn.elearning.learning.mapper.LessonMapper;
 import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.Lesson;
 
-import java.util.Optional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +60,7 @@ public class PracticeController {
             return "redirect:/login";
         }
 
-        // subjectId는 learning 화면의 현재 선택 과목을 세션에서 사용.
+       // subjectId는 learning 화면의 현재 선택 과목을 세션에서 사용
        Long subjectId = (Long) session.getAttribute(LearningController.SESSION_LEARNING_SUBJECT_ID);
 
         if (subjectId == null) {
@@ -333,7 +331,7 @@ public class PracticeController {
             return "redirect:/learning/practice";
         }
 
-        //건너뛰기 제출 포함 수정
+        //건너뛰기 제출 포함
         PracticeSetView view = (PracticeSetView) session.getAttribute(PRACTICE_VIEW_SESSION_KEY);
         if (view == null) {
             return "redirect:/learning/practice";
@@ -366,7 +364,6 @@ public class PracticeController {
     }
 
     //건너뛰기 관련 추가 매서드
-
     @PostMapping("/learning/practice/sets/{setAttemptId}/skip")
     public String skipAnswer(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
