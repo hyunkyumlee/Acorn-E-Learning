@@ -31,6 +31,7 @@
         <option th:each="subject : ${subjectList}"
                 th:value="${subject.subjectName}"
                 th:text="${subject.subjectName}"
+                th:data-subject-id="${subject.subjectId}"
                 th:selected="${selectedSubjectName == subject.subjectName}">Java</option>
       </select>
       <select id="theoryCurriculumFilter" name="curriculumTitle">
@@ -38,6 +39,7 @@
         <option th:each="node : ${curriculumList}"
                 th:value="${node.title}"
                 th:text="${node.title}"
+                th:data-subject-id="${node.subjectId}"
                 th:selected="${selectedCurriculumTitle == node.title}">Java 기초</option>
       </select>
       <select id="theoryLevelFilter" name="levelCode">
@@ -203,6 +205,26 @@
   </section>
 </main>
 <script>
+  function syncTheoryFilterCurriculumOptions() {
+    const subjectFilter = document.querySelector("#theorySubjectFilter");
+    const curriculumFilter = document.querySelector("#theoryCurriculumFilter");
+    const selectedSubjectId = subjectFilter?.selectedOptions[0]?.dataset.subjectId || "";
+
+    curriculumFilter?.querySelectorAll("option").forEach((option) => {
+      option.hidden = selectedSubjectId !== ""
+              && option.value !== ""
+              && option.dataset.subjectId !== selectedSubjectId;
+    });
+
+    if (curriculumFilter?.selectedOptions[0]?.hidden) {
+      curriculumFilter.value = "";
+    }
+  }
+
+  document.querySelector("#theorySubjectFilter")
+          ?.addEventListener("change", syncTheoryFilterCurriculumOptions);
+  syncTheoryFilterCurriculumOptions();
+
   document.querySelector("#lessonNodeId")?.addEventListener("change", (event) => {
     const selectedOption = event.target.selectedOptions[0];
     document.querySelector("#lessonSubjectId").value = selectedOption?.dataset.subjectId || "";

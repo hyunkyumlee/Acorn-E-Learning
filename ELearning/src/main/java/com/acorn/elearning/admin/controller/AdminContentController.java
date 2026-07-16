@@ -233,14 +233,36 @@ public class AdminContentController {
         }
 
         try {
-            if (form.getProblemId() == null) {
-                service.createProblem(form, sessionUser.userId());
-                redirectAttributes.addFlashAttribute("message", "문제가 등록되었습니다.");
-            } else {
-                service.updateProblem(form, sessionUser.userId());
-                redirectAttributes.addFlashAttribute("message", "문제가 수정되었습니다.");
-            }
+            form.setProblemId(null);
+            service.createProblem(form, sessionUser.userId());
+            redirectAttributes.addFlashAttribute("message", "문제가 등록되었습니다.");
         } catch (BusinessException e){
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/admin/problems";
+    }
+
+    @PostMapping("/admin/problems/{problemId}")
+    public String updateProblem(@PathVariable Long problemId,
+                                ProblemForm form,
+                                @SessionAttribute(name= SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+                                RedirectAttributes redirectAttributes) {
+
+        if (sessionUser == null || sessionUser.userId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인한 관리자 정보가 없습니다.");
+            return "redirect:/login";
+        }
+
+        try {
+            form.setProblemId(problemId);
+            int updated = service.updateProblem(form, sessionUser.userId());
+            if (updated == 1) {
+                redirectAttributes.addFlashAttribute("message", "문제가 수정되었습니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "수정할 문제를 찾을 수 없습니다.");
+            }
+        } catch (BusinessException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 

@@ -50,6 +50,7 @@
         <option th:each="node : ${curriculumList}"
                 th:value="${node.nodeId}"
                 th:text="${node.title}"
+                th:data-subject-id="${node.subjectId}"
                 th:selected="${selectedNodeId != null and selectedNodeId == node.nodeId}">
           Java 기초
         </option>
@@ -78,7 +79,7 @@
 
       <button type="submit" class="problem-filter-button">검색</button>
     </form>
-    <button type="button" class="problem-primary-button">+ 문제 등록</button>
+    <button type="button" id="problemCreateButton" class="problem-primary-button">+ 문제 등록</button>
   </section>
 
   <section class="problem-section">
@@ -215,7 +216,7 @@
   <section class="problem-form-panel">
     <h2>문제 등록 / 수정 폼</h2>
 
-    <form method="post" action="/admin/problems" th:object="${problemForm}"
+    <form method="post" action="/admin/problems" id="problemManageForm" th:object="${problemForm}"
           onsubmit="return confirm('문제를 저장하시겠습니까?');">
       <div class="problem-form-layout">
         <div class="problem-form-fields">
@@ -275,7 +276,7 @@
 
           <div class="problem-form-actions">
             <button type="submit" class="problem-primary-button">저장</button>
-            <button type="reset" class="problem-secondary-button">취소</button>
+            <button type="button" id="problemCancelButton" class="problem-secondary-button">취소</button>
           </div>
         </div>
 
@@ -296,6 +297,26 @@
   };
 
   const problemFilterForm = document.querySelector("#problemFilterForm");
+  const problemManageForm = document.querySelector("#problemManageForm");
+
+  function syncProblemFilterCurriculumOptions() {
+    const selectedSubjectId = document.querySelector("#problemSubjectFilter")?.value || "";
+    const curriculumFilter = document.querySelector("#problemCurriculumFilter");
+
+    curriculumFilter?.querySelectorAll("option").forEach((option) => {
+      option.hidden = selectedSubjectId !== ""
+              && option.value !== ""
+              && option.dataset.subjectId !== selectedSubjectId;
+    });
+
+    if (curriculumFilter?.selectedOptions[0]?.hidden) {
+      curriculumFilter.value = "";
+    }
+  }
+
+  document.querySelector("#problemSubjectFilter")
+          ?.addEventListener("change", syncProblemFilterCurriculumOptions);
+  syncProblemFilterCurriculumOptions();
 
   problemFilterForm?.addEventListener("submit", () => {
     const pageInput = problemFilterForm.querySelector("input[name='page']");
@@ -344,7 +365,9 @@
     syncProblemLessonOptions();
   });
 
-  document.querySelector(".problem-primary-button")?.addEventListener("click", () => {
+  function resetProblemManageForm() {
+    problemManageForm.action = "/admin/problems";
+    problemManageForm.reset();
     document.querySelector("#problemId").value = "";
     document.querySelector("#problemSubjectId").value = "";
     document.querySelector("#problemNodeId").value = "";
@@ -357,14 +380,22 @@
     document.querySelector("#problemExplanation").value = "";
     document.querySelector("#problemDifficultyCode").value = "";
     document.querySelector("#problemIsActive").value = "";
+  }
+
+  document.querySelector("#problemCreateButton")?.addEventListener("click", () => {
+    resetProblemManageForm();
 
     document.querySelector("#problemType").scrollIntoView({ behavior: "smooth", block: "center" });
     document.querySelector("#problemType").focus({ preventScroll: true });
   });
 
+  document.querySelector("#problemCancelButton")?.addEventListener("click", resetProblemManageForm);
+
   document.querySelectorAll(".problem-edit-button").forEach((button) => {
     button.addEventListener("click", () => {
-      document.querySelector("#problemId").value = button.dataset.problemId;
+      const problemId = button.dataset.problemId;
+      problemManageForm.action = `/admin/problems/${problemId}`;
+      document.querySelector("#problemId").value = problemId;
       document.querySelector("#problemSubjectId").value = button.dataset.subjectId;
       document.querySelector("#problemNodeId").value = button.dataset.nodeId;
       syncProblemCurriculumOptions();
