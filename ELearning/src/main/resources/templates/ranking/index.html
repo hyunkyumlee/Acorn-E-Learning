@@ -26,17 +26,42 @@
   </section>
 
   <section class="panel ranking-panel">
-    <div class="ranking-tabs">
-      <a th:each="tab : ${view.attributes()['subjectTabs']}"
-         th:href="${tab['subjectId'] == ''} ? @{/ranking} : @{/ranking(subjectId=${tab['subjectId']})}"
-         th:text="${tab['label']}"
-         class="ranking-tab"
-         th:classappend="${
-              (view.attributes()['selectedSubjectId'] == null and tab['subjectId'] == '')
-              or
-              (view.attributes()['selectedSubjectId'] != null and view.attributes()['selectedSubjectId'] == tab['subjectId'])
+    <div class="ranking-filter-bar">
+      <div class="ranking-subject-tabs">
+        <a th:each="tab : ${view.attributes()['subjectTabs']}"
+           th:href="${tab['subjectId'] == ''} ? @{/ranking} : @{/ranking(subjectId=${tab['subjectId']})}"
+           th:text="${tab['label']}"
+           class="ranking-subject-tab"
+           th:classappend="${
+             (tab['subjectId'] == '' and view.attributes()['selectedSubjectId'] == null)
+             or
+             (tab['subjectId'] != '' and tab['subjectId'] == view.attributes()['selectedSubjectId'])
            } ? ' is-active' : ''">
-      </a>
+        </a>
+      </div>
+
+      <div class="ranking-league-strip">
+        <div th:each="league : ${view.attributes()['leagueTabs']}"
+             class="ranking-league-pill"
+             th:classappend="${league['active']} ? ' is-active' : ''"
+             th:attr="data-league=${league['code']}">
+
+          <span class="ranking-league-pill__icon">
+            <img th:if="${league['code'] == 'BRONZE'}"
+                 th:src="@{/assets/images/backgrounds/bronze_league.png}"
+                 alt="브론즈">
+            <img th:if="${league['code'] == 'SILVER'}"
+                 th:src="@{/assets/images/backgrounds/silver_league.png}"
+                 alt="실버">
+            <img th:if="${league['code'] == 'GOLD'}"
+                 th:src="@{/assets/images/backgrounds/gold_league.png}"
+                 alt="골드">
+          </span>
+
+          <span class="ranking-league-pill__label"
+                th:text="${league['label']}">BRONZE</span>
+        </div>
+      </div>
     </div>
 
     <div class="ranking-overview-grid">
@@ -46,17 +71,20 @@
         <div class="ranking-mini-stats">
           <article class="ranking-mini-stat">
             <span class="ranking-mini-label">현재순위</span>
-            <strong class="ranking-mini-value" th:text="|${view.attributes()['mySummary']['rankNo']}위|">1위</strong>
+            <strong class="ranking-mini-value"
+                    th:text="|${view.attributes()['mySummary']['rankNo']}위|">1위</strong>
           </article>
 
           <article class="ranking-mini-stat">
             <span class="ranking-mini-label">현재 점수</span>
-            <strong class="ranking-mini-value" th:text="|${view.attributes()['mySummary']['score']}점|">0점</strong>
+            <strong class="ranking-mini-value"
+                    th:text="|${view.attributes()['mySummary']['score']}점|">0점</strong>
           </article>
 
           <article class="ranking-mini-stat">
             <span class="ranking-mini-label">선순위와 차이</span>
-            <strong class="ranking-mini-value" th:text="|${view.attributes()['mySummary']['gapToPrev']}점|">0점</strong>
+            <strong class="ranking-mini-value"
+                    th:text="|${view.attributes()['mySummary']['gapToPrev']}점|">0점</strong>
           </article>
         </div>
       </article>
@@ -68,9 +96,9 @@
           <article th:each="item : ${view.attributes()['top3']}"
                    class="ranking-top3-item"
                    th:classappend="${
-               item['rankNo'] == 1 ? ' is-first' :
-               (item['rankNo'] == 2 ? ' is-second' : ' is-third')
-             }">
+                     item['rankNo'] == 1 ? ' is-first' :
+                     (item['rankNo'] == 2 ? ' is-second' : ' is-third')
+                   }">
             <span class="ranking-top3-badge" th:text="${item['rankNo']}">1</span>
             <p class="ranking-top3-name" th:text="${item['nickname']}">닉네임</p>
             <p class="ranking-top3-score" th:text="|${item['score']}점|">0점</p>
@@ -90,6 +118,9 @@
         </tr>
         </thead>
         <tbody>
+        <tr th:if="${#lists.isEmpty(view.attributes()['rankingList'])}">
+          <td colspan="4">4위 이후 데이터가 없습니다.</td>
+        </tr>
         <tr th:each="item : ${view.attributes()['rankingList']}">
           <td th:text="${item['rankNo']}"></td>
           <td th:text="${item['nickname']}"></td>
@@ -106,17 +137,20 @@
       <div class="ranking-mini-stats">
         <article class="ranking-mini-stat">
           <span class="ranking-mini-label">문제풀이</span>
-          <strong class="ranking-mini-value" th:text="|${view.attributes()['scoreBreakdown']['practiceScore']}점|">0점</strong>
+          <strong class="ranking-mini-value"
+                  th:text="|${view.attributes()['scoreBreakdown']['practiceScore']}점|">0점</strong>
         </article>
 
         <article class="ranking-mini-stat">
           <span class="ranking-mini-label">시험점수</span>
-          <strong class="ranking-mini-value" th:text="|${view.attributes()['scoreBreakdown']['examScore']}점|">0점</strong>
+          <strong class="ranking-mini-value"
+                  th:text="|${view.attributes()['scoreBreakdown']['examScore']}점|">0점</strong>
         </article>
 
         <article class="ranking-mini-stat">
           <span class="ranking-mini-label">일일학습</span>
-          <strong class="ranking-mini-value" th:text="|${view.attributes()['scoreBreakdown']['dailyScore']}점|">0점</strong>
+          <strong class="ranking-mini-value"
+                  th:text="|${view.attributes()['scoreBreakdown']['dailyScore']}점|">0점</strong>
         </article>
       </div>
     </article>

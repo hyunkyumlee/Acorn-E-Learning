@@ -105,14 +105,33 @@
         ) AS rank_no
         FROM (
         SELECT
+        base.user_id,
+        base.subject_id,
+        COALESCE(base.practice_score, 0) + COALESCE(exam.exam_score, 0) AS score
+        FROM (
+        SELECT
         se.user_id,
         se.subject_id,
-        SUM(se.score_delta) AS score
+        SUM(se.score_delta) AS practice_score
         FROM score_events se
         WHERE se.subject_id IS NOT NULL
         AND se.created_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
         AND se.reason_code NOT LIKE 'ATTENDANCE%'
         GROUP BY se.user_id, se.subject_id
+        ) base
+        LEFT JOIN (
+        SELECT
+        es.user_id,
+        es.subject_id,
+        COUNT(*) * 200 AS exam_score
+        FROM exam_sessions es
+        WHERE es.result_status = 'PASSED'
+        AND es.submitted_at IS NOT NULL
+        AND es.submitted_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        GROUP BY es.user_id, es.subject_id
+        ) exam
+        ON exam.user_id = base.user_id
+        AND exam.subject_id = base.subject_id
         ) agg
         INNER JOIN subjects s
         ON s.subject_id = agg.subject_id
@@ -164,14 +183,33 @@
         ) AS rank_no
         FROM (
         SELECT
+        base.user_id,
+        base.subject_id,
+        COALESCE(base.practice_score, 0) + COALESCE(exam.exam_score, 0) AS score
+        FROM (
+        SELECT
         se.user_id,
         se.subject_id,
-        SUM(se.score_delta) AS score
+        SUM(se.score_delta) AS practice_score
         FROM score_events se
         WHERE se.subject_id IS NOT NULL
         AND DATE_FORMAT(se.created_at, '%Y-%m') = #{periodKey}
         AND se.reason_code NOT LIKE 'ATTENDANCE%'
         GROUP BY se.user_id, se.subject_id
+        ) base
+        LEFT JOIN (
+        SELECT
+        es.user_id,
+        es.subject_id,
+        COUNT(*) * 200 AS exam_score
+        FROM exam_sessions es
+        WHERE es.result_status = 'PASSED'
+        AND es.submitted_at IS NOT NULL
+        AND DATE_FORMAT(es.submitted_at, '%Y-%m') = #{periodKey}
+        GROUP BY es.user_id, es.subject_id
+        ) exam
+        ON exam.user_id = base.user_id
+        AND exam.subject_id = base.subject_id
         ) agg
         INNER JOIN subjects s
         ON s.subject_id = agg.subject_id
@@ -224,14 +262,33 @@
         ROUND(AVG(subject_scores.subject_score)) AS score
         FROM (
         SELECT
+        base.user_id,
+        base.subject_id,
+        COALESCE(base.practice_score, 0) + COALESCE(exam.exam_score, 0) AS subject_score
+        FROM (
+        SELECT
         se.user_id,
         se.subject_id,
-        SUM(se.score_delta) AS subject_score
+        SUM(se.score_delta) AS practice_score
         FROM score_events se
         WHERE se.subject_id IS NOT NULL
         AND DATE_FORMAT(se.created_at, '%Y-%m') = #{periodKey}
         AND se.reason_code NOT LIKE 'ATTENDANCE%'
         GROUP BY se.user_id, se.subject_id
+        ) base
+        LEFT JOIN (
+        SELECT
+        es.user_id,
+        es.subject_id,
+        COUNT(*) * 200 AS exam_score
+        FROM exam_sessions es
+        WHERE es.result_status = 'PASSED'
+        AND es.submitted_at IS NOT NULL
+        AND DATE_FORMAT(es.submitted_at, '%Y-%m') = #{periodKey}
+        GROUP BY es.user_id, es.subject_id
+        ) exam
+        ON exam.user_id = base.user_id
+        AND exam.subject_id = base.subject_id
         ) subject_scores
         GROUP BY subject_scores.user_id
         ) avg_scores
@@ -240,93 +297,125 @@
 
     <select id="findWeeklySubjectRanking" resultType="map">
         SELECT
-        rs.user_id AS userId,
-        u.nickname AS nickname,
-        rs.score AS score,
-        rs.rank_no AS rankNo
-        FROM ranking_scores rs
-        INNER JOIN users u
-        ON u.user_id = rs.user_id
-        WHERE rs.scope_type = 'SUBJECT'
-        AND rs.subject_id = #{subjectId}
-        AND rs.period_type = 'WEEKLY'
-        AND rs.period_key = #{periodKey}
-        ORDER BY rs.rank_no ASC, rs.score DESC, rs.user_id ASC
-    </select>
-
-    <select id="findMyWeeklySubjectRanking" resultType="map">
+        ranked.userId AS userId,
+        ranked.nickname AS nickname,
+        ranked.score AS score,
+        ranked.rankNo AS rankNo
+        FROM (
         SELECT
         rs.user_id AS userId,
         u.nickname AS nickname,
         rs.score AS score,
-        rs.rank_no AS rankNo
+        ROW_NUMBER() OVER (
+        ORDER BY rs.score DESC, rs.user_id ASC
+        ) AS rankNo
         FROM ranking_scores rs
         INNER JOIN users u
         ON u.user_id = rs.user_id
+        INNER JOIN user_learning_profiles ulp
+        ON ulp.user_id = rs.user_id
         WHERE rs.scope_type = 'SUBJECT'
-        AND rs.user_id = #{userId}
         AND rs.subject_id = #{subjectId}
         AND rs.period_type = 'WEEKLY'
         AND rs.period_key = #{periodKey}
+        AND ulp.current_level_code = #{leagueCode}
+        ) ranked
+        ORDER BY ranked.rankNo ASC
+    </select>
+
+    <select id="findMyWeeklySubjectRanking" resultType="map">
+        SELECT
+        ranked.userId AS userId,
+        ranked.nickname AS nickname,
+        ranked.score AS score,
+        ranked.rankNo AS rankNo
+        FROM (
+        SELECT
+        rs.user_id AS userId,
+        u.nickname AS nickname,
+        rs.score AS score,
+        ROW_NUMBER() OVER (
+        ORDER BY rs.score DESC, rs.user_id ASC
+        ) AS rankNo
+        FROM ranking_scores rs
+        INNER JOIN users u
+        ON u.user_id = rs.user_id
+        INNER JOIN user_learning_profiles ulp
+        ON ulp.user_id = rs.user_id
+        WHERE rs.scope_type = 'SUBJECT'
+        AND rs.subject_id = #{subjectId}
+        AND rs.period_type = 'WEEKLY'
+        AND rs.period_key = #{periodKey}
+        AND ulp.current_level_code = #{leagueCode}
+        ) ranked
+        WHERE ranked.userId = #{userId}
         LIMIT 1
     </select>
 
     <select id="findMonthlyGlobalRankingFromSubjects" resultType="map">
         SELECT
-        ranked.user_id AS userId,
-        u.nickname AS nickname,
+        ranked.userId AS userId,
+        ranked.nickname AS nickname,
         ranked.score AS score,
-        ranked.rank_no AS rankNo
+        ranked.rankNo AS rankNo
         FROM (
         SELECT
-        avg_scores.user_id,
-        avg_scores.score,
+        avg_scores.user_id AS userId,
+        u.nickname AS nickname,
+        avg_scores.score AS score,
         ROW_NUMBER() OVER (
         ORDER BY avg_scores.score DESC, avg_scores.user_id ASC
-        ) AS rank_no
+        ) AS rankNo
         FROM (
         SELECT
         rs.user_id,
         ROUND(AVG(rs.score)) AS score
         FROM ranking_scores rs
+        INNER JOIN user_learning_profiles ulp
+        ON ulp.user_id = rs.user_id
         WHERE rs.scope_type = 'SUBJECT'
         AND rs.period_type = 'MONTHLY'
         AND rs.period_key = #{periodKey}
+        AND ulp.current_level_code = #{leagueCode}
         GROUP BY rs.user_id
         ) avg_scores
-        ) ranked
         INNER JOIN users u
-        ON u.user_id = ranked.user_id
-        ORDER BY ranked.rank_no ASC, ranked.user_id ASC
+        ON u.user_id = avg_scores.user_id
+        ) ranked
+        ORDER BY ranked.rankNo ASC
     </select>
 
     <select id="findMyMonthlyGlobalRankingFromSubjects" resultType="map">
         SELECT
-        ranked.user_id AS userId,
-        u.nickname AS nickname,
+        ranked.userId AS userId,
+        ranked.nickname AS nickname,
         ranked.score AS score,
-        ranked.rank_no AS rankNo
+        ranked.rankNo AS rankNo
         FROM (
         SELECT
-        avg_scores.user_id,
-        avg_scores.score,
+        avg_scores.user_id AS userId,
+        u.nickname AS nickname,
+        avg_scores.score AS score,
         ROW_NUMBER() OVER (
         ORDER BY avg_scores.score DESC, avg_scores.user_id ASC
-        ) AS rank_no
+        ) AS rankNo
         FROM (
         SELECT
         rs.user_id,
         ROUND(AVG(rs.score)) AS score
         FROM ranking_scores rs
+        INNER JOIN user_learning_profiles ulp
+        ON ulp.user_id = rs.user_id
         WHERE rs.scope_type = 'SUBJECT'
         AND rs.period_type = 'MONTHLY'
         AND rs.period_key = #{periodKey}
+        AND ulp.current_level_code = #{leagueCode}
         GROUP BY rs.user_id
         ) avg_scores
-        ) ranked
         INNER JOIN users u
-        ON u.user_id = ranked.user_id
-        WHERE ranked.user_id = #{userId}
+        ON u.user_id = avg_scores.user_id
+        ) ranked
+        WHERE ranked.userId = #{userId}
         LIMIT 1
     </select>
 
@@ -340,12 +429,13 @@
     </select>
 
     <select id="sumWeeklyExamScore" resultType="int">
-        SELECT COALESCE(SUM(se.score_delta), 0)
-        FROM score_events se
-        WHERE se.user_id = #{userId}
-        AND (#{subjectId} IS NULL OR se.subject_id = #{subjectId})
-        AND se.reason_code IN ('AI_TEST_PASS')
-        AND se.created_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        SELECT COALESCE(COUNT(*) * 200, 0)
+        FROM exam_sessions es
+        WHERE es.user_id = #{userId}
+        AND es.result_status = 'PASSED'
+        AND es.submitted_at IS NOT NULL
+        AND es.submitted_at >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        AND (#{subjectId} IS NULL OR es.subject_id = #{subjectId})
     </select>
 
     <select id="sumWeeklyDailyScore" resultType="int">
@@ -371,12 +461,13 @@
     </select>
 
     <select id="sumMonthlyExamScore" resultType="int">
-        SELECT COALESCE(SUM(se.score_delta), 0)
-        FROM score_events se
-        WHERE se.user_id = #{userId}
-        AND (#{subjectId} IS NULL OR se.subject_id = #{subjectId})
-        AND se.reason_code IN ('AI_TEST_PASS')
-        AND DATE_FORMAT(se.created_at, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+        SELECT COALESCE(COUNT(*) * 200, 0)
+        FROM exam_sessions es
+        WHERE es.user_id = #{userId}
+        AND es.result_status = 'PASSED'
+        AND es.submitted_at IS NOT NULL
+        AND DATE_FORMAT(es.submitted_at, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+        AND (#{subjectId} IS NULL OR es.subject_id = #{subjectId})
     </select>
 
     <select id="sumMonthlyDailyScore" resultType="int">

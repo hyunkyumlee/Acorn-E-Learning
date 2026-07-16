@@ -5,8 +5,11 @@ import com.acorn.elearning.ranking.dto.response.RankingPageResponse;
 import com.acorn.elearning.ranking.mapper.RankingScoreMapper;
 import com.acorn.elearning.ranking.view.RankingPageView;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.learning.mapper.LearningProfileReadMapper;
+import com.acorn.elearning.user.model.UserLearningProfile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -23,9 +26,11 @@ public class RankingService {
     private static final String PERIOD_MONTHLY = "MONTHLY";
 
     private final RankingScoreMapper rankingScoreMapper;
+    private final LearningProfileReadMapper learningProfileReadMapper;
 
-    public RankingService(RankingScoreMapper rankingScoreMapper) {
+    public RankingService(RankingScoreMapper rankingScoreMapper, LearningProfileReadMapper learningProfileReadMapper) {
         this.rankingScoreMapper = rankingScoreMapper;
+        this.learningProfileReadMapper = learningProfileReadMapper;
     }
 
     public RankingPageView index(SessionUser sessionUser, Long subjectId, String periodType) {
@@ -59,10 +64,19 @@ public class RankingService {
 
         refreshRankingScores(subjectId, effectivePeriodType);
 
+        String leagueCode = resolveCurrentLeagueCode(sessionUser.userId());
+
         List<Map<String, Object>> filteredScores =
                 subjectId == null
-                        ? rankingScoreMapper.findMonthlyGlobalRankingFromSubjects(currentMonthlyPeriodKey())
-                        : rankingScoreMapper.findWeeklySubjectRanking(subjectId, currentWeeklyPeriodKey());
+                        ? rankingScoreMapper.findMonthlyGlobalRankingFromSubjects(
+                        currentMonthlyPeriodKey(),
+                        leagueCode
+                )
+                        : rankingScoreMapper.findWeeklySubjectRanking(
+                        subjectId,
+                        currentWeeklyPeriodKey(),
+                        leagueCode
+                );
 
         List<Map<String, Object>> top3 = new ArrayList<>();
         for (int i = 0; i < Math.min(3, filteredScores.size()); i++) {
@@ -100,12 +114,14 @@ public class RankingService {
                 subjectId == null
                         ? rankingScoreMapper.findMyMonthlyGlobalRankingFromSubjects(
                         sessionUser.userId(),
-                        currentMonthlyPeriodKey()
+                        currentMonthlyPeriodKey(),
+                        leagueCode
                 )
                         : rankingScoreMapper.findMyWeeklySubjectRanking(
                         sessionUser.userId(),
                         subjectId,
-                        currentWeeklyPeriodKey()
+                        currentWeeklyPeriodKey(),
+                        leagueCode
                 );
 
         int myRankNo = -1;
@@ -170,6 +186,26 @@ public class RankingService {
         tab4.put("subjectId", 4L);
         subjectTabs.add(tab4);
 
+        List<Map<String, Object>> leagueTabs = new ArrayList<>();
+
+        Map<String, Object> league1 = new HashMap<>();
+        league1.put("code", "BRONZE");
+        league1.put("label", "BRONZE");
+        league1.put("active", "BRONZE".equals(leagueCode));
+        leagueTabs.add(league1);
+
+        Map<String, Object> league2 = new HashMap<>();
+        league2.put("code", "SILVER");
+        league2.put("label", "SILVER");
+        league2.put("active", "SILVER".equals(leagueCode));
+        leagueTabs.add(league2);
+
+        Map<String, Object> league3 = new HashMap<>();
+        league3.put("code", "GOLD");
+        league3.put("label", "GOLD");
+        league3.put("active", "GOLD".equals(leagueCode));
+        leagueTabs.add(league3);
+
         Map<String, Object> data = new HashMap<>();
         data.put("subjectTabs", subjectTabs);
         data.put("selectedSubjectId", subjectId);
@@ -178,6 +214,8 @@ public class RankingService {
         data.put("rankingList", rankingList);
         data.put("scoreBreakdown", scoreBreakdown);
         data.put("periodType", effectivePeriodType);
+        data.put("currentLeagueCode", leagueCode);
+        data.put("leagueTabs", leagueTabs);
 
         return data;
     }
@@ -258,4 +296,12 @@ public class RankingService {
     private int safeScore(Integer score) {
         return score == null ? 0 : score;
     }
+
+
+private String resolveCurrentLeagueCode(Long userId) {
+    return learningProfileReadMapper.findByUserId(userId)
+            .map(UserLearningProfile::getCurrentLevelCode)
+            .filter(levelCode -> levelCode != null && !levelCode.isBlank())
+            .orElse("BRONZE");
+}
 }
