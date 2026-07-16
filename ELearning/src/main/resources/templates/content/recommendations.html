@@ -18,7 +18,10 @@
 
   <main class="content-recommend-screen">
     <div class="content-recommend-shell">
-      <a class="button content-back-button" th:href="@{/community(subjectId=${activeSubjectId})}" aria-label="커뮤니티로 돌아가기" title="커뮤니티로 돌아가기">
+      <a class="button content-back-button"
+         th:href="@{/community(subjectId=${activeSubjectId})}"
+         aria-label="커뮤니티로 돌아가기"
+         title="커뮤니티로 돌아가기">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="m12 19-7-7 7-7"></path>
           <path d="M19 12H5"></path>
@@ -31,53 +34,53 @@
           <nav class="content-subject-nav">
             <h2>과목 선택</h2>
 
-          <a class="content-subject-card"
-             th:classappend="${activeSubjectId == 1} ? ' is-active'"
-             th:href="@{/content/recommendations(subjectId=1)}">
-            <span class="content-subject-card-visual">
-              <img th:src="@{/assets/images/icons/subject/java.png}" alt="" loading="lazy">
-            </span>
-            <span class="content-subject-card-copy">
-              <strong>Java</strong>
-              <span>영상 · 문서 · 학습 루틴</span>
-            </span>
-          </a>
+            <a class="content-subject-card"
+               th:classappend="${activeSubjectId == 1} ? ' is-active'"
+               th:href="@{/content/recommendations(subjectId=1)}">
+              <span class="content-subject-card-visual">
+                <img th:src="@{/assets/images/icons/subject/java.png}" alt="" loading="lazy">
+              </span>
+              <span class="content-subject-card-copy">
+                <strong>Java</strong>
+                <span>영상 · 설치 방법 · 다운로드</span>
+              </span>
+            </a>
 
-          <a class="content-subject-card"
-             th:classappend="${activeSubjectId == 4} ? ' is-active'"
-             th:href="@{/content/recommendations(subjectId=4)}">
-            <span class="content-subject-card-visual">
-              <img th:src="@{/assets/images/icons/subject/sql.png}" alt="" loading="lazy">
-            </span>
-            <span class="content-subject-card-copy">
-              <strong>SQL</strong>
-              <span>영상 · 문서 · 학습 루틴</span>
-            </span>
-          </a>
+            <a class="content-subject-card"
+               th:classappend="${activeSubjectId == 4} ? ' is-active'"
+               th:href="@{/content/recommendations(subjectId=4)}">
+              <span class="content-subject-card-visual">
+                <img th:src="@{/assets/images/icons/subject/sql.png}" alt="" loading="lazy">
+              </span>
+              <span class="content-subject-card-copy">
+                <strong>SQL</strong>
+                <span>영상 · 설치 방법 · 다운로드</span>
+              </span>
+            </a>
 
-          <a class="content-subject-card"
-             th:classappend="${activeSubjectId == 3} ? ' is-active'"
-             th:href="@{/content/recommendations(subjectId=3)}">
-            <span class="content-subject-card-visual">
-              <img th:src="@{/assets/images/icons/subject/web.png}" alt="" loading="lazy">
-            </span>
-            <span class="content-subject-card-copy">
-              <strong>HTML/CSS/JS</strong>
-              <span>영상 · 문서 · 학습 루틴</span>
-            </span>
-          </a>
+            <a class="content-subject-card"
+               th:classappend="${activeSubjectId == 3} ? ' is-active'"
+               th:href="@{/content/recommendations(subjectId=3)}">
+              <span class="content-subject-card-visual">
+                <img th:src="@{/assets/images/icons/subject/web.png}" alt="" loading="lazy">
+              </span>
+              <span class="content-subject-card-copy">
+                <strong>HTML/CSS/JS</strong>
+                <span>영상 · 설치 방법 · 다운로드</span>
+              </span>
+            </a>
 
-          <a class="content-subject-card"
-             th:classappend="${activeSubjectId == 2} ? ' is-active'"
-             th:href="@{/content/recommendations(subjectId=2)}">
-            <span class="content-subject-card-visual">
-              <img th:src="@{/assets/images/icons/subject/python.png}" alt="" loading="lazy">
-            </span>
-            <span class="content-subject-card-copy">
-              <strong>Python</strong>
-              <span>영상 · 문서 · 학습 루틴</span>
-            </span>
-          </a>
+            <a class="content-subject-card"
+               th:classappend="${activeSubjectId == 2} ? ' is-active'"
+               th:href="@{/content/recommendations(subjectId=2)}">
+              <span class="content-subject-card-visual">
+                <img th:src="@{/assets/images/icons/subject/python.png}" alt="" loading="lazy">
+              </span>
+              <span class="content-subject-card-copy">
+                <strong>Python</strong>
+                <span>영상 · 설치 방법 · 다운로드</span>
+              </span>
+            </a>
           </nav>
         </aside>
 
@@ -105,7 +108,7 @@
                       <span class="content-video-play" aria-hidden="true"></span>
                     </span>
                     <span class="content-video-copy">
-                      <strong th:text="${item.title}">자바지향 기초</strong>
+                      <strong th:text="${item.title}">추천 영상</strong>
                       <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '추천 영상'}">추천 영상</small>
                     </span>
                   </a>
@@ -113,22 +116,168 @@
               </ul>
             </article>
 
-            <article class="content-recommend-card content-practice-card">
-              <h2>실습 자료</h2>
-              <ul>
-                <li th:each="item : ${articleView.recommendations}">
-                  <a th:href="${item.url}" target="_blank" rel="noopener">
-                    <i></i>
-                    <strong th:text="${item.title}">수업 실습 자료</strong>
-                    <small th:text="${item.recommendationSlot != null ? item.recommendationSlot : '실습 자료'}">실습 자료</small>
-                  </a>
-                </li>
-              </ul>
+            <article class="content-recommend-card content-install-card">
+              <h2>설치 방법</h2>
+              <a class="content-install-video-link content-video-link"
+                 th:href="${installView.youtubeUrl}"
+                 target="_blank"
+                 rel="noopener">
+                <span class="content-video-thumbnail">
+                  <img th:if="${installView.youtubeThumbnailUrl() != null}"
+                       th:src="${installView.youtubeThumbnailUrl()}"
+                       alt=""
+                       th:alt="|${subjectLabel} 설치 방법 영상|"
+                       loading="lazy">
+                  <span class="content-video-placeholder" th:unless="${installView.youtubeThumbnailUrl() != null}"></span>
+                  <span class="content-video-play" aria-hidden="true"></span>
+                </span>
+                <span class="content-video-copy">
+                  <strong>설치 방법 영상 보기</strong>
+                  <small>YouTube에서 Windows / Mac 설치 방법을 확인해요.</small>
+                </span>
+              </a>
+
+              <div class="content-install-downloads">
+                <section>
+                  <h3>Windows</h3>
+                  <a th:each="download : ${installView.windowsDownloads}"
+                     th:href="${download.url}"
+                     target="_blank"
+                     rel="noopener"
+                     th:text="${download.label}">Windows 사용자용 설치 버전 다운로드</a>
+                  <ol class="content-install-steps">
+                    <li th:each="step : ${installView.windowsSteps}" th:text="${step}">설치 파일을 내려받습니다.</li>
+                    <li class="content-install-step-action">
+                      <button type="button"
+                              class="content-install-detail-button"
+                              data-detail-target="windows-install-detail">
+                        자세히
+                      </button>
+                    </li>
+                  </ol>
+                </section>
+                <section>
+                  <h3>Mac</h3>
+                  <a th:each="download : ${installView.macDownloads}"
+                     th:href="${download.url}"
+                     target="_blank"
+                     rel="noopener"
+                     th:text="${download.label}">Mac 사용자용 다운로드</a>
+                  <ol class="content-install-steps">
+                    <li th:each="step : ${installView.macSteps}" th:text="${step}">설치 파일을 내려받습니다.</li>
+                    <li class="content-install-step-action">
+                      <button type="button"
+                              class="content-install-detail-button"
+                              data-detail-target="mac-install-detail">
+                        자세히
+                      </button>
+                    </li>
+                  </ol>
+                </section>
+              </div>
+
+              <div class="content-install-note">
+                <strong>설치 확인</strong>
+                <p th:text="${installView.note}">
+                  설치 후 Windows는 명령 프롬프트나 PowerShell, Mac은 터미널에서 설치 확인 명령어를 입력해 주세요.
+                </p>
+                <div class="content-install-command">
+                  <code th:text="${installView.verifyCommand}">java -version</code>
+                  <button type="button"
+                          class="content-copy-command-button"
+                          th:attr="data-copy-command=${installView.verifyCommand}">
+                    복사
+                  </button>
+                </div>
+              </div>
+
+              <div class="content-detail-modal" id="windows-install-detail" aria-hidden="true">
+                <div class="content-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="windows-install-title">
+                  <div class="content-detail-head">
+                    <h3 id="windows-install-title">Windows 설치 자세히</h3>
+                    <button type="button" class="content-detail-close-button" data-detail-close>닫기</button>
+                  </div>
+                  <ol class="content-detail-steps">
+                    <li th:each="step : ${installView.windowsDetailSteps}" th:text="${step}">설치 파일을 내려받습니다.</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="content-detail-modal" id="mac-install-detail" aria-hidden="true">
+                <div class="content-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="mac-install-title">
+                  <div class="content-detail-head">
+                    <h3 id="mac-install-title">Mac 설치 자세히</h3>
+                    <button type="button" class="content-detail-close-button" data-detail-close>닫기</button>
+                  </div>
+                  <ol class="content-detail-steps">
+                    <li th:each="step : ${installView.macDetailSteps}" th:text="${step}">설치 파일을 내려받습니다.</li>
+                  </ol>
+                </div>
+              </div>
             </article>
           </section>
         </section>
       </section>
     </div>
   </main>
+
+  <script>
+    const closeDetailModal = (modal) => {
+      if (!modal) {
+        return;
+      }
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+    };
+
+    document.querySelectorAll("[data-detail-target]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const modal = document.getElementById(button.dataset.detailTarget);
+        if (!modal) {
+          return;
+        }
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+      });
+    });
+
+    document.querySelectorAll("[data-detail-close]").forEach((button) => {
+      button.addEventListener("click", () => closeDetailModal(button.closest(".content-detail-modal")));
+    });
+
+    document.querySelectorAll(".content-detail-modal").forEach((modal) => {
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeDetailModal(modal);
+        }
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        document.querySelectorAll(".content-detail-modal.is-open").forEach(closeDetailModal);
+      }
+    });
+
+    document.querySelectorAll("[data-copy-command]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const command = button.dataset.copyCommand || "";
+        try {
+          await navigator.clipboard.writeText(command);
+        } catch (error) {
+          const textarea = document.createElement("textarea");
+          textarea.value = command;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+        }
+        window.alert("복사가 되었습니다");
+      });
+    });
+  </script>
 </body>
 </html>
