@@ -22,7 +22,13 @@ import com.acorn.elearning.community.service.ReactionService;
 import com.acorn.elearning.community.service.ReportService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.validation.Valid;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -74,7 +80,7 @@ public class CommunityApiController {
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @Valid @RequestBody CreatePostRequest request
     ) {
-        return ApiResponse.success(postService.detail(sessionUser, postService.create(sessionUser, request.toForm()).getPostId()));
+        return ApiResponse.success(postService.detail(sessionUser, postService.create(sessionUser, request.toForm()).getPostId(), false));
     }
 
     @PatchMapping("/api/community/posts/{postId}")
@@ -83,7 +89,7 @@ public class CommunityApiController {
             @PathVariable Long postId,
             @Valid @RequestBody UpdatePostRequest request
     ) {
-        return ApiResponse.success(postService.detail(sessionUser, postService.update(sessionUser, postId, request.toForm()).getPostId()));
+        return ApiResponse.success(postService.detail(sessionUser, postService.update(sessionUser, postId, request.toForm()).getPostId(), false));
     }
 
     @DeleteMapping("/api/community/posts/{postId}")
@@ -111,6 +117,18 @@ public class CommunityApiController {
     ) {
         attachmentService.delete(sessionUser, attachmentId);
         return ApiResponse.success(Map.of("attachmentId", attachmentId, "deleted", true));
+    }
+
+    @GetMapping("/community/attachments/{attachmentId}/file")
+    public ResponseEntity<Resource> attachmentFile(@PathVariable Long attachmentId) {
+        AttachmentService.AttachmentFile file = attachmentService.attachmentFile(attachmentId);
+        ContentDisposition disposition = ContentDisposition.inline()
+                .filename(file.attachment().getOriginalName(), StandardCharsets.UTF_8)
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.contentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                .body(file.resource());
     }
 
     @GetMapping("/api/community/posts/{postId}/comments")

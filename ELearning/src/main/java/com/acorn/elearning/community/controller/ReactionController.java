@@ -27,7 +27,7 @@ public class ReactionController {
         }
         reactionService.like(sessionUser, postId);
         redirectAttributes.addFlashAttribute("message", "좋아요를 눌렀습니다.");
-        return "redirect:/community/posts/" + postId;
+        return "redirect:/community/posts/" + postId + "?skipView=true";
     }
 
     @PostMapping("/community/posts/{postId}/likes/delete")
@@ -41,7 +41,7 @@ public class ReactionController {
         }
         reactionService.unlike(sessionUser, postId);
         redirectAttributes.addFlashAttribute("message", "좋아요를 취소했습니다.");
-        return "redirect:/community/posts/" + postId;
+        return "redirect:/community/posts/" + postId + "?skipView=true";
     }
 
     @PostMapping("/community/posts/{postId}/scraps")
@@ -55,7 +55,7 @@ public class ReactionController {
         }
         reactionService.scrap(sessionUser, postId);
         redirectAttributes.addFlashAttribute("message", "스크랩했습니다.");
-        return "redirect:/community/posts/" + postId;
+        return "redirect:/community/posts/" + postId + "?skipView=true";
     }
 
     @PostMapping("/community/posts/{postId}/scraps/delete")
@@ -69,6 +69,6 @@ public class ReactionController {
         }
         reactionService.unscrap(sessionUser, postId);
         redirectAttributes.addFlashAttribute("message", "스크랩을 취소했습니다.");
-        return "redirect:/community/posts/" + postId;
+        return "redirect:/community/posts/" + postId + "?skipView=true";
     }
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.community.mapper.CommunityNoticeMapper">
+    <select id="findPublishedNotices" resultType="com.acorn.elearning.community.model.CommunityNotice">
+        SELECT
+            n.notice_id AS noticeId,
+            n.title,
+            n.content,
+            COALESCE(NULLIF(u.nickname, ''), '관리자') AS writerNickname,
+            n.published_at AS publishedAt
+        FROM notices n
+        LEFT JOIN users u ON u.user_id = n.writer_id
+        WHERE n.status = 'PUBLISHED'
+        ORDER BY COALESCE(n.published_at, n.created_at) DESC, n.notice_id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="findPublishedNoticeById" resultType="com.acorn.elearning.community.model.CommunityNotice">
+        SELECT
+            n.notice_id AS noticeId,
+            n.title,
+            n.content,
+            COALESCE(NULLIF(u.nickname, ''), '관리자') AS writerNickname,
+            n.published_at AS publishedAt
+        FROM notices n
+        LEFT JOIN users u ON u.user_id = n.writer_id
+        WHERE n.notice_id = #{noticeId}
+          AND n.status = 'PUBLISHED'
+    </select>
+</mapper>
