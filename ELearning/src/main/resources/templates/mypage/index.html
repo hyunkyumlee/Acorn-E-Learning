@@ -207,10 +207,14 @@
                 <img data-profile-image-preview th:if="${view.user().profileImageUrl() != null && !#strings.isEmpty(view.user().profileImageUrl())}" th:src="${view.user().profileImageUrl()}" alt="">
                 <span data-profile-image-fallback th:classappend="${view.user().profileImageUrl() != null && !#strings.isEmpty(view.user().profileImageUrl()) ? 'is-hidden' : ''}" th:text="${view.user().nickname() == null || #strings.isEmpty(view.user().nickname()) ? 'K' : #strings.substring(view.user().nickname(), 0, 1)}">K</span>
               </div>
-              <label class="mini-button">
-                사진 변경
-                <input class="profile-image-input" type="file" th:field="*{profileImage}" accept="image/png,image/jpeg,image/webp" data-profile-image-input>
-              </label>
+              <div class="mypage-profile-image-actions">
+                <label class="mini-button">
+                  사진 변경
+                  <input class="profile-image-input" type="file" th:field="*{profileImage}" accept="image/png,image/jpeg,image/webp" data-profile-image-input>
+                </label>
+                <input type="hidden" th:field="*{resetProfileImage}" data-profile-image-reset-input>
+                <button class="mini-button mypage-profile-image-reset" type="button" data-profile-image-reset>기본 사진으로 변경</button>
+              </div>
             </div>
             <div class="mypage-profile-fields">
               <label>
@@ -303,6 +307,8 @@
       var input = document.querySelector("[data-profile-image-input]");
       var preview = document.querySelector("[data-profile-image-preview]");
       var fallback = document.querySelector("[data-profile-image-fallback]");
+      var resetImageButton = document.querySelector("[data-profile-image-reset]");
+      var resetImageInput = document.querySelector("[data-profile-image-reset-input]");
 
       function pad(value) {
         return String(value).padStart(2, "0");
@@ -459,6 +465,9 @@
           if (!file) {
             return;
           }
+          if (resetImageInput) {
+            resetImageInput.value = "false";
+          }
           var imageUrl = URL.createObjectURL(file);
           if (!preview) {
             preview = document.createElement("img");
@@ -470,6 +479,24 @@
           preview.hidden = false;
           if (fallback) {
             fallback.classList.add("is-hidden");
+          }
+        });
+      }
+
+      if (resetImageButton) {
+        resetImageButton.addEventListener("click", function () {
+          if (input) {
+            input.value = "";
+          }
+          if (resetImageInput) {
+            resetImageInput.value = "true";
+          }
+          if (preview) {
+            preview.removeAttribute("src");
+            preview.hidden = true;
+          }
+          if (fallback) {
+            fallback.classList.remove("is-hidden");
           }
         });
       }

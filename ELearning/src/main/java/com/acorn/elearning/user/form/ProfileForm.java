@@ -19,4 +19,6 @@ public class ProfileForm {
     private Long primarySubjectId;
 
     private MultipartFile profileImage;
+
+    private boolean resetProfileImage;
 }

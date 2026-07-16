@@ -58,11 +58,21 @@ public class UserService {
         User user = userMapper.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
 
+        String previousProfileImageUrl = user.getProfileImageUrl();
+        boolean profileImageChanged = false;
+
         user.setNickname(normalizeRequired(form.getNickname()));
-        if (hasProfileImage(form.getProfileImage())) {
+        if (form.isResetProfileImage()) {
+            user.setProfileImageUrl(null);
+            profileImageChanged = true;
+        } else if (hasProfileImage(form.getProfileImage())) {
             user.setProfileImageUrl(storeProfileImage(userId, form.getProfileImage()));
+            profileImageChanged = true;
         }
         userMapper.update(user);
+        if (profileImageChanged) {
+            deleteStoredProfileImage(previousProfileImageUrl);
+        }
 
         UserLearningProfile learningProfile = userLearningProfileMapper.findByUserId(userId).orElse(null);
         String learningGoal = normalizeOptional(form.getLearningGoal());
@@ -171,6 +181,28 @@ public class UserService {
             throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "프로필 이미지를 저장할 수 없습니다.");
         }
         return "/mypage/profile-images/" + fileName;
+    }
+
+    private void deleteStoredProfileImage(String imageUrl) {
+        String imagePathPrefix = "/mypage/profile-images/";
+        if (imageUrl == null || !imageUrl.startsWith(imagePathPrefix)) {
+            return;
+        }
+        String fileName = imageUrl.substring(imagePathPrefix.length());
+        if (fileName.isBlank() || fileName.contains("/") || fileName.contains("\\")) {
+            return;
+        }
+
+        Path directory = uploadBasePath().resolve("profile-images").toAbsolutePath().normalize();
+        Path target = directory.resolve(fileName).normalize();
+        if (!target.startsWith(directory)) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(target);
+        } catch (IOException ignored) {
+            // DB의 프로필 이미지는 이미 변경되었으므로, 삭제 실패 파일은 다음 정리 작업에서 처리한다.
+        }
     }
 
     private Path uploadBasePath() {
