@@ -16,6 +16,7 @@
   <link rel="stylesheet" th:href="@{/css/screens/practice.css}">
 
   <script defer th:src="@{/js/common/theme.js}"></script>
+  <script defer th:src="@{/js/screens/practice.js}"></script>
 </head>
 
 <body>
@@ -47,51 +48,78 @@
     <!-- 수정: 완료 화면 styling용 class 추가 -->
     <div th:if="${completed}" class="practice-complete">
 
-      <h2>정말 수고했어요! 이제 결과를 확인해 볼까요?</h2>
+      <div id="practiceCompleteIntro" class="practice-complete-intro">
+        <div class="practice-complete-layout">
+          <div class="practice-complete-visual">
+            <img th:src="@{/assets/images/characters/nuvi-celebrate.png}" alt="문제풀이 완료 안내 캐릭터">
+          </div>
 
-      <p th:if="${completeResult != null}">
-        <span th:text="${completeResult.data()['passed']} ? '실력이 정말 많이 늘었네요! 다음 레슨도 바로 시작해 보세요.' : '이번엔 조금 어려웠나요? 다시 도전해서 완벽하게 마스터해 봐요!'">
-          실력이 정말 많이 늘었네요! 다음 레슨도 바로 시작해 보세요.
-        </span>
-      </p>
+          <div class="practice-complete-copy">
+            <h2>정말 수고했어요!</h2>
+            <h2>이제 결과를 확인해 볼까요?</h2>
+            <p>끝까지 문제를 풀어낸 것만으로도 충분히 멋져요. 결과를 확인하고 다음 학습으로 이어가 봐요.</p>
 
-      <div th:if="${completeResult != null}" class="practice-result">
-        <p>
-          정답:
-          <strong th:text="${completeResult.data()['correctCount']}">0</strong>문제
-        </p>
-        <p>
-          오답:
-          <strong th:text="${completeResult.data()['wrongCount']}">0</strong>문제
-        </p>
-        <p>
-          건너뛰기:
-          <strong th:text="${completeResult.data()['skippedCount']}">0</strong>문제
-        </p>
+            <div class="practice-footer">
+              <button type="button" id="showPracticeResultButton">결과 확인하기</button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!--이동경로 -->
-      <div class="practice-footer">
-        <a th:if="${completeResult != null}"
-           th:href="@{/learning/review/list(
+      <div id="practiceCompleteResult" hidden>
+        <h2>연습이 완료되었습니다.</h2>
+
+        <p th:if="${completeResult != null}">
+      <span th:text="${completeResult.data()['passed']} ? '실력을 충분히 보여주셨어요! 다음 학습으로 이어가 볼까요?' : '조금 아쉬웠지만 괜찮아요. 다시 한 번 차근차근 도전해봐요!'">
+        실력을 충분히 보여주셨어요! 다음 학습으로 이어가 볼까요?
+      </span>
+        </p>
+
+        <div th:if="${completeResult != null}" class="practice-result practice-complete-summary">
+
+          <div class="practice-complete-summary-row">
+            <span class="practice-complete-summary-label">정답</span>
+            <p class="practice-complete-summary-value">
+              <strong th:text="${completeResult.data()['correctCount']}">0</strong>문제
+            </p>
+          </div>
+
+          <div class="practice-complete-summary-row">
+            <span class="practice-complete-summary-label">오답</span>
+            <p class="practice-complete-summary-value">
+              <strong th:text="${completeResult.data()['wrongCount']}">0</strong>문제
+            </p>
+          </div>
+
+          <div class="practice-complete-summary-row">
+            <span class="practice-complete-summary-label">건너뛰기</span>
+            <p class="practice-complete-summary-value">
+              <strong th:text="${completeResult.data()['skippedCount']}">0</strong>문제
+            </p>
+          </div>
+        </div>
+
+        <div class="practice-footer">
+          <a th:if="${completeResult != null}"
+             th:href="@{/learning/review/list(
            nodeId=${completeResult.data()['nodeId']},
            lessonId=${completeResult.data()['lessonId']}
-           )}">
-          오답노트
-        </a>
-        <a th:if="${completeResult != null and completeResult.data()['primaryPath'] != null}"
-           th:href="${completeResult.data()['primaryPath']}"
-           th:text="${completeResult.data()['primaryLabel']}">
-          메인 이동
-        </a>
+         )}">
+            오답노트
+          </a>
 
-        <a th:if="${completeResult != null and completeResult.data()['secondaryPath'] != null}"
-           th:href="${completeResult.data()['secondaryPath']}"
-           th:text="${completeResult.data()['secondaryLabel']}">
-          보조 이동
-        </a>
-      </div>
-        <!-- -->
+          <a th:if="${completeResult != null and completeResult.data()['primaryPath'] != null}"
+             th:href="${completeResult.data()['primaryPath']}"
+             th:text="${completeResult.data()['primaryLabel']}">
+            메인 이동
+          </a>
+
+          <a th:if="${completeResult != null and completeResult.data()['secondaryPath'] != null}"
+             th:href="${completeResult.data()['secondaryPath']}"
+             th:text="${completeResult.data()['secondaryLabel']}">
+            보조 이동
+          </a>
+        </div>
       </div>
     </div>
 
@@ -128,7 +156,7 @@
 
         <div class="practice-intro-visual">
           <!-- 여기에 이미지 넣기 -->
-          <img th:src="@{/assets/images/characters/practice-intro.png}" alt="문제풀이 안내 이미지">
+          <img th:src="@{/assets/images/characters/nuvi-encourage.png}" alt="문제풀이 안내 이미지">
         </div>
       </div>
     </div>
@@ -256,23 +284,32 @@
 
       <div th:if="${answered and lastResult != null}">
         <section class="practice-result">
-          <p th:if="${lastResult.data()['correct']}">대단해요! 다음 문제도 자신 있게 도전해 볼까요? </p>
-          <p th:if="${!lastResult.data()['correct']}">앗, 살짝 빗나갔어요! 다음번엔 분명히 맞힐 수 있을 거예요. </p>
-
-          <p>
-            작성한 답변:
-            <strong th:text="${lastResult.data()['submittedAnswer']}">A</strong>
+          <p class="practice-result-message" th:if="${lastResult.data()['correct']}">
+            대단해요! 다음 문제도 자신 있게 도전해 볼까요?
+          </p>
+          <p class="practice-result-message" th:if="${!lastResult.data()['correct']}">
+            앗, 살짝 빗나갔어요! 다음번엔 분명히 맞힐 수 있을 거예요.
           </p>
 
-          <p>
-            올바른 정답:
-            <strong th:text="${lastResult.data()['correctAnswer']}">B</strong>
-          </p>
+          <div class="practice-result-divider"></div>
 
-          <p th:if="${lastResult.data()['explanation'] != null and lastResult.data()['explanation'] != ''}">
-            함께 살펴보기:
-            <span th:text="${lastResult.data()['explanation']}">이 문제는 이렇게 생각하면 더 쉬워요.</span>
-          </p>
+          <div class="practice-result-row">
+            <span class="practice-result-label">작성한 답변</span>
+            <strong class="practice-result-value" th:text="${lastResult.data()['submittedAnswer']}">A</strong>
+          </div>
+
+          <div class="practice-result-row">
+            <span class="practice-result-label">올바른 정답</span>
+            <strong class="practice-result-value" th:text="${lastResult.data()['correctAnswer']}">B</strong>
+          </div>
+
+          <div class="practice-result-divider"></div>
+          <div class="practice-result-row"
+               th:if="${lastResult.data()['explanation'] != null and lastResult.data()['explanation'] != ''}">
+            <span class="practice-result-label">함께 살펴보기</span>
+            <p class="practice-result-explanation"
+               th:text="${lastResult.data()['explanation']}">해설 내용</p>
+          </div>
         </section>
 
         <section class="practice-footer practice-footer--split">
@@ -299,7 +336,7 @@
             <form th:if="${isLastProblem}"
                   th:action="@{|/learning/practice/sets/${setAttemptId}/complete|}"
                   method="post">
-              <button type="submit">결과 보기</button>
+              <button type="submit">다음</button>
             </form>
           </div>
         </section>
