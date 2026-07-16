@@ -31,6 +31,7 @@ public class CommunityProfileController {
         model.addAttribute("activeBoardType", "");
         model.addAttribute("loggedIn", true);
         model.addAttribute("profileName", sessionUser.nickname());
+        model.addAttribute("profileImageUrl", sessionUser.profileImageUrl());
         model.addAttribute("profileEmail", sessionUser.email());
         model.addAttribute("profileSummary", profile);
         return "community/profile";

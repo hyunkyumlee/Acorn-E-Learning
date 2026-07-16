@@ -18,7 +18,7 @@
   <main class="page-shell community-screen community-listing-screen">
     <section class="community-listing-layout" aria-label="게시글 목록">
       <aside class="community-listing-left-rail">
-        <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, false)}"></div>
+        <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileImageUrl}, ${profileSummary}, false)}"></div>
         <a class="community-content-recommend-link" th:href="@{/content/recommendations(subjectId=${activeSubjectId})}">
           <span class="community-content-recommend-copy">
             <strong class="community-content-recommend-title">Knowva의 과목 콘텐츠 추천</strong>
@@ -41,13 +41,13 @@
                th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='hot',period='week')}">인기글</a>
             <a th:classappend="${activeBoardType == 'FREE'} ? ' is-active'"
                th:attr="aria-current=${activeBoardType == 'FREE'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE',keyword=${condition.keyword},sort=${condition.sort})}">자유</a>
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE',keyword=${condition.keyword},sort='latest')}">자유</a>
             <a th:classappend="${activeBoardType == 'QUESTION'} ? ' is-active'"
                th:attr="aria-current=${activeBoardType == 'QUESTION'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='QUESTION',keyword=${condition.keyword},sort=${condition.sort})}">질문</a>
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='QUESTION',keyword=${condition.keyword},sort='latest')}">질문</a>
             <a th:classappend="${activeBoardType == 'STUDY_LOG'} ? ' is-active'"
                th:attr="aria-current=${activeBoardType == 'STUDY_LOG'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG',keyword=${condition.keyword},sort=${condition.sort})}">공부 일지</a>
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG',keyword=${condition.keyword},sort='latest')}">공부 일지</a>
           </nav>
           <a class="button primary community-write-button" th:href="@{/community/write}">글쓰기</a>
         </div>
@@ -57,6 +57,24 @@
             <h1>게시글 목록</h1>
             <span th:text="${view.total + '개'}">0개</span>
           </div>
+
+          <section class="community-notice-strip" th:if="${notices != null and !#lists.isEmpty(notices)}" aria-label="공지사항">
+            <div class="community-notice-strip-heading">
+              <span>NOTICE</span>
+              <strong>공지사항</strong>
+            </div>
+            <ul>
+              <li th:each="notice : ${notices}">
+                <a class="community-notice-title"
+                   th:href="@{/community/notices/{id}(id=${notice.noticeId},subjectId=${condition.subjectId})}"
+                   th:text="${notice.title}">공지사항 제목</a>
+                <small>
+                  <span th:text="${notice.writerNickname}">관리자</span>
+                  <span th:if="${notice.publishedAt != null}" th:text="${#temporals.format(notice.publishedAt, 'yyyy.MM.dd')}">2026.07.16</span>
+                </small>
+              </li>
+            </ul>
+          </section>
 
           <form method="get" th:action="@{/community/board}" class="community-search-form">
             <input type="hidden" name="subjectId" th:value="${condition.subjectId}">
@@ -98,15 +116,15 @@
 
           <nav class="community-pagination" aria-label="게시글 페이지" th:if="${view.totalPages > 1}">
             <a th:if="${view.page > 1}"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},page=${view.page - 1})}">이전</a>
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},period=${condition.period},page=${view.page - 1})}">이전</a>
             <span th:if="${view.page <= 1}" aria-hidden="true">이전</span>
             <a th:each="pageNumber : ${#numbers.sequence(pageStart, pageEnd)}"
                th:classappend="${pageNumber == view.page} ? ' is-active'"
                th:attr="aria-current=${pageNumber == view.page} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},page=${pageNumber})}"
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},period=${condition.period},page=${pageNumber})}"
                th:text="${pageNumber}">1</a>
             <a th:if="${view.page < view.totalPages}"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},page=${view.page + 1})}">다음</a>
+               th:href="@{/community/board(subjectId=${condition.subjectId},boardType=${condition.boardType},keyword=${condition.keyword},sort=${condition.sort},period=${condition.period},page=${view.page + 1})}">다음</a>
             <span th:if="${view.page >= view.totalPages}" aria-hidden="true">다음</span>
           </nav>
         </section>
