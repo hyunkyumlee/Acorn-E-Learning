@@ -7,11 +7,18 @@ import com.acorn.elearning.community.mapper.PostAttachmentMapper;
 import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.community.model.PostAttachment;
 import com.acorn.elearning.security.SessionUser;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,10 +41,16 @@ public class AttachmentService {
 
     private final PostAttachmentMapper postAttachmentMapper;
     private final CommunityPostMapper communityPostMapper;
+    private final Path uploadBasePath;
 
-    public AttachmentService(PostAttachmentMapper postAttachmentMapper, CommunityPostMapper communityPostMapper) {
+    public AttachmentService(
+            PostAttachmentMapper postAttachmentMapper,
+            CommunityPostMapper communityPostMapper,
+            @Value("${knowva.upload.base-path:./uploads}") String configuredUploadBasePath
+    ) {
         this.postAttachmentMapper = postAttachmentMapper;
         this.communityPostMapper = communityPostMapper;
+        this.uploadBasePath = uploadBasePath(configuredUploadBasePath);
     }
 
     public Map<String, Object> stub(String action) {
@@ -84,7 +97,26 @@ public class AttachmentService {
             attachment.setStoredName(storedName(file));
             attachment.setFilePath("community/" + postId + "/" + attachment.getStoredName());
             attachment.setFileSize(file.getSize());
+            saveFile(file, attachment.getFilePath());
             postAttachmentMapper.insert(attachment);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public AttachmentFile attachmentFile(Long attachmentId) {
+        PostAttachment attachment = postAttachmentMapper.findById(attachmentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다."));
+        requireActivePost(attachment.getPostId());
+
+        Path targetPath = resolveStoragePath(attachment.getFilePath());
+        if (!Files.exists(targetPath) || !Files.isRegularFile(targetPath)) {
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다.");
+        }
+        try {
+            Resource resource = new UrlResource(targetPath.toUri());
+            return new AttachmentFile(attachment, resource, contentType(targetPath));
+        } catch (MalformedURLException e) {
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다.");
         }
     }
 
@@ -96,6 +128,7 @@ public class AttachmentService {
         CommunityPost post = requireActivePost(attachment.getPostId());
         requireOwner(post, userId);
         postAttachmentMapper.deleteById(attachmentId);
+        deleteFile(attachment.getFilePath());
     }
 
     private List<MultipartFile> nonEmptyFiles(List<MultipartFile> files) {
@@ -141,6 +174,53 @@ public class AttachmentService {
         return fileName.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
     }
 
+    private Path uploadBasePath(String configuredUploadBasePath) {
+        String basePath = configuredUploadBasePath == null || configuredUploadBasePath.isBlank()
+                ? "./uploads"
+                : configuredUploadBasePath;
+        return Path.of(basePath).toAbsolutePath().normalize();
+    }
+
+    private void saveFile(MultipartFile file, String relativePath) {
+        Path targetPath = resolveStoragePath(relativePath);
+        try {
+            Files.createDirectories(targetPath.getParent());
+            file.transferTo(targetPath);
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 저장에 실패했습니다.");
+        }
+    }
+
+    private void deleteFile(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(resolveStoragePath(relativePath));
+        } catch (IOException ignored) {
+        }
+    }
+
+    private Path resolveStoragePath(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다.");
+        }
+        Path targetPath = uploadBasePath.resolve(relativePath).normalize();
+        if (!targetPath.startsWith(uploadBasePath)) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 경로가 올바르지 않습니다.");
+        }
+        return targetPath;
+    }
+
+    private String contentType(Path targetPath) {
+        try {
+            String contentType = Files.probeContentType(targetPath);
+            return contentType == null || contentType.isBlank() ? "application/octet-stream" : contentType;
+        } catch (IOException e) {
+            return "application/octet-stream";
+        }
+    }
+
     private CommunityPost requireActivePost(Long postId) {
         return communityPostMapper.findActiveById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다."));
@@ -157,5 +237,8 @@ public class AttachmentService {
             throw new BusinessException(ErrorCode.AUTH_REQUIRED);
         }
         return sessionUser.userId();
+    }
+
+    public record AttachmentFile(PostAttachment attachment, Resource resource, String contentType) {
     }
 }

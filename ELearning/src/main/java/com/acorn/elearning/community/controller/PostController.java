@@ -6,13 +6,18 @@ import com.acorn.elearning.community.form.CommentForm;
 import com.acorn.elearning.community.form.PostForm;
 import com.acorn.elearning.community.form.PostSearchCondition;
 import com.acorn.elearning.community.form.ReportForm;
+import com.acorn.elearning.community.mapper.CommunityNoticeMapper;
+import com.acorn.elearning.community.mapper.CommunityWriterMapper;
 import com.acorn.elearning.community.model.Comment;
 import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.community.service.PostService;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.validation.Valid;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,15 +25,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PostController {
-    private final PostService postService;
+    private static final int BOARD_NOTICE_LIMIT = 4;
 
-    public PostController(PostService postService) {
+    private final PostService postService;
+    private final CommunityWriterMapper communityWriterMapper;
+    private final CommunityNoticeMapper communityNoticeMapper;
+
+    public PostController(
+            PostService postService,
+            CommunityWriterMapper communityWriterMapper,
+            CommunityNoticeMapper communityNoticeMapper
+    ) {
         this.postService = postService;
+        this.communityWriterMapper = communityWriterMapper;
+        this.communityNoticeMapper = communityNoticeMapper;
     }
 
     @GetMapping("/community/board")
@@ -46,6 +62,7 @@ public class PostController {
         model.addAttribute("pageStart", Math.max(1, view.page() - 2));
         model.addAttribute("pageEnd", Math.min(view.totalPages(), view.page() + 2));
         model.addAttribute("writerNicknames", writerNicknames(view));
+        model.addAttribute("notices", communityNoticeMapper.findPublishedNotices(BOARD_NOTICE_LIMIT));
         addCommunityShell(model, sessionUser, condition);
         return "community/board";
     }
@@ -54,9 +71,10 @@ public class PostController {
     public String detail(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long postId,
+            @RequestParam(name = "skipView", defaultValue = "false") boolean skipView,
             Model model
     ) {
-        PostDetailResponse view = postService.detail(sessionUser, postId);
+        PostDetailResponse view = postService.detail(sessionUser, postId, !skipView);
         view.post().setContent(removeSampleMarker(view.post().getContent()));
         PostSearchCondition condition = new PostSearchCondition();
         condition.setSubjectId(view.post().getSubjectId());
@@ -104,7 +122,7 @@ public class PostController {
         }
         CommunityPost post = postService.create(sessionUser, form);
         redirectAttributes.addFlashAttribute("message", "게시글이 등록되었습니다.");
-        return "redirect:/community/posts/" + post.getPostId();
+        return "redirect:/community/posts/" + post.getPostId() + "?skipView=true";
     }
 
     @GetMapping("/community/posts/{postId}/edit")
@@ -117,7 +135,7 @@ public class PostController {
             return "redirect:/login";
         }
         model.addAttribute("screen", "community/edit");
-        PostDetailResponse view = postService.detail(sessionUser, postId);
+        PostDetailResponse view = postService.detail(sessionUser, postId, false);
         PostForm form = new PostForm();
         form.setSubjectId(view.post().getSubjectId());
         form.setBoardType(view.post().getBoardType());
@@ -143,13 +161,13 @@ public class PostController {
         }
         if (bindingResult.hasErrors()) {
             model.addAttribute("screen", "community/edit");
-            model.addAttribute("view", postService.detail(sessionUser, postId));
+            model.addAttribute("view", postService.detail(sessionUser, postId, false));
             addCommunityShell(model, sessionUser, conditionFromForm(form));
             return "community/edit";
         }
         postService.update(sessionUser, postId, form);
         redirectAttributes.addFlashAttribute("message", "게시글이 수정되었습니다.");
-        return "redirect:/community/posts/" + postId;
+        return "redirect:/community/posts/" + postId + "?skipView=true";
     }
 
     @PostMapping("/community/posts/{postId}/delete")
@@ -171,6 +189,7 @@ public class PostController {
         model.addAttribute("activeBoardType", condition.getBoardType() == null ? "" : condition.getBoardType());
         model.addAttribute("loggedIn", sessionUser != null);
         model.addAttribute("profileName", sessionUser == null ? "guest" : sessionUser.nickname());
+        model.addAttribute("profileImageUrl", sessionUser == null ? null : sessionUser.profileImageUrl());
         model.addAttribute("profileEmail", sessionUser == null ? "로그인하면 커뮤니티 활동을 확인할 수 있어." : sessionUser.email());
         if (sessionUser != null) {
             model.addAttribute("profileSummary", postService.profile(sessionUser));
@@ -185,39 +204,37 @@ public class PostController {
     }
 
     private Map<Long, String> writerNicknames(PostPageResponse... views) {
-        Map<Long, String> nicknames = new LinkedHashMap<>();
+        Set<Long> writerIds = new HashSet<>();
         for (PostPageResponse view : views) {
-            view.posts().forEach(post -> nicknames.putIfAbsent(post.getWriterId(), nicknameFor(post.getWriterId())));
+            view.posts().forEach(post -> addWriterId(writerIds, post.getWriterId()));
         }
-        return nicknames;
+        return writerNicknames(writerIds);
     }
 
     private Map<Long, String> writerNicknames(PostDetailResponse view) {
-        Map<Long, String> nicknames = new LinkedHashMap<>();
-        nicknames.put(view.post().getWriterId(), nicknameFor(view.post().getWriterId()));
+        Set<Long> writerIds = new HashSet<>();
+        addWriterId(writerIds, view.post().getWriterId());
         view.comments().stream()
                 .map(Comment::getWriterId)
-                .forEach(writerId -> nicknames.putIfAbsent(writerId, nicknameFor(writerId)));
+                .forEach(writerId -> addWriterId(writerIds, writerId));
+        return writerNicknames(writerIds);
+    }
+
+    private Map<Long, String> writerNicknames(Collection<Long> writerIds) {
+        Map<Long, String> nicknames = new LinkedHashMap<>();
+        if (writerIds == null || writerIds.isEmpty()) {
+            return nicknames;
+        }
+        communityWriterMapper.findNicknamesByUserIds(writerIds)
+                .forEach(row -> nicknames.put(row.getWriterId(), row.getNickname()));
+        writerIds.forEach(writerId -> nicknames.putIfAbsent(writerId, "사용자 " + writerId));
         return nicknames;
     }
 
-    private String nicknameFor(Long writerId) {
-        if (writerId == null) {
-            return "커뮤니티러";
+    private void addWriterId(Set<Long> writerIds, Long writerId) {
+        if (writerId != null) {
+            writerIds.add(writerId);
         }
-        String[] names = {
-                "코드하루",
-                "자바노트",
-                "쿼리연습생",
-                "파이썬친구",
-                "웹기록장",
-                "디버깅중",
-                "스터디물결",
-                "개념정리왕",
-                "스프링새싹",
-                "알고한걸음"
-        };
-        return names[(int) Math.floorMod(writerId - 1, names.length)];
     }
 
     private String removeSampleMarker(String content) {

@@ -23,7 +23,7 @@
 
     <section class="community-home-layout" aria-label="커뮤니티 홈">
       <aside class="community-home-left-rail">
-        <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, true)}"></div>
+        <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileImageUrl}, ${profileSummary}, true)}"></div>
         <a class="community-content-recommend-link" th:href="@{/content/recommendations(subjectId=${activeSubjectId})}">
           <span class="community-content-recommend-copy">
             <strong class="community-content-recommend-title"><span th:text="${selectedSubjectName}">Java</span> 과목 콘텐츠 추천</strong>
@@ -39,6 +39,24 @@
         <div class="community-home-main-actions">
           <a class="button primary community-home-write-button" th:href="@{/community/write}">글쓰기</a>
         </div>
+
+        <section class="community-notice-strip" th:if="${notices != null and !#lists.isEmpty(notices)}" aria-label="공지사항">
+          <div class="community-notice-strip-heading">
+            <span>NOTICE</span>
+            <strong>공지사항</strong>
+          </div>
+          <ul>
+            <li th:each="notice : ${notices}">
+              <a class="community-notice-title"
+                 th:href="@{/community/notices/{id}(id=${notice.noticeId},subjectId=${activeSubjectId})}"
+                 th:text="${notice.title}">공지사항 제목</a>
+              <small>
+                <span th:text="${notice.writerNickname}">관리자</span>
+                <span th:if="${notice.publishedAt != null}" th:text="${#temporals.format(notice.publishedAt, 'yyyy.MM.dd')}">2026.07.16</span>
+              </small>
+            </li>
+          </ul>
+        </section>
 
         <section class="panel community-feed-card community-home-feed-card">
           <div class="community-feed-heading">

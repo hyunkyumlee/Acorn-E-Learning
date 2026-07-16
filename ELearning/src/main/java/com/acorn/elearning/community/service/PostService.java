@@ -74,9 +74,16 @@ public class PostService {
 
     @Transactional
     public PostDetailResponse detail(SessionUser sessionUser, Long postId) {
+        return detail(sessionUser, postId, true);
+    }
+
+    @Transactional
+    public PostDetailResponse detail(SessionUser sessionUser, Long postId, boolean incrementView) {
         CommunityPost post = requireViewablePost(postId);
-        communityPostMapper.incrementViewCount(postId);
-        post.setViewCount(safeCount(post.getViewCount()) + 1);
+        if (incrementView) {
+            communityPostMapper.incrementViewCount(postId);
+            post.setViewCount(safeCount(post.getViewCount()) + 1);
+        }
         applyPopularity(List.of(post));
         Long userId = sessionUser == null ? null : sessionUser.userId();
         boolean liked = userId != null && postLikeMapper.findByPostIdAndUserId(postId, userId).isPresent();
@@ -122,6 +129,7 @@ public class PostService {
         post.setTitle(form.getTitle().trim());
         post.setContent(form.getContent().trim());
         communityPostMapper.update(post);
+        deleteSelectedAttachments(sessionUser, form.getDeleteAttachmentIds());
         attachmentService.saveMetadata(postId, userId, form.getFiles());
         return requireActivePost(postId);
     }
@@ -195,6 +203,16 @@ public class PostService {
         return commentMapper.findByPostId(postId).stream()
                 .map(this::maskIfDeleted)
                 .toList();
+    }
+
+    private void deleteSelectedAttachments(SessionUser sessionUser, List<Long> attachmentIds) {
+        if (attachmentIds == null || attachmentIds.isEmpty()) {
+            return;
+        }
+        attachmentIds.stream()
+                .filter(attachmentId -> attachmentId != null)
+                .distinct()
+                .forEach(attachmentId -> attachmentService.delete(sessionUser, attachmentId));
     }
 
     private Comment maskIfDeleted(Comment comment) {

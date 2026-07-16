@@ -22,7 +22,7 @@
     </section>
 
     <section class="community-content-layout" aria-label="게시글 상세">
-      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, false)}"></div>
+      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileImageUrl}, ${profileSummary}, false)}"></div>
 
       <section class="panel community-panel" th:if="${view != null}">
         <div class="community-panel-header">
@@ -49,6 +49,17 @@
 
         <article class="community-post-body">
           <p th:text="${view.post.content}">내용</p>
+          <div class="community-post-inline-attachments" th:if="${!#lists.isEmpty(view.attachments)}">
+            <div class="community-post-inline-attachment" th:each="file : ${view.attachments}" th:with="fileUrl=${file.fileUrl}">
+              <a class="community-attachment-preview"
+                 th:if="${file.image}"
+                 th:href="${fileUrl}"
+                 target="_blank"
+                 rel="noopener">
+                <img th:src="${fileUrl}" th:alt="${file.originalName}">
+              </a>
+            </div>
+          </div>
         </article>
 
         <div class="community-stats-actions">
@@ -73,17 +84,7 @@
             </form>
           </div>
         </div>
-
-        <div class="community-subsection" th:if="${!#lists.isEmpty(view.attachments)}">
-          <h3>첨부 파일</h3>
-          <ul class="community-list compact">
-            <li th:each="file : ${view.attachments}">
-              <span th:text="${file.originalName + ' (' + file.fileSize + ' bytes)'}">file.txt</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="community-subsection">
+<div class="community-subsection">
           <h3>댓글</h3>
           <form method="post" th:action="@{/community/posts/{id}/comments(id=${view.post.postId})}" th:object="${commentForm}" class="community-comment-form">
             <textarea th:field="*{content}" rows="3" placeholder="여러 사람들이 있는 곳이므로 욕설 및 비하하는 댓글은 삼가하여 주시기 바랍니다" required></textarea>

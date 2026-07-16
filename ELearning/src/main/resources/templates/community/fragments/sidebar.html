@@ -1,5 +1,5 @@
 <aside class="panel community-panel community-sidebar"
-       th:fragment="sidebar(activeSubjectId, activeBoardType, profileName, profileEmail, profileSummary, communityHome)"
+       th:fragment="sidebar(activeSubjectId, activeBoardType, profileName, profileEmail, profileImageUrl, profileSummary, communityHome)"
        xmlns:th="http://www.thymeleaf.org"
        aria-label="커뮤니티 사이드바">
   <nav class="community-board-nav" aria-label="언어별 게시판">
@@ -53,7 +53,8 @@
 
   <section class="community-profile-mini" aria-label="커뮤니티 프로필 요약">
     <div class="community-profile-line">
-      <span class="community-avatar" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
+      <span class="community-avatar" th:if="${profileImageUrl == null or #strings.isEmpty(profileImageUrl)}" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
+      <img class="community-avatar community-avatar-image" th:if="${profileImageUrl != null and !#strings.isEmpty(profileImageUrl)}" th:src="${profileImageUrl}" alt="" aria-hidden="true">
       <div>
         <strong th:text="${profileName}">nova_learner</strong>
         <small>

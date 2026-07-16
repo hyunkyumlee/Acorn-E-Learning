@@ -36,10 +36,10 @@ public class ReportController {
             redirectAttributes.addFlashAttribute("message", "신고가 접수되었습니다.");
         }
         if (redirectPostId != null) {
-            return "redirect:/community/posts/" + redirectPostId;
+            return "redirect:/community/posts/" + redirectPostId + "?skipView=true";
         }
         if (form != null && "POST".equalsIgnoreCase(form.getTargetType())) {
-            return "redirect:/community/posts/" + form.getTargetId();
+            return "redirect:/community/posts/" + form.getTargetId() + "?skipView=true";
         }
         return "redirect:/community/board";
     }

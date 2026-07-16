@@ -28,4 +28,5 @@ public class PostForm {
 
     private String idempotencyToken;
     private List<MultipartFile> files = new ArrayList<>();
+    private List<Long> deleteAttachmentIds = new ArrayList<>();
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.elearning.community.mapper.CommunityWriterMapper">
+    <select id="findNicknamesByUserIds" resultType="com.acorn.elearning.community.model.CommunityWriterNickname">
+        SELECT
+            user_id AS writerId,
+            COALESCE(NULLIF(nickname, ''), email, CONCAT('사용자 ', user_id)) AS nickname
+        FROM users
+        WHERE user_id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </select>
+</mapper>

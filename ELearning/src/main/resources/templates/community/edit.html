@@ -22,7 +22,7 @@
     </section>
 
     <div class="community-content-layout">
-      <aside th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, false)}"></aside>
+      <aside th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileImageUrl}, ${profileSummary}, false)}"></aside>
 
       <section class="panel community-panel community-form-panel">
         <div class="community-panel-header">
@@ -58,19 +58,29 @@
             <label class="wide">첨부 파일 추가
               <input th:field="*{files}" type="file" multiple>
             </label>
+            <div class="wide community-edit-attachments" th:if="${!#lists.isEmpty(view.attachments)}">
+              <h3>현재 첨부 이미지</h3>
+              <div class="community-edit-attachment-grid">
+                <label class="community-edit-attachment-card" th:each="file : ${view.attachments}">
+                  <span class="community-edit-attachment-preview" th:if="${file.image}">
+                    <img th:src="${file.fileUrl}" th:alt="${file.originalName}">
+                  </span>
+                  <span class="community-edit-attachment-preview file" th:unless="${file.image}">
+                    <span th:text="${file.originalName}">file.txt</span>
+                  </span>
+                  <span class="community-edit-attachment-control">
+                    <input type="checkbox" th:field="*{deleteAttachmentIds}" th:value="${file.attachmentId}">
+                    <span>삭제</span>
+                  </span>
+                </label>
+              </div>
+            </div>
           </div>
           <div class="community-actions right">
             <a class="button" th:href="@{/community/posts/{id}(id=${view.post.postId})}">취소</a>
             <button class="button primary" type="submit">저장</button>
           </div>
         </form>
-
-        <div class="community-subsection">
-          <h3>현재 첨부 파일</h3>
-          <ul class="community-list compact">
-            <li th:each="file : ${view.attachments}" th:text="${file.originalName}">file.txt</li>
-          </ul>
-        </div>
       </section>
     </div>
   </main>

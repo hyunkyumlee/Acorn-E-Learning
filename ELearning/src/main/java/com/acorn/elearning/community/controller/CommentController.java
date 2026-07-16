@@ -36,7 +36,7 @@ public class CommentController {
             commentService.create(sessionUser, postId, form);
             redirectAttributes.addFlashAttribute("message", "댓글이 등록되었습니다.");
         }
-        return "redirect:/community/posts/" + postId;
+        return "redirect:/community/posts/" + postId + "?skipView=true";
     }
 
     @PostMapping("/community/comments/{commentId}/update")
@@ -55,7 +55,7 @@ public class CommentController {
             commentService.update(sessionUser, commentId, form);
             redirectAttributes.addFlashAttribute("message", "댓글이 수정되었습니다.");
         }
-        return "redirect:/community/posts/" + postId;
+        return "redirect:/community/posts/" + postId + "?skipView=true";
     }
 
     @PostMapping("/community/comments/{commentId}/delete")
@@ -70,6 +70,6 @@ public class CommentController {
         }
         commentService.delete(sessionUser, commentId);
         redirectAttributes.addFlashAttribute("message", "댓글이 삭제되었습니다.");
-        return "redirect:/community/posts/" + postId;
+        return "redirect:/community/posts/" + postId + "?skipView=true";
     }
 }

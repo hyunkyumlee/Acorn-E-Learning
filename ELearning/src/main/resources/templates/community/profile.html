@@ -22,12 +22,13 @@
     </section>
 
     <section class="community-content-layout" aria-label="커뮤니티 프로필">
-      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileSummary}, false)}"></div>
+      <div th:replace="~{community/fragments/sidebar :: sidebar(${activeSubjectId}, ${activeBoardType}, ${profileName}, ${profileEmail}, ${profileImageUrl}, ${profileSummary}, false)}"></div>
 
       <section class="panel community-panel community-profile-panel" th:if="${view != null}">
         <div class="community-profile-hero">
           <div class="community-profile-hero-main">
-            <span class="community-profile-hero-avatar" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
+            <span class="community-profile-hero-avatar" th:if="${profileImageUrl == null or #strings.isEmpty(profileImageUrl)}" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
+            <img class="community-profile-hero-avatar community-profile-hero-avatar-image" th:if="${profileImageUrl != null and !#strings.isEmpty(profileImageUrl)}" th:src="${profileImageUrl}" alt="" aria-hidden="true">
             <div>
               <h2 th:text="${profileName}">nova_learner</h2>
               <a class="button ghost" th:href="@{/community/board}">게시판으로</a>
