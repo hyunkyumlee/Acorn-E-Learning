@@ -55,7 +55,6 @@
           <th>제목</th>
           <th>작성자</th>
           <th>게시일</th>
-          <th>조회수</th>
           <th>상태</th>
           <th>관리</th>
         </tr>
@@ -70,7 +69,6 @@
           <td class="notice-title-cell" th:text="${notice.title}">공지 제목</td>
           <td th:text="${notice.writerNickname != null and !#strings.isEmpty(notice.writerNickname) ? notice.writerNickname : '관리자'}">관리자</td>
           <td th:text="${notice.publishedAt != null ? #temporals.format(notice.publishedAt, 'yyyy-MM-dd') : '-'}">2026-06-01</td>
-          <td>-</td>
           <td th:text="${notice.status == 'PUBLISHED' ? '공개' : '비공개'}"
               th:classappend="${notice.status == 'PUBLISHED'} ? ' notice-status-active' : ' notice-status-muted'">공개</td>
           <td>
@@ -87,7 +85,7 @@
           </td>
         </tr>
         <tr th:if="${#lists.isEmpty(noticePage.items)}">
-          <td colspan="7" class="notice-empty">등록된 공지사항이 없습니다.</td>
+          <td colspan="6" class="notice-empty">등록된 공지사항이 없습니다.</td>
         </tr>
         </tbody>
       </table>
