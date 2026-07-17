@@ -1133,6 +1133,113 @@ a.roadmap-level:hover {
   padding: 0;
 }
 
+/* ----- 누비: 완료한 행성에서 다음 행성으로 날아가는 연출 -----
+   로드맵에 캐릭터를 상주시키지 않는다. 축하 연출이 닫히는 순간에만 등장했다가 퇴장한다.
+   좌표·크기·기울기·빛의 세기는 전부 learning-nuvi.js가 매 프레임 준다
+   (transform 한 줄 + --nuvi-glow). 여기에 keyframes를 두면 같은 연출의 길이가 두 곳에
+   적혀 한쪽만 고쳤을 때 어긋나므로, CSS는 "무엇이 어떻게 생겼나"만 맡는다.
+   빛은 행성을 드나드는 순간에만 잠깐 오르내린다(상시 발광 아님 — 디자인명세의 glow 제약).
+   움직임 자체가 이 연출의 내용이라 reduce 모드에서는 정지본을 남기지 않고 통째로 뺀다. */
+.roadmap-nuvi {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: var(--nuvi-size, 64px);
+  height: var(--nuvi-size, 64px);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: opacity 0.18s ease;
+}
+.roadmap-nuvi.is-visible { opacity: 1; }
+
+.roadmap-nuvi-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
+}
+
+/* 행성/관문을 드나드는 순간의 반짝임.
+   원형 광원 한 겹으로 두면 세기가 오를수록 그냥 커다란 색 얼룩이 된다("금빛 글로우").
+   반짝임으로 읽히려면 별 모양 빛살이 있어야 하고, 세 겹이 서로 다른 박자로 튀어야 한다
+   → 코어 번쩍(--nuvi-flash) / 빛살(--nuvi-rays) / 흩어지는 부스러기(--nuvi-motes)를 JS가 따로 준다.
+   색: 코어는 흰빛, 가장자리에만 옅은 금빛을 남긴다. 이 빛은 파란 하늘(라이트 맵)·남색 하늘(다크 맵)
+   위에도, 흰 구름으로 덮인 행성 위에도 올라간다 — 순백은 흰 구름에 묻히고 금빛 일색은 얼룩이 된다.
+   (cyan은 CTA 전용 색이라 여기 쓰지 않는다) */
+.roadmap-nuvi-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 코어 — 표면을 뚫는 순간에만 확 튀는 번쩍.
+   누비 몸통 뒤(z-index:-1)라 몸통 안쪽에 그리면 가려서 안 보인다 → 실루엣 둘레로만 삐져나오게
+   조금 크게 잡고, 중심은 비워 링처럼 두른다. 얼룩이 되지 않도록 바깥은 빠르게 투명해진다. */
+.roadmap-nuvi-flash {
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+  opacity: var(--nuvi-flash, 0);
+  transform: scale(calc(0.62 + var(--nuvi-flash, 0) * 0.5));
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.9) 24%,
+    rgba(255, 244, 214, 0.62) 46%,
+    rgba(255, 206, 118, 0.2) 62%,
+    transparent 74%
+  );
+}
+
+/* 빛살 — 반짝임의 정체. 가로세로 한 쌍(::before)에 45° 한 쌍(::after)을 겹쳐 8방향 별이 된다.
+   빛살은 코어보다 먼저 서고 늦게 지므로(JS가 완만한 곡선을 준다) 튀는 순간이 길게 읽힌다. */
+.roadmap-nuvi-rays {
+  position: absolute;
+  inset: -95%;
+  opacity: var(--nuvi-rays, 0);
+  transform: rotate(var(--nuvi-spin, 0deg)) scale(var(--nuvi-rays-scale, 0.4));
+}
+/* 빛살은 몸통 밖까지 길게 뻗어야 보인다(몸통 뒤는 가려진다) → 가늘고 길게, 중심은 하얗게.
+   가로세로 한 쌍 위에 45° 한 쌍을 짧게 얹어 8방향 별이 된다. */
+.roadmap-nuvi-rays::before,
+.roadmap-nuvi-rays::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 2.5% at 50% 50%, rgba(255, 255, 255, 1) 0%, rgba(255, 246, 216, 0.85) 26%, rgba(255, 214, 130, 0.34) 54%, transparent 82%),
+    radial-gradient(ellipse 2.5% 50% at 50% 50%, rgba(255, 255, 255, 1) 0%, rgba(255, 246, 216, 0.85) 26%, rgba(255, 214, 130, 0.34) 54%, transparent 82%);
+}
+.roadmap-nuvi-rays::after {
+  transform: rotate(45deg) scale(0.62);
+  opacity: 0.8;
+}
+
+/* 부스러기 — 정점 순간에만 나타나 바깥으로 흩어지며 사라진다(빛살과 반대로 돈다). */
+.roadmap-nuvi-motes {
+  position: absolute;
+  inset: -80%;
+  opacity: var(--nuvi-motes, 0);
+  transform: scale(calc(0.55 + var(--nuvi-motes, 0) * 0.9))
+    rotate(calc(var(--nuvi-spin, 0deg) * -1));
+  background:
+    radial-gradient(circle 4px at 18% 30%, rgba(255, 255, 255, 1), transparent 100%),
+    radial-gradient(circle 3px at 78% 22%, rgba(255, 240, 198, 0.95), transparent 100%),
+    radial-gradient(circle 3px at 55% 10%, rgba(255, 255, 255, 0.95), transparent 100%),
+    radial-gradient(circle 4px at 30% 80%, rgba(255, 255, 255, 0.95), transparent 100%),
+    radial-gradient(circle 3px at 86% 72%, rgba(255, 236, 184, 0.95), transparent 100%),
+    radial-gradient(circle 3px at 10% 60%, rgba(255, 248, 226, 0.95), transparent 100%),
+    radial-gradient(circle 2px at 66% 92%, rgba(255, 255, 255, 0.9), transparent 100%),
+    radial-gradient(circle 2px at 40% 4%, rgba(255, 240, 198, 0.9), transparent 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-nuvi { display: none; }
+}
+
 /* ----- 노드(행성/게이트) — 길 위 좌표에 중심 정렬 ----- */
 .roadmap-node {
   position: absolute;
@@ -2522,10 +2629,46 @@ a.roadmap-level:hover {
 .celebrate-cta:hover { filter: brightness(1.06); transform: translateY(-1px); box-shadow: var(--shadow-soft); }
 .celebrate-cta:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
+/* 과목 완주(COURSE) 카드 전용: '다음 여정' 과목 목록. 카드가 grid·중앙정렬이라 폭을 채우도록 stretch. */
+.celebrate-next {
+  justify-self: stretch;
+  width: 100%;
+  margin-top: 4px; padding-top: 14px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+}
+.celebrate-next-label {
+  margin: 0 0 8px; font-size: 12.5px; font-weight: 750; color: var(--muted);
+  text-align: center; word-break: keep-all;
+}
+.celebrate-next-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.celebrate-next-list a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px;
+  background: var(--surface); color: var(--text); text-decoration: none;
+  transition: border-color 140ms ease-out, transform 140ms ease-out;
+}
+.celebrate-next-list a:hover { border-color: var(--primary); transform: translateY(-1px); }
+.celebrate-next-list a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.celebrate-next-icon { width: 26px; height: 26px; flex: none; object-fit: contain; }
+.celebrate-next-name { font-size: 13.5px; font-weight: 700; }
+.celebrate-next-meta { margin-left: auto; font-size: 12px; color: var(--muted); }
+.celebrate-next-add {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; min-height: 42px; padding: 10px 18px;
+  border: 1px solid var(--primary); border-radius: var(--radius-pill, 999px);
+  color: var(--primary); background: transparent; text-decoration: none;
+  font-size: 13.5px; font-weight: 750;
+  transition: background 140ms ease-out;
+}
+.celebrate-next-add:hover { background: color-mix(in srgb, var(--primary) 12%, transparent); }
+.celebrate-next-add:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
 @media (prefers-reduced-motion: reduce) {
   .celebrate,
   .celebrate-card,
   .celebrate-art img { animation: none; }
   .celebrate-sparks { display: none; }
   .celebrate-cta:hover { transform: none; }
+  .celebrate-next-list a:hover { transform: none; }
 }

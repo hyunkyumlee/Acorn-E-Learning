@@ -16,10 +16,19 @@
 
     var cta = overlay.querySelector("[data-celebrate-close]");
 
+    var celebrationType = overlay.dataset.celebrateType || "";
+
     function close() {
       overlay.remove();
       document.body.style.overflow = "";
       document.removeEventListener("keydown", onKeydown);
+      // 연출이 걷힌 뒤에야 로드맵이 보인다 → 이 시점을 알려 누비가 다음 행성으로 이동하게 한다.
+      // 무엇을 축하했는지(PLANET/LEVEL)까지 넘긴다 — 누비의 등장 방식이 갈린다.
+      document.dispatchEvent(
+        new CustomEvent("knowva:celebration-closed", {
+          detail: { type: celebrationType },
+        })
+      );
     }
 
     function onKeydown(e) {

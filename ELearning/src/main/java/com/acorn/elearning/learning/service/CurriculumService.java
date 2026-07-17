@@ -244,6 +244,11 @@ public class CurriculumService {
         return userLessonProgressMapper.countCompletedRequiredLessons(userId, nodeId);
     }
 
+    /** 노드에서 문제 풀이(practice)를 통과한 required 레슨 수. */
+    public int countPracticePassedRequiredLessons(Long userId, Long nodeId) {
+        return userLessonProgressMapper.countPracticePassedRequiredLessons(userId, nodeId);
+    }
+
     /** 특정 레슨의 이론 완료 여부(레슨 단위). 이론 학습 화면 완료 표시용. */
     public boolean isTheoryCompletedForLesson(Long userId, Long lessonId) {
         return userLessonProgressMapper.findByUserAndLesson(userId, lessonId)

@@ -150,16 +150,17 @@ public class LearningController {
         session.setAttribute(SESSION_LEARNING_SUBJECT_ID, roadmapSubjectId);
 
 
-        // 표시 레벨: 요청 levelCode 우선 → 없으면 사용자 현재 레벨 → 그래도 없으면 최저 레벨.
+        // 해금 기록은 한 번만 읽는다 — 표시 레벨·레벨 탭(어떤 레벨이 열렸나)·축하 연출(무엇으로 열렸나)이
+        // 같은 기록을 본다.
+        List<UserLevelUnlock> unlocks = curriculumService.getUnlocks(user.userId(), roadmapSubjectId);
+        Set<String> unlockedLevels = CurriculumService.levelCodesOf(unlocks);
+
+        // 표시 레벨: 요청 levelCode 우선 → 없으면 지금까지 연 가장 높은 레벨 → 그래도 없으면 최저 레벨.
         String selectedLevel = (levelCode != null && !levelCode.isBlank()) ? levelCode
-                : (dashboard.currentLevelCode() != null ? dashboard.currentLevelCode() : LEVEL_ORDER.get(0));
+                : highestUnlockedLevel(unlockedLevels, dashboard.currentLevelCode());
         model.addAttribute("selectedLevel", selectedLevel);
 
-        // 해금 기록은 한 번만 읽는다 — 레벨 탭(어떤 레벨이 열렸나)과 축하 연출(무엇으로 열렸나)이 같은 기록을 본다.
-        List<UserLevelUnlock> unlocks = curriculumService.getUnlocks(user.userId(), roadmapSubjectId);
-
         // 레벨 탭: 해금된 레벨만 선택 가능, 현재 표시 레벨은 항상 활성으로 둔다.
-        Set<String> unlockedLevels = CurriculumService.levelCodesOf(unlocks);
         List<RoadmapLevelTab> levelTabs = LEVEL_ORDER.stream()
                 .map(code -> new RoadmapLevelTab(
                         code,
@@ -255,6 +256,15 @@ public class LearningController {
                                     || Boolean.TRUE.equals(pr.getPracticePassed())));
         model.addAttribute("currentPlanetStarted", currentPlanetStarted);
 
+        // 단원 진행 현황 '문제 풀이' 지표 = 현재 학습 단원의 required 레슨 중 문제 풀이(practice)를 통과한 수 / 전체.
+        // practice_passed는 practice 세트 통과로만 기록되며 내 테이블(user_lesson_progress)에 있다.
+        int currentUnitLessonTotal = currentNode != null
+                ? curriculumService.countRequiredLessons(currentNode.getNodeId()) : 0;
+        int currentUnitPracticePassed = currentNode != null
+                ? curriculumService.countPracticePassedRequiredLessons(user.userId(), currentNode.getNodeId()) : 0;
+        model.addAttribute("currentUnitLessonTotal", currentUnitLessonTotal);
+        model.addAttribute("currentUnitPracticePassed", currentUnitPracticePassed);
+
         // 내 랭킹(주간 통합 기준) = ranking 도메인 read. 출석/streak 점수는 랭킹에서 제외됨. //
         Map<String, Object> myRanking =
                 (Map<String, Object>) rankingService.myRanking(user, null, "WEEKLY").data().get("mySummary");
@@ -263,7 +273,7 @@ public class LearningController {
         // 직전에 본 로드맵보다 성취가 늘었으면 축하 연출을 한 번 띄운다.
         model.addAttribute("celebration", resolveCelebration(session, roadmapSubjectId, selectedLevel,
                 CurriculumService.examUnlockedLevelCodesOf(unlocks),
-                roadmap, nodePlanets, completedPlanets, planetCount));
+                roadmap, nodePlanets, completedPlanets, planetCount, levelPassed));
 
         model.addAttribute("screen", "learning/main");
         return "learning/main";
@@ -280,7 +290,8 @@ public class LearningController {
                                                Set<String> examUnlocked,
                                                List<CurriculumNode> roadmap,
                                                Map<Long, PlanetView> nodePlanets,
-                                               int completedPlanets, int planetCount) {
+                                               int completedPlanets, int planetCount,
+                                               boolean levelPassed) {
         // 표시 레벨은 요청 파라미터에서 온다. 아는 레벨일 때만 기준선을 기록해야 임의의 levelCode로
         // 세션에 키가 무한히 쌓이지 않는다.
         if (!LEVEL_ORDER.contains(levelCode)) {
@@ -330,6 +341,15 @@ public class LearningController {
             return null;
         }
 
+        // 최고 레벨(GOLD)의 마지막 행성을 마치면 이 과목의 학습 여정이 끝난다. 관문 코딩테스트는 그 위의
+        // 도전 과제이고 통과가 이 도메인에 기록되지 않으므로, 배울 내용을 다 끝낸 이 시점을 완주로 본다.
+        // 카드에 담을 '다음 여정'(다른 과목) 목록은 이미 model에 있는 enrolled/availableCards를 템플릿이 쓴다.
+        if (nextLevel(levelCode) == null && completedPlanets >= planetCount) {
+            return new CelebrationView("COURSE", "여정 완료",
+                    "이 과목의 모든 여행이 끝났어요!",
+                    "또 다른 여정을 시작해볼까요?", null, levelCode);
+        }
+
         // 행성은 앞에서부터 연속으로 완료되므로 방금 마친 행성 번호 = 지금의 완료 행성 수.
         CurriculumNode completed = roadmap.stream()
                 .filter(node -> !"GATE".equals(node.getNodeType()))
@@ -341,9 +361,18 @@ public class LearningController {
         }
 
         PlanetView planet = nodePlanets.get(completed.getNodeId());
-        String message = (completedPlanets >= planetCount)
-                ? "이 레벨의 행성을 모두 마쳤어요. 이제 관문에 도전할 수 있어요."
-                : "다음 행성으로 가는 길이 열렸어요.";
+        // 지나온 레벨은 관문이 이미 통과 상태고 행성도 처음부터 다 열려 있다 — 같은 화면의 게이트 카드가
+        // '이미 통과한 레벨 · 재응시'라고 말하는데 축하만 '이제 관문에 도전할 수 있어요'라고 하면 어긋난다.
+        String message;
+        if (completedPlanets >= planetCount) {
+            message = levelPassed
+                    ? "이 레벨의 행성을 모두 마쳤어요. 관문은 이미 통과했어요."
+                    : "이 레벨의 행성을 모두 마쳤어요. 이제 관문에 도전할 수 있어요.";
+        } else {
+            message = levelPassed
+                    ? "이어서 다음 행성도 학습할 수 있어요."
+                    : "다음 행성으로 가는 길이 열렸어요.";
+        }
         return new CelebrationView("PLANET", "행성 완료",
                 (planet != null) ? planet.name() : completed.getTitle(),
                 message,
@@ -364,5 +393,22 @@ public class LearningController {
     private String nextLevel(String level) {
         int i = LEVEL_ORDER.indexOf(level);
         return (i >= 0 && i + 1 < LEVEL_ORDER.size()) ? LEVEL_ORDER.get(i + 1) : null;
+    }
+
+    /**
+     * levelCode 없이 들어왔을 때 보여 줄 판 = 지금까지 연 레벨 중 가장 높은 것.
+     * 해금 기록이 없으면 프로필의 현재 레벨, 그것도 없으면 최저 레벨.
+     *
+     * <p>프로필의 current_level_code를 먼저 보지 않는 이유: 관문을 통과해 다음 레벨을 열어도
+     * (UnlockService.unlockNextLevel) 그 컬럼은 갱신되지 않는다. 그것을 기준으로 삼으면
+     * 새 판을 열어 두고도 계속 옛 판을 보여 주게 된다. 해금 기록이 실제 진도다.
+     */
+    private static String highestUnlockedLevel(Set<String> unlockedLevels, String profileLevel) {
+        for (int i = LEVEL_ORDER.size() - 1; i >= 0; i--) {
+            if (unlockedLevels.contains(LEVEL_ORDER.get(i))) {
+                return LEVEL_ORDER.get(i);
+            }
+        }
+        return (profileLevel != null) ? profileLevel : LEVEL_ORDER.get(0);
     }
 }

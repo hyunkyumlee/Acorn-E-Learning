@@ -17,6 +17,8 @@ public interface UserLessonProgressMapper {
 
     int countCompletedRequiredLessons(@Param("userId") Long userId, @Param("nodeId") Long nodeId);
 
+    int countPracticePassedRequiredLessons(@Param("userId") Long userId, @Param("nodeId") Long nodeId);
+
     /**
      * 과목별 required 레슨 총수와 완료 수를 한 번에 집계한다(과목 하나당 한 행).
      * 완료 판정은 countCompletedRequiredLessons와 동일한 규약(theory + practice 둘 다)을 쓴다.

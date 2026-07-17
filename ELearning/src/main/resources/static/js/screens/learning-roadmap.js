@@ -67,6 +67,11 @@
        내부 스크롤은 그대로 두고, 끝 구간에 "도달"한 순간에만 1회 페이지를 정렬한다. */
     var snappedBottom = false;
     var snappedTop = true; // 로드는 상단에서 시작 → 상단을 떠났다 되돌아올 때만 스냅
+    // 누비 비행 연출이 카메라를 가져간 동안에는 이 stage의 스크롤이 사용자 의도가 아니다.
+    // 그대로 두면 연출이 맵 끝으로 날아갈 때 페이지가 문서 하단으로 튄다.
+    // → 페이지를 옮기는 것만 참고, 어느 구간에 있는지(아래 플래그)는 계속 따라간다.
+    //   플래그까지 멈추면 연출이 끝난 뒤 첫 스크롤에 밀린 스냅이 터지거나 반대쪽 스냅을 한 번 놓친다.
+    var cameraTaken = false;
     function snapPageToRoadmapEnd() {
       var m = stage.scrollHeight - stage.clientHeight;
       if (m <= 0) {
@@ -78,10 +83,12 @@
       if (stage.scrollTop >= m - lead) {
         if (!snappedBottom) {
           snappedBottom = true;
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: prefersReduced ? "auto" : "smooth",
-          });
+          if (!cameraTaken) {
+            window.scrollTo({
+              top: document.documentElement.scrollHeight,
+              behavior: prefersReduced ? "auto" : "smooth",
+            });
+          }
         }
       } else {
         snappedBottom = false; // 끝 구간에서 벗어나면 다시 스냅 가능하도록 해제
@@ -90,10 +97,12 @@
       if (stage.scrollTop <= lead) {
         if (!snappedTop) {
           snappedTop = true;
-          window.scrollTo({
-            top: 0,
-            behavior: prefersReduced ? "auto" : "smooth",
-          });
+          if (!cameraTaken) {
+            window.scrollTo({
+              top: 0,
+              behavior: prefersReduced ? "auto" : "smooth",
+            });
+          }
         }
       } else {
         snappedTop = false; // 상단 구간에서 벗어나면 다시 스냅 가능하도록 해제
@@ -103,6 +112,7 @@
 
     /* ---- 2b) 관성 스무스 스크롤 (stage 휠 전용) ---- */
     var smoothTo = null; // 현재 노드 이동에서 재사용
+    var stopGlide = null; // 카메라를 넘길 때 관성을 멈추는 용도
 
     if (!prefersReduced) {
       var EASE = 0.06; // 낮을수록 더 길게 미끄러짐(슬라이드 티 확실히 남)
@@ -140,6 +150,11 @@
       stage.addEventListener(
         "wheel",
         function (e) {
+          // 연출이 카메라를 잡고 있어도 사용자가 직접 굴리면 사용자가 이긴다.
+          // 알려주지 않으면 연출과 관성이 매 프레임 같은 scrollTop을 서로 덮어써 떨린다.
+          if (cameraTaken) {
+            document.dispatchEvent(new CustomEvent("knowva:roadmap-camera-released"));
+          }
           var atTop = stage.scrollTop <= 0;
           var atBottom = stage.scrollTop >= maxY() - 1;
           // 맵 끝에서 더 밀면 페이지 스크롤에 양보(가둠 방지)
@@ -169,7 +184,28 @@
         target = clamp(top);
         kick();
       };
+
+      stopGlide = function () {
+        if (raf !== null) {
+          cancelAnimationFrame(raf);
+          raf = null;
+        }
+        smoothing = false;
+        pos = target = stage.scrollTop;
+      };
     }
+
+    // 누비 비행 연출과 카메라 주고받기. 연출이 잡고 있는 동안에는 관성 글라이드를 멈추고
+    // 스크롤로 깨어나는 페이지 스냅도 재운다(위 snapPageToRoadmapEnd 참고).
+    document.addEventListener("knowva:roadmap-camera-taken", function () {
+      cameraTaken = true;
+      if (stopGlide) {
+        stopGlide();
+      }
+    });
+    document.addEventListener("knowva:roadmap-camera-released", function () {
+      cameraTaken = false;
+    });
 
     /* ---- 3) 현재 학습 노드를 가운데로 (같은 관성으로 미끄러짐) ---- */
     var current = stage.querySelector(".roadmap-node.is-current");

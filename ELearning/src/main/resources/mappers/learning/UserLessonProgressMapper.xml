@@ -55,6 +55,17 @@
           AND ulp.practice_passed = 1
     </select>
 
+    <select id="countPracticePassedRequiredLessons" resultType="int">
+        SELECT COUNT(*)
+        FROM lessons l
+        JOIN user_lesson_progress ulp
+          ON ulp.lesson_id = l.lesson_id AND ulp.user_id = #{userId}
+        WHERE l.node_id = #{nodeId}
+          AND l.is_active = 1
+          AND l.required_for_completion = 1
+          AND ulp.practice_passed = 1
+    </select>
+
     <!-- 과목 목록 표시용: 과목별 required 레슨 총수/완료수를 한 번에 집계 -->
     <select id="findLessonStatsBySubject" resultType="com.acorn.elearning.learning.view.SubjectProgressRow">
         SELECT n.subject_id AS subject_id,

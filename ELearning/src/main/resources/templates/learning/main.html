@@ -10,6 +10,8 @@
   <script defer th:src="@{/js/screens/learning-roadmap.js}"></script>
   <!-- 축하 연출 닫기(버튼·바깥 클릭·ESC) -->
   <script defer th:src="@{/js/screens/learning-celebration.js}"></script>
+  <!-- 누비 이동 (축하 연출이 닫히는 시점을 받아 다음 행성으로 이동) -->
+  <script defer th:src="@{/js/screens/learning-nuvi.js}"></script>
 </head>
 <body>
   <div th:replace="~{fragments/topbar :: topbar}"></div>
@@ -341,6 +343,29 @@
                   </div>
                 </li>
               </ol>
+              <!--
+                누비: 축하 연출이 닫히는 순간에만 등장해, 방금 끝낸 행성 속에서 빛과 함께 빠져나와
+                다음 행성(관문이면 관문) 안으로 들어가며 사라진다. 평소 로드맵에는 나타나지 않는다.
+                레벨이 올라 새 판이 열렸을 때는 나올 행성이 없으므로 맵 위쪽에서 날아 들어와 첫 행성으로 들어간다.
+                포즈 PNG는 learning-nuvi.js가 단계별로 갈아끼운다(등장 → 비행 중 두 장 교대 → 도착).
+                좌표·표시 여부도 JS가 노드 위치를 읽어 정한다(들고날 행성을 못 찾으면 연출 없음).
+              -->
+              <div class="roadmap-nuvi" data-roadmap-nuvi hidden aria-hidden="true"
+                   th:data-nuvi-launch="@{/assets/images/characters/nuvi-wave.png}"
+                   th:data-nuvi-fly-a="@{/assets/images/characters/nuvi-telescope.png}"
+                   th:data-nuvi-fly-b="@{/assets/images/characters/nuvi-wave.png}"
+                   th:data-nuvi-arrive="@{/assets/images/characters/nuvi-celebrate.png}">
+                <!-- 드나드는 순간의 반짝임: 코어 번쩍 + 빛살(별) + 흩어지는 부스러기.
+                     세 겹의 세기를 JS가 따로 주기 때문에 한꺼번에 부풀지 않고 튀었다 진다. -->
+                <span class="roadmap-nuvi-glow" aria-hidden="true">
+                  <span class="roadmap-nuvi-flash"></span>
+                  <span class="roadmap-nuvi-rays"></span>
+                  <span class="roadmap-nuvi-motes"></span>
+                </span>
+                <img class="roadmap-nuvi-img" data-roadmap-nuvi-img
+                     th:src="@{/assets/images/characters/nuvi-wave.png}"
+                     alt="" decoding="async">
+              </div>
             </div>
           </div>
         </section>
@@ -387,12 +412,12 @@
             </div>
             <div class="progress-bar"><span th:style="'width:' + ${progressPercent} + '%'"></span></div>
           </div>
-          <div class="progress-meter">
+          <div class="progress-meter" th:if="${currentNode != null}">
             <div class="progress-meter-head">
               <span>문제 풀이</span>
-              <strong>– / 10</strong>
+              <strong th:text="${currentUnitPracticePassed} + ' / ' + ${currentUnitLessonTotal}">0 / 10</strong>
             </div>
-            <p class="status-sub">문제 풀이 기록은 곧 이곳에 연동돼요.</p>
+            <div class="progress-bar"><span th:style="'width:' + ${currentUnitLessonTotal > 0 ? (currentUnitPracticePassed * 100 / currentUnitLessonTotal) : 0} + '%'"></span></div>
           </div>
           <p class="status-sub" th:if="${planetCount == 0}">커리큘럼을 준비 중이에요.</p>
           <p class="status-sub" th:if="${currentNode != null}">다음 단원: <strong th:text="${currentNode.title}">배열</strong></p>
@@ -427,8 +452,11 @@
       축하 연출: 직전에 본 로드맵보다 성취가 늘었을 때만 컨트롤러가 celebration을 채운다(같은 성취는 다시 뜨지 않는다).
       행성 완료면 방금 마친 행성 아트를, 관문을 넘어 레벨이 오르면 티어 배지를 보여 준다.
     -->
+    <!-- data-celebrate-type: 무엇을 축하했는지(PLANET/LEVEL)를 닫는 시점에 누비에게 넘겨,
+         행성 사이 이동인지 새 판으로의 진입인지 가른다. -->
     <div class="celebrate" th:if="${celebration != null}"
          th:classappend="${'is-' + #strings.toLowerCase(celebration.type)}"
+         th:data-celebrate-type="${celebration.type}"
          role="dialog" aria-modal="true" aria-labelledby="celebrateTitle" data-celebrate>
       <div class="celebrate-card">
         <div class="celebrate-sparks" aria-hidden="true">
@@ -444,10 +472,39 @@
         <p class="celebrate-eyebrow" th:text="${celebration.eyebrow}">행성 완료</p>
         <h2 class="celebrate-title" id="celebrateTitle" th:text="${celebration.title}">Fruition Planet</h2>
         <p class="celebrate-message" th:text="${celebration.message}">다음 행성으로 가는 길이 열렸어요.</p>
+
+        <!-- COURSE(과목 완주) 전용: 다음 여정 안내. 담은 다른 과목이 있으면 바로 그리로, 없으면 과목 담기로 유도.
+             목록은 이미 화면에 있는 enrolled/availableCards를 재사용한다(추가 조회 없음). -->
+        <div th:if="${celebration.type == 'COURSE'}" class="celebrate-next"
+             th:with="otherSubjects=${enrolledCards != null ? enrolledCards.?[!selected] : null},
+                      canAdd=${availableCards != null and !availableCards.isEmpty()}">
+          <div th:if="${otherSubjects != null and !otherSubjects.isEmpty()}">
+            <p class="celebrate-next-label">아래 과목들을 바로 여행할 수 있어요!</p>
+            <ul class="celebrate-next-list">
+              <li th:each="s : ${otherSubjects}">
+                <a th:href="@{/learning(subjectId=${s.subjectId})}">
+                  <img class="celebrate-next-icon" aria-hidden="true"
+                       th:src="@{'/assets/images/icons/subject/' + ${#strings.toLowerCase(s.subjectCode)} + '.png'}"
+                       alt="" loading="lazy" decoding="async">
+                  <span class="celebrate-next-name" th:text="${s.subjectName}">과목명</span>
+                  <span class="celebrate-next-meta"
+                        th:text="${s.currentLevelCode != null ? s.currentLevelCode + ' · ' + s.progressPercent + '%' : '새 여정'}">BRONZE</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div th:if="${(otherSubjects == null or otherSubjects.isEmpty()) and canAdd}">
+            <p class="celebrate-next-label">관심 과목을 담고 새로운 여행을 시작해 보세요.</p>
+            <a class="celebrate-next-add"
+               th:href="@{/learning/subjects/{id}(id=${availableCards[0].subjectId})}">새 과목 담으러 가기</a>
+          </div>
+        </div>
+
         <!-- 링크로 두는 이유: 이 오버레이는 화면 전체를 덮는다. 닫기를 JS에만 맡기면 스크립트가 실패했을 때
              빠져나갈 길이 없다. JS가 살아 있으면 이동 없이 그 자리에서 닫는다. -->
         <a class="celebrate-cta" data-celebrate-close
-           th:href="@{/learning(subjectId=${roadmapSubjectId})}">계속 학습하기</a>
+           th:href="@{/learning(subjectId=${roadmapSubjectId})}"
+           th:text="${celebration.type == 'COURSE'} ? '로드맵으로 돌아가기' : '계속 학습하기'">계속 학습하기</a>
       </div>
     </div>
   </main>
