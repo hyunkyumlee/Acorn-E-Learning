@@ -3,6 +3,9 @@ package com.acorn.elearning.admin.dto.response;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.acorn.elearning.practice.model.ProblemChoice;
+import java.util.List;
+
 @Getter
 @Setter
 public class AdminProblemManageRowResponse {
@@ -19,4 +22,5 @@ public class AdminProblemManageRowResponse {
     private String explanation;
     private String difficultyCode;
     private Boolean isActive;
+    private List<ProblemChoice> choices;
 }

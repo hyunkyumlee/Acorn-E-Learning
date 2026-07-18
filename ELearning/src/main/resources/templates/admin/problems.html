@@ -139,6 +139,10 @@
                       th:data-explanation="${problem.explanation}"
                       th:data-difficulty-code="${problem.difficultyCode}"
                       th:data-is-active="${problem.isActive}">
+                <span class="problem-edit-choice"
+                      th:each="choice : ${problem.choices}"
+                      th:data-choice-text="${choice.choiceText}"
+                      th:data-correct="${choice.isCorrect}"></span>
                 수정
               </button>
               <form method="post"
@@ -231,7 +235,13 @@
 
           <textarea name="question" id="problemQuestion" class="problem-question-input" placeholder="문제 내용 입력"></textarea>
 
-          <textarea name="choices" class="problem-choice-input" placeholder="선택지 입력 영역"></textarea>
+          <div id="multipleChoiceField" class="problem-multiple-choice" hidden>
+            <div class="problem-choice-header">
+              <strong>답안 목록</strong>
+              <button type="button" id="addProblemChoiceButton" class="problem-choice-add-button">+ 답안 추가</button>
+            </div>
+            <div id="problemChoiceList" class="problem-choice-list"></div>
+          </div>
 
           <div class="problem-form-row">
             <input type="text" name="answerText" id="problemAnswerText" placeholder="정답 입력">
@@ -298,6 +308,105 @@
 
   const problemFilterForm = document.querySelector("#problemFilterForm");
   const problemManageForm = document.querySelector("#problemManageForm");
+  const problemTypeSelect = document.querySelector("#problemType");
+  const multipleChoiceField = document.querySelector("#multipleChoiceField");
+  const problemChoiceList = document.querySelector("#problemChoiceList");
+  const problemAnswerText = document.querySelector("#problemAnswerText");
+
+  function updateMultipleChoiceAnswer() {
+    const rows = Array.from(problemChoiceList.querySelectorAll(".problem-choice-row"));
+    rows.forEach((row, index) => {
+      const number = index + 1;
+      row.querySelector(".problem-choice-number").textContent = `${number}번`;
+      row.querySelector("input[type='radio']").value = String(number);
+    });
+
+    const checked = problemChoiceList.querySelector("input[type='radio']:checked");
+    const checkedRow = checked?.closest(".problem-choice-row");
+    const choiceText = checkedRow?.querySelector("input[type='text']").value.trim() || "";
+    problemAnswerText.value = checked ? `${checked.value}. ${choiceText}` : "";
+  }
+
+  function addProblemChoice(choiceText = "", isCorrect = false) {
+    const row = document.createElement("div");
+    row.className = "problem-choice-row";
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "correctChoiceNumber";
+    radio.setAttribute("aria-label", "정답 선택");
+    radio.checked = isCorrect;
+
+    const number = document.createElement("span");
+    number.className = "problem-choice-number";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.name = "choiceTexts";
+    input.value = choiceText;
+    input.placeholder = "답안 내용 입력";
+    input.required = true;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "problem-choice-remove-button";
+    removeButton.textContent = "삭제";
+
+    radio.addEventListener("change", updateMultipleChoiceAnswer);
+    input.addEventListener("input", updateMultipleChoiceAnswer);
+    removeButton.addEventListener("click", () => {
+      if (problemChoiceList.children.length <= 2) {
+        alert("객관식 답안은 두 개 이상 필요합니다.");
+        return;
+      }
+      row.remove();
+      updateMultipleChoiceAnswer();
+    });
+
+    row.append(radio, number, input, removeButton);
+    problemChoiceList.appendChild(row);
+    updateMultipleChoiceAnswer();
+  }
+
+  function resetMultipleChoiceRows(choices = []) {
+    problemChoiceList.replaceChildren();
+    if (choices.length > 0) {
+      choices.forEach((choice) => addProblemChoice(choice.text, choice.correct));
+    } else {
+      addProblemChoice();
+      addProblemChoice();
+    }
+    updateMultipleChoiceAnswer();
+  }
+
+  function syncProblemTypeForm() {
+    const problemType = problemTypeSelect.value;
+    const isMultipleChoice = problemType === "MULTIPLE_CHOICE";
+
+    multipleChoiceField.hidden = !isMultipleChoice;
+    problemAnswerText.readOnly = isMultipleChoice;
+    problemAnswerText.placeholder = isMultipleChoice
+            ? "정답을 선택하면 '번호. 정답 내용'으로 표시됩니다."
+            : "정답 입력";
+
+    if (isMultipleChoice) {
+      if (problemChoiceList.children.length === 0) {
+        resetMultipleChoiceRows();
+      }
+      updateMultipleChoiceAnswer();
+    }
+  }
+
+  document.querySelector("#addProblemChoiceButton")
+          ?.addEventListener("click", () => addProblemChoice());
+  problemTypeSelect?.addEventListener("change", () => {
+    if (problemTypeSelect.value === "MULTIPLE_CHOICE") {
+      resetMultipleChoiceRows();
+    } else {
+      problemAnswerText.value = "";
+    }
+    syncProblemTypeForm();
+  });
 
   function syncProblemFilterCurriculumOptions() {
     const selectedSubjectId = document.querySelector("#problemSubjectFilter")?.value || "";
@@ -380,6 +489,8 @@
     document.querySelector("#problemExplanation").value = "";
     document.querySelector("#problemDifficultyCode").value = "";
     document.querySelector("#problemIsActive").value = "";
+    problemChoiceList.replaceChildren();
+    syncProblemTypeForm();
   }
 
   document.querySelector("#problemCreateButton")?.addEventListener("click", () => {
@@ -408,10 +519,33 @@
       document.querySelector("#problemDifficultyCode").value = button.dataset.difficultyCode;
       document.querySelector("#problemIsActive").value = button.dataset.isActive;
 
+      const choices = Array.from(button.querySelectorAll(".problem-edit-choice")).map((choice) => ({
+        text: choice.dataset.choiceText || "",
+        correct: choice.dataset.correct === "true"
+      }));
+      if (problemTypeSelect.value === "MULTIPLE_CHOICE") {
+        resetMultipleChoiceRows(choices);
+      }
+      syncProblemTypeForm();
+
       document.querySelector("#problemType").scrollIntoView({ behavior: "smooth", block: "center" });
       document.querySelector("#problemType").focus({ preventScroll: true });
     });
   });
+
+  problemManageForm?.addEventListener("submit", (event) => {
+    if (problemTypeSelect.value !== "MULTIPLE_CHOICE") {
+      return;
+    }
+    const choices = problemChoiceList.querySelectorAll("input[name='choiceTexts']");
+    const correctChoice = problemChoiceList.querySelector("input[name='correctChoiceNumber']:checked");
+    if (choices.length < 2 || !correctChoice) {
+      event.preventDefault();
+      alert("객관식 답안을 두 개 이상 입력하고 정답을 선택해 주세요.");
+    }
+  });
+
+  syncProblemTypeForm();
 </script>
 </body>
 </html>

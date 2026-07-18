@@ -62,13 +62,22 @@
 }
 
 .admin-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     min-height: 38px;
     margin-bottom: 22px;
     padding: 0 8px;
     color: var(--text);
     font-size: 14px;
     font-weight: 800;
-    line-height: 38px;
+    line-height: 1;
+}
+
+.admin-sidebar-logo {
+    display: block;
+    width: 92px;
+    height: auto;
 }
 
 .admin-sidebar-nav {

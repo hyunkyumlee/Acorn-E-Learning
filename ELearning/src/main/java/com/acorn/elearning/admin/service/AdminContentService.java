@@ -27,6 +27,8 @@ import com.acorn.elearning.learning.model.CurriculumNode;
 import com.acorn.elearning.learning.model.Lesson;
 import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.practice.mapper.PracticeProblemMapper;
+import com.acorn.elearning.practice.mapper.ProblemChoiceMapper;
+import com.acorn.elearning.practice.model.ProblemChoice;
 import com.acorn.elearning.practice.model.PracticeProblem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.parsing.Problem;
@@ -41,6 +43,7 @@ public class AdminContentService {
     private final CurriculumNodeMapper cm;
     private final LessonMapper lm;
     private final PracticeProblemMapper ppm;
+    private final ProblemChoiceMapper problemChoiceMapper;
     private final AdminLessonMapper alm;
     private final AdminProblemMapper apm;
     private final AdminCurriculumNodeMapper acm;
@@ -413,7 +416,7 @@ public class AdminContentService {
 
     //관리자 문제 목록 조회
     public List<AdminProblemManageRowResponse> findAllAdminProblem(){
-        return apm.findAll();
+        return attachProblemChoices(apm.findAll());
     }
 
     @Transactional
@@ -425,6 +428,7 @@ public class AdminContentService {
                         "삭제할 문제를 찾을 수 없습니다."
                 ));
 
+        apm.deleteChoicesByProblemId(problemId);
         int deleted = apm.deleteById(problemId);
 
 
@@ -478,7 +482,7 @@ public class AdminContentService {
         problem.setNodeId(lesson.getNodeId());
         problem.setProblemType(toProblemTypeCode(form.getProblemType()));
         problem.setQuestion(form.getQuestion());
-        problem.setAnswerText(form.getAnswerText());
+        problem.setAnswerText(resolveProblemAnswer(form));
         problem.setLessonId(lesson.getLessonId());
         problem.setExplanation(form.getExplanation());
         problem.setDifficultyCode(form.getDifficultyCode());
@@ -486,6 +490,10 @@ public class AdminContentService {
         problem.setIsActive(form.getIsActive() == null ? Boolean.TRUE : form.getIsActive());
 
         int inserted = ppm.insert(problem);
+
+        if (inserted == 1 && "MULTIPLE_CHOICE".equals(problem.getProblemType())) {
+            saveProblemChoices(problem.getProblemId(), form);
+        }
 
         if(inserted == 1){
             adminLogService.insert(
@@ -525,13 +533,20 @@ public class AdminContentService {
         problem.setNodeId(lesson.getNodeId());
         problem.setProblemType(toProblemTypeCode(form.getProblemType()));
         problem.setQuestion(form.getQuestion());
-        problem.setAnswerText(form.getAnswerText());
+        problem.setAnswerText(resolveProblemAnswer(form));
         problem.setLessonId(lesson.getLessonId());
         problem.setExplanation(form.getExplanation());
         problem.setDifficultyCode(form.getDifficultyCode());
         problem.setIsActive(form.getIsActive() == null ? problem.getIsActive() : form.getIsActive());
 
         int updated = ppm.update(problem);
+
+        if (updated == 1) {
+            apm.deleteChoicesByProblemId(problem.getProblemId());
+            if ("MULTIPLE_CHOICE".equals(problem.getProblemType())) {
+                saveProblemChoices(problem.getProblemId(), form);
+            }
+        }
 
         String actionType = activeChanged ? "PROBLEM_STATUS_UPDATE" : "PROBLEM_UPDATE";
         String changeDetail = activeChanged
@@ -545,6 +560,46 @@ public class AdminContentService {
             );
         }
         return updated;
+    }
+
+    private String resolveProblemAnswer(ProblemForm form) {
+        String problemType = toProblemTypeCode(form.getProblemType());
+        if (!"MULTIPLE_CHOICE".equals(problemType)) {
+            return form.getAnswerText();
+        }
+
+        List<String> choiceTexts = form.getChoiceTexts() == null
+                ? List.of()
+                : form.getChoiceTexts().stream()
+                        .map(text -> text == null ? "" : text.trim())
+                        .filter(text -> !text.isEmpty())
+                        .toList();
+        Integer correctNumber = form.getCorrectChoiceNumber();
+        if (choiceTexts.size() < 2 || correctNumber == null
+                || correctNumber < 1 || correctNumber > choiceTexts.size()) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_VALIDATION_FAILED,
+                    "객관식은 두 개 이상의 답안과 정답을 선택해야 합니다."
+            );
+        }
+        return correctNumber + ". " + choiceTexts.get(correctNumber - 1);
+    }
+
+    private void saveProblemChoices(Long problemId, ProblemForm form) {
+        List<String> choiceTexts = form.getChoiceTexts().stream()
+                .map(String::trim)
+                .filter(text -> !text.isEmpty())
+                .toList();
+
+        for (int index = 0; index < choiceTexts.size(); index++) {
+            ProblemChoice choice = new ProblemChoice();
+            choice.setProblemId(problemId);
+            choice.setChoiceLabel(String.valueOf(index + 1));
+            choice.setChoiceText(choiceTexts.get(index));
+            choice.setIsCorrect(index + 1 == form.getCorrectChoiceNumber());
+            choice.setSortOrder(index + 1);
+            problemChoiceMapper.insert(choice);
+        }
     }
 
     @Transactional
@@ -607,11 +662,21 @@ public class AdminContentService {
 
         List<AdminProblemManageRowResponse> items =
                 apm.findPage(pageSize, offset, keyword, subjectId, nodeId, problemType, difficultyCode, isActive);
+        attachProblemChoices(items);
 
         long totalCount =
                 apm.countAll(keyword, subjectId, nodeId, problemType, difficultyCode, isActive);
 
         return new AdminPageResponse<>(items, currentPage, pageSize, totalCount);
+    }
+
+    private List<AdminProblemManageRowResponse> attachProblemChoices(
+            List<AdminProblemManageRowResponse> problems
+    ) {
+        problems.forEach(problem -> problem.setChoices(
+                problemChoiceMapper.findByProblemId(problem.getProblemId())
+        ));
+        return problems;
     }
 
 

@@ -30,6 +30,7 @@
 
 .theory-filter {
     display: grid;
+    max-width: none;
     grid-template-columns: 190px repeat(4, 150px) 80px;
     gap: 12px;
 }
@@ -157,6 +158,11 @@
     gap: 8px;
 }
 
+.theory-table-actions {
+    min-width: max-content;
+    flex-wrap: nowrap;
+}
+
 .theory-table-button {
     min-width: 46px;
     height: 28px;
@@ -276,13 +282,23 @@
     margin-top: auto;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1360px) {
     .theory-toolbar {
         align-items: stretch;
         flex-direction: column;
     }
 
-    .theory-filter,
+    .theory-filter {
+        width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+    }
+
+    .theory-primary-button {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 1024px) {
     .theory-form-layout,
     .theory-form-row {
         grid-template-columns: 1fr;
@@ -296,6 +312,15 @@
 
     .theory-filter {
         width: 100%;
+        grid-template-columns: 1fr;
+    }
+
+    .theory-primary-button {
+        width: 100%;
+    }
+
+    .theory-toolbar {
+        display: flex;
     }
 
     .theory-form-actions {

@@ -86,6 +86,11 @@
         WHERE problem_id = #{problemId}
     </delete>
 
+    <delete id="deleteChoicesByProblemId" parameterType="long">
+        DELETE FROM problem_choices
+        WHERE problem_id = #{problemId}
+    </delete>
+
     <sql id="ProblemFilterWhere">
         <where>
             <if test="keyword != null and keyword != ''">
