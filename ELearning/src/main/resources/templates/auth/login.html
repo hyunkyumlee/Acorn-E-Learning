@@ -65,7 +65,8 @@
         <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
 
         <label class="checkbox">
-          <input type="checkbox" th:field="*{rememberMe}"> 로그인 상태 유지
+          <input type="checkbox" th:field="*{rememberMe}" data-remember-checkbox> 로그인 상태 유지
+          <span class="remember-tip-bubble" role="status" data-remember-bubble>공용 PC가 아닌 개인 PC에서만 사용해 주세요.</span>
         </label>
 
         <button class="button primary" type="submit">로그인</button>
@@ -142,6 +143,28 @@
       else box.setAttribute('hidden', '');
       btn.setAttribute('aria-expanded', String(willShow));
       btn.classList.toggle('is-active', willShow);
+    });
+  })();
+</script>
+
+<!-- [추가] 로그인 상태 유지 체크 시 안내 말풍선 노출 후 2초 뒤 자동 페이드아웃 -->
+<script th:inline="none">
+  (function () {
+    var checkbox = document.querySelector('[data-remember-checkbox]');
+    var bubble = document.querySelector('[data-remember-bubble]');
+    if (!checkbox || !bubble) return;
+    var hideTimer = null;
+    checkbox.addEventListener('change', function () {
+      clearTimeout(hideTimer);
+      bubble.classList.remove('is-visible');
+      if (checkbox.checked) {
+        // 리플로우를 강제해 트랜지션이 매번 다시 재생되도록 함(연속 체크 시에도 자연스럽게)
+        void bubble.offsetWidth;
+        bubble.classList.add('is-visible');
+        hideTimer = setTimeout(function () {
+          bubble.classList.remove('is-visible');
+        }, 2000);
+      }
     });
   })();
 </script>

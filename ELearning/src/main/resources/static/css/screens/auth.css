@@ -186,6 +186,7 @@ body.auth-bg {
 }
 
 .auth-screen .checkbox {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -195,6 +196,56 @@ body.auth-bg {
 
 .auth-screen .checkbox input {
   width: auto;
+}
+
+/* [추가] 로그인 상태 유지 체크 시 뜨는 안내 말풍선 — 2초 후 JS가 is-visible을 떼면서 페이드아웃 */
+.auth-screen .remember-tip-bubble {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: max-content;
+  max-width: 220px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-elevated, var(--shadow-soft));
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 300;
+  line-height: 1.5;
+  text-align: left;
+  word-break: keep-all;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+  z-index: 5;
+}
+
+.auth-screen .remember-tip-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 14px;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+
+.auth-screen .remember-tip-bubble.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-screen .remember-tip-bubble { transition: none; }
 }
 
 .auth-screen .form-error,

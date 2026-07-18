@@ -1,9 +1,3 @@
-/*
- * SR-001 웰컴/튜토리얼 화면별 CSS
- * - guest-header + page-shell.welcome-screen (login/signup과 동일 shell)
- * - welcome만 우주 hero orbit visual 허용
- */
-
 .welcome-screen {
   --welcome-copy-ink: var(--text);
   --welcome-copy-muted: var(--muted);
@@ -13,11 +7,10 @@
   --welcome-guide-bg: color-mix(in srgb, var(--surface) 92%, transparent);
   --welcome-guide-line: color-mix(in srgb, var(--primary) 28%, var(--line));
   color: var(--welcome-copy-ink);
-  position: relative;   /* 배경 blob(.bg-fx) 위에 콘텐츠 표시 */
+  position: relative;
   z-index: 1;
 }
 
-/* 배경을 뷰포트 전체에 꽉 차게 — body 배경으로 적용(박스처럼 안 보이게) */
 body.welcome-bg {
   background:
     radial-gradient(circle at 82% 12%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 48%),
@@ -38,12 +31,10 @@ body.welcome-bg {
   background-attachment: fixed;
 }
 
-/* [추가] 웰컴만 기본 page-shell(1120px)보다 넓게 — 왼쪽 텍스트 폭은 그대로 두고 오른쪽 박스만 더 길어질 공간 확보 */
 .welcome-screen.page-shell {
   max-width: 1360px;
 }
 
-/* --- hero layout --- */
 .welcome-launch {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(460px, 0.98fr);
@@ -78,23 +69,24 @@ body.welcome-bg {
 .welcome-screen .button-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
 }
 
-/* [수정] "튜토리얼 시작"(button)과 "바로 로그인하기"(a) 크기를 강제로 맞춤.
-   진짜 원인: <button>은 appearance(운영체제 네이티브 버튼 껍데기)가 남아있으면 border/padding을
-   다 덮어써도 브라우저가 내부적으로 여유 공간을 더 얹어서 렌더링함 — <a>는 애초에 그런 네이티브
-   버튼 껍데기가 없어서 CSS로 지정한 크기 그대로 나옴. appearance:none으로 그 껍데기부터 제거하고,
-   그 위에 height/padding을 동일하게 강제 지정. !important로 다른 어떤 규칙보다도 확실히 이김. */
 .welcome-screen .button-row .button {
   -webkit-appearance: none;
   appearance: none;
   box-sizing: border-box !important;
-  height: 48px !important;
+  height: 52px !important;
   min-height: 0 !important;
   padding: 0 18px !important;
   border-width: 1px !important;
   line-height: normal !important;
+}
+
+.welcome-screen .button-row a.button {
+  height: 55px !important;
+  border-radius: 7px !important;
 }
 
 .welcome-screen .button-row button.button::-moz-focus-inner {
@@ -107,7 +99,6 @@ body.welcome-bg {
   cursor: not-allowed;
 }
 
-/* --- orbit visual: 행성 + 궤도 선 함께 float --- */
 @keyframes welcomeOrbitCenterFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
@@ -226,15 +217,9 @@ body.welcome-bg {
   }
 }
 
-/* =========================================================================
-   SR-001 튜토리얼 — 웰컴 페이지 '안에서' 화면 전환 (별도 route 없음)
-   ========================================================================= */
-
-/* 뷰 전환: 웰컴 뷰 / 튜토리얼 뷰 중 하나만 표시 */
 .welcome-launch[hidden],
 .tut-view[hidden] { display: none !important; }
 
-/* '화면이 바뀌는' 느낌의 진입 애니메이션 */
 @keyframes tutViewIn {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: none; }
@@ -252,9 +237,9 @@ body.welcome-bg {
   display: grid;
   gap: var(--space-6);
   width: 100%;
-  max-width: 1100px;   /* [수정] 튜토리얼 박스 확대 (900 → 1100). 내부 요소 크기는 그대로 */
-  min-height: min(640px, calc(100vh - 220px));   /* [추가] 세로 확대 */
-  grid-template-rows: 1fr auto auto;             /* [추가] 남는 세로 공간을 스테이지 행에 몰아줌 (footer/skip은 하단 고정) */
+  max-width: 1100px;
+  min-height: min(640px, calc(100vh - 220px));
+  grid-template-rows: 1fr auto auto;
   margin: 0 auto;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -266,13 +251,12 @@ body.welcome-bg {
 
 .tut-stage {
   display: grid;
-  grid-template-columns: min(370px, 40%) minmax(0, 560px);   /* [수정] 이미지 칸 크기 유지 + 텍스트 칸 폭 제한 */
-  justify-content: center;                                    /* [추가] 이미지·제목·내용을 박스 가운데로 모음 */
+  grid-template-columns: min(430px, 44%) minmax(0, 560px);
+  justify-content: center;
   align-items: center;
   gap: clamp(20px, 4vw, 40px);
 }
 
-/* [추가] .tut-media와 .tut-overlay를 같은 grid 칸에 겹쳐 배치 (overlay는 잘리지 않는 레이어) */
 .tut-media { grid-column: 1; grid-row: 1; }
 .tut-overlay { grid-column: 1; grid-row: 1; }
 .tut-body { grid-column: 2; grid-row: 1; }
@@ -288,20 +272,18 @@ body.welcome-bg {
 .tut-media img { width: 100%; height: 100%; object-fit: contain; }
 .tut-media-label { font-size: 15px; font-weight: 800; }
 
-/* [추가] 하이라이트 박스/누비/말풍선 레이어 — .tut-media와 같은 칸에 겹치지만 overflow 제한 없음 */
 .tut-overlay {
   position: relative;
   aspect-ratio: 1 / 1;
   pointer-events: none;
 }
 
-/* [수정] 캡쳐본 위 빨간 포인트 영역 박스는 제거 — JS는 계속 위치를 계산해 넣지만 항상 숨김 처리 */
 .tut-highlight,
 .tut-highlight[hidden] { display: none; }
 
 .tut-nuvi {
   position: absolute;
-  width: clamp(80px, 17vw, 128px);
+  width: clamp(110px, 22vw, 176px);
   aspect-ratio: 1 / 1;
   background-image: url("/assets/images/characters/nuvi-poses.png");
   background-size: 500% 100%;
@@ -316,12 +298,11 @@ body.welcome-bg {
 .tut-nuvi[data-pose="IDEA"]      { background-position: 75% 0%; }
 .tut-nuvi[data-pose="PAINTING"]  { background-position: 100% 0%; }
 
-/* [추가] 누비 오른쪽 위 말풍선 — 누비 기준 상대 위치라 누비가 움직이면 같이 따라감 */
 .tut-bubble {
   position: absolute;
-  left: 100%;
+  left: 60%;
   top: 0;
-  transform: translate(8px, -100%);
+  transform: translate(0, -65%);
   width: max-content;
   max-width: 200px;
   background: var(--surface);
@@ -354,7 +335,6 @@ body.welcome-bg {
 
 .tut-step-badge { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: 0.04em; color: var(--primary); }
 
-/* 활성 1장만 노출: hidden 슬라이드는 반드시 숨김 (display:grid 가 [hidden] 을 덮지 않도록 명시) */
 .tut-slide { display: grid; gap: var(--space-3); animation: tutSlideIn 0.28s cubic-bezier(0.2, 0.7, 0.2, 1); }
 .tut-slide[hidden] { display: none; }
 @keyframes tutSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -377,21 +357,25 @@ body.welcome-bg {
 @media (max-width: 720px) {
   .tut-stage { grid-template-columns: 1fr; }
   .tut-media, .tut-overlay { grid-column: 1; grid-row: 1; aspect-ratio: 16 / 10; }
-  .tut-body { grid-column: 1; grid-row: 2; }   /* [추가] 1열이 되면 본문은 이미지 아래(2행)로 */
+  .tut-body { grid-column: 1; grid-row: 2; }
   .tut-footer { flex-wrap: wrap; justify-content: center; }
   .tut-dots { order: 3; width: 100%; justify-content: center; }
+
+  .tut-stage:has(.tut-slide[data-step="1"].is-active) .tut-bubble {
+    left: auto;
+    right: 60%;
+    transform: translate(0, -65%);
+  }
+  .tut-stage:has(.tut-slide[data-step="1"].is-active) .tut-bubble::after {
+    left: auto;
+    right: 16px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .tut-view, .tut-slide { animation: none; }
   .tut-nuvi, .tut-highlight { transition: none; }
 }
 
-/* [수정: 성능] 오로라: login/signup과 같은 .bg-fx .blob(components.css) 재사용.
-   전에 filter:blur(95px) + mix-blend-mode:screen 을 얹은 채로 blobMorph(=border-radius 애니메이션,
-   모양 자체가 매 프레임 바뀜)까지 같이 돌려서 3개 블롭을 매 프레임 95px 블러로 다시 래스터라이즈 +
-   블렌드 합성까지 했던 게 렉의 직접적인 원인이었음 (이 파일 맨 아래 예전 SVG 워프 필터와 정확히 같은 실수).
-   → blobMorph(모양 변형)는 끄고 transform만 움직이는 auroraDrift만 남김: blur는 정적인 모양 위에서
-   한 번만 래스터라이즈되고 이동/스케일은 GPU 합성만 타므로 저비용. mix-blend-mode도 제거. */
 @keyframes auroraDrift {
   0%   { transform: translate(0, 0) scale(1); }
   25%  { transform: translate(3%, -4%) scale(1.05); }
@@ -401,7 +385,7 @@ body.welcome-bg {
 }
 body.welcome-bg .bg-fx .blob {
   opacity: 0.2;
-  filter: blur(60px);
+  filter: blur(30px);
   animation: auroraDrift 23s ease-in-out infinite;
 }
 body.welcome-bg .bg-fx .blob-2 { animation: auroraDrift 28s ease-in-out infinite reverse; }
@@ -410,8 +394,6 @@ body.welcome-bg .bg-fx .blob-3 { animation: auroraDrift 19s ease-in-out infinite
   body.welcome-bg .bg-fx .blob { animation: none; }
 }
 
-/* ===== [추가] 밤하늘 별(반짝임) + 별똥별 배경 ===== */
-/* 별 색: 라이트=은은한 남색, 다크=밝은 흰색 (bg-fx는 welcome-screen 밖이라 body에 변수 정의) */
 body.welcome-bg {
   --star-color: rgba(38, 58, 120, 0.55);
   --star-color-bright: rgba(20, 32, 90, 0.85);
@@ -420,31 +402,22 @@ body.welcome-bg {
   --shoot-color: rgba(70, 90, 165, 0.9);
 }
 :root[data-theme="knowva-ion-dark"] body.welcome-bg {
-  --star-color: rgba(255, 255, 255, 0.6);   /* [수정] 별 밝기 낮춤 (0.92 → 0.6) */
-  --star-color-bright: rgba(255, 255, 255, 0.95);   /* [추가] 히어로 별용 최고 밝기 */
-  --star-color-warm: rgba(255, 224, 168, 0.75);      /* [추가] 색온도 변화: 약간 따뜻한 별 */
-  --star-color-cool: rgba(180, 210, 255, 0.75);      /* [추가] 색온도 변화: 약간 차가운 별 */
+  --star-color: rgba(255, 255, 255, 0.6);
+  --star-color-bright: rgba(255, 255, 255, 0.95);
+  --star-color-warm: rgba(255, 224, 168, 0.75);
+  --star-color-cool: rgba(180, 210, 255, 0.75);
   --shoot-color: rgba(255, 255, 255, 0.95);
 }
 
-/* [삭제: 성능] 별 전체에 filter:blur(0.7px)를 얹었었는데, 전체화면을 덮는 레이어 5장(starfield
-   본체+before+after+flicker 3개)을 동시에 블러하는 거라 "정적 블러라 저비용" 가정과 달리 실측
-   렉의 원인 중 하나였음. 큰 별의 부드러움은 아래 코어+헤일로 이중 그라디언트만으로 유지. */
-
-/* 별밭: (1) 항상 켜진 밝은 베이스 + (2)(3) 서로 다른 위치·위상으로 '부분만' 깜빡이는 레이어
-   [수정] 더 실감나게: 크기·밝기·색온도를 섞고, 큰 별은 코어+헤일로 이중 그라디언트로 은은한 광채를 줌.
-   타일을 정사각형이 아닌 큼직한 비율(320x268 등)로 잡아 눈에 띄는 격자 반복을 최대한 숨김. */
 .welcome-bg .starfield {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background-image:
-    /* 헤일로가 있는 밝은 '히어로' 별 2개 */
     radial-gradient(9px 9px at 58px 44px, color-mix(in srgb, var(--star-color) 55%, transparent), transparent 70%),
     radial-gradient(3.5px 3.5px at 58px 44px, var(--star-color-bright) 0%, color-mix(in srgb, var(--star-color-bright) 55%, transparent) 45%, transparent 100%),
     radial-gradient(10px 10px at 262px 190px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent 70%),
     radial-gradient(3.8px 3.8px at 262px 190px, var(--star-color-bright) 0%, color-mix(in srgb, var(--star-color-bright) 55%, transparent) 45%, transparent 100%),
-    /* 자잘한 별들: 크기·밝기 섞어서 원근감 */
     radial-gradient(1.2px 1.2px at 22px 118px, color-mix(in srgb, var(--star-color) 55%, transparent), transparent),
     radial-gradient(1.6px 1.6px at 96px 92px, var(--star-color), transparent),
     radial-gradient(1px 1px at 140px 30px, color-mix(in srgb, var(--star-color) 45%, transparent), transparent),
@@ -457,7 +430,6 @@ body.welcome-bg {
     radial-gradient(1px 1px at 78px 254px, color-mix(in srgb, var(--star-color) 42%, transparent), transparent),
     radial-gradient(1.4px 1.4px at 200px 246px, var(--star-color), transparent),
     radial-gradient(1px 1px at 306px 232px, color-mix(in srgb, var(--star-color) 48%, transparent), transparent),
-    /* [추가] 별 밀도 보강 */
     radial-gradient(1px 1px at 150px 110px, color-mix(in srgb, var(--star-color) 46%, transparent), transparent),
     radial-gradient(1.3px 1.3px at 270px 60px, var(--star-color-cool), transparent),
     radial-gradient(1px 1px at 34px 190px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent),
@@ -472,11 +444,7 @@ body.welcome-bg {
     radial-gradient(1.3px 1.3px at 40px 240px, var(--star-color-warm), transparent);
   background-repeat: repeat;
   background-size: 320px 268px;
-  /* [수정] 성능: 매 프레임 재계산되던 blur+drop-shadow 필터 제거 (렉 주범).
-     별 글로우는 위 헤일로 그라디언트 자체로 대체(정적 레이어, 애니메이션 비용 없음) */
-  /* 베이스 층은 애니메이션 없이 항상 켜둠 → 하늘 전체가 밝게 유지 */
 }
-/* 깜빡이는 두 층: 서로 다른 별 위치·주기·위상 → 여기저기 부분부분 사라졌다 나타남 */
 .welcome-bg .starfield::before,
 .welcome-bg .starfield::after {
   content: "";
@@ -526,51 +494,6 @@ body.welcome-bg {
   animation-delay: -3s;
 }
 
-/* [추가] ::before/::after 2개로는 항상 두 그룹만 같이 맥동해서 '여러 군데가 제각각' 깜빡이는 느낌이
-   안 남 → 별도 div 3개를 더 얹어 서로 다른 위치·주기·모양의 깜빡임 레이어를 5개로 늘림 */
-.welcome-bg .starfield-flicker {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-repeat: repeat;
-}
-.welcome-bg .starfield-flicker-c {
-  background-image:
-    radial-gradient(1.6px 1.6px at 36px 58px, var(--star-color-bright), transparent),
-    radial-gradient(1px 1px at 112px 140px, color-mix(in srgb, var(--star-color) 46%, transparent), transparent),
-    radial-gradient(1.3px 1.3px at 190px 60px, var(--star-color-warm), transparent),
-    radial-gradient(1px 1px at 230px 170px, color-mix(in srgb, var(--star-color) 42%, transparent), transparent),
-    radial-gradient(1.4px 1.4px at 10px 190px, var(--star-color), transparent),
-    radial-gradient(1px 1px at 150px 20px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent);
-  background-size: 260px 210px;
-  animation: welcome-twinkle-pop 3.2s ease-in-out infinite;
-}
-.welcome-bg .starfield-flicker-d {
-  background-image:
-    radial-gradient(1.3px 1.3px at 90px 30px, var(--star-color-cool), transparent),
-    radial-gradient(1px 1px at 20px 110px, color-mix(in srgb, var(--star-color) 44%, transparent), transparent),
-    radial-gradient(1.6px 1.6px at 170px 130px, var(--star-color-bright), transparent),
-    radial-gradient(1px 1px at 240px 50px, color-mix(in srgb, var(--star-color) 48%, transparent), transparent),
-    radial-gradient(1.2px 1.2px at 130px 190px, var(--star-color-warm), transparent),
-    radial-gradient(1px 1px at 60px 220px, color-mix(in srgb, var(--star-color) 40%, transparent), transparent),
-    radial-gradient(1.4px 1.4px at 280px 160px, var(--star-color), transparent);
-  background-size: 310px 250px;
-  animation: welcome-twinkle-pop 4.6s ease-in-out infinite -1.6s;
-}
-.welcome-bg .starfield-flicker-e {
-  background-image:
-    radial-gradient(1.4px 1.4px at 50px 150px, var(--star-color), transparent),
-    radial-gradient(1px 1px at 140px 70px, color-mix(in srgb, var(--star-color) 45%, transparent), transparent),
-    radial-gradient(1.2px 1.2px at 210px 200px, var(--star-color-cool), transparent),
-    radial-gradient(1px 1px at 270px 40px, color-mix(in srgb, var(--star-color) 42%, transparent), transparent),
-    radial-gradient(1.5px 1.5px at 8px 40px, var(--star-color-bright), transparent),
-    radial-gradient(1px 1px at 100px 230px, color-mix(in srgb, var(--star-color) 50%, transparent), transparent);
-  background-size: 290px 240px;
-  animation: welcome-twinkle-pop 6.5s ease-in-out infinite -3.4s;
-}
-
-/* 깜빡이는 층만 깊게 사라졌다 나타남 (베이스가 켜져 있어 하늘은 계속 밝음)
-   [수정] 서로 다른 위상 곡선을 줘서 기계적으로 똑같이 맥동하는 느낌을 줄임 */
 @keyframes welcome-twinkle-a {
   0%, 100% { opacity: 0.12; }
   30%      { opacity: 0.85; }
@@ -583,20 +506,6 @@ body.welcome-bg {
   50%      { opacity: 0.15; }
   75%      { opacity: 0.8; }
 }
-/* [추가] '뿅' 하고 순간적으로 튀는 느낌의 깜빡임 — 한 주기 안에서 두 번 반짝였다 완전히 꺼짐,
-   부드럽게 숨쉬는 a/b와 섞이면 화면 곳곳이 제각각 깜빡이는 것처럼 보임(생동감) */
-@keyframes welcome-twinkle-pop {
-  0%, 100% { opacity: 0; }
-  4%       { opacity: 1; }
-  10%      { opacity: 0.15; }
-  16%      { opacity: 0.9; }
-  26%      { opacity: 0; }
-  70%      { opacity: 0; }
-  78%      { opacity: 0.75; }
-  86%      { opacity: 0; }
-}
-
-/* 별똥별: 오른쪽 대각선 아래(↘)로 하나씩 흘러감 */
 .welcome-bg .shooting-stars {
   position: absolute;
   inset: 0;
@@ -614,7 +523,7 @@ body.welcome-bg {
   transform: rotate(45deg) translateX(0);
   animation: welcome-shoot 9s linear infinite;
 }
-.welcome-bg .shoot::before {                 /* 꼬리: 진행 반대(↖) 방향으로 페이드 */
+.welcome-bg .shoot::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -626,7 +535,6 @@ body.welcome-bg {
   border-radius: 2px;
 }
 
-/* 시작 위치·타이밍을 별마다 다르게 → 중간중간 하나씩 떨어지는 느낌 */
 .welcome-bg .shoot:nth-child(1) { top: 6%;  left: 12%; animation-delay: 0s;  animation-duration: 8s;   }
 .welcome-bg .shoot:nth-child(2) { top: -2%; left: 44%; animation-delay: 3s;  animation-duration: 11s;  }
 .welcome-bg .shoot:nth-child(3) { top: 9%;  left: 68%; animation-delay: 6s;  animation-duration: 9.5s; }
@@ -644,13 +552,8 @@ body.welcome-bg {
 @media (prefers-reduced-motion: reduce) {
   .welcome-bg .starfield::before,
   .welcome-bg .starfield::after,
-  .welcome-bg .starfield-flicker,
   .welcome-bg .shoot { animation: none; }
   .welcome-bg .starfield::before,
-  .welcome-bg .starfield::after,
-  .welcome-bg .starfield-flicker { opacity: 1; }
+  .welcome-bg .starfield::after { opacity: 1; }
   .welcome-bg .shoot { opacity: 0; }
 }
-
-/* [삭제] 오로라(SVG 워프 필터 + mix-blend-mode)는 렉 주범이라 완전히 제거함.
-   배경은 다크 하늘 + 별 + 별똥별만 유지 (전부 필터 없이 GPU 저비용). */

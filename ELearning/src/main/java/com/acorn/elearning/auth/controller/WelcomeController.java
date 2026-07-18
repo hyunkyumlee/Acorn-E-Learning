@@ -29,7 +29,7 @@ public class WelcomeController {
                     "/assets/images/tutorial/4-primeum.png", 25, 25, "IDEA",
                     2, 79, 95, 19, "코딩테스트 결과를 AI가 분석해줘요!"),
             TutorialStepView.of(5, "커뮤니티로 자유롭게 소통", "질문하고 답변하며 학습 경험을 공유하고 함께 성장하세요",
-                    "/assets/images/tutorial/5-community.png", 11, 20, "PAINTING",
+                    "/assets/images/tutorial/5-community.png", 11, 90, "PAINTING",
                     23, 20, 75, 74, "다른 사람들과 소통이 가능해요")
     );
 

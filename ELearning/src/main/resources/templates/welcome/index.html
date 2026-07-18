@@ -1,5 +1,4 @@
 <!doctype html>
-<!-- [수정] 웰컴은 항상 어두운 배경 고정 (다크 테마 하드코딩) -->
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" data-theme="knowva-ion-dark" style="color-scheme: dark">
 <head>
     <meta charset="UTF-8">
@@ -12,25 +11,14 @@
     <link rel="stylesheet" th:href="@{/css/common/components.css}">
     <link rel="stylesheet" th:href="@{/css/common/themes.css}">
     <link rel="stylesheet" th:href="@{/css/screens/welcome.css}">
-    <!-- [삭제] 다크 고정이라 테마 토글 스크립트 제거 (theme.js가 저장값으로 테마를 덮어쓰지 않도록)
-    <script defer th:src="@{/js/common/theme.js}"></script>
-    -->
-    <!-- [추가] 웰컴↔튜토리얼 화면 전환 + 슬라이더 -->
     <script defer th:src="@{/js/screens/welcome-tutorial.js}"></script>
 </head>
 <body class="welcome-bg">
 <div class="bg-fx" aria-hidden="true">
-  <!-- [수정] 오로라: login/signup에서 이미 쓰는 검증된 blob 배경(.bg-fx .blob, components.css) 재사용 -->
   <span class="blob blob-1"></span>
   <span class="blob blob-2"></span>
   <span class="blob blob-3"></span>
-  <!-- 밤하늘 별(반짝임) + 별똥별(오른쪽 대각선 아래로) -->
   <div class="starfield"></div>
-  <!-- [추가] 별밭 ::before/::after 2개 + 이 div 3개 = 총 5개의 독립적인 깜빡임 레이어.
-       주기·위상이 다 달라서 한 화면에서 여러 군데가 동시에 아니라 제각각 사라졌다 나타남 -->
-  <div class="starfield-flicker starfield-flicker-c"></div>
-  <div class="starfield-flicker starfield-flicker-d"></div>
-  <div class="starfield-flicker starfield-flicker-e"></div>
   <div class="shooting-stars">
     <span class="shoot"></span>
     <span class="shoot"></span>
@@ -39,16 +27,13 @@
     <span class="shoot"></span>
   </div>
 </div>
-<!-- [삭제] 다크모드 전환 버튼 제거 (웰컴은 다크 고정) -->
 <main class="page-shell welcome-screen">
 
-    <!-- ===== 뷰 1: 웰컴 히어로 ===== -->
     <section class="welcome-launch" data-welcome-view aria-label="Knowva 소개">
         <div class="welcome-copy">
             <h1>코딩 여정을<br>푸른 이온 궤도로.</h1>
             <p>지식을 얻으며 빛나는 학습자. 짧은 이론과 문제풀이로 실력을 쌓고, 나만의 학습 기록을 이어가 보세요.</p>
             <div class="button-row">
-                <!-- [수정] 페이지 이동/스크롤 아님 → 같은 화면에서 튜토리얼 뷰로 '전환'하는 버튼 -->
                 <button type="button" class="button primary" data-tutorial-open aria-controls="tutorialView">튜토리얼 시작</button>
                 <a class="button" th:href="@{/login}">바로 로그인하기</a>
             </div>
@@ -70,7 +55,6 @@
         </div>
     </section>
 
-    <!-- ===== 뷰 2: 튜토리얼 (같은 index.html 안) ===== -->
     <section id="tutorialView" class="tut-view" data-tutorial-view hidden aria-label="Knowva 튜토리얼">
         <div class="tut-card" data-tut-root tabindex="-1">
             <div class="tut-stage">
@@ -78,7 +62,6 @@
                     <img data-tut-img alt="" hidden>
                     <span class="tut-media-label" data-tut-media-label>서비스 이미지</span>
                 </div>
-                <!-- [추가] 하이라이트 박스/누비/말풍선은 .tut-media(overflow:hidden) 밖의 별도 레이어에 둬서 잘리지 않게 함 -->
                 <div class="tut-overlay" aria-hidden="true">
                     <div class="tut-highlight" data-tut-highlight hidden></div>
                     <div class="tut-nuvi" data-tut-nuvi hidden>
@@ -88,10 +71,8 @@
 
                 <div class="tut-body">
                     <p class="tut-live" data-tut-live aria-live="polite"></p>
-                    <!-- [수정] 총 개수 하드코딩(/ 5) → 서버가 준 단계 수 -->
                     <p class="tut-step-badge"><span data-tut-index>1</span> / <span th:text="${#lists.size(tutorialSteps)}">5</span></p>
 
-                    <!-- [수정] 슬라이드 5장 하드코딩 → tutorialSteps 반복 렌더 -->
                     <article class="tut-slide" th:each="s, it : ${tutorialSteps}"
                              th:classappend="${it.first} ? ' is-active' : ''"
                              th:attr="data-step=${s.step}, data-img=${s.imageUrl},
@@ -110,7 +91,6 @@
             <div class="tut-footer">
                 <button type="button" class="button tut-btn tut-prev" data-tut-prev disabled aria-disabled="true">이전</button>
 
-                <!-- [수정] 점(dot) 5개 하드코딩 → tutorialSteps 반복 렌더 -->
                 <div class="tut-dots" role="tablist" aria-label="튜토리얼 단계" data-tut-dots>
                     <button type="button" class="tut-dot" role="tab" th:each="s, it : ${tutorialSteps}"
                             th:classappend="${it.first} ? ' is-active' : ''"
@@ -123,7 +103,6 @@
             </div>
 
             <p class="tut-skip">
-                <!-- [추가] 페이지 이동이 아니라 뷰를 웰컴으로 되돌리는 버튼 -->
                 <button type="button" class="tut-back" data-tutorial-close>웰컴으로 돌아가기</button>
             </p>
         </div>
