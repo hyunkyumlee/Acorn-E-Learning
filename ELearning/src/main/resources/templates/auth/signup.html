@@ -33,7 +33,7 @@
       </svg>
     </span>
 </button>
-<main class="page-shell auth-screen login-screen">
+<main class="page-shell auth-screen login-screen signup-screen">
   <section class="page-heading">
     <h1 th:text="${social} ? '소셜 회원가입' : '회원가입'">회원가입</h1>
   </section>
@@ -56,10 +56,30 @@
         <p class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
 
         <label class="field">
-          <span>비밀번호 (8자 이상)</span>
+          <span class="field-label-row">
+            비밀번호
+            <span class="help-tip">
+              <button type="button" class="help-tip-trigger" aria-label="비밀번호 규칙 안내">?</button>
+              <span class="help-tip-bubble" role="tooltip">
+                <ul>
+                  <li>8~16자로 입력해 주세요.</li>
+                  <li>영문 대소문자, 숫자, 특수문자를 모두 포함해야 해요.</li>
+                  <li>닉네임이나 이메일 아이디는 포함할 수 없어요.</li>
+                </ul>
+              </span>
+            </span>
+          </span>
           <input type="password" th:field="*{password}" placeholder="Knowva1234!" autocomplete="new-password">
         </label>
         <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        <p class="field-error" th:if="${#fields.hasErrors('passwordNotContainingProfile')}" th:errors="*{passwordNotContainingProfile}"></p>
+
+        <label class="field">
+          <span>비밀번호 확인</span>
+          <input type="password" th:field="*{confirmPassword}" placeholder="비밀번호 재입력" autocomplete="new-password">
+        </label>
+        <p class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></p>
+        <p class="field-error" th:if="${#fields.hasErrors('passwordConfirmed')}" th:errors="*{passwordConfirmed}"></p>
 
         <label class="field">
           <span>닉네임</span>

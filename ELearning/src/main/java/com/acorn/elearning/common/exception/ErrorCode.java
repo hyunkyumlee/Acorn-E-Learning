@@ -19,6 +19,7 @@ public enum ErrorCode {
     AUTH_RESET_TOKEN_EXPIRED(HttpStatus.GONE, "AUTH-RESET-TOKEN-EXPIRED", "재설정 링크가 만료되었습니다. 비밀번호 찾기를 다시 요청해 주세요."),
     AUTH_RESET_TOKEN_USED(HttpStatus.CONFLICT, "AUTH-RESET-TOKEN-USED", "이미 사용된 재설정 링크입니다. 비밀번호 찾기를 다시 요청해 주세요."),
     AUTH_MAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH-MAIL-SEND-FAILED", "메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요."),
+    AUTH_PASSWORD_TOO_GUESSABLE(HttpStatus.BAD_REQUEST, "AUTH-PASSWORD-TOO-GUESSABLE", "비밀번호에 닉네임이나 이메일 아이디를 포함할 수 없습니다."),
 
 
     COMMON_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION-400", "입력값이 올바르지 않습니다."),
