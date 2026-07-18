@@ -20,9 +20,19 @@
 <div th:replace="~{fragments/topbar :: topbar}"></div>
 
 <main class="page-shell learning-screen ranking-screen">
+
   <section class="page-heading ranking-heading">
-    <span class="eyebrow">Ranking</span>
-    <h1>랭킹</h1>
+    <div class="ranking-heading-row">
+      <div>
+        <span class="eyebrow">Ranking</span>
+        <h1>랭킹</h1>
+      </div>
+
+      <a th:href="@{/learning}" class="ranking-back-link">
+        <span class="ranking-back-link__icon" aria-hidden="true">←</span>
+        <span class="ranking-back-link__label">학습 로드맵으로</span>
+      </a>
+    </div>
   </section>
 
   <section class="panel ranking-panel">
