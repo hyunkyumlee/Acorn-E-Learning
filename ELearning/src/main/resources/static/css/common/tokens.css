@@ -5,6 +5,8 @@
   --header-bg: #f7fdff;
   --text: #132331;
   --muted: #607181;
+  --profile-placeholder-bg: color-mix(in srgb, var(--text) 14%, var(--surface));
+  --profile-placeholder-text: var(--muted);
   --line: #d9e7ee;
   --primary: #22b8c8;
   --accent: #0a4f5b;

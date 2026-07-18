@@ -27,11 +27,10 @@
       <section class="panel community-panel community-profile-panel" th:if="${view != null}">
         <div class="community-profile-hero">
           <div class="community-profile-hero-main">
-            <span class="community-profile-hero-avatar" th:if="${profileImageUrl == null or #strings.isEmpty(profileImageUrl)}" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
+            <span class="community-profile-hero-avatar community-profile-hero-avatar-placeholder" th:if="${profileImageUrl == null or #strings.isEmpty(profileImageUrl)}" th:text="${#strings.substring(profileName, 0, 1)}">N</span>
             <img class="community-profile-hero-avatar community-profile-hero-avatar-image" th:if="${profileImageUrl != null and !#strings.isEmpty(profileImageUrl)}" th:src="${profileImageUrl}" alt="" aria-hidden="true">
             <div>
               <h2 th:text="${profileName}">nova_learner</h2>
-              <a class="button ghost" th:href="@{/community/board}">게시판으로</a>
             </div>
           </div>
           <div class="community-profile-hero-meta">
@@ -71,9 +70,60 @@
 
         <div class="community-profile-grid">
           <section class="community-subsection community-profile-post-section">
-            <h3>내가 쓴 글</h3>
+            <div class="community-profile-post-heading">
+              <h3>내가 쓴 글</h3>
+              <span th:text="|${#lists.size(filteredMyPosts)}개|">0개</span>
+            </div>
+            <div class="community-profile-post-toolbar">
+              <nav class="community-profile-subject-filter" aria-label="내가 쓴 글 과목 필터">
+                <a class="community-profile-filter-button"
+                   th:classappend="${selectedSubjectId == null} ? ' is-active'"
+                   th:attr="aria-current=${selectedSubjectId == null} ? 'page' : null"
+                   th:href="@{/community/profile(sort=${selectedSort},direction=${selectedDirection})}">전체</a>
+                <a class="community-profile-filter-button"
+                   th:classappend="${selectedSubjectId == 1} ? ' is-active'"
+                   th:attr="aria-current=${selectedSubjectId == 1} ? 'page' : null"
+                   th:href="@{/community/profile(subjectId=1,sort=${selectedSort},direction=${selectedDirection})}">Java</a>
+                <a class="community-profile-filter-button"
+                   th:classappend="${selectedSubjectId == 4} ? ' is-active'"
+                   th:attr="aria-current=${selectedSubjectId == 4} ? 'page' : null"
+                   th:href="@{/community/profile(subjectId=4,sort=${selectedSort},direction=${selectedDirection})}">SQL</a>
+                <a class="community-profile-filter-button"
+                   th:classappend="${selectedSubjectId == 3} ? ' is-active'"
+                   th:attr="aria-current=${selectedSubjectId == 3} ? 'page' : null"
+                   th:href="@{/community/profile(subjectId=3,sort=${selectedSort},direction=${selectedDirection})}">HTML/CSS/JS</a>
+                <a class="community-profile-filter-button"
+                   th:classappend="${selectedSubjectId == 2} ? ' is-active'"
+                   th:attr="aria-current=${selectedSubjectId == 2} ? 'page' : null"
+                   th:href="@{/community/profile(subjectId=2,sort=${selectedSort},direction=${selectedDirection})}">Python</a>
+              </nav>
+              <nav class="community-profile-sort-filter" aria-label="내가 쓴 글 정렬">
+                <a class="community-profile-filter-button"
+                   th:classappend="${selectedSort == 'latest'} ? ' is-active'"
+                   th:attr="aria-current=${selectedSort == 'latest'} ? 'page' : null"
+                   th:href="@{/community/profile(subjectId=${selectedSubjectId},sort='latest',direction=${selectedSort == 'latest' and selectedDirection == 'desc' ? 'asc' : 'desc'})}">
+                  최신순
+                  <svg class="community-profile-sort-direction" th:if="${selectedSort == 'latest'}" th:classappend="${selectedDirection == 'asc'} ? ' is-asc' : ' is-desc'" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="m7 10 5-5 5 5"></path></svg>
+                </a>
+                <a class="community-profile-filter-button"
+                   th:classappend="${selectedSort == 'views'} ? ' is-active'"
+                   th:attr="aria-current=${selectedSort == 'views'} ? 'page' : null"
+                   th:href="@{/community/profile(subjectId=${selectedSubjectId},sort='views',direction=${selectedSort == 'views' and selectedDirection == 'desc' ? 'asc' : 'desc'})}">
+                  조회순
+                  <svg class="community-profile-sort-direction" th:if="${selectedSort == 'views'}" th:classappend="${selectedDirection == 'asc'} ? ' is-asc' : ' is-desc'" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="m7 10 5-5 5 5"></path></svg>
+                </a>
+                <a class="community-profile-filter-button"
+                   th:classappend="${selectedSort == 'popular'} ? ' is-active'"
+                   th:attr="aria-current=${selectedSort == 'popular'} ? 'page' : null"
+                   th:href="@{/community/profile(subjectId=${selectedSubjectId},sort='popular',direction=${selectedSort == 'popular' and selectedDirection == 'desc' ? 'asc' : 'desc'})}">
+                  인기순
+                  <svg class="community-profile-sort-direction" th:if="${selectedSort == 'popular'}" th:classappend="${selectedDirection == 'asc'} ? ' is-asc' : ' is-desc'" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="m7 10 5-5 5 5"></path></svg>
+                </a>
+              </nav>
+            </div>
             <ul class="community-profile-post-list">
-              <li th:each="post : ${view.myPosts}">
+              <li class="community-profile-post-empty" th:if="${#lists.isEmpty(filteredMyPosts)}">선택한 조건의 작성 글이 없습니다.</li>
+              <li th:each="post : ${filteredMyPosts}">
                 <a th:href="@{/community/posts/{id}(id=${post.postId})}">
                   <strong th:text="${post.title}">글 제목</strong>
                   <span>
