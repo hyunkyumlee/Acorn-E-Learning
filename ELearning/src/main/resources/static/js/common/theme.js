@@ -11,6 +11,12 @@
   }
 
   function preferredTheme() {
+
+
+    if(window.location.pathname.startsWith("/admin")){
+      return "light";
+    }
+
     if (storedTheme() === "dark" || storedTheme() === "light") {
       return storedTheme();
     }
