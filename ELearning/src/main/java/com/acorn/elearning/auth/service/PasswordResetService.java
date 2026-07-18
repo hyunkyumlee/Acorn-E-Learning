@@ -8,7 +8,9 @@ import com.acorn.elearning.auth.model.PasswordResetToken;
 import com.acorn.elearning.auth.model.UserCredential;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
+import com.acorn.elearning.common.validation.PasswordPolicy;
 import com.acorn.elearning.user.mapper.UserMapper;
+import com.acorn.elearning.user.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -121,6 +123,14 @@ public class PasswordResetService {
         }
 
         UserCredential credential = userCredentialMapper.findByUserId(row.getUserId()).orElseThrow(() -> new BusinessException(ErrorCode.AUTH_RESET_TOKEN_INVALID));
+
+        //새 비밀번호에 닉네임/이메일 아이디가 들어가지 않는지 확인 (DTO에 닉네임이 없어서 여기서 조회 후 검사)
+        User user = userMapper.findById(row.getUserId()).orElse(null);
+        String nickname = user != null ? user.getNickname() : null;
+        if (PasswordPolicy.containsProfileInfo(newPassword, nickname, credential.getLoginEmail())) {
+            throw new BusinessException(ErrorCode.AUTH_PASSWORD_TOO_GUESSABLE);
+        }
+
         credential.setPasswordHash(passwordEncoder.encode(newPassword));
         //update() 가 password_updated_at = NOW() 를 함께 갱신 -> remember-me 쿠키의 tokenVersion이 달라져 기존 자동로그인 쿠키가 전부 무효화 된다
         userCredentialMapper.update(credential);

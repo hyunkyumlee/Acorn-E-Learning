@@ -7,6 +7,7 @@ import com.acorn.elearning.auth.mapper.UserCredentialMapper;
 import com.acorn.elearning.auth.model.UserCredential;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
+import com.acorn.elearning.common.validation.PasswordPolicy;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.dto.response.UserProfileResponse;
 import com.acorn.elearning.user.dto.response.UserSettingsResponse;
@@ -76,6 +77,10 @@ public class SettingsService {
     @Transactional
     public void changePassword(SessionUser sessionUser, PasswordChangeForm form) {
         Long userId = userService.requireUserId(sessionUser);
+        //새 비밀번호에 닉네임/이메일 아이디가 들어가지 않는지 확인 (DTO에 닉네임이 없어서 세션 정보로 검사)
+        if (PasswordPolicy.containsProfileInfo(form.getNewPassword(), sessionUser.nickname(), sessionUser.email())) {
+            throw new BusinessException(ErrorCode.AUTH_PASSWORD_TOO_GUESSABLE);
+        }
         PasswordChangePort port = passwordChangePort.getIfAvailable();
         if (port == null) {
             throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "비밀번호 변경 기능은 auth 연결 후 사용할 수 있습니다.");
