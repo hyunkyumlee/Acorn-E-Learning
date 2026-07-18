@@ -13,6 +13,12 @@ class ErrorPageControllerWebMvcTest {
     private final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new ErrorPageController()).build();
 
     @Test
+    void healthEndpointReturnsOkWithoutRenderingView() throws Exception {
+        mockMvc.perform(get("/health"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void directErrorRoutesRenderTheirStatusSpecificViews() throws Exception {
         mockMvc.perform(get("/error/403"))
                 .andExpect(status().isForbidden())
