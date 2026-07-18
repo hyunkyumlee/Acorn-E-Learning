@@ -71,8 +71,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--primary) 20%, var(--surface));
-  color: var(--primary);
+  background: var(--profile-placeholder-bg);
+  color: var(--profile-placeholder-text);
   font-size: 20px;
   font-weight: 900;
 }
@@ -694,10 +694,17 @@
   object-fit: cover;
 }
 
+.community-profile-hero-avatar-placeholder {
+  border: 0;
+  background: var(--profile-placeholder-bg);
+  color: var(--profile-placeholder-text);
+  box-shadow: none;
+}
+
 .community-profile-hero h2 {
   margin: 0;
   color: var(--text);
-  font-size: 40px;
+  font-size: 36px;
   font-weight: 950;
   line-height: 1.1;
 }
@@ -707,11 +714,6 @@
   color: var(--muted);
   font-size: 16px;
   font-weight: 650;
-}
-
-.community-profile-hero .button {
-  min-height: 38px;
-  padding: 0 16px;
 }
 
 .community-profile-hero-meta {
@@ -744,6 +746,83 @@
 .community-profile-post-section,
 .community-profile-comments-panel {
   grid-column: 1 / -1;
+}
+
+.community-profile-post-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.community-profile-post-heading h3 {
+  margin: 0;
+}
+
+.community-profile-post-heading > span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.community-profile-post-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  padding: 10px 12px;
+}
+
+.community-profile-subject-filter,
+.community-profile-sort-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.community-profile-sort-filter {
+  justify-content: flex-end;
+}
+
+.community-profile-filter-button {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0 11px;
+  text-decoration: none;
+}
+
+.community-profile-filter-button:hover,
+.community-profile-filter-button:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 62%, var(--line));
+  color: var(--accent);
+}
+
+.community-profile-filter-button.is-active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent);
+}
+
+.community-profile-sort-direction {
+  width: 13px;
+  height: 13px;
+}
+
+.community-profile-sort-direction.is-desc {
+  transform: rotate(180deg);
 }
 
 .community-profile-list li {
@@ -816,7 +895,7 @@
 
 .community-profile-post-list {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -828,13 +907,13 @@
 
 .community-profile-post-list a {
   display: grid;
-  gap: 8px;
+  gap: 4px;
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface) 90%, transparent);
   color: var(--text);
-  padding: 18px 20px;
+  padding: 11px 14px;
   text-decoration: none;
 }
 
@@ -846,7 +925,7 @@
 .community-profile-post-list strong {
   overflow: hidden;
   color: var(--text);
-  font-size: 21px;
+  font-size: 16px;
   font-weight: 950;
   line-height: 1.3;
   text-overflow: ellipsis;
@@ -856,10 +935,20 @@
 .community-profile-post-list span {
   overflow: hidden;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.community-profile-post-empty {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 16px;
+  text-align: center;
 }
 
 .community-comment-note-backdrop[hidden] {
@@ -1009,6 +1098,17 @@
   .recommendations-filter .button {
     width: 100%;
   }
+
+  .community-profile-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .community-profile-hero-meta {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+    padding-top: var(--space-4);
+    padding-left: 0;
+  }
 }
 
 @media (max-width: 680px) {
@@ -1028,12 +1128,34 @@
   .community-form-grid,
   .community-comment-form,
   .community-profile-grid,
-  .community-profile-stats {
+  .community-profile-stats,
+  .community-profile-post-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .community-profile-sort-filter {
+    justify-content: flex-start;
   }
 
   .community-profile-hero {
     grid-template-columns: 1fr;
+    gap: var(--space-4);
+    padding: 20px;
+  }
+
+  .community-profile-hero-main {
+    gap: 14px;
+  }
+
+  .community-profile-hero-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 30px;
+  }
+
+  .community-profile-hero h2 {
+    font-size: 26px;
+    word-break: keep-all;
   }
 
   .community-profile-hero-meta {

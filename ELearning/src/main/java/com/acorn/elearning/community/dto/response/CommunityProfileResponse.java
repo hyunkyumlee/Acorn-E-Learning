@@ -2,6 +2,8 @@ package com.acorn.elearning.community.dto.response;
 
 import com.acorn.elearning.community.model.Comment;
 import com.acorn.elearning.community.model.CommunityPost;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 public record CommunityProfileResponse(
@@ -50,5 +52,33 @@ public record CommunityProfileResponse(
 
     public int activityCount() {
         return postCount() + commentCount() + likedCount() + scrapCount();
+    }
+
+    public List<CommunityPost> filteredMyPosts(Long subjectId, String sort, String direction) {
+        if (myPosts == null) {
+            return List.of();
+        }
+        Comparator<CommunityPost> comparator = profilePostComparator(sort);
+        if (!"asc".equals(direction)) {
+            comparator = comparator.reversed();
+        }
+        return myPosts.stream()
+                .filter(post -> subjectId == null || subjectId.equals(post.getSubjectId()))
+                .sorted(comparator)
+                .toList();
+    }
+
+    private static Comparator<CommunityPost> profilePostComparator(String sort) {
+        Comparator<Integer> countComparator = Comparator.nullsLast(Comparator.naturalOrder());
+        Comparator<Long> idComparator = Comparator.nullsLast(Comparator.naturalOrder());
+        Comparator<LocalDateTime> createdAtComparator = Comparator.nullsLast(Comparator.naturalOrder());
+        Comparator<CommunityPost> comparator = switch (sort) {
+            case "views" -> Comparator.comparing(CommunityPost::getViewCount, countComparator);
+            case "popular" -> Comparator.comparing(CommunityPost::getLikeCount, countComparator)
+                    .thenComparing(CommunityPost::getCommentCount, countComparator)
+                    .thenComparing(CommunityPost::getScrapCount, countComparator);
+            default -> Comparator.comparing(CommunityPost::getCreatedAt, createdAtComparator);
+        };
+        return comparator.thenComparing(CommunityPost::getPostId, idComparator);
     }
 }

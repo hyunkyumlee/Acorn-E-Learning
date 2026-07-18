@@ -88,8 +88,8 @@
   aspect-ratio: 1;
   place-items: center;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--text) 14%, var(--surface));
-  color: var(--muted);
+  background: var(--profile-placeholder-bg);
+  color: var(--profile-placeholder-text);
   font-size: clamp(24px, 4vw, 38px);
   font-weight: 950;
   overflow: hidden;
@@ -245,8 +245,8 @@
   place-items: center;
   overflow: hidden;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--text) 14%, var(--surface));
-  color: var(--muted);
+  background: var(--profile-placeholder-bg);
+  color: var(--profile-placeholder-text);
   font-size: 40px;
   font-weight: 950;
 }

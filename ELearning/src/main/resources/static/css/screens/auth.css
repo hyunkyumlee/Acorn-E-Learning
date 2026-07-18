@@ -69,6 +69,102 @@ body.auth-bg {
   font-weight: 700;
 }
 
+/* [추가] 비밀번호 규칙 안내 — 라벨 옆 물음표 버튼 + 마우스오버/포커스 시 말풍선 */
+.auth-screen .field-label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auth-screen .help-tip {
+  position: relative;
+  display: inline-flex;
+}
+
+.auth-screen .help-tip-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--muted) 14%, transparent);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: help;
+}
+
+.auth-screen .help-tip-trigger:hover,
+.auth-screen .help-tip-trigger:focus-visible {
+  border-color: var(--primary);
+  color: var(--accent);
+  outline: none;
+}
+
+.auth-screen .help-tip-bubble {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  width: max-content;
+  max-width: 240px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-elevated, var(--shadow-soft));
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 300;
+  line-height: 1.6;
+  text-align: left;
+  word-break: keep-all;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 5;
+}
+
+.auth-screen .help-tip-bubble ul {
+  margin: 0;
+  padding-left: 1.1em;
+}
+
+.auth-screen .help-tip-bubble li + li {
+  margin-top: 4px;
+}
+
+.auth-screen .help-tip-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+
+.auth-screen .help-tip:hover .help-tip-bubble,
+.auth-screen .help-tip:focus-within .help-tip-bubble {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-screen .help-tip-bubble { transition: none; }
+}
+
 .auth-screen .field input,
 .auth-screen .field textarea,
 .auth-screen .field select {
@@ -308,6 +404,33 @@ body.auth-bg {
 /* [추가] 소셜 로그인 버튼 위·아래 여백 확대 */
 .auth-screen.login-screen .social-login-row {
   margin-top: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+/* [추가] 회원가입만: 로그인보다 칸이 많아서 login-screen 기본 간격 그대로 쓰면 스크롤이 생김 →
+   회원가입 페이지에서만 칸 사이 간격을 줄임(로그인 페이지 간격엔 영향 없음) */
+.auth-screen.signup-screen .form-panel {
+  padding-block: var(--space-4);
+}
+.auth-screen.signup-screen .page-heading {
+  margin-bottom: var(--space-4);
+}
+.auth-screen.signup-screen .form-panel form {
+  gap: var(--space-3);
+}
+.auth-screen.signup-screen form button[type="submit"] {
+  margin-block: var(--space-3);
+}
+
+/* [추가] 비밀번호 재설정만: 안내 문구가 제목 바로 아래에 붙고, 입력칸과는 확실히 떨어지게
+   .form-panel h3의 기본 padding-bottom:20px가 실제 간격의 대부분이라 grid gap만 줄여선 안 붙어서 같이 줄임 */
+.auth-screen.password-reset-screen .form-panel {
+  gap: var(--space-2);
+}
+.auth-screen.password-reset-screen .form-panel h3 {
+  padding-bottom: 4px;
+}
+.auth-screen.password-reset-screen .reset-intro {
   margin-bottom: var(--space-6);
 }
 

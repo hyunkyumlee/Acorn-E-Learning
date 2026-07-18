@@ -83,7 +83,7 @@
 }
 
 :root[data-theme="knowva-ion-dark"] .profile-dot {
-  color: var(--header-bg);
+  color: var(--profile-placeholder-text);
 }
 
 .brand-mark,
@@ -390,6 +390,8 @@
 }
 
 .profile-dot {
+  background: var(--profile-placeholder-bg);
+  color: var(--profile-placeholder-text);
   width: 30px;
   height: 30px;
   font-size: 12px;

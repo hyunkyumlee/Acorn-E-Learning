@@ -81,6 +81,27 @@ body.welcome-bg {
   gap: var(--space-3);
 }
 
+/* [수정] "튜토리얼 시작"(button)과 "바로 로그인하기"(a) 크기를 강제로 맞춤.
+   진짜 원인: <button>은 appearance(운영체제 네이티브 버튼 껍데기)가 남아있으면 border/padding을
+   다 덮어써도 브라우저가 내부적으로 여유 공간을 더 얹어서 렌더링함 — <a>는 애초에 그런 네이티브
+   버튼 껍데기가 없어서 CSS로 지정한 크기 그대로 나옴. appearance:none으로 그 껍데기부터 제거하고,
+   그 위에 height/padding을 동일하게 강제 지정. !important로 다른 어떤 규칙보다도 확실히 이김. */
+.welcome-screen .button-row .button {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box !important;
+  height: 48px !important;
+  min-height: 0 !important;
+  padding: 0 18px !important;
+  border-width: 1px !important;
+  line-height: normal !important;
+}
+
+.welcome-screen .button-row button.button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
 .welcome-screen .button.primary:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -365,9 +386,12 @@ body.welcome-bg {
   .tut-nuvi, .tut-highlight { transition: none; }
 }
 
-/* [수정] 오로라: login/signup과 같은 .bg-fx .blob(components.css)을 베이스로 재사용하되,
-   웰컴에서만 더 은은하고(투명도↓, 블러↑, screen 블렌드로 별빛과 섞임) 원형 궤도 대신
-   물결처럼 흐르는 다방향 드리프트로 덮어씀. login/signup의 원래 .blob은 그대로 유지. */
+/* [수정: 성능] 오로라: login/signup과 같은 .bg-fx .blob(components.css) 재사용.
+   전에 filter:blur(95px) + mix-blend-mode:screen 을 얹은 채로 blobMorph(=border-radius 애니메이션,
+   모양 자체가 매 프레임 바뀜)까지 같이 돌려서 3개 블롭을 매 프레임 95px 블러로 다시 래스터라이즈 +
+   블렌드 합성까지 했던 게 렉의 직접적인 원인이었음 (이 파일 맨 아래 예전 SVG 워프 필터와 정확히 같은 실수).
+   → blobMorph(모양 변형)는 끄고 transform만 움직이는 auroraDrift만 남김: blur는 정적인 모양 위에서
+   한 번만 래스터라이즈되고 이동/스케일은 GPU 합성만 타므로 저비용. mix-blend-mode도 제거. */
 @keyframes auroraDrift {
   0%   { transform: translate(0, 0) scale(1); }
   25%  { transform: translate(3%, -4%) scale(1.05); }
@@ -377,12 +401,11 @@ body.welcome-bg {
 }
 body.welcome-bg .bg-fx .blob {
   opacity: 0.2;
-  filter: blur(95px);
-  mix-blend-mode: screen;
+  filter: blur(60px);
+  animation: auroraDrift 23s ease-in-out infinite;
 }
-body.welcome-bg .bg-fx .blob-1 { animation: auroraDrift 23s ease-in-out infinite, blobMorph 14s ease-in-out infinite; }
-body.welcome-bg .bg-fx .blob-2 { animation: auroraDrift 28s ease-in-out infinite reverse, blobMorph 18s ease-in-out infinite -6s; }
-body.welcome-bg .bg-fx .blob-3 { animation: auroraDrift 19s ease-in-out infinite -8s, blobMorph 12s ease-in-out infinite -3s; }
+body.welcome-bg .bg-fx .blob-2 { animation: auroraDrift 28s ease-in-out infinite reverse; }
+body.welcome-bg .bg-fx .blob-3 { animation: auroraDrift 19s ease-in-out infinite -8s; }
 @media (prefers-reduced-motion: reduce) {
   body.welcome-bg .bg-fx .blob { animation: none; }
 }
@@ -404,15 +427,9 @@ body.welcome-bg {
   --shoot-color: rgba(255, 255, 255, 0.95);
 }
 
-/* [추가] 별 전체를 살짝 부드럽게 — 위치/모양은 그대로 두고 filter만 정적으로 얹은 거라
-   (opacity만 애니메이션되고 blur 값 자체는 안 바뀜) 레이어당 1회 래스터라이즈면 끝, 프레임마다 다시 계산 안 됨.
-   전에 없앤 필터(예전 SVG 워프)와는 다름: 그건 모양 자체가 매 프레임 바뀌어서 매번 다시 블러해야 했던 경우. */
-.welcome-bg .starfield,
-.welcome-bg .starfield::before,
-.welcome-bg .starfield::after,
-.welcome-bg .starfield-flicker {
-  filter: blur(0.7px);
-}
+/* [삭제: 성능] 별 전체에 filter:blur(0.7px)를 얹었었는데, 전체화면을 덮는 레이어 5장(starfield
+   본체+before+after+flicker 3개)을 동시에 블러하는 거라 "정적 블러라 저비용" 가정과 달리 실측
+   렉의 원인 중 하나였음. 큰 별의 부드러움은 아래 코어+헤일로 이중 그라디언트만으로 유지. */
 
 /* 별밭: (1) 항상 켜진 밝은 베이스 + (2)(3) 서로 다른 위치·위상으로 '부분만' 깜빡이는 레이어
    [수정] 더 실감나게: 크기·밝기·색온도를 섞고, 큰 별은 코어+헤일로 이중 그라디언트로 은은한 광채를 줌.

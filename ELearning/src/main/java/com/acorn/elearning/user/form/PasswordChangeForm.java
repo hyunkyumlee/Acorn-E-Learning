@@ -1,8 +1,8 @@
 package com.acorn.elearning.user.form;
 
+import com.acorn.elearning.common.validation.StrongPassword;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +13,7 @@ public class PasswordChangeForm {
     private String currentPassword;
 
     @NotBlank(message = "새 비밀번호를 입력해주세요.")
-    @Size(min = 8, max = 72, message = "새 비밀번호는 8자 이상 72자 이하로 입력해주세요.")
+    @StrongPassword(message = "새 비밀번호는 8~16자이며 영문 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.")
     private String newPassword;
 
     @NotBlank(message = "새 비밀번호 확인을 입력해주세요.")
