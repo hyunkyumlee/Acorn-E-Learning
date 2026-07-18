@@ -912,6 +912,14 @@ textarea.mypage-field {
   color: var(--surface);
 }
 
+.mini-button.primary.learning-continue-button {
+  color: #0b3440;
+}
+
+.mini-button.primary.mypage-profile-submit {
+  color: #0b3440;
+}
+
 .learning-continue-button.is-disabled {
   border-color: var(--mypage-line);
   background: var(--mypage-card-strong);
