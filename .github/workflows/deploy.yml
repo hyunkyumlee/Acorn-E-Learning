@@ -18,6 +18,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
+    defaults:
+      run:
+        working-directory: ELearning
     env:
       AWS_REGION: ${{ vars.AWS_REGION }}
       AWS_ROLE_TO_ASSUME: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
