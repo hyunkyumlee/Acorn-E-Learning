@@ -26,7 +26,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // [추가] 다른 인터셉터보다 먼저 실행되도록 맨 위에 등록
         /// 진입 시 WelcomeController가 세션을 확인하기 전에 인터셉터가 쿠키로 세션을 복원하므로, /로 들어오면 자동으로 role별 홈으로 redirect된다.
-        registry.addInterceptor(rememberMeInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(rememberMeInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/health");
         // [수정] 비밀번호 찾기/재설정 화면도 게스트 전용으로 추가 (로그인 상태면 자기 홈으로 redirect)
         registry.addInterceptor(guestOnlyInterceptor).addPathPatterns("/login", "/signup", "/password/forgot", "/password/reset");
         registry.addInterceptor(loginRequiredInterceptor).addPathPatterns(
