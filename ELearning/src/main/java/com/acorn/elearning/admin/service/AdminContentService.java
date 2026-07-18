@@ -428,6 +428,7 @@ public class AdminContentService {
                         "삭제할 문제를 찾을 수 없습니다."
                 ));
 
+        apm.deleteChoicesByProblemId(problemId);
         int deleted = apm.deleteById(problemId);
 
 

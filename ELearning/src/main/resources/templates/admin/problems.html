@@ -243,9 +243,6 @@
             <div id="problemChoiceList" class="problem-choice-list"></div>
           </div>
 
-          <textarea name="choices" id="problemChoiceInput" class="problem-choice-input"
-                    placeholder="문제 유형을 선택하면 알맞은 입력 안내가 표시됩니다."></textarea>
-
           <div class="problem-form-row">
             <input type="text" name="answerText" id="problemAnswerText" placeholder="정답 입력">
             <select name="difficultyCode" id="problemDifficultyCode">
@@ -314,14 +311,7 @@
   const problemTypeSelect = document.querySelector("#problemType");
   const multipleChoiceField = document.querySelector("#multipleChoiceField");
   const problemChoiceList = document.querySelector("#problemChoiceList");
-  const problemChoiceInput = document.querySelector("#problemChoiceInput");
   const problemAnswerText = document.querySelector("#problemAnswerText");
-
-  const choicePlaceholderByType = {
-    "FILL_BLANK": "빈칸에 들어갈 정답 후보나 채점 참고 내용을 입력하세요.",
-    "CODE_OUTPUT": "실행 결과 예시나 출력 형식을 입력하세요.",
-    "CODE_SHORT": "작성할 코드의 조건이나 채점 참고 내용을 입력하세요."
-  };
 
   function updateMultipleChoiceAnswer() {
     const rows = Array.from(problemChoiceList.querySelectorAll(".problem-choice-row"));
@@ -394,8 +384,6 @@
     const isMultipleChoice = problemType === "MULTIPLE_CHOICE";
 
     multipleChoiceField.hidden = !isMultipleChoice;
-    problemChoiceInput.hidden = isMultipleChoice;
-    problemChoiceInput.disabled = isMultipleChoice;
     problemAnswerText.readOnly = isMultipleChoice;
     problemAnswerText.placeholder = isMultipleChoice
             ? "정답을 선택하면 '번호. 정답 내용'으로 표시됩니다."
@@ -406,9 +394,6 @@
         resetMultipleChoiceRows();
       }
       updateMultipleChoiceAnswer();
-    } else {
-      problemChoiceInput.placeholder = choicePlaceholderByType[problemType]
-              || "문제 유형을 선택하면 알맞은 입력 안내가 표시됩니다.";
     }
   }
 
@@ -501,7 +486,6 @@
     document.querySelector("#problemType").value = "";
     document.querySelector("#problemQuestion").value = "";
     document.querySelector("#problemAnswerText").value = "";
-    document.querySelector("#problemChoiceInput").value = "";
     document.querySelector("#problemExplanation").value = "";
     document.querySelector("#problemDifficultyCode").value = "";
     document.querySelector("#problemIsActive").value = "";
