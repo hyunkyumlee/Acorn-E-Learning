@@ -15,6 +15,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
@@ -69,17 +71,44 @@ class CountingChatGptApiClient extends ChatGptApiClient {
 class FailingChatGptApiClient extends ChatGptApiClient {
     private final AtomicInteger sendCount = new AtomicInteger();
     private final long delayMillis;
+    private final CountDownLatch requestStarted;
+    private final CountDownLatch failureRelease;
 
     FailingChatGptApiClient(ObjectMapper objectMapper, long delayMillis) {
+        this(objectMapper, delayMillis, null, null);
+    }
+
+    FailingChatGptApiClient(
+            ObjectMapper objectMapper,
+            CountDownLatch requestStarted,
+            CountDownLatch failureRelease
+    ) {
+        this(objectMapper, 0, requestStarted, failureRelease);
+    }
+
+    private FailingChatGptApiClient(
+            ObjectMapper objectMapper,
+            long delayMillis,
+            CountDownLatch requestStarted,
+            CountDownLatch failureRelease
+    ) {
         super("openai", true, "test-key", "https://example.com", "gpt-test", 800, objectMapper);
         this.delayMillis = delayMillis;
+        this.requestStarted = requestStarted;
+        this.failureRelease = failureRelease;
     }
 
     @Override
     public ChatGptResponse send(ChatGptRequest request) {
         sendCount.incrementAndGet();
+        if (requestStarted != null) {
+            requestStarted.countDown();
+            awaitFailureRelease();
+        }
         try {
-            Thread.sleep(delayMillis);
+            if (delayMillis > 0) {
+                Thread.sleep(delayMillis);
+            }
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         }
@@ -88,6 +117,17 @@ class FailingChatGptApiClient extends ChatGptApiClient {
 
     int sendCount() {
         return sendCount.get();
+    }
+
+    private void awaitFailureRelease() {
+        try {
+            if (!failureRelease.await(5, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("AI 실패 시점 대기 시간이 초과되었습니다.");
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("AI 실패 시점 대기 중 인터럽트되었습니다.", exception);
+        }
     }
 }
 

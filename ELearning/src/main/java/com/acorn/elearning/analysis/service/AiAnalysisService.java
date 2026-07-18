@@ -156,6 +156,9 @@ public class AiAnalysisService {
     public AnalysisReportResponse retry(SessionUser sessionUser, Long reportId) {
         Long userId = requireUserId(sessionUser);
         AiAnalysisReport initialReport = requireReport(userId, reportId);
+        if (!"FAILED".equals(initialReport.getStatus())) {
+            return AnalysisReportResponse.from(initialReport);
+        }
         int expectedRetryCount = number(initialReport.getRetryCount());
         synchronized (reportLock(userId, initialReport.getExamId())) {
             AiAnalysisReport report = requireReport(userId, reportId);
