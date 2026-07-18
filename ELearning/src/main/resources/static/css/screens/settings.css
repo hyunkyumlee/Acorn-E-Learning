@@ -340,7 +340,7 @@ textarea.figma-field {
 }
 
 .figma-profile-save {
-  justify-self: center;
+  justify-self: end;
   min-width: 112px;
 }
 
@@ -585,6 +585,40 @@ textarea.figma-field {
 
 .figma-payment-plan {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+}
+
+.figma-payment-plan-copy,
+.figma-payment-plan-status {
+  display: grid;
+  gap: 4px;
+}
+
+.figma-payment-plan-status {
+  justify-items: end;
+  text-align: right;
+}
+
+.figma-payment-plan-status span {
+  font-size: 13px;
+}
+
+.figma-payment-plan-status b {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.figma-payment-empty {
+  display: grid;
+  min-height: 168px;
+  place-items: center;
+  text-align: center;
+}
+
+.figma-payment-empty p {
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 850;
 }
 
 .figma-payment-history {
