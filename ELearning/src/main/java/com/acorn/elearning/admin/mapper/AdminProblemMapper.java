@@ -25,4 +25,6 @@ public interface AdminProblemMapper {
                   @Param("isActive") Boolean isActive);
 
     int deleteById(@Param("problemId") Long problemId);
+
+    int deleteChoicesByProblemId(@Param("problemId") Long problemId);
 }
