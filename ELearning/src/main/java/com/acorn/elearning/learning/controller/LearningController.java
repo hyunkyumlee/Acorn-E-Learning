@@ -256,6 +256,14 @@ public class LearningController {
                                     || Boolean.TRUE.equals(pr.getPracticePassed())));
         model.addAttribute("currentPlanetStarted", currentPlanetStarted);
 
+        // 이 레벨에서 아직 학습을 시작하지 않은(완료 0·미시작) 첫 행성 = 진입 환영 시점.
+        // 기준은 "지나온 레벨이냐"가 아니라 "이 레벨을 학습했느냐"(completedPlanets==0)다.
+        // 레벨 테스트로 상위 레벨에 배정되면 그 아래 레벨도 열리지만(levelPassed) 학습 전이므로
+        // 그 레벨의 첫 행성에서도 등장 연출이 떠야 한다. 반대로 게이트를 통과해 실제 학습을 마친
+        // 아래 레벨은 completedPlanets>0이라 자동으로 제외된다. 그래서 levelPassed는 조건에 넣지 않는다.
+        boolean roadmapEntryWelcome = currentNode != null && completedPlanets == 0 && !currentPlanetStarted;
+        model.addAttribute("roadmapEntryWelcome", roadmapEntryWelcome);
+
         // 단원 진행 현황 '문제 풀이' 지표 = 현재 학습 단원의 required 레슨 중 문제 풀이(practice)를 통과한 수 / 전체.
         // practice_passed는 practice 세트 통과로만 기록되며 내 테이블(user_lesson_progress)에 있다.
         int currentUnitLessonTotal = currentNode != null
