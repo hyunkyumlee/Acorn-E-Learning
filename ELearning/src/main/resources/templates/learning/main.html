@@ -345,26 +345,30 @@
               </ol>
               <!--
                 누비: 축하 연출이 닫히는 순간에만 등장해, 방금 끝낸 행성 속에서 빛과 함께 빠져나와
-                다음 행성(관문이면 관문) 안으로 들어가며 사라진다. 평소 로드맵에는 나타나지 않는다.
-                레벨이 올라 새 판이 열렸을 때는 나올 행성이 없으므로 맵 위쪽에서 날아 들어와 첫 행성으로 들어간다.
-                포즈 PNG는 learning-nuvi.js가 단계별로 갈아끼운다(등장 → 비행 중 두 장 교대 → 도착).
-                좌표·표시 여부도 JS가 노드 위치를 읽어 정한다(들고날 행성을 못 찾으면 연출 없음).
+                다음 행성(관문이면 관문) 안으로 흡수되며 사라진다. 평소 로드맵에는 나타나지 않는다.
+                레벨이 올라 새 판이 열렸을 때는 관문 빛 포털로 빨려들어 → 새 로드맵이 열리며 첫 행성으로 들어간다.
+                누비 자체 = 두 벌의 스프라이트로 그린다. learning-nuvi.js가 매 프레임 프레임/좌표/빛을 준다.
+                  cruise strip(가로 8프레임, 좌/우): 실제로 빠르게 날 때(속도로 안테나 뒤로 젖힘).
+                  pose atlas(4×2 반응 포즈, 좌/우): 멈춤·점화·감속·놀람·감탄·정지·입장 등 정지/리액션.
+                흡수 빛 필드·관문 포털은 노드와 같은 좌표계라 JS가 .roadmap-layer에 붙인다.
               -->
               <div class="roadmap-nuvi" data-roadmap-nuvi hidden aria-hidden="true"
-                   th:data-nuvi-launch="@{/assets/images/characters/nuvi-wave.png}"
-                   th:data-nuvi-fly-a="@{/assets/images/characters/nuvi-telescope.png}"
-                   th:data-nuvi-fly-b="@{/assets/images/characters/nuvi-wave.png}"
-                   th:data-nuvi-arrive="@{/assets/images/characters/nuvi-celebrate.png}">
-                <!-- 드나드는 순간의 반짝임: 코어 번쩍 + 빛살(별) + 흩어지는 부스러기.
-                     세 겹의 세기를 JS가 따로 주기 때문에 한꺼번에 부풀지 않고 튀었다 진다. -->
-                <span class="roadmap-nuvi-glow" aria-hidden="true">
-                  <span class="roadmap-nuvi-flash"></span>
-                  <span class="roadmap-nuvi-rays"></span>
-                  <span class="roadmap-nuvi-motes"></span>
+                   th:attr="data-entry-welcome=${roadmapEntryWelcome} ? '1' : null"
+                   th:data-nuvi-pose-right="@{/assets/images/characters/nuvi-pose-right.png}"
+                   th:data-nuvi-pose-left="@{/assets/images/characters/nuvi-pose-left.png}"
+                   th:data-nuvi-cruise-right="@{/assets/images/characters/nuvi-cruise-right.png}"
+                   th:data-nuvi-cruise-left="@{/assets/images/characters/nuvi-cruise-left.png}">
+                <!-- 비행 표현: 속도선(추진) · 감속 링 · 방향 섬광. 세기를 JS가 --nuvi-thrust/brake/flash로 준다. -->
+                <span class="roadmap-nuvi-speed" aria-hidden="true"></span>
+                <span class="roadmap-nuvi-brake" aria-hidden="true"></span>
+                <span class="roadmap-nuvi-flash" aria-hidden="true"></span>
+                <!-- 정지/리액션 포즈(background로 atlas 셀) — 비행 strip과 opacity 교차. -->
+                <span class="roadmap-nuvi-pose" data-nuvi-pose aria-hidden="true"></span>
+                <!-- 비행 strip(clip 창 안에서 프레임을 밀어 보여줌). -->
+                <span class="roadmap-nuvi-cruise" data-nuvi-cruise-clip aria-hidden="true">
+                  <img class="roadmap-nuvi-cruise-strip" data-nuvi-cruise-strip
+                       th:src="@{/assets/images/characters/nuvi-cruise-right.png}" alt="" decoding="async">
                 </span>
-                <img class="roadmap-nuvi-img" data-roadmap-nuvi-img
-                     th:src="@{/assets/images/characters/nuvi-wave.png}"
-                     alt="" decoding="async">
               </div>
             </div>
           </div>

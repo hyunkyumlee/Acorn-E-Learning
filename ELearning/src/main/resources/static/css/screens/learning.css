@@ -1133,111 +1133,245 @@ a.roadmap-level:hover {
   padding: 0;
 }
 
-/* ----- 누비: 완료한 행성에서 다음 행성으로 날아가는 연출 -----
+/* ----- 누비: 완료한 행성에서 다음 행성으로 날아가는 연출 (스프라이트 판) -----
    로드맵에 캐릭터를 상주시키지 않는다. 축하 연출이 닫히는 순간에만 등장했다가 퇴장한다.
-   좌표·크기·기울기·빛의 세기는 전부 learning-nuvi.js가 매 프레임 준다
-   (transform 한 줄 + --nuvi-glow). 여기에 keyframes를 두면 같은 연출의 길이가 두 곳에
-   적혀 한쪽만 고쳤을 때 어긋나므로, CSS는 "무엇이 어떻게 생겼나"만 맡는다.
-   빛은 행성을 드나드는 순간에만 잠깐 오르내린다(상시 발광 아님 — 디자인명세의 glow 제약).
+   좌표·크기·기울기·프레임·빛의 세기는 전부 learning-nuvi.js가 매 프레임 준다.
+   CSS에 keyframes를 두면 같은 연출의 길이가 두 곳에 적혀 어긋나므로, CSS는 "무엇이 어떻게 생겼나"만 맡는다.
+   누비 몸통 = cruise strip(비행)·pose atlas(정지/리액션) 두 스프라이트를 opacity로 교차.
    움직임 자체가 이 연출의 내용이라 reduce 모드에서는 정지본을 남기지 않고 통째로 뺀다. */
 .roadmap-nuvi {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 3;
-  width: var(--nuvi-size, 64px);
-  height: var(--nuvi-size, 64px);
+  width: var(--nuvi-size, 96px);
+  height: var(--nuvi-size, 96px);
   opacity: 0;
   pointer-events: none;
-  will-change: transform, opacity;
+  transform-origin: 50% 62%;
+  will-change: transform, opacity, filter;
   transition: opacity 0.18s ease;
+  filter: brightness(var(--nuvi-brightness, 1)) saturate(var(--nuvi-saturate, 1))
+    blur(var(--nuvi-soft, 0px))
+    drop-shadow(0 0 var(--nuvi-shadow, 0px) rgba(255, 220, 162, 0.76));
 }
 .roadmap-nuvi.is-visible { opacity: 1; }
 
-.roadmap-nuvi-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
-}
-
-/* 행성/관문을 드나드는 순간의 반짝임.
-   원형 광원 한 겹으로 두면 세기가 오를수록 그냥 커다란 색 얼룩이 된다("금빛 글로우").
-   반짝임으로 읽히려면 별 모양 빛살이 있어야 하고, 세 겹이 서로 다른 박자로 튀어야 한다
-   → 코어 번쩍(--nuvi-flash) / 빛살(--nuvi-rays) / 흩어지는 부스러기(--nuvi-motes)를 JS가 따로 준다.
-   색: 코어는 흰빛, 가장자리에만 옅은 금빛을 남긴다. 이 빛은 파란 하늘(라이트 맵)·남색 하늘(다크 맵)
-   위에도, 흰 구름으로 덮인 행성 위에도 올라간다 — 순백은 흰 구름에 묻히고 금빛 일색은 얼룩이 된다.
-   (cyan은 CTA 전용 색이라 여기 쓰지 않는다) */
-.roadmap-nuvi-glow {
+/* 정지/리액션 포즈: atlas(4×2) 한 셀을 background로 보여준다(400% 200%로 확대 → 셀 하나가 몸통 전체). */
+.roadmap-nuvi-pose {
   position: absolute;
   inset: 0;
-  z-index: -1;
-  pointer-events: none;
+  z-index: 4;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: 400% 200%;
+  filter: drop-shadow(0 11px 14px rgba(2, 7, 21, 0.52));
+  will-change: opacity, transform;
 }
 
-/* 코어 — 표면을 뚫는 순간에만 확 튀는 번쩍.
-   누비 몸통 뒤(z-index:-1)라 몸통 안쪽에 그리면 가려서 안 보인다 → 실루엣 둘레로만 삐져나오게
-   조금 크게 잡고, 중심은 비워 링처럼 두른다. 얼룩이 되지 않도록 바깥은 빠르게 투명해진다. */
-.roadmap-nuvi-flash {
+/* 비행 strip: clip 창(몸통 크기) 안에서 8프레임 가로 strip을 밀어 한 칸만 보여준다. */
+.roadmap-nuvi-cruise {
   position: absolute;
-  inset: -22%;
-  border-radius: 50%;
-  opacity: var(--nuvi-flash, 0);
-  transform: scale(calc(0.62 + var(--nuvi-flash, 0) * 0.5));
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.9) 24%,
-    rgba(255, 244, 214, 0.62) 46%,
-    rgba(255, 206, 118, 0.2) 62%,
-    transparent 74%
-  );
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  opacity: 0;
+  /* 그림자는 clip 컨테이너에 건다 — strip에 걸면 overflow:hidden(프레임 클리핑)에 그림자 밑변이 잘린다.
+     filter는 요소 자신의 overflow에 다시 잘리지 않으므로 우주선 밑 그림자가 온전히 나온다. */
+  filter: drop-shadow(0 11px 14px rgba(2, 7, 21, 0.52));
+}
+.roadmap-nuvi-cruise-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 800%;
+  max-width: none;
+  height: 100%;
+  object-fit: fill;
+  transform: translate3d(0, 0, 0);
+  transform-origin: 0 0;
+  user-select: none;
+  -webkit-user-drag: none;
+  will-change: transform;
 }
 
-/* 빛살 — 반짝임의 정체. 가로세로 한 쌍(::before)에 45° 한 쌍(::after)을 겹쳐 8방향 별이 된다.
-   빛살은 코어보다 먼저 서고 늦게 지므로(JS가 완만한 곡선을 준다) 튀는 순간이 길게 읽힌다. */
-.roadmap-nuvi-rays {
+/* 속도선(추진) — 비행 방향 반대로 뻗는 잔상. 세기 --nuvi-thrust, 각도 --nuvi-trail을 JS가 준다. */
+.roadmap-nuvi-speed {
   position: absolute;
-  inset: -95%;
-  opacity: var(--nuvi-rays, 0);
-  transform: rotate(var(--nuvi-spin, 0deg)) scale(var(--nuvi-rays-scale, 0.4));
+  z-index: 1;
+  top: 53%;
+  right: 56%;
+  width: 144%;
+  height: 4px;
+  border-radius: 999px;
+  opacity: calc(var(--nuvi-thrust, 0) * 0.78);
+  transform: translateY(-50%) rotate(var(--nuvi-trail, 155deg))
+    scaleX(calc(0.14 + var(--nuvi-thrust, 0) * 0.86));
+  transform-origin: 100% 50%;
+  background: linear-gradient(90deg, transparent, rgba(121, 169, 255, 0.48), rgba(246, 249, 255, 0.88));
 }
-/* 빛살은 몸통 밖까지 길게 뻗어야 보인다(몸통 뒤는 가려진다) → 가늘고 길게, 중심은 하얗게.
-   가로세로 한 쌍 위에 45° 한 쌍을 짧게 얹어 8방향 별이 된다. */
-.roadmap-nuvi-rays::before,
-.roadmap-nuvi-rays::after {
+.roadmap-nuvi-speed::before,
+.roadmap-nuvi-speed::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 50% 2.5% at 50% 50%, rgba(255, 255, 255, 1) 0%, rgba(255, 246, 216, 0.85) 26%, rgba(255, 214, 130, 0.34) 54%, transparent 82%),
-    radial-gradient(ellipse 2.5% 50% at 50% 50%, rgba(255, 255, 255, 1) 0%, rgba(255, 246, 216, 0.85) 26%, rgba(255, 214, 130, 0.34) 54%, transparent 82%);
+  right: 8%;
+  width: 66%;
+  height: 100%;
+  border-radius: inherit;
+  background: inherit;
 }
-.roadmap-nuvi-rays::after {
-  transform: rotate(45deg) scale(0.62);
-  opacity: 0.8;
+.roadmap-nuvi-speed::before { top: -15px; opacity: 0.5; }
+.roadmap-nuvi-speed::after { top: 15px; opacity: 0.3; transform: scaleX(0.74); }
+
+/* 감속 링 — 급제동 순간의 원호. 세기 --nuvi-brake. */
+.roadmap-nuvi-brake {
+  position: absolute;
+  z-index: 2;
+  inset: -18%;
+  border-radius: 50%;
+  opacity: var(--nuvi-brake, 0);
+  transform: scale(calc(0.74 + var(--nuvi-brake, 0) * 0.36)) rotate(-14deg);
+  background: conic-gradient(from 192deg, transparent 0 17%, rgba(121, 169, 255, 0.82) 19% 21%, transparent 23% 59%, rgba(255, 216, 154, 0.8) 61% 64%, transparent 66% 100%);
+  -webkit-mask: radial-gradient(circle, transparent 0 57%, #000 59% 62%, transparent 64%);
+  mask: radial-gradient(circle, transparent 0 57%, #000 59% 62%, transparent 64%);
 }
 
-/* 부스러기 — 정점 순간에만 나타나 바깥으로 흩어지며 사라진다(빛살과 반대로 돈다). */
-.roadmap-nuvi-motes {
+/* 방향 섬광 — 점화/반동 순간의 십자 번쩍. 세기 --nuvi-flash. */
+.roadmap-nuvi-flash {
   position: absolute;
-  inset: -80%;
-  opacity: var(--nuvi-motes, 0);
-  transform: scale(calc(0.55 + var(--nuvi-motes, 0) * 0.9))
-    rotate(calc(var(--nuvi-spin, 0deg) * -1));
+  z-index: 2;
+  inset: -58%;
+  border-radius: 50%;
+  opacity: var(--nuvi-flash, 0);
+  transform: scale(calc(0.55 + var(--nuvi-flash, 0) * 0.58));
   background:
-    radial-gradient(circle 4px at 18% 30%, rgba(255, 255, 255, 1), transparent 100%),
-    radial-gradient(circle 3px at 78% 22%, rgba(255, 240, 198, 0.95), transparent 100%),
-    radial-gradient(circle 3px at 55% 10%, rgba(255, 255, 255, 0.95), transparent 100%),
-    radial-gradient(circle 4px at 30% 80%, rgba(255, 255, 255, 0.95), transparent 100%),
-    radial-gradient(circle 3px at 86% 72%, rgba(255, 236, 184, 0.95), transparent 100%),
-    radial-gradient(circle 3px at 10% 60%, rgba(255, 248, 226, 0.95), transparent 100%),
-    radial-gradient(circle 2px at 66% 92%, rgba(255, 255, 255, 0.9), transparent 100%),
-    radial-gradient(circle 2px at 40% 4%, rgba(255, 240, 198, 0.9), transparent 100%);
+    radial-gradient(ellipse 42% 2% at 50% 50%, rgba(255, 255, 255, 0.9), rgba(255, 220, 161, 0.38) 45%, transparent 76%),
+    radial-gradient(ellipse 2% 42% at 50% 50%, rgba(255, 255, 255, 0.9), rgba(255, 220, 161, 0.38) 45%, transparent 76%);
 }
+.roadmap-nuvi-flash::after {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.72), rgba(255, 216, 154, 0.18) 42%, transparent 70%);
+}
+
+/* 흡수 빛 필드 — 행성/관문으로 드나드는 순간의 빛. 여섯 겹이 서로 다른 박자로 튄다(JS가 --rn-* 세기 지정).
+   JS가 .roadmap-layer에 붙이고 좌표·크기를 준다. 노드 위에 얹혀 흡수되는 지점을 밝힌다. */
+.roadmap-nuvi-absorb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  opacity: var(--rn-op, 0);
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+.roadmap-nuvi-absorb > span {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.rn-absorb-halo {
+  inset: -24%;
+  opacity: var(--rn-halo, 0);
+  transform: scale(var(--rn-halo-scale, 0.72));
+  background: radial-gradient(circle, rgba(255, 248, 224, 0.48), rgba(255, 210, 142, 0.2) 32%, rgba(121, 169, 255, 0.12) 50%, transparent 72%);
+  filter: blur(3px);
+}
+.rn-absorb-core {
+  z-index: 4;
+  inset: 36%;
+  opacity: var(--rn-core, 0);
+  transform: scale(var(--rn-core-scale, 0.46));
+  box-shadow: 0 0 22px rgba(255, 241, 207, 0.92), 0 0 46px rgba(255, 195, 108, 0.48);
+  background: radial-gradient(circle, #fff 0 18%, rgba(255, 244, 213, 0.96) 28%, rgba(255, 190, 94, 0.28) 58%, transparent 74%);
+}
+.rn-absorb-rays {
+  z-index: 3;
+  inset: 2%;
+  opacity: var(--rn-rays, 0);
+  transform: rotate(var(--rn-spin, 0deg)) scale(var(--rn-ring-scale, 0.6));
+  background:
+    linear-gradient(90deg, transparent 7%, rgba(255, 224, 172, 0.08) 30%, rgba(255, 255, 255, 0.94) 49%, rgba(255, 224, 172, 0.08) 70%, transparent 93%) center / 100% 2px no-repeat,
+    linear-gradient(0deg, transparent 7%, rgba(155, 192, 255, 0.08) 30%, rgba(255, 255, 255, 0.9) 49%, rgba(155, 192, 255, 0.08) 70%, transparent 93%) center / 2px 100% no-repeat;
+}
+.rn-absorb-ring {
+  z-index: 2;
+  inset: 15%;
+  opacity: var(--rn-ring, 0);
+  transform: scale(var(--rn-ring-scale, 0.6));
+  border: 1.5px solid rgba(255, 230, 186, 0.72);
+  box-shadow: 0 0 12px rgba(121, 169, 255, 0.26);
+}
+.rn-absorb-ring-b {
+  inset: 25%;
+  transform: rotate(38deg) scale(var(--rn-ring-b-scale, 0.5));
+  border-color: rgba(154, 190, 255, 0.68);
+}
+.rn-absorb-motes {
+  z-index: 5;
+  inset: -4%;
+  opacity: var(--rn-motes, 0);
+  transform: rotate(var(--rn-spin-rev, 0deg)) scale(var(--rn-motes-scale, 0.62));
+  background:
+    radial-gradient(circle at 17% 46%, #fff 0 1.4%, transparent 2.2%),
+    radial-gradient(circle at 31% 18%, rgba(255, 221, 164, 0.95) 0 1.2%, transparent 2.1%),
+    radial-gradient(circle at 72% 22%, rgba(171, 202, 255, 0.92) 0 1.4%, transparent 2.2%),
+    radial-gradient(circle at 84% 56%, #fff 0 1.2%, transparent 2%),
+    radial-gradient(circle at 67% 82%, rgba(255, 211, 139, 0.92) 0 1.4%, transparent 2.2%),
+    radial-gradient(circle at 26% 78%, rgba(166, 198, 255, 0.9) 0 1.3%, transparent 2.1%);
+}
+
+/* 관문 빛 포털 — 레벨 진입에서 누비가 빨려 들어가는 빛의 고리. JS가 .roadmap-layer에 붙이고 좌표를 준다. */
+.roadmap-nuvi-gate {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  opacity: var(--rn-gate-op, 0);
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity, filter;
+}
+.roadmap-nuvi-gate::before,
+.roadmap-nuvi-gate::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.roadmap-nuvi-gate::before {
+  inset: -28%;
+  opacity: var(--rn-gate-glow, 0);
+  transform: rotate(var(--rn-gate-spin, 0deg));
+  background:
+    radial-gradient(circle, rgba(255, 248, 225, 0.54), rgba(120, 165, 255, 0.18) 38%, transparent 68%),
+    conic-gradient(from 30deg, transparent 0 14%, rgba(255, 218, 158, 0.52) 17% 20%, transparent 23% 51%, rgba(154, 189, 255, 0.5) 54% 57%, transparent 60% 100%);
+  -webkit-mask: radial-gradient(circle, transparent 0 42%, #000 48% 52%, transparent 58%);
+  mask: radial-gradient(circle, transparent 0 42%, #000 48% 52%, transparent 58%);
+}
+.roadmap-nuvi-gate::after {
+  inset: 24%;
+  opacity: var(--rn-gate-glow, 0);
+  box-shadow: 0 0 30px rgba(255, 226, 174, 0.74), inset 0 0 22px rgba(255, 250, 235, 0.68);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.58), rgba(134, 178, 255, 0.24) 38%, transparent 70%);
+}
+
+/* 레벨 진입 중: 새 로드맵/행성이 흐릿→또렷하게 열린다. 스크롤 게이지는 줌 동안 감춘다. */
+.roadmap-stage.is-level-entry .roadmap-node {
+  opacity: var(--intro-op, 1);
+  filter: blur(var(--intro-blur, 0px));
+  transition: none;
+}
+.roadmap-stage.is-level-entry .roadmap-progress { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .roadmap-nuvi { display: none; }
+  .roadmap-nuvi,
+  .roadmap-nuvi-absorb,
+  .roadmap-nuvi-gate { display: none; }
 }
 
 /* ----- 노드(행성/게이트) — 길 위 좌표에 중심 정렬 ----- */
