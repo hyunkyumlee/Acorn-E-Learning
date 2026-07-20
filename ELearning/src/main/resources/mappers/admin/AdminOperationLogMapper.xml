@@ -62,21 +62,6 @@
         )
     </insert>
 
-    <update id="update" parameterType="com.acorn.elearning.admin.model.AdminOperationLog">
-        UPDATE admin_operation_logs
-        SET admin_id = #{adminId},
-        action_type = #{actionType},
-        target_id = #{targetId},
-        target_name = #{targetName},
-        change_detail = #{changeDetail},
-        result_status = #{resultStatus},
-        target_name = #{targetName},
-        change_detail = #{changeDetail},
-        target_type = #{targetType}
-        WHERE log_id = #{logId}
-    </update>
-
-
     <!-- 운영 로그 필터 공통 조건 -->
     <sql id="OperationLogFilterWhere">
         <where>
