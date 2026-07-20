@@ -29,7 +29,7 @@
         if (!slides.length || !prevBtn || !nextBtn) return;
 
         var total = slides.length;
-        var signupHref = nextBtn.getAttribute('data-signup-href') || '/signup';
+        var loginHref = nextBtn.getAttribute('data-login-href') || '/login';
         var current = 1;
 
         // 단계별 서비스 이미지 (data-img 있으면 <img>, 없으면 placeholder 라벨)
@@ -148,7 +148,7 @@
         prevBtn.addEventListener('click', function () { goTo(current - 1); });
         nextBtn.addEventListener('click', function () {
             if (current < total) goTo(current + 1);           // 마지막 전: 다음 슬라이드
-            else window.location.href = signupHref;            // 마지막: 회원가입 이동
+            else window.location.href = loginHref;             // 마지막: 로그인 이동
         });
         dots.forEach(function (dot) {
             dot.addEventListener('click', function () { goTo(Number(dot.getAttribute('data-tut-goto'))); });
