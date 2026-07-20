@@ -44,6 +44,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 "/mypage",
                 "/ranking",
                 "/settings/**");
-        registry.addInterceptor(adminRequiredInterceptor).addPathPatterns("/admin/**");
+        registry.addInterceptor(adminRequiredInterceptor)
+                .addPathPatterns(
+                        "/admin/**",
+                        "/api/admin/**");
     }
 }
