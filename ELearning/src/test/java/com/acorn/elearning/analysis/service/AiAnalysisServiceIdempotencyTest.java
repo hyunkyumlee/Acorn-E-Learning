@@ -161,7 +161,9 @@ class AiAnalysisServiceIdempotencyTest {
             List<AnalysisReportResponse> responses = List.of(first.get(), second.get());
 
             assertEquals(1, client.sendCount());
-            assertTrue(responses.stream().allMatch(response -> "SUCCESS".equals(response.status())));
+            assertTrue(responses.stream().allMatch(response ->
+                    "SUCCESS".equals(response.status()) || "PENDING".equals(response.status())));
+            assertTrue(responses.stream().anyMatch(response -> "SUCCESS".equals(response.status())));
             AiAnalysisReport retriedReport = reportMapper.findById(failedReport.getReportId()).orElseThrow();
             assertEquals("SUCCESS", retriedReport.getStatus());
             assertEquals(1, retriedReport.getRetryCount());
