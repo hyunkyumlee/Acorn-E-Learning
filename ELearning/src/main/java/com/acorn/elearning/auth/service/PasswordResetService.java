@@ -69,8 +69,7 @@ public class PasswordResetService {
             if (socialOnly) {
                 return ForgotResult.SOCIAL_ONLY;
             }
-            //미가입 이메일 : 계정 존재 여부 노출 방지 -> "보냈습니다" 와 동일하게 응답
-            return ForgotResult.SENT;
+            throw new BusinessException(ErrorCode.AUTH_USER_NOT_FOUND, "가입되지 않은 이메일입니다.");
         }
 
         if (!STATUS_ACTIVE.equals(credentialRow.getStatus())) {
