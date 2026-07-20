@@ -119,7 +119,14 @@ public class AdminContentService {
         s.setDescription(form.getDescription());
 
         s.setSubjectCode(form.getSubjectName());
-        s.setSortOrder(sm.findAll().size() + 1);
+
+        int nextSortOrder = sm.findAll().stream()
+                .map(Subject::getSortOrder)
+                .filter(Objects::nonNull)
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0) + 1;
+        s.setSortOrder(nextSortOrder);
 
         int inserted = sm.insert(s);
 

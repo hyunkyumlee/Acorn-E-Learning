@@ -28,8 +28,5 @@ public class AdminLogService {
         return mapper.insert(model);
     }
 
-    public int update(AdminOperationLog model) {
-        return mapper.update(model);
-    }
 
 }
