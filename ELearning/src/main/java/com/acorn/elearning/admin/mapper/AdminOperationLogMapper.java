@@ -11,7 +11,6 @@ public interface AdminOperationLogMapper {
     Optional<AdminOperationLog> findById(Long id);
     List<AdminOperationLog> findAll();
     int insert(AdminOperationLog model);
-    int update(AdminOperationLog model);
 
 
     List<AdminOperationLogPageResponse> findPage(
