@@ -22,41 +22,52 @@
     
     <select id="findPage" resultMap="CurriculumNodeResultMap">
         SELECT
-            node_id,
-            subject_id,
-            parent_node_id,
-            level_code,
-            node_type,
-            planet_no,
-            title,
-            description,
-            sort_order,
-            gate_condition,
-            is_active,
-            created_at,
-            updated_at
-        FROM curriculum_nodes
+            c.node_id,
+            c.subject_id,
+            c.parent_node_id,
+            c.level_code,
+            c.node_type,
+            c.planet_no,
+            c.title,
+            c.description,
+            c.sort_order,
+            c.gate_condition,
+            c.is_active,
+            c.created_at,
+            c.updated_at
+        FROM curriculum_nodes c
+        JOIN subjects s
+            ON c.subject_id = s.subject_id
         <include refid="CurriculumFilterWhere" />
-        ORDER BY subject_id ASC, level_code ASC, sort_order ASC, node_id ASC
+        ORDER BY s.sort_order ASC,
+                 s.subject_id ASC,
+                 CASE c.level_code
+                     WHEN 'BRONZE' THEN 1
+                     WHEN 'SILVER' THEN 2
+                     WHEN 'GOLD' THEN 3
+                     ELSE 4
+                 END,
+                 c.sort_order ASC,
+                 c.node_id ASC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <select id="countAll" resultType="long">
         SELECT COUNT(*)
-        FROM curriculum_nodes
+        FROM curriculum_nodes c
         <include refid="CurriculumFilterWhere" />
     </select>
 
     <sql id="CurriculumFilterWhere">
         <where>
             <if test="keyword != null and keyword != ''">
-                AND title LIKE CONCAT('%', #{keyword}, '%')
+                AND c.title LIKE CONCAT('%', #{keyword}, '%')
             </if>
             <if test="subjectId != null">
-                AND subject_id = #{subjectId}
+                AND c.subject_id = #{subjectId}
             </if>
             <if test="levelCode != null and levelCode != ''">
-                AND level_code = #{levelCode}
+                AND c.level_code = #{levelCode}
             </if>
         </where>
     </sql>
