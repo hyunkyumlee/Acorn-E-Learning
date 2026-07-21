@@ -36,26 +36,22 @@ public interface RankingScoreMapper {
 
     List<Map<String, Object>> findWeeklySubjectRanking(
             @Param("subjectId") Long subjectId,
-            @Param("periodKey") String periodKey,
-            @Param("leagueCode") String leagueCode
+            @Param("periodKey") String periodKey
     );
 
     Map<String, Object> findMyWeeklySubjectRanking(
             @Param("userId") Long userId,
             @Param("subjectId") Long subjectId,
-            @Param("periodKey") String periodKey,
-            @Param("leagueCode") String leagueCode
+            @Param("periodKey") String periodKey
     );
 
     List<Map<String, Object>> findMonthlyGlobalRankingFromSubjects(
-            @Param("periodKey") String periodKey,
-            @Param("leagueCode") String leagueCode
+            @Param("periodKey") String periodKey
     );
 
     Map<String, Object> findMyMonthlyGlobalRankingFromSubjects(
             @Param("userId") Long userId,
-            @Param("periodKey") String periodKey,
-            @Param("leagueCode") String leagueCode
+            @Param("periodKey") String periodKey
     );
 
     Integer sumWeeklyPracticeScore(

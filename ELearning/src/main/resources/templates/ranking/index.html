@@ -49,29 +49,6 @@
            } ? ' is-active' : ''">
         </a>
       </div>
-
-      <div class="ranking-league-strip">
-        <div th:each="league : ${view.attributes()['leagueTabs']}"
-             class="ranking-league-pill"
-             th:classappend="${league['active']} ? ' is-active' : ''"
-             th:attr="data-league=${league['code']}">
-
-          <span class="ranking-league-pill__icon">
-            <img th:if="${league['code'] == 'BRONZE'}"
-                 th:src="@{/assets/images/backgrounds/bronze_league.png}"
-                 alt="브론즈">
-            <img th:if="${league['code'] == 'SILVER'}"
-                 th:src="@{/assets/images/backgrounds/silver_league.png}"
-                 alt="실버">
-            <img th:if="${league['code'] == 'GOLD'}"
-                 th:src="@{/assets/images/backgrounds/gold_league.png}"
-                 alt="골드">
-          </span>
-
-          <span class="ranking-league-pill__label"
-                th:text="${league['label']}">BRONZE</span>
-        </div>
-      </div>
     </div>
 
     <div class="ranking-overview-grid">
