@@ -1,11 +1,12 @@
 /*
-  Knowva demo setup data v2.5 - MySQL 8 / InnoDB / utf8mb4
+  Knowva demo setup data v2.5.1 - MySQL 8 / InnoDB / utf8mb4
   File: docs/ddl/Knowva_demo_setup_data.sql
   Compatibility: Knowva_DDL.sql / Notion DB 명세 v2.4
   Source: 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정 / 관리자 댓글 삭제 주체
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Revision history
+  - v2.5.1 (2026-07-21): 시연 사용자 행을 유지한 뒤 계정 설정을 upsert하도록 fixture 사용자 삭제 순서를 보정.
   - v2.5 (2026-07-21): 시연 계정 2개(admin, 사용자)로 정리하고 사용자 계정의 Java Silver 마지막 행성 9번 레슨까지 해금 상태를 반영.
 
   Execution contract
@@ -1456,7 +1457,7 @@ ON DUPLICATE KEY UPDATE
 
 
 -- -----------------------------------------------------------------------------
--- Demo account fixture reconciliation (v2.5)
+-- Demo account fixture reconciliation (v2.5.1)
 -- -----------------------------------------------------------------------------
 -- The seed temporarily uses legacy fixture identities while building related
 -- records. Before COMMIT, all demo content is reassigned to the final user and
@@ -1586,7 +1587,8 @@ DELETE FROM user_level_unlocks
 WHERE user_id BETWEEN 2 AND 53;
 
 DELETE FROM users
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 2 AND 53
+  AND user_id <> 6;
 
 -- Account and curriculum fixture imported from users_data.sql.
 UPDATE user_credentials
