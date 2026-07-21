@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 public interface UserMapper {
     Optional<User> findById(@Param("id") Long id);
+    Optional<User> findByIdForUpdate(@Param("id") Long id);
     Optional<User> findByEmail(@Param("email") String email);
     List<User> findAll();
     int insert(User model);

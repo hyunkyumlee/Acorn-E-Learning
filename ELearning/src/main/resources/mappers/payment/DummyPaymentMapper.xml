@@ -85,6 +85,18 @@
         FOR UPDATE
     </select>
 
+    <select id="findPendingByUserIdAndProductForUpdate" resultMap="DummyPaymentResultMap">
+        SELECT
+        <include refid="DummyPaymentColumns" />
+        FROM dummy_payments
+        WHERE user_id = #{userId}
+          AND product_id = #{productId}
+          AND payment_status = 'PENDING'
+        ORDER BY payment_id DESC
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
     <select id="findByIdAndUserId" resultMap="DummyPaymentResultMap">
         SELECT
         <include refid="DummyPaymentColumns" />

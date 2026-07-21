@@ -13,6 +13,7 @@ import com.acorn.elearning.payment.model.DummyPayment;
 import com.acorn.elearning.payment.model.PaymentProduct;
 import com.acorn.elearning.payment.model.PremiumGrant;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.mapper.UserMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -46,13 +47,15 @@ public class TossPaymentService {
     private final PremiumGrantService premiumGrantService;
     private final TossPaymentsProperties tossPaymentsProperties;
     private final RestClient restClient;
+    private final UserMapper userMapper;
 
     public TossPaymentService(
             DummyPaymentMapper dummyPaymentMapper,
             PaymentProductMapper paymentProductMapper,
             DummyPaymentService dummyPaymentService,
             PremiumGrantService premiumGrantService,
-            TossPaymentsProperties tossPaymentsProperties
+            TossPaymentsProperties tossPaymentsProperties,
+            UserMapper userMapper
     ) {
         this.dummyPaymentMapper = dummyPaymentMapper;
         this.paymentProductMapper = paymentProductMapper;
@@ -60,6 +63,7 @@ public class TossPaymentService {
         this.premiumGrantService = premiumGrantService;
         this.tossPaymentsProperties = tossPaymentsProperties;
         this.restClient = RestClient.create();
+        this.userMapper = userMapper;
     }
 
     @Transactional
@@ -77,11 +81,15 @@ public class TossPaymentService {
         PaymentProduct product = paymentProductMapper.findByCode(request.productCode())
                 .filter(productItem -> Boolean.TRUE.equals(productItem.getIsActive()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "활성화된 결제 상품을 찾을 수 없습니다."));
-        String orderNo = dummyPaymentService.buildOrderNo(userId, request.idempotencyToken());
 
-        DummyPayment payment = dummyPaymentMapper.findByOrderNoForUpdate(orderNo)
-                .map(existing -> reusePendingOrder(existing, userId, product))
-                .orElseGet(() -> createPendingOrder(userId, product, orderNo));
+        DummyPayment payment = dummyPaymentMapper.findPendingByUserIdAndProductForUpdate(userId, product.getProductId())
+                .filter(existing -> samePendingOrder(existing, userId, product))
+                .orElseGet(() -> {
+                    String orderNo = dummyPaymentService.buildOrderNo(userId, request.idempotencyToken());
+                    return dummyPaymentMapper.findByOrderNoForUpdate(orderNo)
+                            .map(existing -> reusePendingOrder(existing, userId, product))
+                            .orElseGet(() -> createPendingOrder(userId, product, orderNo));
+                });
 
         return new TossPaymentOrderResponse(
                 payment.getPaymentId(),
@@ -124,8 +132,7 @@ public class TossPaymentService {
 
         DummyPayment paidPayment = dummyPaymentMapper.findById(payment.getPaymentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR));
-        PremiumGrant grant = premiumGrantService.findByPaymentId(paidPayment.getPaymentId())
-                .orElseGet(() -> premiumGrantService.grantLifetime(userId, paidPayment.getPaymentId()));
+        PremiumGrant grant = resolveGrant(userId, paidPayment.getPaymentId());
         return PaymentResultResponse.from(paidPayment, grant);
     }
 
@@ -176,9 +183,16 @@ public class TossPaymentService {
         if (!paymentKey.equals(payment.getPgTransactionId())) {
             throw new BusinessException(ErrorCode.COMMON_IDEMPOTENCY_CONFLICT, "이미 다른 결제 승인 정보가 처리되었습니다.");
         }
-        PremiumGrant grant = premiumGrantService.findByPaymentId(payment.getPaymentId())
-                .orElseGet(() -> premiumGrantService.grantLifetime(userId, payment.getPaymentId()));
+        PremiumGrant grant = resolveGrant(userId, payment.getPaymentId());
         return PaymentResultResponse.from(payment, grant);
+    }
+
+    private PremiumGrant resolveGrant(Long userId, Long paymentId) {
+        userMapper.findByIdForUpdate(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
+        return premiumGrantService.findByPaymentId(paymentId)
+                .or(() -> premiumGrantService.findActiveByUserIdForUpdate(userId))
+                .orElseGet(() -> premiumGrantService.grantLifetime(userId, paymentId));
     }
 
     private DummyPayment loadOwnedTossPaymentForUpdate(Long userId, String orderId) {
@@ -291,16 +305,19 @@ public class TossPaymentService {
     }
 
     private DummyPayment reusePendingOrder(DummyPayment payment, Long userId, PaymentProduct product) {
-        boolean samePendingOrder = userId.equals(payment.getUserId())
+        if (!samePendingOrder(payment, userId, product)) {
+            throw new BusinessException(ErrorCode.COMMON_IDEMPOTENCY_CONFLICT);
+        }
+        return payment;
+    }
+
+    private boolean samePendingOrder(DummyPayment payment, Long userId, PaymentProduct product) {
+        return userId.equals(payment.getUserId())
                 && product.getProductId().equals(payment.getProductId())
                 && DummyPaymentService.METHOD_CARD.equals(payment.getPaymentMethod())
                 && PG_PROVIDER.equals(payment.getPgProvider())
                 && sameAmount(product.getPrice(), payment.getAmount())
                 && PAYMENT_STATUS_PENDING.equals(payment.getPaymentStatus());
-        if (!samePendingOrder) {
-            throw new BusinessException(ErrorCode.COMMON_IDEMPOTENCY_CONFLICT);
-        }
-        return payment;
     }
 
     private int amount(BigDecimal price) {
