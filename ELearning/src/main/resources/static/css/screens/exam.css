@@ -632,6 +632,12 @@
   align-items: center;
 }
 
+.exam-copy-button {
+  min-height: 34px;
+  padding: var(--space-2) var(--space-3);
+  font-size: 12px;
+}
+
 .exam-action-row .button[disabled] {
   cursor: not-allowed;
   opacity: 0.55;

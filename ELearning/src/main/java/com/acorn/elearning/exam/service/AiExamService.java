@@ -31,6 +31,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.dao.DuplicateKeyException;
@@ -208,6 +209,14 @@ public class AiExamService {
     @Transactional(readOnly = true)
     public ExamSessionResponse detail(SessionUser sessionUser, Long examId) {
         return detail(requireUserId(sessionUser), examId);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<String> solutionCode(SessionUser sessionUser, Long examId, Long aiProblemId) {
+        Long userId = requireUserId(sessionUser);
+        requireSession(userId, examId);
+        return aiExamProblemMapper.findByIdAndExamId(aiProblemId, examId)
+                .flatMap(ExamStarterCodeResolver::solutionCode);
     }
 
     @Transactional(readOnly = true)

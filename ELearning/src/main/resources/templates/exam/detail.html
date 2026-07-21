@@ -74,6 +74,9 @@
           </div>
         </form>
 
+        <textarea data-magic-solution-code hidden aria-hidden="true" tabindex="-1"
+                  th:text="${magicSolutionCode}"></textarea>
+
         <section class="exam-run-result" data-code-run-result hidden aria-live="polite">
           <div>
             <span>결과</span>
@@ -87,6 +90,8 @@
         </section>
 
         <div class="exam-action-row">
+          <button type="button" class="button exam-copy-button" data-code-copy-button aria-label="정답 전체 코드 복사"
+                  th:disabled="${magicSolutionCode == null or magicSolutionCode.isBlank()}">마법 버튼</button>
           <button type="button" class="button" data-code-run-button>실행 테스트</button>
           <button type="submit" class="button primary" form="exam-answer-form" name="move" value="next"
                   data-code-submit-button>제출</button>
