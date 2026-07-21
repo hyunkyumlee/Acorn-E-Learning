@@ -54,6 +54,18 @@
         LIMIT 1
     </select>
 
+    <select id="findActiveByUserIdForUpdate" parameterType="long" resultMap="PremiumGrantResultMap">
+        SELECT
+        <include refid="PremiumGrantColumns" />
+        FROM premium_grants
+        WHERE user_id = #{userId}
+          AND status = 'ACTIVE'
+          AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP)
+        ORDER BY grant_id DESC
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
     <select id="findAll" resultMap="PremiumGrantResultMap">
         SELECT
         <include refid="PremiumGrantColumns" />

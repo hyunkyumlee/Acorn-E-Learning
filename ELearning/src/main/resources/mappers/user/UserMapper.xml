@@ -34,6 +34,14 @@
         WHERE user_id = #{id}
     </select>
 
+    <select id="findByIdForUpdate" parameterType="long" resultMap="UserResultMap">
+        SELECT
+        <include refid="UserColumns" />
+        FROM users
+        WHERE user_id = #{id}
+        FOR UPDATE
+    </select>
+
     <select id="findByEmail" parameterType="string" resultMap="UserResultMap">
         SELECT
         <include refid="UserColumns" />

@@ -20,6 +20,11 @@ public class PremiumGrantService {
         return premiumGrantMapper.findActiveByUserId(userId);
     }
 
+    public Optional<PremiumGrant> findActiveByUserIdForUpdate(Long userId) {
+        requireUserId(userId);
+        return premiumGrantMapper.findActiveByUserIdForUpdate(userId);
+    }
+
     public Optional<PremiumGrant> findByPaymentId(Long paymentId) {
         if (paymentId == null) {
             return Optional.empty();
