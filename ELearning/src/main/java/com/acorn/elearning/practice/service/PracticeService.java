@@ -2,12 +2,15 @@ package com.acorn.elearning.practice.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.learning.mapper.LessonMapper;
 import com.acorn.elearning.learning.mapper.UserLessonProgressMapper;
+import com.acorn.elearning.learning.model.CurriculumNode;
+import com.acorn.elearning.learning.model.Lesson;
 import com.acorn.elearning.learning.service.CurriculumService;
 import com.acorn.elearning.practice.dto.response.PracticeAnswerResultResponse;
 import com.acorn.elearning.practice.dto.response.PracticeSetResponse;
@@ -70,38 +73,71 @@ public class PracticeService {
     @Transactional
     public PracticeSetView createPracticeSet(SessionUser user, CreatePracticeSetForm form) {
 
-        // 1. 문제 조회
-        if (form.getLessonId() == null) {
+        if(user == null || user.userId() == null){
+            throw new BusinessException(ErrorCode.AUTH_REQUIRED);
+        }
+
+        if(form == null
+            || form.getSubjectId() == null
+            || form.getNodeId() == null
+            || form.getLessonId() == null){
             throw new BusinessException(
                     ErrorCode.COMMON_VALIDATION_FAILED,
-                    "lessonId가 없습니다."
+                    "과목, 단원, 레슨 정보가 필요합니다."
             );
         }
 
-        List<PracticeProblem> problems = problemService.getProblemsByLessonId(form.getLessonId());
-
-        if (problems == null || problems.isEmpty()) {
+        //1. 화면 요청이 아닌 LessonId 기준으로 실제 레슨 조회
+        Lesson lesson = curriculumService.getLessonDetail(form.getLessonId());
+        if(lesson == null || !Boolean.TRUE.equals(lesson.getIsActive())){
             throw new BusinessException(
                     ErrorCode.COMMON_NOT_FOUND,
-                    "해당 lesson에 문제가 없습니다."
+                    "학습 가능한 레슨을 찾을 수 없습니다."
             );
         }
 
+        // 2. 레슨이 속한 실제 단원 조회
+        CurriculumNode node = curriculumService.getNodeDetail(lesson.getNodeId());
+        if (node == null || !Boolean.TRUE.equals(node.getIsActive())) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_NOT_FOUND,
+                    "학습 가능한 단원을 찾을 수 없습니다."
+            );
+        }
 
-        // 2. practice_set_attempts 생성
+        // 3. 화면에서 전달된 과목·단원값이 실제 레슨 소속과 다른 경우 차단
+        if (!Objects.equals(form.getNodeId(), node.getNodeId())
+                || !Objects.equals(form.getSubjectId(), node.getSubjectId())) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_VALIDATION_FAILED,
+                    "과목, 단원, 레슨 정보가 서로 일치하지 않습니다."
+            );
+        }
+
+        // 4. 검증이 끝난 실제 레슨의 문제만 조회
+        List<PracticeProblem> problems =
+                problemService.getProblemsByLessonId(lesson.getLessonId());
+
+        if (problems.isEmpty()) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_NOT_FOUND,
+                    "해당 레슨에 등록된 연습문제가 없습니다."
+            );
+        }
+
+        // 5. 요청값이 아닌 서버가 확인한 실제 값으로 연습 세트 생성
         PracticeSetAttempt attempt = new PracticeSetAttempt();
         attempt.setUserId(user.userId());
-        attempt.setSubjectId(form.getSubjectId()); //과목
-        attempt.setNodeId(form.getNodeId()); //단원id -행성
-        attempt.setLessonId(form.getLessonId());//lessonid
-        attempt.setTotalCount(problems.size()); // 10개
-        attempt.setCorrectCount(0); // 시작할때 정답은 0개
-        attempt.setStatus("IN_PROGRESS"); // 풀이 진행 중
-        attempt.setPassed(false); // 아직 통과 못함
+        attempt.setSubjectId(node.getSubjectId());
+        attempt.setNodeId(node.getNodeId());
+        attempt.setLessonId(lesson.getLessonId());
+        attempt.setTotalCount(problems.size());
+        attempt.setCorrectCount(0);
+        attempt.setStatus("IN_PROGRESS");
+        attempt.setPassed(false);
 
-        // Mapper를 통해 DB에 Insert (insert 직후 attempt 객체 안에 자동 생성된 PK값이 담김)
         practiceSetAttemptMapper.insertAttempt(attempt);
-        //문제순서 저장
+
         for (int i = 0; i < problems.size(); i++) {
             PracticeProblem problem = problems.get(i);
 
@@ -113,8 +149,6 @@ public class PracticeService {
             practiceSetItemMapper.insertSetItem(item);
         }
 
-        // 3. 문제별 선택지 조회
-        // 객관식 문제는 choices를 화면에 넘기고, 정답(answerText/isCorrect)은 넘기지 않음
         Map<Long, List<ProblemChoice>> choiceMap = problems.stream()
                 .collect(Collectors.toMap(
                         PracticeProblem::getProblemId,
@@ -127,6 +161,10 @@ public class PracticeService {
                 choiceMap
         );
     }
+
+
+
+
 
         //submission 관련 business logic
         @Transactional

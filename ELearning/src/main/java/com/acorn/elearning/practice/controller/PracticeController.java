@@ -1,5 +1,7 @@
 package com.acorn.elearning.practice.controller;
 
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.practice.dto.response.PracticeSetResponse;
 import com.acorn.elearning.practice.dto.response.PracticeAnswerResultResponse;
 import com.acorn.elearning.practice.form.CreatePracticeSetForm;
@@ -27,6 +29,7 @@ import com.acorn.elearning.learning.model.Lesson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Controller
 public class PracticeController {
@@ -42,6 +45,30 @@ public class PracticeController {
     private final LessonMapper lessonMapper;
     private final CurriculumNodeMapper curriculumNodeMapper;
 
+    private Long requireCurrentProblemId(
+            PracticeSetView view,
+            Long requestedSetAttemptId,
+            Long requestedProblemId,
+            int index
+    ){
+        Long sessionSetAttemptId = toLong(view.attributes().get("setAttemptId"));
+
+        if(!Objects.equals(sessionSetAttemptId, requestedSetAttemptId)){
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND);
+        }
+        List<Map<String, Object>> problems = getProblems(view);
+
+        if(index < 0 || index >= problems.size()){
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND);
+        }
+        Long currentProblemId = toLong(problems.get(index).get("problemId"));
+
+        if(!Objects.equals(currentProblemId, requestedProblemId)){
+            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND);
+        }
+
+        return currentProblemId;
+    }
     public PracticeController(ProblemService problemService,
                               PracticeService practiceService,
                               FreeCodingService freeCodingService,
@@ -184,6 +211,13 @@ public class PracticeController {
             index = 0;
         }
 
+        Long verifiedProblemId = requireCurrentProblemId(
+                view,
+                setAttemptId,
+                problemId,
+                index
+        );
+
         Map<String, Object> currentProblem = problems.get(index);
 
         List<PracticeAnswerForm.SingleAnswer> answers = getAnswerSessionList(session);
@@ -214,7 +248,7 @@ public class PracticeController {
         if (flashResult != null) {
             restoredResult = flashResult;
         } else if (currentAnswer != null && !skipped) {
-            PracticeProblem problem = problemService.getProblem(problemId);
+            PracticeProblem problem = problemService.getProblem(verifiedProblemId);
             boolean correct = normalizeAnswer(problem.getAnswerText())
                     .equals(normalizeAnswer(currentAnswer.getSubmittedAnswer()));
 
@@ -297,12 +331,19 @@ public class PracticeController {
             return "redirect:/learning/practice";
         }
 
+        Long verifiedProblemId = requireCurrentProblemId(
+                view,
+                setAttemptId,
+                problemId,
+                index
+        );
+
         PracticeProblem problem = problemService.getProblem(problemId);
         boolean correct = normalizeAnswer(problem.getAnswerText())
                 .equals(normalizeAnswer(submittedAnswer));
 
         PracticeAnswerForm.SingleAnswer answer = new PracticeAnswerForm.SingleAnswer();
-        answer.setProblemId(problemId);
+        answer.setProblemId(verifiedProblemId);
         answer.setSubmittedAnswer(submittedAnswer);
 
         setAnswerAtIndex(answers, index, answer);
@@ -311,7 +352,7 @@ public class PracticeController {
         PracticeAnswerResultResponse result = new PracticeAnswerResultResponse(
                 "SUCCESS",
                 Map.of(
-                        "problemId", problemId,
+                        "problemId", verifiedProblemId,
                         "submittedAnswer", submittedAnswer,
                         "correct", correct,
                         "correctAnswer", problem.getAnswerText(),
@@ -325,7 +366,7 @@ public class PracticeController {
         redirectAttributes.addAttribute("setAttemptId", setAttemptId);
         redirectAttributes.addAttribute("index", index);
 
-        return "redirect:/learning/practice/problems/" + problemId;
+        return "redirect:/learning/practice/problems/" + verifiedProblemId;
     }
 
     @PostMapping("/learning/practice/sets/{setAttemptId}/complete")
@@ -400,18 +441,26 @@ public class PracticeController {
             return "redirect:/learning/practice";
         }
 
+        Long verifiedProblemId = requireCurrentProblemId(
+                view,
+                setAttemptId,
+                problemId,
+                index
+        );
+
         boolean isLastProblem = index == problems.size() - 1;
+
 
         if (isLastProblem && !confirmFinalSkip) {
             redirectAttributes.addFlashAttribute("message", "이 문제를 건너뛴 채 최종 제출하시겠습니까?");
             redirectAttributes.addFlashAttribute("showFinalSkipConfirm", true);
             redirectAttributes.addAttribute("setAttemptId", setAttemptId);
             redirectAttributes.addAttribute("index", index);
-            return "redirect:/learning/practice/problems/" + problemId;
+            return "redirect:/learning/practice/problems/" + verifiedProblemId;
         }
 
         PracticeAnswerForm.SingleAnswer skippedAnswer = new PracticeAnswerForm.SingleAnswer();
-        skippedAnswer.setProblemId(problemId);
+        skippedAnswer.setProblemId(verifiedProblemId);
         skippedAnswer.setSubmittedAnswer("__SKIPPED__");
 
         setAnswerAtIndex(answers, index, skippedAnswer);

@@ -11,11 +11,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -152,6 +149,38 @@ public class AttachmentService {
         CommunityPost post = requireActivePost(attachment.getPostId());
         requireOwner(post, userId);
         postAttachmentMapper.deleteById(attachmentId);
+        deleteFile(attachment.getFilePath());
+    }
+
+    @Transactional
+    public void deleteForPost(
+            SessionUser sessionUser,
+            Long postId,
+            Long attachmentId
+    ) {
+        Long userId = requireUserId(sessionUser);
+
+        // 1. 수정하려는 게시글 A가 존재하고 본인 글인지 확인
+        CommunityPost currentPost = requireActivePost(postId);
+        requireOwner(currentPost, userId);
+
+        // 2. 삭제하려는 첨부파일 조회
+        PostAttachment attachment = postAttachmentMapper.findById(attachmentId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "첨부파일을 찾을 수 없습니다."
+                ));
+
+        // 3. 가장 중요한 관계 검증
+        if (!Objects.equals(attachment.getPostId(), postId)) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_NOT_FOUND,
+                    "현재 게시글의 첨부파일이 아닙니다."
+            );
+        }
+
+        // 4. DB 행 삭제 후 실제 파일 삭제
+        postAttachmentMapper.deleteByIdAndPostId(attachmentId, postId);
         deleteFile(attachment.getFilePath());
     }
 

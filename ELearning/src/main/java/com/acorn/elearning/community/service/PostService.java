@@ -164,7 +164,7 @@ public class PostService {
         post.setTitle(form.getTitle().trim());
         post.setContent(form.getContent().trim());
         communityPostMapper.update(post);
-        deleteSelectedAttachments(sessionUser, form.getDeleteAttachmentIds());
+        deleteSelectedAttachments(sessionUser, postId, form.getDeleteAttachmentIds());
         attachmentService.saveMetadata(postId, userId, form.getFiles());
         attachmentService.removeUnreferencedInlineImages(postId, post.getContent());
         return requireActivePost(postId);
@@ -255,14 +255,20 @@ public class PostService {
                 .toList();
     }
 
-    private void deleteSelectedAttachments(SessionUser sessionUser, List<Long> attachmentIds) {
+    private void deleteSelectedAttachments(SessionUser sessionUser, Long postId, List<Long> attachmentIds) {
         if (attachmentIds == null || attachmentIds.isEmpty()) {
             return;
         }
         attachmentIds.stream()
                 .filter(attachmentId -> attachmentId != null)
                 .distinct()
-                .forEach(attachmentId -> attachmentService.delete(sessionUser, attachmentId));
+                .forEach(attachmentId ->
+                        attachmentService.deleteForPost(
+                                sessionUser,
+                                postId,
+                                attachmentId
+                        )
+                );
     }
 
     private Comment maskIfDeleted(Comment comment) {

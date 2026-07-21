@@ -68,4 +68,10 @@
         DELETE FROM post_attachments
         WHERE attachment_id = #{attachmentId}
     </delete>
+
+    <delete id="deleteByIdAndPostId">
+        DELETE FROM post_attachments
+        WHERE attachment_id = #{attachmentId}
+        AND post_id = #{postId}
+    </delete>
 </mapper>
