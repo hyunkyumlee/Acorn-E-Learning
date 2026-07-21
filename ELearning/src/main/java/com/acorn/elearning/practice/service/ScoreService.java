@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.acorn.elearning.practice.mapper.ScoreEventMapper;
 import com.acorn.elearning.practice.model.ScoreEvent;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,22 @@ public class ScoreService {
                           int scoreDelta,
                           String reasonCode,
                           String idempotencyKey) {
+        giveScoreIfAbsent(userId, subjectId, sourceId, sourceType, scoreDelta, reasonCode, idempotencyKey);
+    }
+
+    /** 동일한 멱등 키의 점수는 한 번만 지급한다. */
+    @Transactional
+    public boolean giveScoreIfAbsent(Long userId,
+                                     Long subjectId,
+                                     Long sourceId,
+                                     String sourceType,
+                                     int scoreDelta,
+                                     String reasonCode,
+                                     String idempotencyKey) {
+        if (scoreEventMapper.countByIdempotencyKey(idempotencyKey) > 0) {
+            return false;
+        }
+
         ScoreEvent event = new ScoreEvent();
         event.setUserId(userId);
         event.setSubjectId(subjectId);
@@ -44,8 +61,12 @@ public class ScoreService {
         event.setReasonCode(reasonCode);
         event.setIdempotencyKey(idempotencyKey);
 
-        scoreEventMapper.insert(event);
-
+        try {
+            scoreEventMapper.insert(event);
+            return true;
+        } catch (DuplicateKeyException exception) {
+            return false;
+        }
     }
 
 }
