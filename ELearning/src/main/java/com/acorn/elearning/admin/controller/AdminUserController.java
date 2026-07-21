@@ -3,6 +3,7 @@ package com.acorn.elearning.admin.controller;
 import com.acorn.elearning.admin.form.SubjectForm;
 import com.acorn.elearning.admin.service.AdminContentService;
 import com.acorn.elearning.admin.service.AdminUserService;
+import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.security.SessionUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -54,12 +55,16 @@ public class AdminUserController {
             return "redirect:/login";
         }
 
-        int statusResult = service.updateStatus(userId, status, sessionUser.userId());
+        try {
+            int statusResult = service.updateStatus(userId, status, sessionUser.userId());
 
-        if(statusResult == 1) {
-            redirectAttributes.addFlashAttribute("message", "상태가 변경되었습니다.");
-        }else{
-            redirectAttributes.addFlashAttribute("errorMessage", "상태가 변경되지 않았습니다. 다시 시도하세요.");
+            if(statusResult == 1) {
+                redirectAttributes.addFlashAttribute("message", "상태가 변경되었습니다.");
+            }else{
+                redirectAttributes.addFlashAttribute("errorMessage", "상태가 변경되지 않았습니다. 다시 시도하세요.");
+            }
+        } catch (BusinessException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
         }
 
         return "redirect:/admin/users";
@@ -77,12 +82,16 @@ public class AdminUserController {
             return "redirect:/login";
         }
 
-        int roleResult = service.updateRole(userId, role, sessionUser.userId());
+        try {
+            int roleResult = service.updateRole(userId, role, sessionUser.userId());
 
-        if(roleResult == 1){
-            redirectAttributes.addFlashAttribute("message", "권한이 변경되었습니다.");
-        }else{
-            redirectAttributes.addFlashAttribute("errorMessage", "권한 변경에 실패하였습니다.");
+            if(roleResult == 1){
+                redirectAttributes.addFlashAttribute("message", "권한이 변경되었습니다.");
+            }else{
+                redirectAttributes.addFlashAttribute("errorMessage", "권한 변경에 실패하였습니다.");
+            }
+        } catch (BusinessException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
         }
 
         return "redirect:/admin/users";

@@ -22,6 +22,9 @@ public enum ErrorCode {
     AUTH_PASSWORD_TOO_GUESSABLE(HttpStatus.BAD_REQUEST, "AUTH-PASSWORD-TOO-GUESSABLE", "비밀번호에 닉네임이나 이메일 아이디를 포함할 수 없습니다."),
 
 
+    ADMIN_SELF_MODIFY_FORBIDDEN(HttpStatus.FORBIDDEN, "ADMIN-SELF-MODIFY-FORBIDDEN", "자기 자신의 계정 상태/권한은 변경할 수 없습니다."),
+    ADMIN_LAST_ADMIN_PROTECTED(HttpStatus.FORBIDDEN, "ADMIN-LAST-ADMIN-PROTECTED", "마지막 남은 관리자입니다. 상태/권한을 변경할 수 없습니다."),
+
     COMMON_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION-400", "입력값이 올바르지 않습니다."),
     COMMON_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON-NOT-FOUND", "요청한 대상을 찾을 수 없습니다."),
     COMMON_IDEMPOTENCY_KEY_REQUIRED(HttpStatus.BAD_REQUEST, "COMMON-IDEMPOTENCY-KEY-REQUIRED", "중복 방지 토큰이 필요합니다."),

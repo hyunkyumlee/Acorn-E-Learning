@@ -3,7 +3,9 @@ package com.acorn.elearning.security;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import com.acorn.elearning.auth.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -12,7 +14,7 @@ class LoginRequiredInterceptorTest {
 
     @Test
     void preHandle_redirects_to_login_with_encoded_current_path_when_enforced() throws Exception {
-        LoginRequiredInterceptor interceptor = new LoginRequiredInterceptor(true);
+        LoginRequiredInterceptor interceptor = new LoginRequiredInterceptor(true, mock(AuthService.class));
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/learning/main");
         request.setQueryString("subjectId=1");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -25,7 +27,7 @@ class LoginRequiredInterceptorTest {
 
     @Test
     void preHandle_allows_request_when_security_enforcement_is_disabled() throws Exception {
-        LoginRequiredInterceptor interceptor = new LoginRequiredInterceptor(false);
+        LoginRequiredInterceptor interceptor = new LoginRequiredInterceptor(false, mock(AuthService.class));
 
         boolean result = interceptor.preHandle(new MockHttpServletRequest("GET", "/learning"), new MockHttpServletResponse(), new Object());
 
