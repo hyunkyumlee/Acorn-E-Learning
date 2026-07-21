@@ -15,6 +15,8 @@ public interface UserLessonProgressMapper {
 
     int upsertTheoryCompleted(@Param("userId") Long userId, @Param("lessonId") Long lessonId);
 
+    int claimTheoryCompletion(@Param("userId") Long userId, @Param("lessonId") Long lessonId);
+
     int countCompletedRequiredLessons(@Param("userId") Long userId, @Param("nodeId") Long nodeId);
 
     int countPracticePassedRequiredLessons(@Param("userId") Long userId, @Param("nodeId") Long nodeId);

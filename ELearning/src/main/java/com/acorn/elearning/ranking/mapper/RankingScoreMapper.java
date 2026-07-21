@@ -28,6 +28,11 @@ public interface RankingScoreMapper {
 
     int insertMonthlySubjectRankingScores(@Param("periodKey") String periodKey);
 
+    Integer tryAcquireRefreshLock(@Param("lockName") String lockName,
+                                  @Param("timeoutSeconds") int timeoutSeconds);
+
+    Integer releaseRefreshLock(@Param("lockName") String lockName);
+
 
     List<Map<String, Object>> findWeeklySubjectRanking(
             @Param("subjectId") Long subjectId,

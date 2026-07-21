@@ -2,6 +2,48 @@
   var storageKey = "knowva-ui-theme";
   var root = document.documentElement;
 
+  function readCookie(name) {
+    var prefix = name + "=";
+    return document.cookie.split(";").map(function (cookie) {
+      return cookie.trim();
+    }).filter(function (cookie) {
+      return cookie.indexOf(prefix) === 0;
+    }).map(function (cookie) {
+      return decodeURIComponent(cookie.substring(prefix.length));
+    })[0] || null;
+  }
+
+  function installCsrfFetchHeader() {
+    var originalFetch = window.fetch;
+    if (!originalFetch) {
+      return;
+    }
+
+    window.fetch = function (input, init) {
+      var options = init ? Object.assign({}, init) : {};
+      var method = (options.method || (input instanceof Request && input.method) || "GET").toUpperCase();
+      var requestUrl = new URL(input instanceof Request ? input.url : input, window.location.origin);
+      var csrfToken = readCookie("XSRF-TOKEN");
+
+      if (!/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)
+          && requestUrl.origin === window.location.origin
+          && csrfToken) {
+        var headers = new Headers(input instanceof Request ? input.headers : undefined);
+        new Headers(options.headers || {}).forEach(function (value, name) {
+          headers.set(name, value);
+        });
+        if (!headers.has("X-XSRF-TOKEN")) {
+          headers.set("X-XSRF-TOKEN", csrfToken);
+        }
+        options.headers = headers;
+      }
+
+      return originalFetch(input, options);
+    };
+  }
+
+  installCsrfFetchHeader();
+
   function storedTheme() {
     try {
       return localStorage.getItem(storageKey);

@@ -4,6 +4,8 @@ import com.acorn.elearning.ranking.dto.response.MyRankingResponse;
 import com.acorn.elearning.ranking.dto.response.RankingPageResponse;
 import com.acorn.elearning.ranking.mapper.RankingScoreMapper;
 import com.acorn.elearning.ranking.view.RankingPageView;
+import com.acorn.elearning.common.exception.BusinessException;
+import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.learning.mapper.LearningProfileReadMapper;
 import com.acorn.elearning.user.model.UserLearningProfile;
@@ -256,22 +258,36 @@ public class RankingService {
     }
 
 
+    @Transactional
     public void refreshRankingScores(Long subjectId, String periodType) {
-        if (PERIOD_WEEKLY.equals(periodType)) {
-            String weeklyPeriodKey = currentWeeklyPeriodKey();
-            rankingScoreMapper.deleteWeeklySubjectRankingByPeriodKey(weeklyPeriodKey);
-            rankingScoreMapper.insertWeeklySubjectRankingScores(weeklyPeriodKey);
-            return;
+        String periodKey = PERIOD_WEEKLY.equals(periodType)
+                ? currentWeeklyPeriodKey()
+                : currentMonthlyPeriodKey();
+        String lockName = "ranking-refresh:" + periodType + ":" + periodKey;
+        Integer lockAcquired = rankingScoreMapper.tryAcquireRefreshLock(lockName, 10);
+        if (!Integer.valueOf(1).equals(lockAcquired)) {
+            throw new BusinessException(
+                    ErrorCode.COMMON_IDEMPOTENCY_CONFLICT,
+                    "같은 기간의 랭킹을 재계산 중입니다. 잠시 후 다시 시도해 주세요."
+            );
         }
 
-        if (PERIOD_MONTHLY.equals(periodType)) {
-            String monthlyPeriodKey = currentMonthlyPeriodKey();
+        try {
+            if (PERIOD_WEEKLY.equals(periodType)) {
+                rankingScoreMapper.deleteWeeklySubjectRankingByPeriodKey(periodKey);
+                rankingScoreMapper.insertWeeklySubjectRankingScores(periodKey);
+                return;
+            }
 
-            rankingScoreMapper.deleteMonthlySubjectRankingByPeriodKey(monthlyPeriodKey);
-            rankingScoreMapper.insertMonthlySubjectRankingScores(monthlyPeriodKey);
+            if (PERIOD_MONTHLY.equals(periodType)) {
+                rankingScoreMapper.deleteMonthlySubjectRankingByPeriodKey(periodKey);
+                rankingScoreMapper.insertMonthlySubjectRankingScores(periodKey);
 
-            rankingScoreMapper.deleteMonthlyGlobalRankingByPeriodKey(monthlyPeriodKey);
-            rankingScoreMapper.insertMonthlyGlobalRankingScores(monthlyPeriodKey);
+                rankingScoreMapper.deleteMonthlyGlobalRankingByPeriodKey(periodKey);
+                rankingScoreMapper.insertMonthlyGlobalRankingScores(periodKey);
+            }
+        } finally {
+            rankingScoreMapper.releaseRefreshLock(lockName);
         }
     }
 
