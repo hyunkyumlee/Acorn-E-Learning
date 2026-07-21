@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -102,6 +103,13 @@ public class AuthService {
     public long currentTokenVersion(Long userId) {
         return userCredentialMapper.findByUserId(userId)
                 .map(c -> c.getPasswordUpdatedAt() == null ? 0L : c.getPasswordUpdatedAt().toEpochSecond(ZoneOffset.UTC)). orElse(0L);
+    }
+
+    // 인터셉터가 매 요청 DB 상태로 세션을 재검증할 때 사용. 정지 상태면 빈 Optional 반환.
+    public Optional<SessionUser> revalidate(Long userId) {
+        return userMapper.findById(userId)
+                .filter(user -> STATUS_ACTIVE.equals(user.getStatus()))
+                .map(this::toSessionUser);
     }
 
     private UserSessionResponse signup (HttpSession session, String email, String rawPassword, String nickname, Long primarySubjectId, String learningGoal) {
