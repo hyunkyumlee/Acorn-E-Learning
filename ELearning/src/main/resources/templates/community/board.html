@@ -34,48 +34,60 @@
       </aside>
 
       <section class="community-listing-main">
-        <div class="community-listing-filter-row">
-          <nav class="community-listing-tabs" aria-label="게시판 탭">
-            <a th:classappend="${activeBoardType == '' and condition.sort != 'hot'} ? ' is-active'"
-               th:attr="aria-current=${activeBoardType == '' and condition.sort != 'hot'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='latest')}">전체</a>
-            <a th:classappend="${activeBoardType == '' and condition.sort == 'hot'} ? ' is-active'"
-               th:attr="aria-current=${activeBoardType == '' and condition.sort == 'hot'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='hot',period='week')}">인기글</a>
-            <a th:classappend="${activeBoardType == 'FREE'} ? ' is-active'"
-               th:attr="aria-current=${activeBoardType == 'FREE'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE',keyword=${condition.keyword},sort='latest')}">자유</a>
-            <a th:classappend="${activeBoardType == 'QUESTION'} ? ' is-active'"
-               th:attr="aria-current=${activeBoardType == 'QUESTION'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='QUESTION',keyword=${condition.keyword},sort='latest')}">질문</a>
-            <a th:classappend="${activeBoardType == 'STUDY_LOG'} ? ' is-active'"
-               th:attr="aria-current=${activeBoardType == 'STUDY_LOG'} ? 'page' : null"
-               th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG',keyword=${condition.keyword},sort='latest')}">공부 일지</a>
-          </nav>
-        </div>
+        <section class="community-notice-strip" th:if="${notices != null and !#lists.isEmpty(notices)}" aria-label="공지사항">
+          <div class="community-notice-strip-heading">
+            <span>NOTICE</span>
+            <strong>공지사항</strong>
+          </div>
+          <ul>
+            <li th:each="notice : ${notices}">
+              <a class="community-notice-title"
+                 th:href="@{/community/notices/{id}(id=${notice.noticeId},subjectId=${condition.subjectId})}"
+                 th:text="${notice.title}">공지사항 제목</a>
+              <small>
+                <span th:text="${notice.writerNickname}">관리자</span>
+                <span th:if="${notice.publishedAt != null}" th:text="${#temporals.format(notice.publishedAt, 'yyyy.MM.dd')}">2026.07.16</span>
+              </small>
+            </li>
+          </ul>
+        </section>
 
         <section class="panel community-listing-panel">
-          <section class="community-notice-strip" th:if="${notices != null and !#lists.isEmpty(notices)}" aria-label="공지사항">
-            <div class="community-notice-strip-heading">
-              <span>NOTICE</span>
-              <strong>공지사항</strong>
-            </div>
-            <ul>
-              <li th:each="notice : ${notices}">
-                <a class="community-notice-title"
-                   th:href="@{/community/notices/{id}(id=${notice.noticeId},subjectId=${condition.subjectId})}"
-                   th:text="${notice.title}">공지사항 제목</a>
-                <small>
-                  <span th:text="${notice.writerNickname}">관리자</span>
-                  <span th:if="${notice.publishedAt != null}" th:text="${#temporals.format(notice.publishedAt, 'yyyy.MM.dd')}">2026.07.16</span>
-                </small>
-              </li>
-            </ul>
-          </section>
+          <div class="community-listing-filter-row">
+            <nav class="community-listing-tabs" aria-label="게시판 탭">
+              <a th:classappend="${activeBoardType == '' and condition.sort != 'hot'} ? ' is-active'"
+                 th:attr="aria-current=${activeBoardType == '' and condition.sort != 'hot'} ? 'page' : null"
+                 th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='latest')}">전체</a>
+              <a th:classappend="${activeBoardType == '' and condition.sort == 'hot'} ? ' is-active'"
+                 th:attr="aria-current=${activeBoardType == '' and condition.sort == 'hot'} ? 'page' : null"
+                 th:href="@{/community/board(subjectId=${condition.subjectId},keyword=${condition.keyword},sort='hot',period='week')}">인기글</a>
+              <a th:classappend="${activeBoardType == 'FREE'} ? ' is-active'"
+                 th:attr="aria-current=${activeBoardType == 'FREE'} ? 'page' : null"
+                 th:href="@{/community/board(subjectId=${condition.subjectId},boardType='FREE',keyword=${condition.keyword},sort='latest')}">자유</a>
+              <a th:classappend="${activeBoardType == 'QUESTION'} ? ' is-active'"
+                 th:attr="aria-current=${activeBoardType == 'QUESTION'} ? 'page' : null"
+                 th:href="@{/community/board(subjectId=${condition.subjectId},boardType='QUESTION',keyword=${condition.keyword},sort='latest')}">질문</a>
+              <a th:classappend="${activeBoardType == 'STUDY_LOG'} ? ' is-active'"
+                 th:attr="aria-current=${activeBoardType == 'STUDY_LOG'} ? 'page' : null"
+                 th:href="@{/community/board(subjectId=${condition.subjectId},boardType='STUDY_LOG',keyword=${condition.keyword},sort='latest')}">공부 일지</a>
+            </nav>
+          </div>
 
           <div class="community-listing-heading">
-            <h1>게시글 목록</h1>
-            <span th:text="${view.total + '개'}">0개</span>
+            <div class="community-listing-heading-copy">
+              <h1>게시글 목록</h1>
+              <span th:text="${view.total + '개'}">0개</span>
+            </div>
+            <a class="button community-back-button"
+               th:href="@{/community(subjectId=${condition.subjectId})}"
+               aria-label="현재 과목 커뮤니티 홈으로 돌아가기"
+               title="커뮤니티 홈으로 돌아가기">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"></path>
+                <path d="M19 12H5"></path>
+              </svg>
+              <span>커뮤니티 홈으로</span>
+            </a>
           </div>
 
           <form method="get" th:action="@{/community/board}" class="community-search-form">
