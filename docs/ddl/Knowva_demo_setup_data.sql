@@ -1,11 +1,15 @@
 /*
-  Knowva demo setup data v2.5.1 - MySQL 8 / InnoDB / utf8mb4
+  Knowva demo setup data v2.5.5 - MySQL 8 / InnoDB / utf8mb4
   File: docs/ddl/Knowva_demo_setup_data.sql
   Compatibility: Knowva_DDL.sql / Notion DB 명세 v2.4
   Source: 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정 / 관리자 댓글 삭제 주체
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Revision history
+  - v2.5.5 (2026-07-21): 일반·Premium 계정은 Knowva_sample_data.sql 원본 진행·시험·결제 데이터를 보존하도록 final reconciliation 정리 범위에서 제외.
+  - v2.5.4 (2026-07-21): seed 실행 세션에서만 sql_safe_updates를 일시 해제하고 COMMIT 뒤 원래 값으로 복구해 optimizer의 full scan 선택에도 전체 실행을 보장.
+  - v2.5.3 (2026-07-21): UNSIGNED primary key의 항상 참인 `>= 0` 조건을 `> 0`으로 보정해 Workbench safe update mode 인식을 보장.
+  - v2.5.2 (2026-07-21): Workbench safe update mode에서도 실행되도록 fixture 정리 UPDATE/DELETE의 WHERE에 primary key 조건을 추가.
   - v2.5.1 (2026-07-21): 시연 사용자 행을 유지한 뒤 계정 설정을 upsert하도록 fixture 사용자 삭제 순서를 보정.
   - v2.5 (2026-07-21): 시연 계정 2개(admin, 사용자)로 정리하고 사용자 계정의 Java Silver 마지막 행성 9번 레슨까지 해금 상태를 반영.
 
@@ -17,9 +21,11 @@
 
   Demo login accounts
   - admin account (ROLE_ADMIN)
+  - general learner account (ROLE_USER, Java BRONZE)
+  - premium learner account (ROLE_USER, all subjects GOLD / Premium)
   - demo user account (ROLE_USER, Java SILVER)
   - Login credentials are managed only by this setup file's final account fixture.
-  - Existing local/password and OAuth sample accounts are deleted before COMMIT.
+  - OAuth sample accounts are deleted before COMMIT; local test accounts are rebuilt in the final account fixture.
 
   Password policy
   - BCrypt(10), generated with Spring Security Crypto 7.0.5.
@@ -31,6 +37,12 @@ SET time_zone = '+09:00';
 
 USE elearning;
 
+-- Workbench safe update mode can reject a mutation when the optimizer chooses
+-- a full scan despite a primary key predicate. Disable it only for this seed
+-- session and restore the caller's value after COMMIT.
+SET @knowva_seed_sql_safe_updates = @@SESSION.sql_safe_updates;
+SET SESSION sql_safe_updates = 0;
+
 DROP PROCEDURE IF EXISTS assert_knowva_seed_schema;
 DELIMITER $$
 CREATE PROCEDURE assert_knowva_seed_schema()
@@ -38,6 +50,7 @@ BEGIN
   DECLARE required_column_count INT DEFAULT 0;
   DECLARE pending_status_default_count INT DEFAULT 0;
   DECLARE refund_eligibility_index_count INT DEFAULT 0;
+
 
   SELECT COUNT(*)
     INTO required_column_count
@@ -99,10 +112,10 @@ SET @sample_password_hash = '$2a$10$rXWwp4H7mIiDJv.c2H9moOtZ3m/8cBMGOsMuaX0G7vW/
 
 DELETE FROM subject_content_status_backups WHERE backup_id > 0;
 
-DELETE FROM wrong_answers WHERE set_attempt_id IN (100101, 200501);
-DELETE FROM practice_submissions WHERE set_attempt_id IN (100101, 200501);
-DELETE FROM practice_set_items WHERE set_attempt_id IN (100101, 200501);
-DELETE FROM practice_set_attempts WHERE set_attempt_id IN (100101, 200501);
+DELETE FROM wrong_answers WHERE set_attempt_id IN (100101, 200501) AND wrong_answer_id > 0;
+DELETE FROM practice_submissions WHERE set_attempt_id IN (100101, 200501) AND submission_id > 0;
+DELETE FROM practice_set_items WHERE set_attempt_id IN (100101, 200501) AND set_item_id > 0;
+DELETE FROM practice_set_attempts WHERE set_attempt_id IN (100101, 200501) AND set_attempt_id > 0;
 
 INSERT INTO subjects (subject_code, subject_name, description, sort_order, is_active)
 VALUES
@@ -1457,145 +1470,186 @@ ON DUPLICATE KEY UPDATE
 
 
 -- -----------------------------------------------------------------------------
--- Demo account fixture reconciliation (v2.5.1)
+-- Demo account fixture reconciliation (v2.5.4)
 -- -----------------------------------------------------------------------------
 -- The seed temporarily uses legacy fixture identities while building related
 -- records. Before COMMIT, all demo content is reassigned to the final user and
 -- login/profile/curriculum data is rebuilt from users_data.sql.
--- Final accounts: admin (user_id = 1) and demo user (user_id = 6).
+-- Final accounts: admin (user_id = 1), sample general learner (user_id = 2),
+-- sample Premium learner (user_id = 3), and demo user (user_id = 6).
+-- This script disables sql_safe_updates only for its current session because
+-- MySQL Workbench can reject a key predicate when the optimizer selects a scan.
+-- Only temporary OAuth/community fixture users (user_id 4 through 53) are
+-- reconciled. Users 2 and 3 keep their original sample-data records.
 
 UPDATE lessons
 SET created_by = 1
-WHERE created_by BETWEEN 2 AND 53;
+WHERE created_by BETWEEN 4 AND 53
+  AND lesson_id > 0;
 
 UPDATE practice_problems
 SET created_by = 1
-WHERE created_by BETWEEN 2 AND 53;
+WHERE created_by BETWEEN 4 AND 53
+  AND problem_id > 0;
 
 UPDATE lesson_bookmarks
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND bookmark_id > 0;
 
 UPDATE level_test_attempts
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND attempt_id > 0;
 
 UPDATE practice_set_attempts
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND set_attempt_id > 0;
 
 UPDATE practice_submissions
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND submission_id > 0;
 
 UPDATE score_events
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND score_event_id > 0;
 
 UPDATE exam_sessions
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND exam_id > 0;
 
 UPDATE ai_analysis_reports
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND report_id > 0;
 
 UPDATE community_posts
 SET writer_id = 6
-WHERE writer_id BETWEEN 2 AND 53;
+WHERE writer_id BETWEEN 4 AND 53
+  AND post_id > 0;
 
 UPDATE post_attachments
 SET uploader_id = 6
-WHERE uploader_id BETWEEN 2 AND 53;
+WHERE uploader_id BETWEEN 4 AND 53
+  AND attachment_id > 0;
 
 UPDATE comments
 SET writer_id = 6
-WHERE writer_id BETWEEN 2 AND 53;
+WHERE writer_id BETWEEN 4 AND 53
+  AND comment_id > 0;
 
 UPDATE comments
 SET deleted_by_admin_id = 1
-WHERE deleted_by_admin_id BETWEEN 2 AND 53;
+WHERE deleted_by_admin_id BETWEEN 4 AND 53
+  AND comment_id > 0;
 
 UPDATE reports
 SET reporter_id = 6
-WHERE reporter_id BETWEEN 2 AND 53;
+WHERE reporter_id BETWEEN 4 AND 53
+  AND report_id > 0;
 
 UPDATE reports
 SET handled_by = 1
-WHERE handled_by BETWEEN 2 AND 53;
+WHERE handled_by BETWEEN 4 AND 53
+  AND report_id > 0;
 
 UPDATE dummy_payments
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND payment_id > 0;
 
 UPDATE premium_grants
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND grant_id > 0;
 
 UPDATE payment_refunds
 SET user_id = 6
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND refund_id > 0;
 
 UPDATE notices
 SET writer_id = 1
-WHERE writer_id BETWEEN 2 AND 53;
+WHERE writer_id BETWEEN 4 AND 53
+  AND notice_id > 0;
 
 UPDATE admin_operation_logs
 SET admin_id = 1
-WHERE admin_id BETWEEN 2 AND 53;
+WHERE admin_id BETWEEN 4 AND 53
+  AND log_id > 0;
 
 DELETE FROM post_likes
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND like_id > 0;
 
 DELETE FROM post_scraps
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND scrap_id > 0;
 
 DELETE FROM attendance_records
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND attendance_id > 0;
 
 DELETE FROM wrong_answers
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND wrong_answer_id > 0;
 
 DELETE FROM ranking_scores
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND ranking_id > 0;
 
 DELETE FROM password_reset_tokens
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND token_id > 0;
 
 DELETE FROM social_accounts
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND social_account_id > 0;
 
 DELETE FROM user_credentials
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND credential_id > 0;
 
 DELETE FROM user_settings
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND setting_id > 0;
 
 DELETE FROM user_learning_profiles
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND profile_id > 0;
 
 DELETE FROM user_subject_enrollments
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND enrollment_id > 0;
 
 DELETE FROM user_lesson_progress
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND lesson_progress_id > 0;
 
 DELETE FROM learning_progress
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND progress_id > 0;
 
 DELETE FROM user_level_unlocks
-WHERE user_id BETWEEN 2 AND 53;
+WHERE user_id BETWEEN 4 AND 53
+  AND unlock_id > 0;
 
 DELETE FROM users
-WHERE user_id BETWEEN 2 AND 53
+WHERE user_id BETWEEN 4 AND 53
   AND user_id <> 6;
 
--- Account and curriculum fixture imported from users_data.sql.
+-- Rebuild only the final demo account and curriculum fixture after temporary
+-- identities and related rows have been reconciled.
 UPDATE user_credentials
 SET password_hash = '$2y$10$U2ho1jIzQKb7PGRQPJE9w.GWHsQyfDGuE3ZC6FDyxZ33E57MZhvDq',
     password_updated_at = CURRENT_TIMESTAMP,
     updated_at = CURRENT_TIMESTAMP
-WHERE login_email = 'admin@knowva.local';
+WHERE login_email = 'admin@knowva.local'
+  AND credential_id > 0;
 
 INSERT INTO users (
   user_id, email, nickname, role, status, profile_image_url, last_login_at, withdrawn_at, created_at, updated_at
@@ -1737,3 +1791,5 @@ ON DUPLICATE KEY UPDATE
   updated_at = CURRENT_TIMESTAMP;
 
 COMMIT;
+
+SET SESSION sql_safe_updates = @knowva_seed_sql_safe_updates;
