@@ -81,16 +81,22 @@ public class AdminUserService {
     @Transactional
     public int updateStatus(Long userId, String status, Long adminId){
 
-
-
        if(! "ACTIVE".equals(status) && ! "SUSPENDED".equals(status)) {
            return 0;
+       }
+
+       if (userId.equals(adminId)) {
+           throw new BusinessException(ErrorCode.ADMIN_SELF_MODIFY_FORBIDDEN);
        }
 
        AdminUserManageRowResponse user = mapper.findById(userId).orElse(null);
 
        if(user == null){
            return 0;
+       }
+
+       if ("SUSPENDED".equals(status) && isLastActiveAdmin(user)) {
+           throw new BusinessException(ErrorCode.ADMIN_LAST_ADMIN_PROTECTED);
        }
 
         int updated = mapper.updateStatus(userId, status);
@@ -117,10 +123,18 @@ public class AdminUserService {
             return 0;
         }
 
+        if (userId.equals(adminId)) {
+            throw new BusinessException(ErrorCode.ADMIN_SELF_MODIFY_FORBIDDEN);
+        }
+
         AdminUserManageRowResponse user = mapper.findById(userId).orElse(null);
 
         if(user == null){
             return 0;
+        }
+
+        if ("ROLE_USER".equals(role) && isLastActiveAdmin(user)) {
+            throw new BusinessException(ErrorCode.ADMIN_LAST_ADMIN_PROTECTED);
         }
 
         int updated = mapper.updateRole(userId, role);
@@ -138,5 +152,11 @@ public class AdminUserService {
         return updated;
     }
 
+    // 대상이 유일하게 남은 활성 관리자인지 확인 (상태 정지/권한 강등으로 관리자가 0명이 되는 것 방지)
+    private boolean isLastActiveAdmin(AdminUserManageRowResponse user) {
+        return "ROLE_ADMIN".equals(user.getRole())
+                && "ACTIVE".equals(user.getStatus())
+                && mapper.countAll(null, null, null, "ROLE_ADMIN", "ACTIVE") <= 1;
+    }
 
 }
