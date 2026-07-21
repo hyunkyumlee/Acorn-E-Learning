@@ -33,6 +33,7 @@ public class RankingService {
         this.learningProfileReadMapper = learningProfileReadMapper;
     }
 
+    @Transactional
     public RankingPageView index(SessionUser sessionUser, Long subjectId, String periodType) {
         Map<String, Object> data = buildRankingData(sessionUser, subjectId);
 
@@ -42,11 +43,13 @@ public class RankingService {
         return RankingPageView.of("랭킹", attributes);
     }
 
+    @Transactional
     public RankingPageResponse rankings(SessionUser sessionUser, Long subjectId, String periodType) {
         Map<String, Object> data = buildRankingData(sessionUser, subjectId);
         return new RankingPageResponse("SUCCESS", data);
     }
 
+    @Transactional
     public MyRankingResponse myRanking(SessionUser sessionUser, Long subjectId, String periodType) {
         Map<String, Object> data = buildRankingData(sessionUser, subjectId);
 
@@ -61,8 +64,6 @@ public class RankingService {
 
     private Map<String, Object> buildRankingData(SessionUser sessionUser, Long subjectId) {
         String effectivePeriodType = resolvePeriodType(subjectId);
-
-        refreshRankingScores(subjectId, effectivePeriodType);
 
         String leagueCode = resolveCurrentLeagueCode(sessionUser.userId());
 
@@ -254,7 +255,7 @@ public class RankingService {
         return scoreBreakdown;
     }
 
-    @Transactional
+
     public void refreshRankingScores(Long subjectId, String periodType) {
         if (PERIOD_WEEKLY.equals(periodType)) {
             String weeklyPeriodKey = currentWeeklyPeriodKey();

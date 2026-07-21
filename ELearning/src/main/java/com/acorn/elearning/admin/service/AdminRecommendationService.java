@@ -9,9 +9,11 @@ import com.acorn.elearning.admin.model.AdminOperationLog;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.builder.BuilderException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -162,7 +164,39 @@ public class AdminRecommendationService {
                     "추천 콘텐츠 입력값이 올바르지 않습니다."
             );
         }
+        form.setUrl(normalizeExternalUrl(form.getUrl()));
     }
 
+    private String normalizeExternalUrl(String rawUrl){
+        try{
+            URI uri = URI.create(rawUrl.trim());
+            String scheme = uri.getScheme();
+
+            if(!"http".equalsIgnoreCase(scheme)
+                && !"https".equalsIgnoreCase(scheme)){
+                throw new BusinessException(
+                        ErrorCode.COMMON_VALIDATION_FAILED,
+                        "추천 URL은 http 또는 https 주소만 입력할 수 있습니다."
+                );
+            }
+
+            if(uri.getHost() == null || uri.getHost().isBlank()){
+                throw new BusinessException(
+                        ErrorCode.COMMON_VALIDATION_FAILED,
+                        "올바른 추천 URL을 입력해 주세요."
+                );
+            }
+
+            return uri.toString();
+
+        } catch(IllegalArgumentException exception){
+            throw new BusinessException(
+                    ErrorCode.COMMON_VALIDATION_FAILED,
+                    "올바른 추천 URL을 입력해 주세요."
+            );
+        }
+
+
+    }
 
 }
