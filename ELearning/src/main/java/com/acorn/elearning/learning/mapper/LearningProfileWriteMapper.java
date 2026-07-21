@@ -13,5 +13,5 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface LearningProfileWriteMapper {
     /** 레벨 테스트 결과 반영: 사용자 프로필의 current_level_code를 갱신한다. grade_code/total_score는 건드리지 않는다. */
-    int updateLevel(@Param("userId") Long userId, @Param("currentLevelCode") String currentLevelCode);
+    int updateLevelIfHigher(@Param("userId") Long userId, @Param("currentLevelCode") String currentLevelCode);
 }

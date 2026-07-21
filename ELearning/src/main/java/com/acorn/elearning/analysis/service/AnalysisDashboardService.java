@@ -85,13 +85,19 @@ public class AnalysisDashboardService {
     private AnalysisReportResponse latestReport(Long userId) {
         return aiAnalysisReportMapper.findByUserId(userId).stream()
                 .findFirst()
-                .map(AnalysisReportResponse::from)
+                .map(report -> AnalysisReportResponse.from(
+                        report,
+                        paymentAccessService.hasPremiumAccess(userId)
+                ))
                 .orElse(null);
     }
 
     private AnalysisReportResponse reportForExam(Long userId, Long examId) {
         return aiAnalysisReportMapper.findByExamIdAndUserId(examId, userId)
-                .map(AnalysisReportResponse::from)
+                .map(report -> AnalysisReportResponse.from(
+                        report,
+                        paymentAccessService.hasPremiumAccess(userId)
+                ))
                 .orElse(null);
     }
 

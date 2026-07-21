@@ -11,13 +11,16 @@ public record AnalysisReportResponse(
         String analysisErrorCode,
         Integer retryCount
 ) {
-    public static AnalysisReportResponse from(AiAnalysisReport report) {
+    public static AnalysisReportResponse from(
+            AiAnalysisReport report,
+            boolean premiumActive
+    ) {
         return new AnalysisReportResponse(
                 report.getReportId(),
                 report.getExamId(),
                 report.getStatus(),
                 report.getFreeSummary(),
-                report.getPremiumDetail(),
+                premiumActive ? report.getPremiumDetail() : null,
                 report.getAnalysisErrorCode(),
                 report.getRetryCount());
     }
