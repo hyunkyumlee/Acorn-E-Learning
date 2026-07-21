@@ -17,7 +17,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 final class AiGeneratedProblemParser {
-    private static final List<String> RESTRICTED_STARTER_TOKENS = List.of(
+    private static final List<String> RESTRICTED_API_TOKENS = List.of(
             "BufferedReader",
             "InputStreamReader",
             "StringTokenizer",
@@ -43,13 +43,14 @@ final class AiGeneratedProblemParser {
 
     List<GeneratedProblem> parse(String content, ExamLearningScope learningScope, int problemCount) {
         try {
-            JsonNode problems = objectMapper.readTree(content).path("problems");
+            String normalizedContent = normalizeJsonContent(content);
+            JsonNode problems = objectMapper.readTree(normalizedContent).path("problems");
             if (!problems.isArray() || problems.size() < problemCount) {
-                throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 문제 수가 부족합니다.");
+                throw invalidGeneratedProblem("AI가 생성한 문제 수가 부족합니다.");
             }
-            return parseProblems(problems, content, learningScope, problemCount);
+            return parseProblems(problems, normalizedContent, learningScope, problemCount);
         } catch (JacksonException exception) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 문제 형식이 올바르지 않습니다.");
+            throw invalidGeneratedProblem("AI가 생성한 문제 형식이 올바르지 않습니다.");
         }
     }
 
@@ -59,8 +60,6 @@ final class AiGeneratedProblemParser {
         List<GeneratedProblem> parsed = new ArrayList<>();
         for (int index = 0; index < problemCount; index++) {
             JsonNode problem = problems.get(index);
-            String starterCode = requiredText(problem, "starterCode");
-            validateStarterCode(starterCode, learningScopeText);
             String solutionCode = requiredText(problem, "solutionCode");
             validateSolutionCode(solutionCode, learningScopeText);
             String testCaseSpec = objectMapper.writeValueAsString(validTestCases(problem));
@@ -76,7 +75,7 @@ final class AiGeneratedProblemParser {
     private JsonNode validTestCases(JsonNode problem) {
         JsonNode testCases = problem.path("testCases");
         if (!testCases.isArray() || testCases.size() == 0) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 테스트케이스가 비어 있습니다.");
+            throw invalidGeneratedProblem("AI가 생성한 테스트케이스가 비어 있습니다.");
         }
         for (JsonNode testCase : testCases) {
             requireTestCaseText(testCase, "input");
@@ -85,25 +84,21 @@ final class AiGeneratedProblemParser {
         return testCases;
     }
 
-    private void validateStarterCode(String starterCode, String learningScopeText) {
-        validateAllowedApis(starterCode, learningScopeText, "starterCode");
-    }
-
     private void validateSolutionCode(String solutionCode, String learningScopeText) {
         if (solutionCode.contains("TODO")) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 solutionCode에 미완성 로직이 있습니다.");
+            throw invalidGeneratedProblem("AI가 생성한 solutionCode에 미완성 로직이 있습니다.");
         }
         if (!solutionCode.contains("public class Solution")) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 solutionCode 형식이 올바르지 않습니다.");
+            throw invalidGeneratedProblem("AI가 생성한 solutionCode 형식이 올바르지 않습니다.");
         }
         validateAllowedApis(solutionCode, learningScopeText, "solutionCode");
     }
 
     private void validateAllowedApis(String code, String learningScopeText, String codeFieldName) {
         String normalizedCode = code.toLowerCase(Locale.ROOT);
-        for (String token : RESTRICTED_STARTER_TOKENS) {
+        for (String token : RESTRICTED_API_TOKENS) {
             if (normalizedCode.contains(token.toLowerCase(Locale.ROOT)) && !allowedByLearningScope(token, learningScopeText)) {
-                throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR,
+                throw invalidGeneratedProblem(
                         "학습 범위에 없는 " + codeFieldName + " API가 포함되어 있습니다.");
             }
         }
@@ -116,7 +111,7 @@ final class AiGeneratedProblemParser {
         answer.setAnswerText(solutionCode);
         TestCaseExecutionResult result = testCaseExecutionService.execute(problem, answer);
         if (!result.passed()) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR,
+            throw invalidGeneratedProblem(
                     "AI가 생성한 solutionCode가 테스트케이스를 통과하지 못했습니다.");
         }
     }
@@ -146,16 +141,44 @@ final class AiGeneratedProblemParser {
     private String requiredText(JsonNode node, String fieldName) {
         JsonNode field = node.path(fieldName);
         if (!field.isTextual() || field.asText().isBlank()) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 문제 본문이 비어 있습니다.");
+            throw invalidGeneratedProblem("AI가 생성한 문제 본문이 비어 있습니다.");
         }
         return field.asText();
     }
 
     private void requireTestCaseText(JsonNode node, String fieldName) {
         if (!node.path(fieldName).isTextual()) {
-            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 테스트케이스 형식이 올바르지 않습니다.");
+            throw invalidGeneratedProblem("AI가 생성한 테스트케이스 형식이 올바르지 않습니다.");
         }
     }
 
+    private String normalizeJsonContent(String content) {
+        String normalized = content == null ? "" : content.trim();
+        if (!normalized.startsWith("```")) {
+            return normalized;
+        }
+
+        int firstLineEnd = normalized.indexOf('\n');
+        if (firstLineEnd < 0 || !normalized.endsWith("```")) {
+            return normalized;
+        }
+
+        String fenceLanguage = normalized.substring(3, firstLineEnd).trim();
+        if (!fenceLanguage.isEmpty() && !"json".equalsIgnoreCase(fenceLanguage)) {
+            return normalized;
+        }
+        return normalized.substring(firstLineEnd + 1, normalized.length() - 3).trim();
+    }
+
+    private InvalidGeneratedProblemException invalidGeneratedProblem(String message) {
+        return new InvalidGeneratedProblemException(message);
+    }
+
     record GeneratedProblem(String prompt, String testCaseSpec, String rawResponse) {}
+}
+
+final class InvalidGeneratedProblemException extends BusinessException {
+    InvalidGeneratedProblemException(String message) {
+        super(ErrorCode.COMMON_INTERNAL_ERROR, message);
+    }
 }

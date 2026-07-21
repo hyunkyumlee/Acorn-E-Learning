@@ -28,6 +28,8 @@ class AiFailureTransactionPolicyTest {
                 "success", AiRequestLog.class, ChatGptResponse.class));
         assertRequiresNew(AiRequestLogService.class.getMethod(
                 "failed", AiRequestLog.class, Exception.class));
+        assertRequiresNew(AiRequestLogService.class.getMethod(
+                "failed", AiRequestLog.class, ChatGptResponse.class, Exception.class));
     }
 
     @Test

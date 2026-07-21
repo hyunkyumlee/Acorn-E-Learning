@@ -50,7 +50,19 @@ public class AiRequestLogService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void failed(AiRequestLog log, Exception exception) {
+        markFailed(log, null, exception);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void failed(AiRequestLog log, ChatGptResponse response, Exception exception) {
+        markFailed(log, response, exception);
+    }
+
+    private void markFailed(AiRequestLog log, ChatGptResponse response, Exception exception) {
         log.setStatus(STATUS_FAILED);
+        if (response != null) {
+            log.setResponsePayload(toJson(response));
+        }
         log.setErrorCode(exception instanceof BusinessException businessException
                 ? businessException.errorCode().code()
                 : ErrorCode.COMMON_INTERNAL_ERROR.code());

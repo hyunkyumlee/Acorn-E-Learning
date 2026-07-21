@@ -11,23 +11,38 @@ if (form && runButton && resultPanel) {
   const textarea = form.querySelector("textarea[name='answerText']");
   const editorHost = form.querySelector("[data-code-editor]");
   const submitButton = document.querySelector("[data-code-submit-button]");
+  const submitHelp = document.querySelector("[data-code-submit-help]");
   const statusText = resultPanel.querySelector("[data-code-run-status]");
   const timeText = resultPanel.querySelector("[data-code-run-time]");
   const detailText = resultPanel.querySelector("[data-code-run-detail]");
   let editorView = null;
   const initialAnswerText = textarea?.value || "";
   const alreadySubmitted = form.dataset.answerSubmitted === "true";
+  const testRunStorageKey = `knowva:exam-test-run:${form.dataset.testRunUrl}`;
+  let testRunCompleted = false;
   const magicSolutionCode = magicSolutionSource?.value || "";
   const notifyEditorReady = () => document.dispatchEvent(new CustomEvent("knowva:code-editor-ready"));
   const notifyEditorFailed = () => document.dispatchEvent(new CustomEvent("knowva:code-editor-failed"));
+
+  try {
+    testRunCompleted = window.sessionStorage.getItem(testRunStorageKey) === "completed";
+  } catch {
+    testRunCompleted = false;
+  }
 
   const updateSubmitState = (code) => {
     if (!submitButton) {
       return;
     }
     const changed = code !== initialAnswerText;
-    submitButton.disabled = alreadySubmitted && !changed;
+    const submittedWithoutChanges = alreadySubmitted && !changed;
+    submitButton.disabled = !testRunCompleted || submittedWithoutChanges;
     submitButton.textContent = alreadySubmitted && !changed ? "제출됨" : (alreadySubmitted ? "다시 제출" : "제출");
+    if (submitHelp) {
+      submitHelp.textContent = testRunCompleted
+        ? "실행 테스트를 완료했습니다. 현재 답안을 제출할 수 있습니다."
+        : "제출하려면 실행 테스트를 한 번 진행하세요.";
+    }
   };
 
   if (textarea && editorHost) {
@@ -107,6 +122,11 @@ if (form && runButton && resultPanel) {
 
   form.addEventListener("submit", (event) => {
     const code = syncTextarea();
+    if (!testRunCompleted) {
+      event.preventDefault();
+      renderResult("danger", "제출 불가", "-", "제출하기 전에 실행 테스트를 한 번 진행하세요.");
+      return;
+    }
     if (!code.trim()) {
       event.preventDefault();
       renderResult("danger", "제출 불가", "-", "답안 코드가 필요합니다.");
@@ -139,6 +159,13 @@ if (form && runButton && resultPanel) {
         throw new Error(message);
       }
       const data = payload.data;
+      testRunCompleted = true;
+      try {
+        window.sessionStorage.setItem(testRunStorageKey, "completed");
+      } catch {
+        // sessionStorage를 사용할 수 없는 환경에서는 현재 페이지에서만 실행 이력을 유지한다.
+      }
+      updateSubmitState(code);
       renderResult(
         data.passed ? "success" : "danger",
         data.message,

@@ -43,6 +43,7 @@ public class AiExamService {
     private static final String TARGET_TYPE = "EXAM_SESSION";
     private static final int PROBLEM_COUNT = 3;
     private static final int PASS_COUNT = 2;
+    private static final int PROBLEM_GENERATION_MAX_ATTEMPTS = 2;
 
     private final ExamSessionMapper examSessionMapper;
     private final AiExamProblemMapper aiExamProblemMapper;
@@ -150,22 +151,42 @@ public class AiExamService {
                     .orElseThrow(() -> exception);
         }
 
-        ChatGptRequest chatGptRequest = ExamProblemGenerationRequestFactory.create(request, learningScope, PROBLEM_COUNT);
-        AiRequestLog log = aiRequestLogService.start(TARGET_TYPE, session.getExamId(), "PROBLEM_GENERATION", chatGptRequest);
         try {
-            ChatGptResponse response = chatGptApiClient.send(chatGptRequest);
-            saveGeneratedProblems(session.getExamId(), response.content(), learningScope);
-            aiRequestLogService.success(log, response);
+            generateProblems(session.getExamId(), request, learningScope);
         } catch (RuntimeException exception) {
             session.setStatus(ExamSessionStatusPolicy.FAILED);
             examSessionMapper.updateStatus(session);
-            aiRequestLogService.failed(log, exception);
             throw exception;
         }
 
         session.setStatus(ExamSessionStatusPolicy.READY);
         examSessionMapper.updateStatus(session);
         return detail(userId, session.getExamId());
+    }
+
+    private void generateProblems(Long examId, CreateExamRequest request, ExamLearningScope learningScope) {
+        ChatGptRequest chatGptRequest = ExamProblemGenerationRequestFactory.create(request, learningScope, PROBLEM_COUNT);
+        InvalidGeneratedProblemException lastValidationFailure = null;
+
+        for (int retryNo = 0; retryNo < PROBLEM_GENERATION_MAX_ATTEMPTS; retryNo++) {
+            AiRequestLog log = aiRequestLogService.start(TARGET_TYPE, examId, "PROBLEM_GENERATION", chatGptRequest);
+            log.setRetryNo(retryNo);
+            ChatGptResponse response = null;
+            try {
+                response = chatGptApiClient.send(chatGptRequest);
+                saveGeneratedProblems(examId, response.content(), learningScope);
+                aiRequestLogService.success(log, response);
+                return;
+            } catch (InvalidGeneratedProblemException exception) {
+                aiRequestLogService.failed(log, response, exception);
+                lastValidationFailure = exception;
+            } catch (RuntimeException exception) {
+                aiRequestLogService.failed(log, response, exception);
+                throw exception;
+            }
+        }
+
+        throw lastValidationFailure;
     }
 
     @Transactional

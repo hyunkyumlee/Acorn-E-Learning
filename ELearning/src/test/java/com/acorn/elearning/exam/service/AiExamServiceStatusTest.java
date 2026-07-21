@@ -28,6 +28,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.dao.DuplicateKeyException;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
@@ -99,6 +100,43 @@ class AiExamServiceStatusTest {
         assertEquals(ExamSessionStatusPolicy.ABANDONED, activeSession.getStatus());
         assertEquals(List.of(ExamSessionStatusPolicy.ABANDONED, ExamSessionStatusPolicy.FAILED), sessionMapper.statusUpdates);
         assertEquals(1, sessionMapper.insertCount);
+    }
+
+    @Test
+    void create_retries_once_when_first_generated_response_is_invalid() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        FakeExamSessionMapper sessionMapper = new FakeExamSessionMapper(readySession());
+        RecordingAiExamProblemMapper problemMapper = new RecordingAiExamProblemMapper();
+        AtomicInteger requestCount = new AtomicInteger();
+        ChatGptApiClient client = new ChatGptApiClient(
+                "openai", true, "test-key", "https://example.com", "gpt-test", 1, objectMapper) {
+            @Override
+            public ChatGptResponse send(ChatGptRequest request) {
+                if (requestCount.getAndIncrement() == 0) {
+                    return response("{\"problems\":[");
+                }
+                return response(validGeneratedContent());
+            }
+        };
+        AiRequestLogService logService = new AiRequestLogService(new NoOpAiRequestLogMapper(), objectMapper);
+        AiExamService service = new AiExamService(
+                sessionMapper,
+                problemMapper,
+                new EmptyExamAnswerMapper(),
+                client,
+                logService,
+                new TestCaseExecutionService(objectMapper),
+                new AiReviewService(client, logService),
+                new ExamLearningScopeService(new LearnedExamLearningScopeMapper()),
+                objectMapper,
+                new UnlockService(unusedMapper(UserLevelUnlockMapper.class)));
+
+        ExamSessionResponse response = service.create(user(), new CreateExamRequest(1L, "BRONZE"));
+
+        assertEquals(2, requestCount.get());
+        assertEquals(3, problemMapper.problems.size());
+        assertEquals(ExamSessionStatusPolicy.READY, response.status());
+        assertEquals(List.of(ExamSessionStatusPolicy.READY), sessionMapper.statusUpdates);
     }
 
     @Test
@@ -206,6 +244,31 @@ class AiExamServiceStatusTest {
         };
     }
 
+    private static ChatGptResponse response(String content) {
+        return new ChatGptResponse(
+                "SUCCESS",
+                "openai",
+                "https://example.com",
+                "gpt-test",
+                "exam-problem-generation",
+                content,
+                "{}",
+                java.util.Map.of());
+    }
+
+    private static String validGeneratedContent() {
+        String solutionCode = "import java.util.Scanner; public class Solution { public static void main(String[] args) { Scanner scanner = new Scanner(System.in); int n = scanner.nextInt(); int sum = 0; for (int value = 1; value <= n; value++) { sum += value; } System.out.println(sum); } }";
+        return """
+                {
+                  "problems": [
+                    {"prompt":"1부터 n까지 합을 구하세요.","solutionCode":"%s","testCases":[{"input":"3","expectedOutput":"6"}]},
+                    {"prompt":"1부터 n까지 합을 구하세요.","solutionCode":"%s","testCases":[{"input":"3","expectedOutput":"6"}]},
+                    {"prompt":"1부터 n까지 합을 구하세요.","solutionCode":"%s","testCases":[{"input":"3","expectedOutput":"6"}]}
+                  ]
+                }
+                """.formatted(solutionCode, solutionCode, solutionCode);
+    }
+
     private static <T> T unusedMapper(Class<T> type) {
         Object proxy = Proxy.newProxyInstance(
                 type.getClassLoader(),
@@ -276,6 +339,49 @@ class AiExamServiceStatusTest {
         @Override
         public int update(AiExamProblem model) {
             return 0;
+        }
+    }
+
+    private static class RecordingAiExamProblemMapper implements AiExamProblemMapper {
+        private final List<AiExamProblem> problems = new ArrayList<>();
+
+        @Override
+        public Optional<AiExamProblem> findById(Long id) {
+            return problems.stream().filter(problem -> id.equals(problem.getAiProblemId())).findFirst();
+        }
+
+        @Override
+        public Optional<AiExamProblem> findByIdAndExamId(Long aiProblemId, Long examId) {
+            return problems.stream()
+                    .filter(problem -> aiProblemId.equals(problem.getAiProblemId()) && examId.equals(problem.getExamId()))
+                    .findFirst();
+        }
+
+        @Override
+        public List<AiExamProblem> findByExamId(Long examId) {
+            return problems.stream().filter(problem -> examId.equals(problem.getExamId())).toList();
+        }
+
+        @Override
+        public List<AiExamProblem> findByExamIdForUpdate(Long examId) {
+            return findByExamId(examId);
+        }
+
+        @Override
+        public List<AiExamProblem> findAll() {
+            return List.copyOf(problems);
+        }
+
+        @Override
+        public int insert(AiExamProblem model) {
+            model.setAiProblemId((long) problems.size() + 1);
+            problems.add(model);
+            return 1;
+        }
+
+        @Override
+        public int update(AiExamProblem model) {
+            return 1;
         }
     }
 
@@ -404,6 +510,7 @@ class AiExamServiceStatusTest {
                 duplicateSession = null;
                 throw new DuplicateKeyException("활성 시험이 이미 생성되었습니다.");
             }
+            model.setExamId(10L);
             return 1;
         }
 

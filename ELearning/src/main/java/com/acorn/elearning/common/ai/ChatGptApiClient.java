@@ -35,7 +35,7 @@ public class ChatGptApiClient {
             @Value("${knowva.ai.api-key:}") String apiKey,
             @Value("${knowva.ai.base-url:https://api.openai.com/v1}") String baseUrl,
             @Value("${knowva.ai.model:}") String model,
-            @Value("${knowva.ai.max-completion-tokens:800}") int maxCompletionTokens,
+            @Value("${knowva.ai.max-completion-tokens:1200}") int maxCompletionTokens,
             ObjectMapper objectMapper
     ) {
         this.provider = provider;

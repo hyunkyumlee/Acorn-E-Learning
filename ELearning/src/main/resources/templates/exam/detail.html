@@ -94,11 +94,11 @@
                   th:disabled="${magicSolutionCode == null or magicSolutionCode.isBlank()}">마법 버튼</button>
           <button type="button" class="button" data-code-run-button>실행 테스트</button>
           <button type="submit" class="button primary" form="exam-answer-form" name="move" value="next"
-                  data-code-submit-button>제출</button>
+                  data-code-submit-button aria-describedby="exam-submit-help" disabled>제출</button>
           <a class="button" th:if="${step.nextProblemNo() != null}"
              th:href="@{/exams/{examId}/problems/{problemNo}(examId=${exam.examId()}, problemNo=${step.nextProblemNo()})}">넘어가기</a>
         </div>
-        <p class="exam-submit-help">모든 문제를 제출하면 최종 제출 확인 창이 열립니다.</p>
+        <p class="exam-submit-help" id="exam-submit-help" data-code-submit-help>제출하려면 실행 테스트를 한 번 진행하세요.</p>
       </aside>
     </section>
 
