@@ -16,6 +16,7 @@ import com.acorn.elearning.auth.model.SocialAccount;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.config.OAuthProperties;
+import com.acorn.elearning.payment.service.PaymentAccessService;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.mapper.UserLearningProfileMapper;
 import com.acorn.elearning.user.mapper.UserMapper;
@@ -47,6 +48,7 @@ public class OAuthService {
     private final SessionService sessionService;
     private final OAuthProperties oAuthProperties;
     private final UserCredentialMapper userCredentialMapper; //최소 인증수단 유지 룰 검증용
+    private final PaymentAccessService paymentAccessService;
     private final SecureRandom secureRandom = new SecureRandom();
     private final RestClient restClient = RestClient.create();
 
@@ -55,7 +57,9 @@ public class OAuthService {
                         UserSettingMapper userSettingMapper,
                         UserLearningProfileMapper userLearningProfileMapper,
                         SessionService sessionService,
-                        OAuthProperties oAuthProperties, UserCredentialMapper userCredentialMapper) {
+                        OAuthProperties oAuthProperties,
+                        UserCredentialMapper userCredentialMapper,
+                        PaymentAccessService paymentAccessService) {
         this.socialAccountMapper = socialAccountMapper;
         this.userMapper = userMapper;
         this.userSettingMapper = userSettingMapper;
@@ -63,6 +67,7 @@ public class OAuthService {
         this.sessionService = sessionService;
         this.oAuthProperties = oAuthProperties;
         this.userCredentialMapper = userCredentialMapper;
+        this.paymentAccessService = paymentAccessService;
     }
 
     // ================= AUTH-005: 로그인 provider redirect =================
@@ -381,7 +386,8 @@ public class OAuthService {
     }
 
     private SessionUser toSessionUser(User user) {
-        return new SessionUser(user.getUserId(), user.getEmail(), user.getNickname(), user.getRole(), false, user.getProfileImageUrl());
+        boolean premiumActive = paymentAccessService.hasPremiumAccess(user.getUserId());
+        return new SessionUser(user.getUserId(), user.getEmail(), user.getNickname(), user.getRole(), premiumActive, user.getProfileImageUrl());
     }
 
     private void requireLogin(SessionUser sessionUser) {

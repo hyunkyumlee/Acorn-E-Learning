@@ -16,4 +16,8 @@ public interface LearningProgressMapper {
                                                      @Param("nodeId") Long nodeId);
     int insert(LearningProgress model);
     int update(LearningProgress model);
+
+    int upsertLessonCompleted(@Param("userId") Long userId,
+                              @Param("subjectId") Long subjectId,
+                              @Param("nodeId") Long nodeId);
 }

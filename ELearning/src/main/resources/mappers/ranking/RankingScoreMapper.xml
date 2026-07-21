@@ -60,6 +60,15 @@
         WHERE ranking_id = #{rankingId}
     </update>
 
+    <!-- 여러 서버 인스턴스에서도 같은 기간의 재계산은 하나만 실행한다. -->
+    <select id="tryAcquireRefreshLock" resultType="int">
+        SELECT GET_LOCK(#{lockName}, #{timeoutSeconds})
+    </select>
+
+    <select id="releaseRefreshLock" resultType="int">
+        SELECT RELEASE_LOCK(#{lockName})
+    </select>
+
     <delete id="deleteWeeklySubjectRankingByPeriodKey">
         DELETE FROM ranking_scores
         WHERE scope_type = 'SUBJECT'

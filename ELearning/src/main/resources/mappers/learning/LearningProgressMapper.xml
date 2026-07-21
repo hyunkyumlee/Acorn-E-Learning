@@ -71,4 +71,17 @@
         WHERE progress_id = #{progressId}
     </update>
 
+    <!-- (user, subject, node) 유니크 키로 이론 완료를 원자적으로 반영한다. -->
+    <insert id="upsertLessonCompleted">
+        INSERT INTO learning_progress
+            (user_id, subject_id, node_id, lesson_completed, practice_passed, progress_rate, completed_at)
+        VALUES
+            (#{userId}, #{subjectId}, #{nodeId}, 1, 0, 50.00, NULL)
+        ON DUPLICATE KEY UPDATE
+            lesson_completed = 1,
+            progress_rate = IF(practice_passed = 1, 100.00, 50.00),
+            completed_at = IF(practice_passed = 1, COALESCE(completed_at, NOW()), completed_at),
+            updated_at = NOW()
+    </insert>
+
 </mapper>

@@ -18,7 +18,6 @@ import com.acorn.elearning.learning.model.LessonBookmark;
 import com.acorn.elearning.learning.view.LessonProgressView;
 import com.acorn.elearning.security.SessionUser;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,45 +90,19 @@ public class LessonService {
             throw new BusinessException(ErrorCode.AUTH_FORBIDDEN, "아직 잠긴 레벨의 학습입니다.");
         }
 
-        LearningProgress progress = learningProgressMapper
-                .findByUserSubjectNode(userId, subjectId, node.getNodeId())
-                .orElse(null);
-
-        // 409: 이미 이론을 완료한 '레슨'(레슨 단위 재완료 방지). user_lesson_progress 기준.
-        boolean alreadyTheoryDone = userLessonProgressMapper.findByUserAndLesson(userId, lessonId)
-                .map(p -> Boolean.TRUE.equals(p.getTheoryCompleted()))
-                .orElse(false);
-        if (alreadyTheoryDone) {
+        // 레슨 완료 권한을 DB에서 원자적으로 선점한다. 동시에 들어온 두 번째 요청은 0을 받아 409가 된다.
+        int claimResult = userLessonProgressMapper.claimTheoryCompletion(userId, lessonId);
+        if (claimResult == 0) {
             throw new BusinessException(ErrorCode.COMMON_IDEMPOTENCY_CONFLICT, "이미 완료한 학습입니다.");
         }
 
-        boolean practicePassed = progress != null && Boolean.TRUE.equals(progress.getPracticePassed());
+        // 노드 진행 행도 원자 upsert한다. 기존 "조회 후 insert" 경쟁 조건을 제거한다.
+        learningProgressMapper.upsertLessonCompleted(userId, subjectId, node.getNodeId());
+        LearningProgress progress = learningProgressMapper
+                .findByUserSubjectNode(userId, subjectId, node.getNodeId())
+                .orElseThrow(() -> new IllegalStateException("학습 진행 상태를 저장하지 못했습니다."));
+        boolean practicePassed = Boolean.TRUE.equals(progress.getPracticePassed());
         BigDecimal rate = practicePassed ? RATE_FULL : RATE_LESSON_ONLY;
-        LocalDateTime now = LocalDateTime.now();
-
-        if (progress == null) {
-            // 진행 행이 없던 단원 → 새 행 insert. 이론만 완료라 단원 완전완료(completed_at)는 아직 아님.
-            LearningProgress row = new LearningProgress();
-            row.setUserId(userId);
-            row.setSubjectId(subjectId);
-            row.setNodeId(node.getNodeId());
-            row.setLessonCompleted(true);
-            row.setPracticePassed(false);
-            row.setProgressRate(rate);
-            row.setCompletedAt(null);
-            learningProgressMapper.insert(row);
-        } else {
-            // 문제풀이만 되어 있던 단원 → 이론 완료로 갱신. 둘 다 되면 단원 완전완료 시점 기록.
-            progress.setLessonCompleted(true);
-            progress.setProgressRate(rate);
-            if (practicePassed) {
-                progress.setCompletedAt(now);
-            }
-            learningProgressMapper.update(progress);
-        }
-
-        // 레슨 단위 진행 기록(source of truth). 레슨 선택 화면·로드맵 집계가 이 값을 읽는다.
-        userLessonProgressMapper.upsertTheoryCompleted(userId, lessonId);
 
         // nextAction 힌트: 문제풀이가 남았으면 START_PRACTICE, 아니면 다음 단원/게이트.
         String nextAction;

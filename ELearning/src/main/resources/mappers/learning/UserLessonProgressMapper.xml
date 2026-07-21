@@ -43,6 +43,17 @@
             updated_at       = NOW()
     </insert>
 
+    <!-- 최초 완료 요청만 1 또는 2를 반환하고, 이미 완료된 요청은 0을 반환한다. -->
+    <insert id="claimTheoryCompletion">
+        INSERT INTO user_lesson_progress (user_id, lesson_id, theory_completed, practice_passed, progress_rate)
+        VALUES (#{userId}, #{lessonId}, 1, 0, 50.00)
+        ON DUPLICATE KEY UPDATE
+            progress_rate = IF(theory_completed = 0, IF(practice_passed = 1, 100.00, 50.00), progress_rate),
+            completed_at = IF(theory_completed = 0 AND practice_passed = 1, NOW(), completed_at),
+            updated_at = IF(theory_completed = 0, NOW(), updated_at),
+            theory_completed = IF(theory_completed = 0, 1, theory_completed)
+    </insert>
+
     <select id="countCompletedRequiredLessons" resultType="int">
         SELECT COUNT(*)
         FROM lessons l
