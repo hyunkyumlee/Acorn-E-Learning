@@ -11,6 +11,7 @@ import com.acorn.elearning.payment.model.DummyPayment;
 import com.acorn.elearning.payment.model.PaymentProduct;
 import com.acorn.elearning.payment.model.PremiumGrant;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.user.mapper.UserMapper;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -29,15 +30,18 @@ public class DummyPaymentService {
     private final DummyPaymentMapper dummyPaymentMapper;
     private final PaymentProductMapper paymentProductMapper;
     private final PremiumGrantService premiumGrantService;
+    private final UserMapper userMapper;
 
     public DummyPaymentService(
             DummyPaymentMapper dummyPaymentMapper,
             PaymentProductMapper paymentProductMapper,
-            PremiumGrantService premiumGrantService
+            PremiumGrantService premiumGrantService,
+            UserMapper userMapper
     ) {
         this.dummyPaymentMapper = dummyPaymentMapper;
         this.paymentProductMapper = paymentProductMapper;
         this.premiumGrantService = premiumGrantService;
+        this.userMapper = userMapper;
     }
 
     @Transactional
@@ -65,12 +69,14 @@ public class DummyPaymentService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "활성화된 결제 상품을 찾을 수 없습니다."));
         String orderNo = buildOrderNo(userId, form.getIdempotencyToken());
 
-        Optional<DummyPayment> existingPayment = dummyPaymentMapper.findByOrderNo(orderNo);
+        Optional<DummyPayment> existingPayment = dummyPaymentMapper.findByOrderNoForUpdate(orderNo);
         if (existingPayment.isPresent()) {
             return reuseExistingPayment(existingPayment.get(), userId, product, form);
         }
 
-        if (premiumGrantService.hasActiveGrant(userId)) {
+        userMapper.findByIdForUpdate(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND));
+        if (premiumGrantService.findActiveByUserIdForUpdate(userId).isPresent()) {
             throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "이미 Premium 권한이 활성화되어 있습니다.");
         }
 
