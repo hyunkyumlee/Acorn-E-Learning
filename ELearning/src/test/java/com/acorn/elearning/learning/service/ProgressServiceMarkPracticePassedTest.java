@@ -182,5 +182,10 @@ class ProgressServiceMarkPracticePassedTest {
         public List<LearningProgress> findByUserIdAndSubjectId(Long userId, Long subjectId) {
             return List.of();
         }
+
+        @Override
+        public int upsertLessonCompleted(Long userId, Long subjectId, Long nodeId) {
+            throw new AssertionError("upsertLessonCompleted 는 호출되면 안 됩니다.");
+        }
     }
 }
