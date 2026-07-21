@@ -1399,11 +1399,17 @@
 }
 
 .community-home-screen .community-feed-heading p,
-.community-listing-heading > span {
+.community-listing-heading-copy > span {
   margin-top: 4px;
   color: var(--muted);
   font-size: 14px;
   font-weight: 650;
+}
+
+.community-listing-heading-copy {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
 }
 
 .community-more-link {
@@ -3334,6 +3340,10 @@
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--surface-soft) 88%, transparent);
   padding: 16px;
+}
+
+.community-listing-main > .community-notice-strip {
+  margin: 0;
 }
 
 .community-notice-strip-heading {
