@@ -13,4 +13,8 @@ public interface PostAttachmentMapper {
     int insert(PostAttachment model);
     int update(PostAttachment model);
     int deleteById(@Param("attachmentId") Long attachmentId);
+    int deleteByIdAndPostId(
+            @Param("attachmentId") Long attachmentId,
+            @Param("postId") Long postId
+    );
 }
