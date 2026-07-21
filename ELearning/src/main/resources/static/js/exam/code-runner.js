@@ -2,6 +2,8 @@ import {createJavaCodeEditor} from "./code-editor.js";
 
 const form = document.querySelector("[data-code-run-form]");
 const runButton = document.querySelector("[data-code-run-button]");
+const copyButton = document.querySelector("[data-code-copy-button]");
+const magicSolutionSource = document.querySelector("[data-magic-solution-code]");
 const resultPanel = document.querySelector("[data-code-run-result]");
 const finalSubmitModal = document.querySelector("[data-final-submit-modal]");
 
@@ -15,6 +17,7 @@ if (form && runButton && resultPanel) {
   let editorView = null;
   const initialAnswerText = textarea?.value || "";
   const alreadySubmitted = form.dataset.answerSubmitted === "true";
+  const magicSolutionCode = magicSolutionSource?.value || "";
   const notifyEditorReady = () => document.dispatchEvent(new CustomEvent("knowva:code-editor-ready"));
   const notifyEditorFailed = () => document.dispatchEvent(new CustomEvent("knowva:code-editor-failed"));
 
@@ -26,6 +29,7 @@ if (form && runButton && resultPanel) {
     submitButton.disabled = alreadySubmitted && !changed;
     submitButton.textContent = alreadySubmitted && !changed ? "제출됨" : (alreadySubmitted ? "다시 제출" : "제출");
   };
+
   if (textarea && editorHost) {
     try {
       editorView = createJavaCodeEditor({
@@ -45,7 +49,9 @@ if (form && runButton && resultPanel) {
   } else {
     notifyEditorReady();
   }
-  textarea?.addEventListener("input", () => updateSubmitState(textarea.value));
+  textarea?.addEventListener("input", () => {
+    updateSubmitState(textarea.value);
+  });
   updateSubmitState(initialAnswerText);
 
   const syncTextarea = () => {
@@ -64,17 +70,39 @@ if (form && runButton && resultPanel) {
   };
 
   const caseSummary = (data) => {
-    const failedCase = (data.cases || []).find((testCase) => !testCase.passed);
     const lines = [`${data.passedCount} / ${data.totalCount} 테스트 통과`];
-    if (failedCase) {
-      lines.push(`입력: ${failedCase.input || "(없음)"}`);
-      lines.push(`기대 출력: ${failedCase.expectedOutput || "(없음)"}`);
-      lines.push(`실제 출력: ${failedCase.actualOutput || "(없음)"}`);
-      if (failedCase.errorMessage) {
-        lines.push(`오류: ${failedCase.errorMessage}`);
+    (data.cases || []).forEach((testCase, index) => {
+      lines.push("", `[테스트케이스 ${index + 1}] ${testCase.passed ? "통과" : "실패"}`);
+      if (!testCase.passed) {
+        lines.push(`입력: ${testCase.input || "(없음)"}`);
+        lines.push(`기대 출력: ${testCase.expectedOutput || "(없음)"}`);
       }
-    }
+      lines.push("콘솔 출력:", testCase.actualOutput || "(출력 없음)");
+      if (testCase.errorMessage) {
+        lines.push(`오류: ${testCase.errorMessage}`);
+      }
+    });
     return lines.join("\n");
+  };
+
+  const copyText = async (value) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+
+    const copySource = document.createElement("textarea");
+    copySource.value = value;
+    copySource.setAttribute("readonly", "");
+    copySource.style.position = "fixed";
+    copySource.style.opacity = "0";
+    document.body.append(copySource);
+    copySource.select();
+    const copied = document.execCommand("copy");
+    copySource.remove();
+    if (!copied) {
+      throw new Error("클립보드에 복사하지 못했습니다.");
+    }
   };
 
   form.addEventListener("submit", (event) => {
@@ -121,6 +149,21 @@ if (form && runButton && resultPanel) {
       renderResult("danger", "실행 실패", "-", error.message);
     } finally {
       runButton.disabled = false;
+    }
+  });
+
+  copyButton?.addEventListener("click", async () => {
+    if (!magicSolutionCode.trim()) {
+      renderResult("danger", "복사 실패", "-", "정답 코드를 준비하지 못했습니다.");
+      return;
+    }
+
+    try {
+      await copyText(magicSolutionCode);
+      copyButton.textContent = "복사됨";
+      copyButton.setAttribute("aria-label", "정답 전체 코드가 복사되었습니다.");
+    } catch (error) {
+      renderResult("danger", "복사 실패", "-", error.message);
     }
   });
 }

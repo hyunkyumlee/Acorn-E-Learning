@@ -21,15 +21,6 @@ const knowvaEditorTheme = EditorView.theme({
   },
 });
 
-const insertSoftTab = (view) => {
-  const hasSelection = view.state.selection.ranges.some((range) => !range.empty);
-  if (hasSelection) {
-    return indentMore(view);
-  }
-  view.dispatch(view.state.replaceSelection("    "));
-  return true;
-};
-
 const enableTemporaryTabFocus = (view) => {
   view.setTabFocusMode(2000);
   return true;
@@ -49,7 +40,7 @@ export const createJavaCodeEditor = ({textarea, editorHost, onChange}) => {
       knowvaEditorTheme,
       keymap.of([
         {key: "Escape", run: enableTemporaryTabFocus},
-        {key: "Tab", run: insertSoftTab, shift: indentLess},
+        {key: "Tab", run: indentMore, shift: indentLess},
       ]),
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {
