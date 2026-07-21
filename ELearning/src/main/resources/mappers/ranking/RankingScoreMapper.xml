@@ -321,13 +321,10 @@
         FROM ranking_scores rs
         INNER JOIN users u
         ON u.user_id = rs.user_id
-        INNER JOIN user_learning_profiles ulp
-        ON ulp.user_id = rs.user_id
         WHERE rs.scope_type = 'SUBJECT'
         AND rs.subject_id = #{subjectId}
         AND rs.period_type = 'WEEKLY'
         AND rs.period_key = #{periodKey}
-        AND ulp.current_level_code = #{leagueCode}
         ) ranked
         ORDER BY ranked.rankNo ASC
     </select>
@@ -349,13 +346,10 @@
         FROM ranking_scores rs
         INNER JOIN users u
         ON u.user_id = rs.user_id
-        INNER JOIN user_learning_profiles ulp
-        ON ulp.user_id = rs.user_id
         WHERE rs.scope_type = 'SUBJECT'
         AND rs.subject_id = #{subjectId}
         AND rs.period_type = 'WEEKLY'
         AND rs.period_key = #{periodKey}
-        AND ulp.current_level_code = #{leagueCode}
         ) ranked
         WHERE ranked.userId = #{userId}
         LIMIT 1
@@ -378,14 +372,11 @@
         FROM (
         SELECT
         rs.user_id,
-        ROUND(AVG(rs.score)) AS score
+        SUM(rs.score) AS score
         FROM ranking_scores rs
-        INNER JOIN user_learning_profiles ulp
-        ON ulp.user_id = rs.user_id
         WHERE rs.scope_type = 'SUBJECT'
         AND rs.period_type = 'MONTHLY'
         AND rs.period_key = #{periodKey}
-        AND ulp.current_level_code = #{leagueCode}
         GROUP BY rs.user_id
         ) avg_scores
         INNER JOIN users u
@@ -411,14 +402,11 @@
         FROM (
         SELECT
         rs.user_id,
-        ROUND(AVG(rs.score)) AS score
+        SUM(rs.score) AS score
         FROM ranking_scores rs
-        INNER JOIN user_learning_profiles ulp
-        ON ulp.user_id = rs.user_id
         WHERE rs.scope_type = 'SUBJECT'
         AND rs.period_type = 'MONTHLY'
         AND rs.period_key = #{periodKey}
-        AND ulp.current_level_code = #{leagueCode}
         GROUP BY rs.user_id
         ) avg_scores
         INNER JOIN users u
