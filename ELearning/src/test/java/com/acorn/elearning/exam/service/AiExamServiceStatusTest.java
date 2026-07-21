@@ -102,14 +102,14 @@ class AiExamServiceStatusTest {
     }
 
     @Test
-    void solutionCode_returns_raw_solution_for_current_exam_problem() {
+    void solutionCode_returns_dedicated_solution_for_current_exam_problem() {
         AiExamProblem problem = new AiExamProblem();
         problem.setAiProblemId(99L);
         problem.setProblemNo(1);
         problem.setAiRawResponse("""
                 {
                   "problems": [
-                    {"starterCode": "public class Solution { public static void main(String[] args) { System.out.println(42); } }"}
+                    {"starterCode": "public class Solution { public static void main(String[] args) { /* TODO */ } }", "solutionCode": "public class Solution { public static void main(String[] args) { System.out.println(42); } }"}
                   ]
                 }
                 """);

@@ -46,7 +46,7 @@ public final class ExamStarterCodeResolver {
                 return Optional.empty();
             }
 
-            JsonNode solutionCode = problems.get(problemIndex).path("starterCode");
+            JsonNode solutionCode = problems.get(problemIndex).path("solutionCode");
             if (!solutionCode.isTextual() || solutionCode.asText().isBlank()) {
                 return Optional.empty();
             }

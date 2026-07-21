@@ -13,7 +13,10 @@ import tools.jackson.databind.ObjectMapper;
 
 class AiGeneratedProblemParserTest {
 
-    private final AiGeneratedProblemParser parser = new AiGeneratedProblemParser(new ObjectMapper());
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final AiGeneratedProblemParser parser = new AiGeneratedProblemParser(
+            objectMapper,
+            new TestCaseExecutionService(objectMapper));
 
     @Test
     void parse_accepts_valid_problem_response() {
@@ -64,29 +67,53 @@ class AiGeneratedProblemParserTest {
     @Test
     void parse_converts_literal_newline_sequences_in_prompt_before_persisting() {
         List<AiGeneratedProblemParser.GeneratedProblem> problems = parser.parse(
-                validContent("첫 번째 문장\\n\\n두 번째 문장", scannerStarterCode(), validTestCases()),
+                validContentWithPrompt("첫 번째 문장\\n\\n두 번째 문장", scannerStarterCode(), validTestCases()),
                 beginnerScope(),
                 1);
 
         assertEquals("첫 번째 문장\n\n두 번째 문장", problems.get(0).prompt());
     }
 
-    private String validContent(String starterCode, String testCases) {
-        return validContent("1부터 n까지 합을 구하세요.", starterCode, testCases);
+    @Test
+    void parse_rejects_solution_code_that_does_not_pass_test_cases() {
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> parser.parse(validContentWithSolution(
+                        scannerStarterCode(),
+                        "public class Solution { public static void main(String[] args) { System.out.println(0); } }",
+                        validTestCases()),
+                        beginnerScope(),
+                        1));
+
+        assertEquals(ErrorCode.COMMON_INTERNAL_ERROR, exception.errorCode());
+        assertEquals("AI가 생성한 solutionCode가 테스트케이스를 통과하지 못했습니다.", exception.getMessage());
     }
 
-    private String validContent(String prompt, String starterCode, String testCases) {
+    private String validContent(String starterCode, String testCases) {
+        return validContent("1부터 n까지 합을 구하세요.", starterCode, solutionCode(), testCases);
+    }
+
+    private String validContentWithPrompt(String prompt, String starterCode, String testCases) {
+        return validContent(prompt, starterCode, solutionCode(), testCases);
+    }
+
+    private String validContentWithSolution(String starterCode, String solutionCode, String testCases) {
+        return validContent("1부터 n까지 합을 구하세요.", starterCode, solutionCode, testCases);
+    }
+
+    private String validContent(String prompt, String starterCode, String solutionCode, String testCases) {
         return """
                 {
                   "problems": [
                     {
                       "prompt": "%s",
                       "starterCode": "%s",
+                      "solutionCode": "%s",
                       "testCases": %s
                     }
                   ]
                 }
-                """.formatted(prompt, starterCode, testCases);
+                """.formatted(prompt, starterCode, solutionCode, testCases);
     }
 
     private String validTestCases() {
@@ -95,6 +122,10 @@ class AiGeneratedProblemParserTest {
 
     private String scannerStarterCode() {
         return "import java.util.Scanner; public class Solution { public static void main(String[] args) { Scanner scanner = new Scanner(System.in); } }";
+    }
+
+    private String solutionCode() {
+        return "import java.util.Scanner; public class Solution { public static void main(String[] args) { Scanner scanner = new Scanner(System.in); int n = scanner.nextInt(); int sum = 0; for (int value = 1; value <= n; value++) { sum += value; } System.out.println(sum); } }";
     }
 
     private String bufferedReaderStarterCode() {

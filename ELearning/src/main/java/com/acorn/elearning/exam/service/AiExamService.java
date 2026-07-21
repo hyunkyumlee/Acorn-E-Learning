@@ -76,7 +76,7 @@ public class AiExamService {
         this.testCaseExecutionService = testCaseExecutionService;
         this.aiReviewService = aiReviewService;
         this.examLearningScopeService = examLearningScopeService;
-        this.generatedProblemParser = new AiGeneratedProblemParser(objectMapper);
+        this.generatedProblemParser = new AiGeneratedProblemParser(objectMapper, testCaseExecutionService);
         this.objectMapper = objectMapper;
         this.unlockService = unlockService;
     }

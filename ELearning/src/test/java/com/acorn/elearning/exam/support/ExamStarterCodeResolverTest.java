@@ -33,14 +33,14 @@ class ExamStarterCodeResolverTest {
     }
 
     @Test
-    void solutionCode_returns_raw_solution_for_matching_problem() {
+    void solutionCode_returns_dedicated_solution_for_matching_problem() {
         AiExamProblem problem = new AiExamProblem();
         problem.setProblemNo(2);
         problem.setAiRawResponse("""
                 {
                   "problems": [
-                    {"starterCode": "public class Solution { public static void main(String[] args) { System.out.println(1); } }"},
-                    {"starterCode": "public class Solution { public static void main(String[] args) { System.out.println(2); } }"}
+                    {"starterCode": "public class Solution { public static void main(String[] args) { /* TODO */ } }", "solutionCode": "public class Solution { public static void main(String[] args) { System.out.println(1); } }"},
+                    {"starterCode": "public class Solution { public static void main(String[] args) { /* TODO */ } }", "solutionCode": "public class Solution { public static void main(String[] args) { System.out.println(2); } }"}
                   ]
                 }
                 """);
@@ -48,5 +48,20 @@ class ExamStarterCodeResolverTest {
         String solutionCode = ExamStarterCodeResolver.solutionCode(problem).orElseThrow();
 
         assertEquals("public class Solution { public static void main(String[] args) { System.out.println(2); } }", solutionCode);
+    }
+
+    @Test
+    void solutionCode_does_not_treat_legacy_starter_code_as_a_correct_solution() {
+        AiExamProblem problem = new AiExamProblem();
+        problem.setProblemNo(1);
+        problem.setAiRawResponse("""
+                {
+                  "problems": [
+                    {"starterCode": "public class Solution { public static void main(String[] args) { System.out.println(42); } }"}
+                  ]
+                }
+                """);
+
+        assertTrue(ExamStarterCodeResolver.solutionCode(problem).isEmpty());
     }
 }

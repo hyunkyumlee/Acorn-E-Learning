@@ -2,6 +2,9 @@ package com.acorn.elearning.exam.service;
 
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
+import com.acorn.elearning.exam.dto.response.TestCaseExecutionResult;
+import com.acorn.elearning.exam.model.AiExamProblem;
+import com.acorn.elearning.exam.model.ExamAnswer;
 import com.acorn.elearning.exam.service.ExamLearningScopeService.ExamLearningScope;
 import com.acorn.elearning.exam.service.ExamLearningScopeService.LearnedItem;
 import com.acorn.elearning.exam.support.ExamPromptNormalizer;
@@ -31,9 +34,11 @@ final class AiGeneratedProblemParser {
             "PriorityQueue");
 
     private final ObjectMapper objectMapper;
+    private final TestCaseExecutionService testCaseExecutionService;
 
-    AiGeneratedProblemParser(ObjectMapper objectMapper) {
+    AiGeneratedProblemParser(ObjectMapper objectMapper, TestCaseExecutionService testCaseExecutionService) {
         this.objectMapper = objectMapper;
+        this.testCaseExecutionService = testCaseExecutionService;
     }
 
     List<GeneratedProblem> parse(String content, ExamLearningScope learningScope, int problemCount) {
@@ -56,9 +61,13 @@ final class AiGeneratedProblemParser {
             JsonNode problem = problems.get(index);
             String starterCode = requiredText(problem, "starterCode");
             validateStarterCode(starterCode, learningScopeText);
+            String solutionCode = requiredText(problem, "solutionCode");
+            validateSolutionCode(solutionCode, learningScopeText);
+            String testCaseSpec = objectMapper.writeValueAsString(validTestCases(problem));
+            validateSolutionExecution(solutionCode, testCaseSpec);
             parsed.add(new GeneratedProblem(
                     ExamPromptNormalizer.normalize(requiredText(problem, "prompt")),
-                    objectMapper.writeValueAsString(validTestCases(problem)),
+                    testCaseSpec,
                     content));
         }
         return parsed;
@@ -77,11 +86,38 @@ final class AiGeneratedProblemParser {
     }
 
     private void validateStarterCode(String starterCode, String learningScopeText) {
-        String normalizedStarterCode = starterCode.toLowerCase(Locale.ROOT);
+        validateAllowedApis(starterCode, learningScopeText, "starterCode");
+    }
+
+    private void validateSolutionCode(String solutionCode, String learningScopeText) {
+        if (solutionCode.contains("TODO")) {
+            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 solutionCode에 미완성 로직이 있습니다.");
+        }
+        if (!solutionCode.contains("public class Solution")) {
+            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "AI가 생성한 solutionCode 형식이 올바르지 않습니다.");
+        }
+        validateAllowedApis(solutionCode, learningScopeText, "solutionCode");
+    }
+
+    private void validateAllowedApis(String code, String learningScopeText, String codeFieldName) {
+        String normalizedCode = code.toLowerCase(Locale.ROOT);
         for (String token : RESTRICTED_STARTER_TOKENS) {
-            if (normalizedStarterCode.contains(token.toLowerCase(Locale.ROOT)) && !allowedByLearningScope(token, learningScopeText)) {
-                throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "학습 범위에 없는 starterCode API가 포함되어 있습니다.");
+            if (normalizedCode.contains(token.toLowerCase(Locale.ROOT)) && !allowedByLearningScope(token, learningScopeText)) {
+                throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR,
+                        "학습 범위에 없는 " + codeFieldName + " API가 포함되어 있습니다.");
             }
+        }
+    }
+
+    private void validateSolutionExecution(String solutionCode, String testCaseSpec) {
+        AiExamProblem problem = new AiExamProblem();
+        problem.setTestCaseSpec(testCaseSpec);
+        ExamAnswer answer = new ExamAnswer();
+        answer.setAnswerText(solutionCode);
+        TestCaseExecutionResult result = testCaseExecutionService.execute(problem, answer);
+        if (!result.passed()) {
+            throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR,
+                    "AI가 생성한 solutionCode가 테스트케이스를 통과하지 못했습니다.");
         }
     }
 
