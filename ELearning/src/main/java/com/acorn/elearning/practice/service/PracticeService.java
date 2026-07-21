@@ -29,15 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PracticeService {
-   /* public Map<String, Object> stub(String action) {
-        // TODO 구현 예시입니다. 실제 parameter와 return DTO로 method signature를 교체하세요.
-        // List<PracticeProblem> problems = practiceProblemMapper.findAvailable(userId, subjectId);
-        // PracticeSetAttempt attempt = PracticeSetAttempt.start(userId, problems);
-        // practiceSetAttemptMapper.insert(attempt);
-        // return Map.of("attempt", PracticeSetResponse.from(attempt, problems));
-        return Map.of("action", action, "status", "SKELETON");
-    }
-    */
+
     private final PracticeSetAttemptMapper practiceSetAttemptMapper;
     private final PracticeSubmissionMapper practiceSubmissionMapper;
     private final ProblemService problemService;
@@ -142,20 +134,20 @@ public class PracticeService {
             Long setAttemptId = completeForm.getSetAttemptId();
             List<PracticeAnswerForm.SingleAnswer> answerList = completeForm.getAnswers();
 
-            // 문제 10개 방어용
-            if (answerList == null || answerList.size() != 10) {
+            PracticeSetAttempt attempt = requireOwnedAttempt(user, setAttemptId);
+            if (!"IN_PROGRESS".equals(attempt.getStatus())) {
                 throw new BusinessException(
-                        ErrorCode.COMMON_VALIDATION_FAILED,
-                        "제출 문항 수가 올바르지 않습니다."
+                        ErrorCode.COMMON_IDEMPOTENCY_CONFLICT,
+                        "이미 제출 또는 완료된 연습 세트입니다."
                 );
             }
 
-            // 1. 세트 이력 조회
-            PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
-                    .orElseThrow(() -> new BusinessException(
-                            ErrorCode.COMMON_NOT_FOUND,
-                            "존재하지 않는 세트입니다."
-                    ));
+            if (answerList == null || answerList.size() != attempt.getTotalCount()) {
+                throw new BusinessException(
+                        ErrorCode.COMMON_VALIDATION_FAILED,
+                        "모든 문제의 답안을 제출해야 합니다."
+                );
+            }
 
             int correctCount = 0;
 
@@ -240,44 +232,17 @@ public class PracticeService {
 
         @Transactional
         public PracticeSetResponse completeSet(SessionUser user, Long setAttemptId) {
-            PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
-                    .orElseThrow(() -> new BusinessException(
-                            ErrorCode.COMMON_NOT_FOUND,
-                            "세트를 찾을 수 없습니다."
-                    ));
+            PracticeSetAttempt attempt = requireOwnedAttempt(user, setAttemptId);
 
-            // 1. 상태 처리
             if (!"COMPLETED".equals(attempt.getStatus())) {
-                attempt.setStatus("COMPLETED");
-
-                int updatedRows = practiceSetAttemptMapper.updateAttempt(attempt);
-                if (updatedRows == 0) {
-                    throw new BusinessException(
-                            ErrorCode.COMMON_INTERNAL_ERROR,
-                            "세트 상태 업데이트에 실패했습니다."
-                    );
-                }
+                throw new BusinessException(
+                        ErrorCode.COMMON_IDEMPOTENCY_CONFLICT,
+                        "답안 제출이 완료된 연습 세트만 완료 처리할 수 있습니다."
+                );
             }
 
-            // 통과 시 학습 진행/출석/점수 반영
             if (Boolean.TRUE.equals(attempt.getPassed())) {
-                progressService.markPracticePassed(
-                        attempt.getUserId(),
-                        attempt.getSubjectId(),
-                        attempt.getNodeId()
-                );
-
-                userLessonProgressMapper.upsertPracticePassed(
-                        attempt.getUserId(),
-                        attempt.getLessonId()
-                );
-
-                attendanceService.recordAttendanceOnPracticePass(
-                        attempt.getUserId(),
-                        attempt.getSetAttemptId()
-                );
-
-                scoreService.giveScore(
+                boolean firstCompletion = scoreService.giveScoreIfAbsent(
                         attempt.getUserId(),
                         attempt.getSubjectId(),
                         attempt.getSetAttemptId(),
@@ -286,6 +251,24 @@ public class PracticeService {
                         "PRACTICE_SET_PASS",
                         "PRACTICE_SET_PASS:" + attempt.getSetAttemptId()
                 );
+
+                if (firstCompletion) {
+                    progressService.markPracticePassed(
+                            attempt.getUserId(),
+                            attempt.getSubjectId(),
+                            attempt.getNodeId()
+                    );
+
+                    userLessonProgressMapper.upsertPracticePassed(
+                            attempt.getUserId(),
+                            attempt.getLessonId()
+                    );
+
+                    attendanceService.recordAttendanceOnPracticePass(
+                            attempt.getUserId(),
+                            attempt.getSetAttemptId()
+                    );
+                }
             }
 
             // 다음단원 이동 경로
@@ -387,4 +370,18 @@ public class PracticeService {
         return value == null ? "" : value.replaceAll("\\s+", "");
     }
 
+
+    private PracticeSetAttempt requireOwnedAttempt(SessionUser user, Long setAttemptId){
+        PracticeSetAttempt attempt = practiceSetAttemptMapper.findByIdAttempt(setAttemptId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.COMMON_NOT_FOUND,
+                        "연습 세트를 찾을 수 없습니다."
+                ));
+
+        if(!attempt.getUserId().equals(user.userId())){
+            throw new BusinessException(ErrorCode.AUTH_FORBIDDEN);
+        }
+
+        return attempt;
+    }
 }
