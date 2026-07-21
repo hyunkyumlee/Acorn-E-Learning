@@ -3,10 +3,26 @@
 <mapper namespace="com.acorn.elearning.learning.mapper.LearningProfileWriteMapper">
 
     <!-- 레벨 테스트 결과 반영: current_level_code만 갱신. grade_code/total_score는 다른 도메인 소유라 건드리지 않는다. -->
-    <update id="updateLevel">
+    <update id="updateLevelIfHigher">
         UPDATE user_learning_profiles
-        SET current_level_code = #{currentLevelCode},
-            updated_at         = NOW()
+        SET current_level_code = CASE
+            WHEN current_level_code IS NULL THEN #{currentLevelCode}
+
+            WHEN current_level_code = 'GOLD' THEN 'GOLD'
+
+            WHEN current_level_code = 'SILVER'
+                AND #{currentLevelCode} = 'GOLD'
+            THEN 'GOLD'
+
+            WHEN current_level_code = 'SILVER' THEN 'SILVER'
+
+            WHEN current_level_code = 'BRONZE'
+                AND #{currentLevelCode} IN ('SILVER', 'GOLD')
+            THEN #{currentLevelCode}
+
+            ELSE current_level_code
+        END,
+        updated_at = NOW()
         WHERE user_id = #{userId}
     </update>
 

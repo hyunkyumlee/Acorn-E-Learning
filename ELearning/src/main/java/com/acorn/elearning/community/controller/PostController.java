@@ -1,5 +1,7 @@
 package com.acorn.elearning.community.controller;
 
+import com.acorn.elearning.common.idempotency.IdempotencyToken;
+import com.acorn.elearning.common.idempotency.IdempotencyTokenService;
 import com.acorn.elearning.community.dto.response.PostDetailResponse;
 import com.acorn.elearning.community.dto.response.PostPageResponse;
 import com.acorn.elearning.community.form.CommentForm;
@@ -12,6 +14,7 @@ import com.acorn.elearning.community.model.Comment;
 import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.community.service.PostService;
 import com.acorn.elearning.security.SessionUser;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,14 +40,20 @@ public class PostController {
     private final CommunityWriterMapper communityWriterMapper;
     private final CommunityNoticeMapper communityNoticeMapper;
 
+    private static final String CREATE_POST_FORM_TYPE = "COMMUNITY_POST_CREATE";
+
+    private final IdempotencyTokenService idempotencyTokenService;
+
     public PostController(
             PostService postService,
             CommunityWriterMapper communityWriterMapper,
-            CommunityNoticeMapper communityNoticeMapper
+            CommunityNoticeMapper communityNoticeMapper,
+            IdempotencyTokenService idempotencyTokenService
     ) {
         this.postService = postService;
         this.communityWriterMapper = communityWriterMapper;
         this.communityNoticeMapper = communityNoticeMapper;
+        this.idempotencyTokenService = idempotencyTokenService;
     }
 
     @GetMapping("/community/board")
@@ -93,13 +102,22 @@ public class PostController {
     @GetMapping("/community/write")
     public String createForm(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
-            Model model
+            Model model,
+            HttpSession httpSession
     ) {
         if (sessionUser == null) {
             return "redirect:/login";
         }
         model.addAttribute("screen", "community/write");
-        model.addAttribute("form", new PostForm());
+        PostForm form = new PostForm();
+        form.setIdempotencyToken(
+                idempotencyTokenService.issue(
+                        CREATE_POST_FORM_TYPE,
+                        httpSession,
+                        sessionUser.userId()
+                ).token()
+        );
+        model.addAttribute("form", form);
         addCommunityShell(model, sessionUser, new PostSearchCondition());
         return "community/write";
     }
@@ -110,7 +128,8 @@ public class PostController {
             @Valid @ModelAttribute("form") PostForm form,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
-            Model model
+            Model model,
+            HttpSession httpSession
     ) {
         if (sessionUser == null) {
             return "redirect:/login";
@@ -120,6 +139,13 @@ public class PostController {
             addCommunityShell(model, sessionUser, conditionFromForm(form));
             return "community/write";
         }
+
+        idempotencyTokenService.requireAndConsume(
+                form.getIdempotencyToken(),
+                "",
+                httpSession
+        );
+
         CommunityPost post = form.getDraftPostId() == null
                 ? postService.create(sessionUser, form)
                 : postService.publishDraft(sessionUser, form);
@@ -131,13 +157,21 @@ public class PostController {
     public String editForm(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @PathVariable Long postId,
-            Model model
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         if (sessionUser == null) {
             return "redirect:/login";
         }
         model.addAttribute("screen", "community/edit");
         PostDetailResponse view = postService.detail(sessionUser, postId, false);
+        if(!view.owner()){
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "본인이 작성한 게시글만 수정할 수 있습니다."
+            );
+            return "redirect:/community/posts/" + postId;
+        }
         PostForm form = new PostForm();
         form.setSubjectId(view.post().getSubjectId());
         form.setBoardType(view.post().getBoardType());

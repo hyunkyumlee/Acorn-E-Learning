@@ -35,6 +35,7 @@
 
         <form method="post" th:action="@{/community/posts}" th:object="${form}" class="community-form">
           <input type="hidden" th:field="*{draftPostId}">
+          <input type="hidden" th:field="*{idempotencyToken}">
           <div class="community-form-grid">
             <label class="wide">제목
               <input th:field="*{title}" maxlength="200" required>

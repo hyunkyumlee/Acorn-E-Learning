@@ -99,7 +99,7 @@ public class OnboardingController {
         }
         // 기초부터 시작: 신청과 함께 최저 레벨을 연다.
         enrollmentService.enroll(user.userId(), subjectId, EnrollmentService.START_MODE_BASIC);
-        profileWriteMapper.updateLevel(user.userId(), DEFAULT_LEVEL_CODE);
+        profileWriteMapper.updateLevelIfHigher(user.userId(), DEFAULT_LEVEL_CODE);
         model.addAttribute("step", "result");
         model.addAttribute("result", new OnboardingResultView(DEFAULT_LEVEL_CODE, 0, 0, false, 1));
         model.addAttribute("profile", buildProfile(session, sessionUser, learningService));

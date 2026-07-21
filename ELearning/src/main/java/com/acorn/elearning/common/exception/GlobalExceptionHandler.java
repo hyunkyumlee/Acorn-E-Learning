@@ -25,12 +25,30 @@ public class GlobalExceptionHandler {
     private static final String VALIDATION_DETAIL = "요청 본문 검증에 실패했습니다.";
 
     @ExceptionHandler(BusinessException.class)
-    ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException exception) {
+    Object handleBusinessException(
+            BusinessException exception,
+            HttpServletRequest request
+    ) {
         ErrorCode errorCode = exception.errorCode();
+
+        if (acceptsHtml(request)) {
+            String errorView = switch (errorCode.status()) {
+                case NOT_FOUND -> "error/404";
+                case FORBIDDEN, UNAUTHORIZED -> "error/403";
+                default -> "error/500";
+            };
+
+            return errorPage(errorView, errorCode.status());
+        }
+
         return ResponseEntity
                 .status(errorCode.status())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.fail(exception.getMessage(), errorCode.code(), exception.getMessage()));
+                .body(ApiResponse.fail(
+                        exception.getMessage(),
+                        errorCode.code(),
+                        exception.getMessage()
+                ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

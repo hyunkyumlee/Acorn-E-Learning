@@ -172,7 +172,7 @@ public class LevelTestService {
         attemptMapper.update(attempt);
 
         // 4) 프로필 레벨 반영(learning 전용 write 매퍼 — 6번 공유 매퍼 미사용).
-        profileWriteMapper.updateLevel(userId, resultLevel);
+        profileWriteMapper.updateLevelIfHigher(userId, resultLevel);
 
         // 5) unlock 이력 반영(멱등). 레벨 테스트는 배치(placement) 성격 → 판정 등급까지의 레벨을 모두 연다.
         //    (예: GOLD 판정 → BRONZE·SILVER·GOLD 3건). current_level_code와 user_level_unlocks가 일치해야

@@ -74,7 +74,7 @@ public class AiAnalysisService {
         Long userId = requireUserId(sessionUser);
         return aiAnalysisReportMapper.findByUserId(userId).stream()
                 .findFirst()
-                .map(AnalysisReportResponse::from)
+                .map(report -> responseFor(userId, report))
                 .orElse(null);
     }
 
@@ -104,14 +104,14 @@ public class AiAnalysisService {
             AiAnalysisReport existingReport = aiAnalysisReportMapper.findByExamIdAndUserId(session.getExamId(), userId)
                     .orElse(null);
             if (existingReport != null) {
-                return AnalysisReportResponse.from(existingReport);
+                return responseFor(userId, existingReport);
             }
             ReportClaim claim = pendingReport(userId, session);
             if (!claim.created()) {
-                return AnalysisReportResponse.from(claim.report());
+                return responseFor(userId, claim.report());
             }
             generateContent(claim.report(), session);
-            return AnalysisReportResponse.from(claim.report());
+            return responseFor(userId, claim.report());
         }
     }
 
@@ -119,19 +119,21 @@ public class AiAnalysisService {
         synchronized (reportLock(userId, examId)) {
             AiAnalysisReport report = aiAnalysisReportMapper.findByExamIdAndUserId(examId, userId).orElse(null);
             if (report != null) {
-                return AnalysisAutoRefreshResponse.skipped(AnalysisReportResponse.from(report));
+                return AnalysisAutoRefreshResponse.skipped(
+                        responseFor(userId, report)
+                );
             }
             ExamSession session = requireExam(userId, examId);
             ReportClaim claim = pendingReport(userId, session);
             if (!claim.created()) {
-                return AnalysisAutoRefreshResponse.skipped(AnalysisReportResponse.from(claim.report()));
+                return AnalysisAutoRefreshResponse.skipped(responseFor(userId, claim.report()));
             }
             try {
                 generateContent(claim.report(), session);
             } catch (BusinessException exception) {
                 log.warn("AI 분석 자동 갱신에 실패했습니다. examId={}", examId, exception);
             }
-            return AnalysisAutoRefreshResponse.attempted(AnalysisReportResponse.from(claim.report()));
+            return AnalysisAutoRefreshResponse.attempted(responseFor(userId, claim.report()));
         }
     }
 
@@ -157,31 +159,37 @@ public class AiAnalysisService {
         Long userId = requireUserId(sessionUser);
         AiAnalysisReport initialReport = requireReport(userId, reportId);
         if (!"FAILED".equals(initialReport.getStatus())) {
-            return AnalysisReportResponse.from(initialReport);
+            return responseFor(userId, initialReport);
         }
         int expectedRetryCount = number(initialReport.getRetryCount());
         synchronized (reportLock(userId, initialReport.getExamId())) {
             AiAnalysisReport report = requireReport(userId, reportId);
             if (!"FAILED".equals(report.getStatus())) {
-                return AnalysisReportResponse.from(report);
+                return responseFor(userId, report);
             }
             ExamSession session = requireExam(userId, report.getExamId());
             if (aiAnalysisReportMapper.claimRetry(reportId, userId, expectedRetryCount) == 0) {
-                return AnalysisReportResponse.from(aiAnalysisReportMapper
+                AiAnalysisReport latestReport = aiAnalysisReportMapper
                         .findByExamIdAndUserIdForUpdate(report.getExamId(), userId)
                         .orElseThrow(() -> new BusinessException(
                                 ErrorCode.COMMON_NOT_FOUND,
-                                "AI 분석 결과를 찾을 수 없습니다.")));
+                                "AI 분석 결과를 찾을 수 없습니다."
+                        ));
+
+                return responseFor(userId, latestReport);
             }
             AiAnalysisReport claimedReport = requireReport(userId, reportId);
             generateContent(claimedReport, session);
-            return AnalysisReportResponse.from(claimedReport);
+            return responseFor(userId, claimedReport);
         }
     }
 
     @Transactional(readOnly = true)
     public AnalysisReportResponse detail(SessionUser sessionUser, Long reportId) {
-        return AnalysisReportResponse.from(requireReport(requireUserId(sessionUser), reportId));
+        Long userId = requireUserId(sessionUser);
+        AiAnalysisReport report = requireReport(userId, reportId);
+
+        return responseFor(userId, report);
     }
 
     @Transactional(readOnly = true)
@@ -308,6 +316,13 @@ public class AiAnalysisService {
         return java.util.stream.IntStream.range(0, REPORT_LOCK_STRIPES)
                 .mapToObj(index -> new Object())
                 .toArray(Object[]::new);
+    }
+
+    private AnalysisReportResponse responseFor(Long userId, AiAnalysisReport report) {
+        return AnalysisReportResponse.from(
+                report,
+                paymentAccessService.hasPremiumAccess(userId)
+        );
     }
 
     private record ReportClaim(AiAnalysisReport report, boolean created) {}
