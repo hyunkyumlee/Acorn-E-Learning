@@ -1,7 +1,12 @@
 /*
-  Knowva sample data - MySQL 8 / InnoDB / utf8mb4
-  Source: Notion DB 명세 v2.4 / 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정 / 관리자 댓글 삭제 주체
+  Knowva demo setup data v2.5 - MySQL 8 / InnoDB / utf8mb4
+  File: docs/ddl/Knowva_demo_setup_data.sql
+  Compatibility: Knowva_DDL.sql / Notion DB 명세 v2.4
+  Source: 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정 / 관리자 댓글 삭제 주체
   Execute after docs/ddl/Knowva_DDL.sql.
+
+  Revision history
+  - v2.5 (2026-07-21): 시연 계정 2개(admin, 사용자)로 정리하고 사용자 계정의 Java Silver 마지막 행성 9번 레슨까지 해금 상태를 반영.
 
   Execution contract
   - This is sample seed data, not a schema migration.
@@ -9,16 +14,15 @@
   - A schema preflight runs before the first INSERT. If it fails, update the schema first.
   - All seed INSERT/UPDATE statements run in one transaction to prevent partial application.
 
-  Sample login accounts
-  - admin@knowva.local / Knowva1234! / ROLE_ADMIN
-  - learner@knowva.local / Knowva1234! / ROLE_USER
-  - premium@knowva.local / Knowva1234! / ROLE_USER + ACTIVE premium_grant
-  - google OAuth sample: learner@knowva.local provider email, separate user_id, no password credential
-  - github OAuth sample: learner@knowva.local provider email, separate user_id, no password credential
+  Demo login accounts
+  - admin account (ROLE_ADMIN)
+  - demo user account (ROLE_USER, Java SILVER)
+  - Login credentials are managed only by this setup file's final account fixture.
+  - Existing local/password and OAuth sample accounts are deleted before COMMIT.
 
-  Password hash
+  Password policy
   - BCrypt(10), generated with Spring Security Crypto 7.0.5.
-  - Plain sample password is only for local development/demo data.
+  - Do not copy plain passwords into documentation or change history.
 */
 
 SET NAMES utf8mb4;
@@ -1447,6 +1451,287 @@ ON DUPLICATE KEY UPDATE
   content_type = VALUES(content_type),
   recommendation_slot = VALUES(recommendation_slot),
   is_active = VALUES(is_active),
+  updated_at = CURRENT_TIMESTAMP;
+
+
+
+-- -----------------------------------------------------------------------------
+-- Demo account fixture reconciliation (v2.5)
+-- -----------------------------------------------------------------------------
+-- The seed temporarily uses legacy fixture identities while building related
+-- records. Before COMMIT, all demo content is reassigned to the final user and
+-- login/profile/curriculum data is rebuilt from users_data.sql.
+-- Final accounts: admin (user_id = 1) and demo user (user_id = 6).
+
+UPDATE lessons
+SET created_by = 1
+WHERE created_by BETWEEN 2 AND 53;
+
+UPDATE practice_problems
+SET created_by = 1
+WHERE created_by BETWEEN 2 AND 53;
+
+UPDATE lesson_bookmarks
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE level_test_attempts
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE practice_set_attempts
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE practice_submissions
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE score_events
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE exam_sessions
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE ai_analysis_reports
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE community_posts
+SET writer_id = 6
+WHERE writer_id BETWEEN 2 AND 53;
+
+UPDATE post_attachments
+SET uploader_id = 6
+WHERE uploader_id BETWEEN 2 AND 53;
+
+UPDATE comments
+SET writer_id = 6
+WHERE writer_id BETWEEN 2 AND 53;
+
+UPDATE comments
+SET deleted_by_admin_id = 1
+WHERE deleted_by_admin_id BETWEEN 2 AND 53;
+
+UPDATE reports
+SET reporter_id = 6
+WHERE reporter_id BETWEEN 2 AND 53;
+
+UPDATE reports
+SET handled_by = 1
+WHERE handled_by BETWEEN 2 AND 53;
+
+UPDATE dummy_payments
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE premium_grants
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE payment_refunds
+SET user_id = 6
+WHERE user_id BETWEEN 2 AND 53;
+
+UPDATE notices
+SET writer_id = 1
+WHERE writer_id BETWEEN 2 AND 53;
+
+UPDATE admin_operation_logs
+SET admin_id = 1
+WHERE admin_id BETWEEN 2 AND 53;
+
+DELETE FROM post_likes
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM post_scraps
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM attendance_records
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM wrong_answers
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM ranking_scores
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM password_reset_tokens
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM social_accounts
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM user_credentials
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM user_settings
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM user_learning_profiles
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM user_subject_enrollments
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM user_lesson_progress
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM learning_progress
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM user_level_unlocks
+WHERE user_id BETWEEN 2 AND 53;
+
+DELETE FROM users
+WHERE user_id BETWEEN 2 AND 53;
+
+-- Account and curriculum fixture imported from users_data.sql.
+UPDATE user_credentials
+SET password_hash = '$2y$10$U2ho1jIzQKb7PGRQPJE9w.GWHsQyfDGuE3ZC6FDyxZ33E57MZhvDq',
+    password_updated_at = CURRENT_TIMESTAMP,
+    updated_at = CURRENT_TIMESTAMP
+WHERE login_email = 'admin@knowva.local';
+
+INSERT INTO users (
+  user_id, email, nickname, role, status, profile_image_url, last_login_at, withdrawn_at, created_at, updated_at
+)
+VALUES
+  (6, 'hg102938363736@gmail.com', '이현겸', 'ROLE_USER', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  email = VALUES(email),
+  nickname = VALUES(nickname),
+  role = VALUES(role),
+  status = VALUES(status),
+  profile_image_url = VALUES(profile_image_url),
+  last_login_at = VALUES(last_login_at),
+  withdrawn_at = VALUES(withdrawn_at),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO user_credentials (
+  credential_id, user_id, login_email, password_hash, email_verified_at, password_updated_at, failed_login_count, locked_until, created_at, updated_at
+)
+VALUES
+  (4, 6, 'hg102938363736@gmail.com', '$2y$10$19xlEkYp72sWGY6EmxavCeUeDKZhjTJIZwohv2DWVdenpCbKGAMmm', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  login_email = VALUES(login_email),
+  password_hash = VALUES(password_hash),
+  email_verified_at = VALUES(email_verified_at),
+  password_updated_at = VALUES(password_updated_at),
+  failed_login_count = VALUES(failed_login_count),
+  locked_until = VALUES(locked_until),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO user_settings (
+  setting_id, user_id, theme, notification_enabled, accessibility_mode, reduced_motion_enabled, created_at, updated_at
+)
+VALUES
+  (6, 6, 'SYSTEM', 1, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  theme = VALUES(theme),
+  notification_enabled = VALUES(notification_enabled),
+  accessibility_mode = VALUES(accessibility_mode),
+  reduced_motion_enabled = VALUES(reduced_motion_enabled),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO user_learning_profiles (
+  profile_id, user_id, primary_subject_id, learning_goal, current_level_code, total_score, grade_code, created_at, updated_at
+)
+VALUES
+  (6, 6, @java_subject_id, 'Java 기초를 탄탄히 다지고 실전 문제 해결 능력을 키우고 싶습니다.', 'SILVER', 1450, 'INTERMEDIATE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  primary_subject_id = VALUES(primary_subject_id),
+  learning_goal = VALUES(learning_goal),
+  current_level_code = VALUES(current_level_code),
+  total_score = VALUES(total_score),
+  grade_code = VALUES(grade_code),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO user_level_unlocks (
+  unlock_id, user_id, subject_id, level_code, unlock_source, unlocked_by_exam_id, unlocked_at, created_at
+)
+VALUES
+  (600001, 6, @java_subject_id, 'BRONZE', 'ONBOARDING', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (600002, 6, @java_subject_id, 'SILVER', 'ADMIN_ADJUST', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  subject_id = VALUES(subject_id),
+  level_code = VALUES(level_code),
+  unlock_source = VALUES(unlock_source),
+  unlocked_by_exam_id = VALUES(unlocked_by_exam_id),
+  unlocked_at = VALUES(unlocked_at);
+
+INSERT INTO user_subject_enrollments (
+  user_id, subject_id, status, start_mode, enrolled_at
+)
+VALUES
+  (6, @java_subject_id, 'ACTIVE', 'BASIC', CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  status = VALUES(status),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO learning_progress (
+  progress_id, user_id, subject_id, node_id, lesson_completed, practice_passed, progress_rate, completed_at, created_at, updated_at
+)
+SELECT
+  600000 + node.node_id AS progress_id,
+  6 AS user_id,
+  node.subject_id,
+  node.node_id,
+  1 AS lesson_completed,
+  IF(node.level_code = 'SILVER' AND node.planet_no = 5, 0, 1) AS practice_passed,
+  IF(node.level_code = 'SILVER' AND node.planet_no = 5, 90.00, 100.00) AS progress_rate,
+  IF(node.level_code = 'SILVER' AND node.planet_no = 5, NULL, CURRENT_TIMESTAMP) AS completed_at,
+  CURRENT_TIMESTAMP AS created_at,
+  CURRENT_TIMESTAMP AS updated_at
+FROM curriculum_nodes node
+WHERE node.subject_id = @java_subject_id
+  AND node.node_type = 'PLANET'
+  AND node.level_code IN ('BRONZE', 'SILVER')
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  subject_id = VALUES(subject_id),
+  node_id = VALUES(node_id),
+  lesson_completed = VALUES(lesson_completed),
+  practice_passed = VALUES(practice_passed),
+  progress_rate = VALUES(progress_rate),
+  completed_at = VALUES(completed_at),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO user_lesson_progress (
+  lesson_progress_id, user_id, lesson_id, theory_completed, practice_passed, progress_rate, completed_at, created_at, updated_at
+)
+SELECT
+  600000 + lesson.lesson_id AS lesson_progress_id,
+  6 AS user_id,
+  lesson.lesson_id,
+  1 AS theory_completed,
+  1 AS practice_passed,
+  100.00 AS progress_rate,
+  CURRENT_TIMESTAMP AS completed_at,
+  CURRENT_TIMESTAMP AS created_at,
+  CURRENT_TIMESTAMP AS updated_at
+FROM lessons lesson
+JOIN curriculum_nodes node ON node.node_id = lesson.node_id
+WHERE node.subject_id = @java_subject_id
+  AND node.node_type = 'PLANET'
+  AND (
+    node.level_code = 'BRONZE'
+    OR (node.level_code = 'SILVER' AND node.planet_no < 5)
+    OR (node.level_code = 'SILVER' AND node.planet_no = 5 AND lesson.sort_order < 10)
+  )
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  lesson_id = VALUES(lesson_id),
+  theory_completed = VALUES(theory_completed),
+  practice_passed = VALUES(practice_passed),
+  progress_rate = VALUES(progress_rate),
+  completed_at = VALUES(completed_at),
   updated_at = CURRENT_TIMESTAMP;
 
 COMMIT;
