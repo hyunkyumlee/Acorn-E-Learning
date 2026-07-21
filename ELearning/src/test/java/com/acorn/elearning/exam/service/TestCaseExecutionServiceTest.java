@@ -39,6 +39,8 @@ class TestCaseExecutionServiceTest {
         assertTrue(result.passed());
         assertEquals(2, result.passedCount());
         assertEquals(2, result.totalCount());
+        assertEquals("3", result.cases().get(0).actualOutput());
+        assertEquals("25", result.cases().get(1).actualOutput());
     }
 
     @Test
@@ -202,6 +204,21 @@ class TestCaseExecutionServiceTest {
         ExamCodeRunResponse response = ExamCodeRunResponse.from(result, 1L);
 
         assertEquals("보안 정책으로 실행이 차단되었습니다.", response.message());
+    }
+
+    @Test
+    void codeRunResponse_keeps_console_output_for_passing_case() {
+        TestCaseExecutionResult result = new TestCaseExecutionResult(
+                "SUCCESS",
+                true,
+                1,
+                1,
+                List.of(new TestCaseExecutionResult.CaseResult("10 32", "42", "42", true, null)));
+
+        ExamCodeRunResponse response = ExamCodeRunResponse.from(result, 1L);
+
+        assertTrue(response.passed());
+        assertEquals("42", response.cases().get(0).actualOutput());
     }
 
     private String twoCaseSpec() {

@@ -101,6 +101,28 @@ class AiExamServiceStatusTest {
         assertEquals(1, sessionMapper.insertCount);
     }
 
+    @Test
+    void solutionCode_returns_raw_solution_for_current_exam_problem() {
+        AiExamProblem problem = new AiExamProblem();
+        problem.setAiProblemId(99L);
+        problem.setProblemNo(1);
+        problem.setAiRawResponse("""
+                {
+                  "problems": [
+                    {"starterCode": "public class Solution { public static void main(String[] args) { System.out.println(42); } }"}
+                  ]
+                }
+                """);
+        AiExamService service = service(
+                new FakeExamSessionMapper(readySession()),
+                new EmptyAiExamProblemMapper(problem),
+                unusedMapper(ExamAnswerMapper.class));
+
+        String solutionCode = service.solutionCode(user(), 8L, 99L).orElseThrow();
+
+        assertEquals("public class Solution { public static void main(String[] args) { System.out.println(42); } }", solutionCode);
+    }
+
     private static AiExamService service(
             ExamSessionMapper sessionMapper,
             AiExamProblemMapper problemMapper,
@@ -219,11 +241,21 @@ class AiExamServiceStatusTest {
     }
 
     private static class EmptyAiExamProblemMapper implements AiExamProblemMapper {
+        private final AiExamProblem problem;
+
+        EmptyAiExamProblemMapper() {
+            this(null);
+        }
+
+        EmptyAiExamProblemMapper(AiExamProblem problem) {
+            this.problem = problem;
+        }
+
         @Override
         public Optional<AiExamProblem> findById(Long id) { return Optional.empty(); }
 
         @Override
-        public Optional<AiExamProblem> findByIdAndExamId(Long aiProblemId, Long examId) { return Optional.empty(); }
+        public Optional<AiExamProblem> findByIdAndExamId(Long aiProblemId, Long examId) { return Optional.ofNullable(problem); }
 
         @Override
         public List<AiExamProblem> findByExamId(Long examId) { return List.of(); }

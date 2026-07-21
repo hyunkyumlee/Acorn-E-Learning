@@ -134,6 +134,9 @@ public class ExamController {
         model.addAttribute("screen", "exam/detail");
         model.addAttribute("exam", exam);
         model.addAttribute("step", step);
+        model.addAttribute("magicSolutionCode", aiExamService
+                .solutionCode(sessionUser, examId, step.problem().aiProblemId())
+                .orElse(""));
         model.addAttribute("answerIdempotencyToken", idempotencyTokenService.issue(ANSWER_FORM_TYPE, httpSession, sessionUser.userId()).token());
         return "exam/detail";
     }
