@@ -689,7 +689,7 @@
         if (aborted || !nuvi.hidden) { return; } // 다른 트리거로 이미 날고 있으면 그만둔다
         var target = findTarget();
         var art = target && (target.querySelector(".roadmap-planet") || target);
-        if (target && art && art.offsetWidth > 0) { // 행성 그림이 레이아웃된 뒤에만 시작
+        if (target && art && art.offsetWidth > 0 && art.offsetHeight > 0) { // 행성 그림의 너비·높이가 레이아웃된 뒤에만 시작
           run({ detail: { type: "LEVEL" } });
           return;
         }
