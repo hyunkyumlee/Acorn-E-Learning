@@ -11,6 +11,7 @@ import com.acorn.elearning.auth.model.UserCredential;
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
 import com.acorn.elearning.payment.service.PaymentAccessService;
+import com.acorn.elearning.security.RememberMeCookie;
 import com.acorn.elearning.security.SessionUser;
 import com.acorn.elearning.user.mapper.UserLearningProfileMapper;
 import com.acorn.elearning.user.mapper.UserMapper;
@@ -18,6 +19,7 @@ import com.acorn.elearning.user.mapper.UserSettingMapper;
 import com.acorn.elearning.user.model.User;
 import com.acorn.elearning.user.model.UserLearningProfile;
 import com.acorn.elearning.user.model.UserSetting;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,8 +40,9 @@ public class AuthService {
     private final UserSettingMapper userSettingMapper;
     private final UserLearningProfileMapper userLearningProfileMapper;
     private final PaymentAccessService paymentAccessService;
+    private final RememberMeCookie rememberMeCookie;
 
-    public AuthService(UserCredentialMapper userCredentialMapper, SessionService sessionService, PasswordEncoder passwordEncoder, UserMapper userMapper, UserSettingMapper userSettingMapper, UserLearningProfileMapper userLearningProfileMapper, PaymentAccessService paymentAccessService) {
+    public AuthService(UserCredentialMapper userCredentialMapper, SessionService sessionService, PasswordEncoder passwordEncoder, UserMapper userMapper, UserSettingMapper userSettingMapper, UserLearningProfileMapper userLearningProfileMapper, PaymentAccessService paymentAccessService, RememberMeCookie rememberMeCookie) {
         this.userCredentialMapper = userCredentialMapper;
         this.sessionService = sessionService;
         this.passwordEncoder = passwordEncoder;
@@ -47,6 +50,7 @@ public class AuthService {
         this.userSettingMapper = userSettingMapper;
         this.userLearningProfileMapper = userLearningProfileMapper;
         this.paymentAccessService = paymentAccessService;
+        this.rememberMeCookie = rememberMeCookie;
     }
 
     public UserSessionResponse login(HttpSession session, LoginForm form) {
@@ -71,8 +75,10 @@ public class AuthService {
         return sessionService.toLoginResponse(sessionUser);
     }
 
-    public void logout(HttpSession session) {
+    // response도 받아 remember-me 쿠키까지 지움 (쿠키가 남으면 다음 요청에서 자동 재로그인됨)
+    public void logout(HttpSession session, HttpServletResponse response) {
         sessionService.logout(session);
+        rememberMeCookie.clear(response);
     }
 
     private SessionUser toSessionUser(LoginUserRow row) {
