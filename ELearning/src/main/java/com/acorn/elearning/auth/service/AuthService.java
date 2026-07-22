@@ -161,7 +161,7 @@ public class AuthService {
     }
 
     private SessionUser toSessionUser(User user){
-        boolean premiumActive = false;
+        boolean premiumActive = paymentAccessService.hasPremiumAccess(user.getUserId());
         return new SessionUser(user.getUserId(), user.getEmail(), user.getNickname(), user.getRole(), premiumActive, user.getProfileImageUrl());
     }
 

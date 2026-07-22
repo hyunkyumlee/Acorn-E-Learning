@@ -19,6 +19,7 @@ public class PostForm {
     private String title;
 
     @NotBlank
+    @Size(max = 2000, message = "본문은 2,000자 이하로 입력해주세요.")
     private String content;
 
     @NotNull

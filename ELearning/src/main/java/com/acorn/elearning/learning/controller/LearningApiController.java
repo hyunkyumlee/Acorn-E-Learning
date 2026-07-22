@@ -76,8 +76,10 @@ public class LearningApiController {
     public ApiResponse<SubjectListResponse> subjects(
             @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
             @RequestParam(name = "activeOnly", defaultValue = "true") boolean activeOnly) {
-        resolve(sessionUser);
-        List<Subject> source = activeOnly
+        SessionUser user = resolve(sessionUser);
+        // 버그 #36: 일반 회원이 activeOnly=false로 비활성 과목까지 조회 가능했음 — 관리자만 전체 조회 허용
+        boolean effectiveActiveOnly = activeOnly || !user.admin();
+        List<Subject> source = effectiveActiveOnly
                 ? learningService.getActiveSubjects()
                 : learningService.getAllSubjects();
         List<SubjectListResponse.Item> items = source.stream()

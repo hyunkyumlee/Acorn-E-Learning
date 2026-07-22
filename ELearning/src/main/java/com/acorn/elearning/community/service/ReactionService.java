@@ -11,6 +11,7 @@ import com.acorn.elearning.community.model.PostLike;
 import com.acorn.elearning.community.model.PostScrap;
 import com.acorn.elearning.security.SessionUser;
 import java.util.Map;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +45,12 @@ public class ReactionService {
         PostLike like = new PostLike();
         like.setPostId(postId);
         like.setUserId(userId);
-        postLikeMapper.insert(like);
+        try {
+            postLikeMapper.insert(like);
+        } catch (DataIntegrityViolationException e) {
+            // 버그 #33: 더블클릭 등 동시 요청이 유니크 제약과 충돌하면 이미 좋아요된 것으로 처리(500 방지)
+            return new ReactionResponse(postId, "LIKE", true, safeCount(post.getLikeCount()));
+        }
         communityPostMapper.incrementLikeCount(postId);
         return new ReactionResponse(postId, "LIKE", true, safeCount(post.getLikeCount()) + 1);
     }
@@ -70,7 +76,12 @@ public class ReactionService {
         PostScrap scrap = new PostScrap();
         scrap.setPostId(postId);
         scrap.setUserId(userId);
-        postScrapMapper.insert(scrap);
+        try {
+            postScrapMapper.insert(scrap);
+        } catch (DataIntegrityViolationException e) {
+            // 버그 #33: 더블클릭 등 동시 요청이 유니크 제약과 충돌하면 이미 스크랩된 것으로 처리(500 방지)
+            return new ReactionResponse(postId, "SCRAP", true, safeCount(post.getScrapCount()));
+        }
         communityPostMapper.incrementScrapCount(postId);
         return new ReactionResponse(postId, "SCRAP", true, safeCount(post.getScrapCount()) + 1);
     }
