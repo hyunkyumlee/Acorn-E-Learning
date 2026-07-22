@@ -13,6 +13,7 @@ import com.acorn.elearning.common.response.VoidResponse;
 import com.acorn.elearning.security.SessionUser;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -43,8 +44,8 @@ public class AuthApiController {
     }
 
     @PostMapping("/api/auth/logout")
-    public ApiResponse<VoidResponse> logout(HttpSession session) {
-        authService.logout(session);
+    public ApiResponse<VoidResponse> logout(HttpSession session, HttpServletResponse response) {
+        authService.logout(session, response);
         return ApiResponse.success(VoidResponse.INSTANCE);
     }
 

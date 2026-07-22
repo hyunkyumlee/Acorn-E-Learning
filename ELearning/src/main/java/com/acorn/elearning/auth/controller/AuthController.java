@@ -114,12 +114,11 @@ public class AuthController {
         }
     }
 
-    // 로그아웃: HttpServletResponse 추가, 쿠키도 삭제
+    // 로그아웃: 쿠키 삭제는 AuthService.logout 내부에서 처리
     @PostMapping("/logout")
     public String logout(HttpSession session, HttpServletResponse response,
                          @RequestParam(required = false) String redirect) {
-        authService.logout(session);
-        rememberMeCookie.clear(response);
+        authService.logout(session, response);
         return "redirect:" + safeRedirect(redirect, "/login");
     }
 

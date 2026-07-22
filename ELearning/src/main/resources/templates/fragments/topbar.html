@@ -51,6 +51,7 @@
           <span>설정</span>
         </a>
         <form class="profile-dropdown-form" th:action="@{/logout}" method="post">
+          <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <button class="profile-dropdown-item profile-dropdown-button" type="submit" role="menuitem">
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M10 17 15 12 10 7"></path>

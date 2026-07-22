@@ -75,6 +75,7 @@
   </nav>
 
   <form class="admin-sidebar-logout-form" method="post" th:action="@{/logout}">
+    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
     <button type="submit" class="admin-sidebar-logout">
       로그아웃
     </button>
