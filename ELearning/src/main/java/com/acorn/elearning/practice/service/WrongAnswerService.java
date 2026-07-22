@@ -94,6 +94,10 @@ public class WrongAnswerService {
 
     //오답목록조회
     public WrongAnswerSummaryView summary(SessionUser sessionUser) {
+        if (sessionUser == null || sessionUser.userId() == null) {
+            throw new BusinessException(ErrorCode.AUTH_REQUIRED);
+        }
+
         List<WrongAnswer> wrongAnswers =
                 wrongAnswerMapper.findAllWrongAnswersByUserId(sessionUser.userId());
 
@@ -110,6 +114,9 @@ public class WrongAnswerService {
 
     //시그니처에 nodeId 추가
     public WrongAnswerPageView list(SessionUser sessionUser, Long nodeId, Long lessonId) {
+        if (sessionUser == null || sessionUser.userId() == null) {
+            throw new BusinessException(ErrorCode.AUTH_REQUIRED);
+        }
 
         //nodeid용 분기 추가
             List<WrongAnswer> wrongAnswers;
@@ -265,6 +272,10 @@ public class WrongAnswerService {
     }
 
     private WrongAnswer getOwnedWrongAnswer(SessionUser sessionUser, Long wrongAnswerId) {
+        if (sessionUser == null || sessionUser.userId() == null) {
+            throw new BusinessException(ErrorCode.AUTH_REQUIRED);
+        }
+
         WrongAnswer wrongAnswer = wrongAnswerMapper.findByIdWrongAnswer(wrongAnswerId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.COMMON_NOT_FOUND,
