@@ -2,6 +2,8 @@ package com.acorn.knowva.mail;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 public class PasswordResetMailHandler implements RequestHandler<MailLambdaRequest, MailLambdaResponse> {
 
@@ -23,11 +25,31 @@ public class PasswordResetMailHandler implements RequestHandler<MailLambdaReques
             return MailLambdaResponse.success(messageId, request.requestId());
         } catch (InvalidMailRequestException exception) {
             return MailLambdaResponse.failure("INVALID_REQUEST", requestIdOf(request));
-        } catch (MailSendException exception) {
-            return MailLambdaResponse.failure("SES_SEND_FAILED", requestIdOf(request));
         } catch (RuntimeException exception) {
+            logSendFailure(context, exception);
             return MailLambdaResponse.failure("SES_SEND_FAILED", requestIdOf(request));
         }
+    }
+
+    private void logSendFailure(Context context, RuntimeException exception) {
+        if (context == null) {
+            return;
+        }
+        context.getLogger().log("password_reset_mail_send_failed error_code=" + errorCodeOf(exception) + "\n");
+    }
+
+    private String errorCodeOf(RuntimeException exception) {
+        Throwable current = exception;
+        while (current != null) {
+            if (current instanceof AwsServiceException awsException) {
+                AwsErrorDetails errorDetails = awsException.awsErrorDetails();
+                if (errorDetails != null && !isBlank(errorDetails.errorCode())) {
+                    return errorDetails.errorCode();
+                }
+            }
+            current = current.getCause();
+        }
+        return exception.getClass().getSimpleName();
     }
 
     private void validate(MailLambdaRequest request) {
