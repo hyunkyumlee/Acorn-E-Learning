@@ -130,7 +130,7 @@ public class AiAnalysisService {
             }
             try {
                 generateContent(claim.report(), session);
-            } catch (BusinessException exception) {
+            } catch (RuntimeException exception) {
                 log.warn("AI 분석 자동 갱신에 실패했습니다. examId={}", examId, exception);
             }
             return AnalysisAutoRefreshResponse.attempted(responseFor(userId, claim.report()));

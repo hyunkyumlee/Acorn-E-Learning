@@ -1,6 +1,7 @@
 package com.acorn.elearning.analysis.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,6 +18,7 @@ import com.acorn.elearning.analysis.dto.response.AnalysisAutoRefreshResponse;
 import com.acorn.elearning.analysis.dto.response.AnalysisReportResponse;
 import com.acorn.elearning.analysis.model.AiAnalysisReport;
 import com.acorn.elearning.analysis.model.AnalysisCodingAnswerSummary;
+import com.acorn.elearning.common.ai.ChatGptApiClient;
 import com.acorn.elearning.common.ai.ChatGptRequest;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -75,6 +77,26 @@ class AiAnalysisServiceIdempotencyTest {
         assertEquals("FAILED", response.report().status());
         assertEquals(0, client.sendCount());
         assertEquals(1, reportMapper.count());
+    }
+
+    @Test
+    void refreshLatestIfRequired_keeps_failed_report_when_ai_throws_unexpected_runtime_exception() {
+        InMemoryAiAnalysisReportMapper reportMapper = new InMemoryAiAnalysisReportMapper();
+        ChatGptApiClient client = new ChatGptApiClient(
+                "openai", true, "test-key", "https://example.com", "gpt-test", 800, new ObjectMapper()) {
+            @Override
+            public com.acorn.elearning.common.ai.ChatGptResponse send(ChatGptRequest request) {
+                throw new IllegalStateException("테스트용 예기치 않은 분석 실패입니다.");
+            }
+        };
+        AiAnalysisService service = service(reportMapper, client);
+
+        AnalysisAutoRefreshResponse response = assertDoesNotThrow(() -> service.refreshLatestIfRequired(USER));
+
+        assertTrue(response.attempted());
+        assertEquals("FAILED", response.report().status());
+        assertEquals(1, reportMapper.count());
+        assertFalse(service.latestRefreshRequired(USER));
     }
 
     @Test

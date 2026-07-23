@@ -2,12 +2,16 @@
 -- Created: 2026-07-22 14:43:31
 -- Scope: Java, SQL, HTML/CSS/JS, Python community posts, 20 posts per subject
 -- Includes 2 to 5 comments per post. Does not modify DDL, source code, Workbench, users, or subjects.
--- Run after Knowva_DDL.sql and the base sample/user/subject data.
+-- Run after Knowva_DDL.sql, Knowva_demo_setup_data.sql, and Knowva_Java_Curriculum_Data.sql.
 -- OVERWRITE MODE: wipes all existing community_posts/comments (and their dependent
 -- post_likes/post_scraps/post_attachments rows, to satisfy FK constraints) before
 -- inserting this seed set. Not additive, not duplicate-safe on rerun by design.
 
 SET NAMES utf8mb4;
+-- MySQL Workbench safe update mode rejects the intentional full refresh below.
+-- Keep the override scoped to this seed session and restore the caller's value.
+SET @community_previous_sql_safe_updates := @@SESSION.sql_safe_updates;
+SET SQL_SAFE_UPDATES = 0;
 START TRANSACTION;
 SET FOREIGN_KEY_CHECKS = 0;
 DELETE FROM post_likes;
@@ -449,6 +453,7 @@ WHERE post.status = 'ACTIVE';
 DROP TEMPORARY TABLE IF EXISTS tmp_realistic_community_comments;
 DROP TEMPORARY TABLE IF EXISTS tmp_realistic_community_posts;
 COMMIT;
+SET SQL_SAFE_UPDATES = @community_previous_sql_safe_updates;
 
 -- Included posts: Java 20, SQL 20, HTML/CSS/JS 20, Python 20
 -- Included comments: 280, each post has 2 to 5 comments

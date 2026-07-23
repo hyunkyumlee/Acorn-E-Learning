@@ -879,48 +879,42 @@
   background: color-mix(in srgb, var(--danger) 8%, var(--surface));
 }
 
-.analysis-loading-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
-  backdrop-filter: blur(10px);
-}
-
-.analysis-loading-modal[hidden] {
+.analysis-refresh-notice[hidden] {
   display: none;
 }
 
-.analysis-loading-modal > div {
-  display: grid;
-  width: min(360px, calc(100vw - 40px));
-  justify-items: center;
-  gap: var(--space-3);
+.analysis-refresh-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface);
-  padding: var(--space-8);
-  box-shadow: var(--shadow-elevated);
-  text-align: center;
+  background: color-mix(in srgb, var(--primary) 7%, var(--surface));
+  padding: var(--space-4) var(--space-5);
 }
 
-.analysis-loading-modal strong {
+.analysis-refresh-notice > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.analysis-refresh-notice strong {
   color: var(--text);
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 850;
 }
 
-.analysis-loading-modal p {
+.analysis-refresh-notice p {
   margin: 0;
   color: var(--muted);
+  font-size: 14px;
   line-height: 1.5;
 }
 
 .analysis-loading-spinner {
-  width: 34px;
-  height: 34px;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
   border: 3px solid color-mix(in srgb, var(--primary) 22%, var(--line));
   border-top-color: var(--primary);
   border-radius: 999px;

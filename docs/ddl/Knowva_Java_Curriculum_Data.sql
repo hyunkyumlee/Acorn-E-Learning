@@ -1,7 +1,7 @@
 /*
   Knowva Java curriculum learning data (MySQL 8)
   Source: 프로젝트자료/Knowva_Java_이론.md and java_Quiz.md
-  Prerequisite: run Knowva_DDL.sql first.
+  Prerequisite: run Knowva_DDL.sql, then Knowva_demo_setup_data.sql.
   Scope: 15 planets, 150 lessons, 1,500 practice problems.
   Node IDs follow Knowva_sample_data.sql: Bronze 1-5, Silver 11-15, Gold 21-25.
 */
@@ -9,6 +9,10 @@
 USE elearning;
 
 SET NAMES utf8mb4;
+-- Workbench safe update mode can reject the intentional obsolete-data cleanup
+-- and choice replacement below. Scope the override to this seed session.
+SET @curriculum_previous_sql_safe_updates := @@SESSION.sql_safe_updates;
+SET SQL_SAFE_UPDATES = 0;
 START TRANSACTION;
 
 -- One-time repair for the earlier generated 1001-1015 node range. Existing user records are cleared only for that obsolete range.
@@ -4694,27 +4698,16 @@ Files.writeString(path, ____);
   (150908, @java_subject_id, 15, 1509, 'CODE_SHORT', 'memo.txt에 "Java 학습"을 기록하는 문장 한 줄을 작성하시오.', '`Files.writeString(Path.of("memo.txt"), "Java 학습");`', '파일 쓰기의 기본형입니다.', 'SILVER', NULL, 1),
   (150909, @java_subject_id, 15, 1509, 'CODE_OUTPUT', '한글 깨짐을 막으려면 파일을 주고받는 양쪽이 무엇을 맞춰야 하는지 쓰시오.', '같은 문자 인코딩', '저장·복원 양쪽에서 같은 규칙을 사용합니다.', 'SILVER', NULL, 1),
   (150910, @java_subject_id, 15, 1509, 'CODE_OUTPUT', 'writeString이 던질 수 있는 대표 예외를 쓰시오.', 'IOException', '쓰기도 외부 환경 실패가 가능한 작업입니다.', 'SILVER', NULL, 1),
-  (151001, @java_subject_id, 15, 1510, 'MULTIPLE_CHOICE', '파일 처리의 올바른 구성 순서는?', '경로 준비 → 읽기·쓰기 → 예외 처리', '경로 준비, 작업, 예외 처리 순서로 구성합니다.', 'SILVER', NULL, 1),
-  (151002, @java_subject_id, 15, 1510, 'MULTIPLE_CHOICE', 'memo.txt가 없을 때 다음 코드의 출력 결과는?
-```java
-try {
-    String text = Files.readString(Path.of("memo.txt"));
-    System.out.println(text.length());
-} catch (IOException e) {
-    System.out.println("파일을 확인하세요");
-}
-```', '파일을 확인하세요', 'IOException이 catch에서 처리됩니다.', 'SILVER', NULL, 1),
-  (151003, @java_subject_id, 15, 1510, 'MULTIPLE_CHOICE', '빈칸에 들어갈 예외 타입은?
-```java
-} catch (____ e) { System.out.println("파일을 확인하세요"); }
-```', 'IOException', '파일 작업의 실패는 IOException으로 처리합니다.', 'SILVER', NULL, 1),
-  (151004, @java_subject_id, 15, 1510, 'MULTIPLE_CHOICE', 'try-with-resources를 사용하면 얻는 이점은?', '작업이 끝날 때 자원이 자동으로 닫힌다', '자원 정리를 문법이 보장합니다.', 'SILVER', NULL, 1),
-  (151005, @java_subject_id, 15, 1510, 'SHORT_ANSWER', '예외를 잡은 뒤 아무것도 하지 않고 지나가면 어떤 문제가 생기는지 쓰시오.', '문제를 숨기게 된다', '최소한 원인 출력이나 기본값 복구 등 의미 있는 처리를 남깁니다.', 'SILVER', NULL, 1),
-  (151006, @java_subject_id, 15, 1510, 'CODE_OUTPUT', 'memo.txt가 존재하면 2번 문제의 코드는 무엇을 출력하는지 쓰시오.', '파일 내용의 글자 수', '정상 경로에서는 length()가 출력됩니다.', 'SILVER', NULL, 1),
-  (151007, @java_subject_id, 15, 1510, 'CODE_OUTPUT', 'catch 블록에서 예외의 원인 메시지를 확인하는 메서드를 쓰시오.', 'e.getMessage()', '원인을 출력해 문제를 숨기지 않습니다.', 'SILVER', NULL, 1),
-  (151008, @java_subject_id, 15, 1510, 'CODE_SHORT', 'memo.txt를 안전하게 읽어 출력하고 실패 시 "파일을 확인하세요"를 출력하는 try-catch를 한 줄로 작성하시오.', '`try { System.out.println(Files.readString(Path.of("memo.txt"))); } catch (IOException e) { System.out.println("파일을 확인하세요"); }`', '읽기와 복구를 묶은 형태입니다.', 'SILVER', NULL, 1),
-  (151009, @java_subject_id, 15, 1510, 'CODE_OUTPUT', '예외 처리에서 ''의미 있는 처리''의 예를 한 가지 쓰시오.', '원인 출력 또는 기본값으로 복구', '사용자 안내도 좋은 처리입니다.', 'SILVER', NULL, 1),
-  (151010, @java_subject_id, 15, 1510, 'CODE_OUTPUT', '경로 문제와 권한 문제를 구분해 안내하면 좋은 이유를 쓰시오.', '원인에 따라 해결 방법이 다르기 때문', '실패 지점을 구분하면 대응이 빨라집니다.', 'SILVER', NULL, 1),
+  (151001, @java_subject_id, 15, 1510, 'MULTIPLE_CHOICE', '파일 처리 중 오류가 날 수 있는 코드를 감싸는 keyword는?', 'try', '오류가 날 수 있는 코드는 try 블록에 작성합니다.', 'SILVER', NULL, 1),
+  (151002, @java_subject_id, 15, 1510, 'FILL_BLANK', '빈칸에 들어갈 예외 타입을 입력하시오. catch (____ e) { System.out.println("파일 오류"); }', 'IOException', '파일 읽기·쓰기에서 발생할 수 있는 대표 예외는 IOException입니다.', 'SILVER', NULL, 1),
+  (151003, @java_subject_id, 15, 1510, 'MULTIPLE_CHOICE', '예외가 발생했을 때 실행할 코드를 작성하는 블록은?', 'catch', 'catch 블록에서 오류 상황을 안내하거나 복구합니다.', 'SILVER', NULL, 1),
+  (151004, @java_subject_id, 15, 1510, 'FILL_BLANK', '예외 메시지를 확인하도록 빈칸을 채우시오. System.out.println(e.____());', 'getMessage', 'getMessage()는 예외의 원인 메시지를 반환합니다.', 'SILVER', NULL, 1),
+  (151005, @java_subject_id, 15, 1510, 'MULTIPLE_CHOICE', 'try-with-resources가 자동으로 해 주는 일은?', '사용한 자원을 자동으로 닫는다', '파일·스트림 같은 자원은 작업이 끝나면 자동으로 닫힙니다.', 'SILVER', NULL, 1),
+  (151006, @java_subject_id, 15, 1510, 'FILL_BLANK', '파일 전체를 읽도록 빈칸을 채우시오. String text = Files.____(Path.of("memo.txt"));', 'readString', 'Files.readString()은 파일 전체를 문자열로 읽습니다.', 'SILVER', NULL, 1),
+  (151007, @java_subject_id, 15, 1510, 'CODE_SHORT', 'memo.txt에 "안녕"을 쓰도록 빈칸에 들어갈 값을 입력하시오. Files.writeString(Path.of("memo.txt"), ____);', '"안녕"', '문자열 값은 큰따옴표를 포함해 전달합니다.', 'SILVER', NULL, 1),
+  (151008, @java_subject_id, 15, 1510, 'CODE_SHORT', 'catch 블록에서 "파일 오류"를 출력하는 코드 한 줄을 작성하시오.', 'System.out.println("파일 오류");', '오류를 잡은 뒤 사용자에게 상황을 안내합니다.', 'SILVER', NULL, 1),
+  (151009, @java_subject_id, 15, 1510, 'FILL_BLANK', '파일이 존재하는지 확인하도록 빈칸을 채우시오. if (Files.____(path)) {', 'exists', 'Files.exists(path)는 파일이나 경로의 존재 여부를 확인합니다.', 'SILVER', NULL, 1),
+  (151010, @java_subject_id, 15, 1510, 'MULTIPLE_CHOICE', '파일 처리에서 예외를 잡는 이유로 알맞은 것은?', '오류 상황을 안내하거나 처리할 수 있어서', '예외를 처리하면 실패 원인을 알리고 필요한 대응을 할 수 있습니다.', 'SILVER', NULL, 1),
   (210101, @java_subject_id, 21, 2101, 'MULTIPLE_CHOICE', '배열과 비교한 컬렉션의 특징으로 옳은 것은?', '크기를 유연하게 바꿀 수 있고 목적별 구조(List·Set·Map)를 선택할 수 있다', '컬렉션 프레임워크는 여러 객체를 저장·처리하는 표준 자료구조입니다.', 'GOLD', NULL, 1),
   (210102, @java_subject_id, 21, 2101, 'MULTIPLE_CHOICE', '다음 코드의 출력 결과는?
 ```java
@@ -7344,22 +7337,22 @@ VALUES
   (150904, '②', 'StandardOpenOption.READ', 0, 2),
   (150904, '③', 'Path.APPEND', 0, 3),
   (150904, '④', '옵션 없음', 0, 4),
-  (151001, '①', '예외 처리 → 읽기 → 경로 준비', 0, 1),
-  (151001, '②', '경로 준비 → 읽기·쓰기 → 예외 처리', 1, 2),
-  (151001, '③', '읽기 → 삭제 → 경로 준비', 0, 3),
-  (151001, '④', '순서가 없다', 0, 4),
-  (151002, '①', '0', 0, 1),
-  (151002, '②', '파일을 확인하세요', 1, 2),
-  (151002, '③', '프로그램 중단', 0, 3),
-  (151002, '④', '컴파일 오류', 0, 4),
-  (151003, '①', 'NullPointerException', 0, 1),
-  (151003, '②', 'IOException', 1, 2),
-  (151003, '③', 'ArithmeticException', 0, 3),
-  (151003, '④', 'ClassCastException', 0, 4),
-  (151004, '①', '예외가 사라진다', 0, 1),
-  (151004, '②', '작업이 끝날 때 자원이 자동으로 닫힌다', 1, 2),
-  (151004, '③', '컴파일이 생략된다', 0, 3),
-  (151004, '④', '파일이 암호화된다', 0, 4),
+  (151001, '①', 'try', 1, 1),
+  (151001, '②', 'catch', 0, 2),
+  (151001, '③', 'finally', 0, 3),
+  (151001, '④', 'throws', 0, 4),
+  (151003, '①', 'try', 0, 1),
+  (151003, '②', 'catch', 1, 2),
+  (151003, '③', 'throw', 0, 3),
+  (151003, '④', 'return', 0, 4),
+  (151005, '①', '파일 이름을 자동으로 바꾼다', 0, 1),
+  (151005, '②', '사용한 자원을 자동으로 닫는다', 1, 2),
+  (151005, '③', '예외를 전부 없앤다', 0, 3),
+  (151005, '④', '프로그램을 자동 종료한다', 0, 4),
+  (151010, '①', '파일이 항상 생성돼서', 0, 1),
+  (151010, '②', '오류 상황을 안내하거나 처리할 수 있어서', 1, 2),
+  (151010, '③', '코드가 자동 완성돼서', 0, 3),
+  (151010, '④', '실행 시간이 0이 돼서', 0, 4),
   (210101, '①', '크기가 고정된다', 0, 1),
   (210101, '②', '크기를 유연하게 바꿀 수 있고 목적별 구조(List·Set·Map)를 선택할 수 있다', 1, 2),
   (210101, '③', '기본형만 저장한다', 0, 3),
@@ -8163,3 +8156,4 @@ VALUES
 ON DUPLICATE KEY UPDATE choice_text = VALUES(choice_text), is_correct = VALUES(is_correct), sort_order = VALUES(sort_order);
 
 COMMIT;
+SET SQL_SAFE_UPDATES = @curriculum_previous_sql_safe_updates;
