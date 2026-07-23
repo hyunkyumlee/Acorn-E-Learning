@@ -1658,7 +1658,7 @@ INSERT INTO users (
   user_id, email, nickname, role, status, profile_image_url, last_login_at, withdrawn_at, created_at, updated_at
 )
 VALUES
-  (6, 'hg102938363736@gmail.com', '이현겸', 'ROLE_USER', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (6, 'hg102938363736@gmail.com', '사용자', 'ROLE_USER', 'ACTIVE', NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   email = VALUES(email),
   nickname = VALUES(nickname),
