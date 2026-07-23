@@ -71,6 +71,16 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
+          - Sid: ListKnowvaObjectPrefix
+            Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !GetAtt KnowvaUploadBucket.Arn
+            Condition:
+              StringLike:
+                s3:prefix:
+                  - !Ref S3KeyPrefix
+                  - !Sub '${S3KeyPrefix}*'
           - Sid: ReadWriteKnowvaObjects
             Effect: Allow
             Action:
