@@ -113,7 +113,7 @@ jobs:
             --template-file .aws-sam/build/template.yaml \
             --stack-name "$MAIL_LAMBDA_STACK_NAME" \
             --region "$AWS_REGION" \
-            --capabilities CAPABILITY_IAM \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --resolve-s3 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
