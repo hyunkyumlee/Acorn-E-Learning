@@ -1,10 +1,12 @@
 package com.acorn.elearning.user.controller;
 
-import com.acorn.elearning.config.UploadProperties;
 import com.acorn.elearning.learning.mapper.SubjectMapper;
 import com.acorn.elearning.learning.model.Subject;
 import com.acorn.elearning.learning.service.EnrollmentService;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.storage.ObjectStorage;
+import com.acorn.elearning.storage.StorageException;
+import com.acorn.elearning.storage.StorageObject;
 import com.acorn.elearning.user.dto.response.CommunityActivityPageResponse;
 import com.acorn.elearning.user.dto.response.LearningStatusPageResponse;
 import com.acorn.elearning.user.dto.response.MyPageSummaryResponse;
@@ -14,13 +16,11 @@ import com.acorn.elearning.user.service.UserActivityService;
 import com.acorn.elearning.user.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -40,20 +40,20 @@ public class MyPageController {
     private final UserService userService;
     private final EnrollmentService enrollmentService;
     private final SubjectMapper subjectMapper;
-    private final UploadProperties uploadProperties;
+    private final ObjectStorage objectStorage;
 
     public MyPageController(
             UserActivityService userActivityService,
             UserService userService,
             EnrollmentService enrollmentService,
             SubjectMapper subjectMapper,
-            UploadProperties uploadProperties
+            ObjectStorage objectStorage
     ) {
         this.userActivityService = userActivityService;
         this.userService = userService;
         this.enrollmentService = enrollmentService;
         this.subjectMapper = subjectMapper;
-        this.uploadProperties = uploadProperties;
+        this.objectStorage = objectStorage;
     }
 
     @GetMapping("/mypage")
@@ -146,19 +146,19 @@ public class MyPageController {
     }
 
     @GetMapping("/mypage/profile-images/{fileName:.+}")
-    public ResponseEntity<Resource> profileImage(@PathVariable String fileName) throws MalformedURLException {
-        Path directory = uploadBasePath().resolve("profile-images").toAbsolutePath().normalize();
-        Path target = directory.resolve(fileName).normalize();
-        if (!target.startsWith(directory)) {
+    public ResponseEntity<Resource> profileImage(@PathVariable String fileName) {
+        if (fileName == null || fileName.isBlank() || fileName.contains("/") || fileName.contains("\\") || fileName.contains("..")) {
             return ResponseEntity.notFound().build();
         }
-        Resource resource = new UrlResource(target.toUri());
-        if (!resource.exists() || !resource.isReadable()) {
+        try {
+            StorageObject stored = objectStorage.get("profile-images/" + fileName);
+            Resource resource = new InputStreamResource(stored.stream());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(stored.contentType()))
+                    .body(resource);
+        } catch (IOException | StorageException exception) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok()
-                .contentType(contentType(fileName))
-                .body(resource);
     }
 
     private ProfileForm profileForm(MyPageSummaryResponse view) {
@@ -195,20 +195,4 @@ public class MyPageController {
         return viewName;
     }
 
-    private Path uploadBasePath() {
-        String configuredPath = uploadProperties == null ? null : uploadProperties.basePath();
-        String basePath = configuredPath == null || configuredPath.isBlank() ? "./uploads" : configuredPath;
-        return Paths.get(basePath).toAbsolutePath().normalize();
-    }
-
-    private MediaType contentType(String fileName) {
-        String lower = fileName.toLowerCase();
-        if (lower.endsWith(".png")) {
-            return MediaType.IMAGE_PNG;
-        }
-        if (lower.endsWith(".webp")) {
-            return MediaType.parseMediaType("image/webp");
-        }
-        return MediaType.IMAGE_JPEG;
-    }
 }

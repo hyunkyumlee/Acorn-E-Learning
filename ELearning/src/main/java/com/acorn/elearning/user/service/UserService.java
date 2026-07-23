@@ -2,9 +2,10 @@ package com.acorn.elearning.user.service;
 
 import com.acorn.elearning.common.exception.BusinessException;
 import com.acorn.elearning.common.exception.ErrorCode;
-import com.acorn.elearning.config.UploadProperties;
 import com.acorn.elearning.learning.service.EnrollmentService;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.storage.ObjectStorage;
+import com.acorn.elearning.storage.StorageException;
 import com.acorn.elearning.user.dto.response.UserProfileResponse;
 import com.acorn.elearning.user.form.ProfileForm;
 import com.acorn.elearning.user.form.SecurityForm;
@@ -14,9 +15,6 @@ import com.acorn.elearning.user.mapper.UserMapper;
 import com.acorn.elearning.user.model.User;
 import com.acorn.elearning.user.model.UserLearningProfile;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
@@ -29,18 +27,18 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserLearningProfileMapper userLearningProfileMapper;
     private final EnrollmentService enrollmentService;
-    private final UploadProperties uploadProperties;
+    private final ObjectStorage objectStorage;
 
     public UserService(
             UserMapper userMapper,
             UserLearningProfileMapper userLearningProfileMapper,
             EnrollmentService enrollmentService,
-            UploadProperties uploadProperties
+            ObjectStorage objectStorage
     ) {
         this.userMapper = userMapper;
         this.userLearningProfileMapper = userLearningProfileMapper;
         this.enrollmentService = enrollmentService;
-        this.uploadProperties = uploadProperties;
+        this.objectStorage = objectStorage;
     }
 
     @Transactional(readOnly = true)
@@ -69,7 +67,14 @@ public class UserService {
             user.setProfileImageUrl(storeProfileImage(userId, form.getProfileImage()));
             profileImageChanged = true;
         }
-        userMapper.update(user);
+        try {
+            userMapper.update(user);
+        } catch (RuntimeException exception) {
+            if (profileImageChanged && user.getProfileImageUrl() != null) {
+                deleteStoredProfileImage(user.getProfileImageUrl());
+            }
+            throw exception;
+        }
         if (profileImageChanged) {
             deleteStoredProfileImage(previousProfileImageUrl);
         }
@@ -169,15 +174,10 @@ public class UserService {
     private String storeProfileImage(Long userId, MultipartFile file) {
         String extension = imageExtension(file.getContentType());
         String fileName = "user-" + userId + "-" + UUID.randomUUID() + "." + extension;
-        Path directory = uploadBasePath().resolve("profile-images").toAbsolutePath().normalize();
-        Path target = directory.resolve(fileName).normalize();
-        if (!target.startsWith(directory)) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "프로필 이미지 파일명이 올바르지 않습니다.");
-        }
-        try {
-            Files.createDirectories(directory);
-            Files.copy(file.getInputStream(), target);
-        } catch (IOException exception) {
+        String key = "profile-images/" + fileName;
+        try (java.io.InputStream input = file.getInputStream()) {
+            objectStorage.put(key, input, file.getSize(), file.getContentType());
+        } catch (IOException | StorageException exception) {
             throw new BusinessException(ErrorCode.COMMON_INTERNAL_ERROR, "프로필 이미지를 저장할 수 없습니다.");
         }
         return "/mypage/profile-images/" + fileName;
@@ -193,22 +193,11 @@ public class UserService {
             return;
         }
 
-        Path directory = uploadBasePath().resolve("profile-images").toAbsolutePath().normalize();
-        Path target = directory.resolve(fileName).normalize();
-        if (!target.startsWith(directory)) {
-            return;
-        }
         try {
-            Files.deleteIfExists(target);
-        } catch (IOException ignored) {
+            objectStorage.delete("profile-images/" + fileName);
+        } catch (IOException | StorageException ignored) {
             // DB의 프로필 이미지는 이미 변경되었으므로, 삭제 실패 파일은 다음 정리 작업에서 처리한다.
         }
-    }
-
-    private Path uploadBasePath() {
-        String configuredPath = uploadProperties == null ? null : uploadProperties.basePath();
-        String basePath = configuredPath == null || configuredPath.isBlank() ? "./uploads" : configuredPath;
-        return Paths.get(basePath).toAbsolutePath().normalize();
     }
 
     private String imageExtension(String contentType) {

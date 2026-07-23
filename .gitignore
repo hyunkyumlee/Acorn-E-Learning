@@ -49,6 +49,7 @@ application-*.local.properties
 *.zip
 *.tar.gz
 *.rar
+!mail-lambda/gradle/wrapper/gradle-wrapper.jar
 
 # JVM crash logs
 hs_err_pid*

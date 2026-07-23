@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Knowva password-reset mail Lambda and private user-upload S3 bucket
+
+Parameters:
+  MailFrom:
+    Type: String
+    Description: Verified SES sender identity email address
+    NoEcho: true
+  SesIdentityArn:
+    Type: String
+    Description: Verified SES identity ARN allowed to send mail
+  S3KeyPrefix:
+    Type: String
+    Default: prod/
+    Description: Physical key prefix used by the Spring storage adapter
+
+Resources:
+  KnowvaUploadBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: AbortIncompleteUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+
+  PasswordResetMailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: knowva-password-reset-mail
+      CodeUri: ../../mail-lambda/
+      Handler: com.acorn.knowva.mail.PasswordResetMailHandler::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 10
+      ReservedConcurrentExecutions: 2
+      AutoPublishAlias: live
+      Environment:
+        Variables:
+          MAIL_FROM: !Ref MailFrom
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Sid: SendPasswordResetEmail
+              Effect: Allow
+              Action:
+                - ses:SendEmail
+              Resource: !Ref SesIdentityArn
+
+  KnowvaUploadRuntimePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub knowva-upload-runtime-${AWS::StackName}
+      Description: Least-privilege S3 and Lambda runtime access for the Knowva EC2 instance role
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ReadWriteKnowvaObjects
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource: !Sub '${KnowvaUploadBucket.Arn}/${S3KeyPrefix}*'
+          - Sid: InvokePasswordResetMail
+            Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+            Resource: !Sub '${PasswordResetMailFunction.Arn}:live'
+
+Outputs:
+  PasswordResetMailFunctionName:
+    Description: Lambda function name without alias
+    Value: !Ref PasswordResetMailFunction
+  PasswordResetMailInvokeName:
+    Description: Lambda function name with the stable live alias
+    Value: !Sub '${PasswordResetMailFunction}:live'
+  PasswordResetMailFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt PasswordResetMailFunction.Arn
+  KnowvaUploadBucketName:
+    Description: Private S3 bucket for application-managed uploads
+    Value: !Ref KnowvaUploadBucket
+  KnowvaUploadBucketArn:
+    Description: S3 bucket ARN
+    Value: !GetAtt KnowvaUploadBucket.Arn
+  KnowvaUploadRuntimePolicyArn:
+    Description: Attach this managed policy to the EC2 instance role before enabling Lambda or S3 mode
+    Value: !Ref KnowvaUploadRuntimePolicy

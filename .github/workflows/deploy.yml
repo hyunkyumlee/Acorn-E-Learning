@@ -26,6 +26,12 @@ jobs:
       AWS_ROLE_TO_ASSUME: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
       ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
       EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+      MAIL_LAMBDA_ENABLED: ${{ vars.MAIL_LAMBDA_ENABLED || 'false' }}
+      MAIL_LAMBDA_STACK_NAME: ${{ vars.MAIL_LAMBDA_STACK_NAME || 'knowva-mail' }}
+      MAIL_FROM: ${{ vars.MAIL_FROM }}
+      SES_IDENTITY_ARN: ${{ vars.SES_IDENTITY_ARN }}
+      KNOWVA_STORAGE_MODE: ${{ vars.KNOWVA_STORAGE_MODE || 'local' }}
+      KNOWVA_S3_PREFIX: ${{ vars.KNOWVA_S3_PREFIX || 'prod/' }}
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -49,6 +55,43 @@ jobs:
       - name: Build and test
         run: ./gradlew test bootJar
 
+      - name: Check Lambda deployment configuration
+        if: env.MAIL_LAMBDA_ENABLED == 'true'
+        run: |
+          for variable in MAIL_FROM SES_IDENTITY_ARN; do
+            if [ -z "${!variable}" ]; then
+              echo "::error::GitHub Actions variable ${variable} is required when MAIL_LAMBDA_ENABLED=true."
+              exit 1
+            fi
+          done
+
+      - name: Check storage deployment configuration
+        run: |
+          case "$KNOWVA_STORAGE_MODE" in
+            local) ;;
+            mirror|s3)
+              if [ "$MAIL_LAMBDA_ENABLED" != "true" ]; then
+                echo "::error::MAIL_LAMBDA_ENABLED=true is required before enabling KNOWVA_STORAGE_MODE=$KNOWVA_STORAGE_MODE."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::KNOWVA_STORAGE_MODE must be local, mirror, or s3."
+              exit 1
+              ;;
+          esac
+
+      - name: Build and test mail Lambda
+        if: env.MAIL_LAMBDA_ENABLED == 'true'
+        working-directory: mail-lambda
+        run: ../ELearning/gradlew test build --no-daemon
+
+      - name: Set up AWS SAM CLI
+        if: env.MAIL_LAMBDA_ENABLED == 'true'
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
       - name: Configure AWS credentials with OIDC
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -59,6 +102,56 @@ jobs:
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Deploy Lambda and S3 infrastructure
+        id: lambda
+        if: env.MAIL_LAMBDA_ENABLED == 'true'
+        working-directory: .
+        run: |
+          sam build --template-file infra/aws/template.yaml --build-dir .aws-sam/build --cached
+          sam deploy \
+            --template-file .aws-sam/build/template.yaml \
+            --stack-name "$MAIL_LAMBDA_STACK_NAME" \
+            --region "$AWS_REGION" \
+            --capabilities CAPABILITY_IAM \
+            --resolve-s3 \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              MailFrom="$MAIL_FROM" \
+              SesIdentityArn="$SES_IDENTITY_ARN" \
+              S3KeyPrefix="$KNOWVA_S3_PREFIX"
+
+          invoke_name="$(aws cloudformation describe-stacks \
+            --stack-name "$MAIL_LAMBDA_STACK_NAME" \
+            --query 'Stacks[0].Outputs[?OutputKey==`PasswordResetMailInvokeName`].OutputValue' \
+            --output text)"
+          if [ -z "$invoke_name" ] || [ "$invoke_name" = "None" ]; then
+            echo "::error::PasswordResetMailInvokeName output is missing."
+            exit 1
+          fi
+          echo "function_name=$invoke_name" >> "$GITHUB_OUTPUT"
+
+          bucket_name="$(aws cloudformation describe-stacks \
+            --stack-name "$MAIL_LAMBDA_STACK_NAME" \
+            --query 'Stacks[0].Outputs[?OutputKey==`KnowvaUploadBucketName`].OutputValue' \
+            --output text)"
+          if [ -z "$bucket_name" ] || [ "$bucket_name" = "None" ]; then
+            echo "::error::KnowvaUploadBucketName output is missing."
+            exit 1
+          fi
+          echo "bucket_name=$bucket_name" >> "$GITHUB_OUTPUT"
+
+          smoke_payload='{"schemaVersion":"1","mailType":"INVALID_SMOKE","toEmail":"invalid@example.com","resetUrl":"https://example.com/reset","ttlMinutes":30,"requestId":"smoke"}'
+          smoke_response="$(mktemp)"
+          aws lambda invoke \
+            --function-name "$invoke_name" \
+            --invocation-type RequestResponse \
+            --cli-binary-format raw-in-base64-out \
+            --payload "$smoke_payload" \
+            "$smoke_response" >/dev/null
+          grep -q 'INVALID_REQUEST' "$smoke_response"
+          rm -f "$smoke_response"
 
       - name: Build and push container image
         id: image
@@ -81,13 +174,20 @@ jobs:
             --arg region "$AWS_REGION" \
             --arg registry "$REGISTRY" \
             --arg image "$IMAGE_URI" \
+            --arg mailTransport "$([[ "$MAIL_LAMBDA_ENABLED" == "true" ]] && echo lambda || echo smtp)" \
+            --arg lambdaFunctionName "${{ steps.lambda.outputs.function_name }}" \
+            --arg storageMode "$KNOWVA_STORAGE_MODE" \
+            --arg storageBucket "${{ steps.lambda.outputs.bucket_name }}" \
+            --arg storagePrefix "$KNOWVA_S3_PREFIX" \
             '{
               commands: [
                 "set -eu",
                 "aws ecr get-login-password --region \($region) | docker login --username AWS --password-stdin \($registry)",
                 "docker pull \($image)",
+                "mkdir -p /opt/knowva/uploads",
+                "if [ \($storageMode) != \"local\" ]; then test -n \"\($storageBucket)\"; aws s3 sync /opt/knowva/uploads \"s3://\($storageBucket)/\($storagePrefix)\" --only-show-errors; fi",
                 "docker rm -f knowva-server || true",
-                "docker run -d --name knowva-server --restart unless-stopped --network knowva-network --env-file /opt/knowva/.env --volume /opt/knowva/uploads:/app/uploads -p 8080:8080 \($image)",
+                "docker run -d --name knowva-server --restart unless-stopped --network knowva-network --env-file /opt/knowva/.env --env MAIL_TRANSPORT=\($mailTransport) --env MAIL_LAMBDA_FUNCTION_NAME=\($lambdaFunctionName) --env KNOWVA_STORAGE_MODE=\($storageMode) --env KNOWVA_S3_BUCKET=\($storageBucket) --env KNOWVA_S3_PREFIX=\($storagePrefix) --env AWS_REGION=\($region) --volume /opt/knowva/uploads:/app/uploads -p 8080:8080 \($image)",
                 "for attempt in $(seq 1 30); do curl --fail --silent --show-error http://localhost:8080/health && exit 0; sleep 2; done; exit 1"
               ]
             }')"

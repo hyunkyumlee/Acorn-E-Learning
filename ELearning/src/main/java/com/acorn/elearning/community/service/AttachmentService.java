@@ -7,51 +7,41 @@ import com.acorn.elearning.community.mapper.PostAttachmentMapper;
 import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.community.model.PostAttachment;
 import com.acorn.elearning.security.SessionUser;
+import com.acorn.elearning.storage.ObjectStorage;
+import com.acorn.elearning.storage.StorageException;
+import com.acorn.elearning.storage.StorageObject;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-
-import org.springframework.beans.factory.annotation.Value;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AttachmentService {
-    private static final int MAX_FILES_PER_POST = 5;
-    private static final long MAX_FILE_SIZE = 10L * 1024L * 1024L;
-    private static final long MAX_TOTAL_SIZE = 20L * 1024L * 1024L;
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("png", "jpg", "jpeg", "webp", "pdf", "txt", "zip");
-    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
-            "image/png",
-            "image/jpeg",
-            "image/webp",
-            "application/pdf",
-            "text/plain",
-            "application/zip",
-            "application/x-zip-compressed"
-    );
-    private static final Set<String> IMAGE_EXTENSIONS = Set.of("png", "jpg", "jpeg", "webp");
-    private static final Set<String> IMAGE_CONTENT_TYPES = Set.of("image/png", "image/jpeg", "image/webp");
+    private static final Logger log = LoggerFactory.getLogger(AttachmentService.class);
     private static final String STATUS_ACTIVE = "ACTIVE";
     private static final String STATUS_DRAFT = "DRAFT";
 
     private final PostAttachmentMapper postAttachmentMapper;
     private final CommunityPostMapper communityPostMapper;
-    private final Path uploadBasePath;
+    private final ObjectStorage objectStorage;
+    private final AttachmentUploadPolicy uploadPolicy = new AttachmentUploadPolicy();
 
     public AttachmentService(
             PostAttachmentMapper postAttachmentMapper,
             CommunityPostMapper communityPostMapper,
-            @Value("${knowva.upload.base-path:./uploads}") String configuredUploadBasePath
-    ) {
+            ObjectStorage objectStorage) {
         this.postAttachmentMapper = postAttachmentMapper;
         this.communityPostMapper = communityPostMapper;
-        this.uploadBasePath = uploadBasePath(configuredUploadBasePath);
+        this.objectStorage = objectStorage;
     }
 
     public Map<String, Object> stub(String action) {
@@ -77,67 +67,67 @@ public class AttachmentService {
         Long userId = requireUserId(sessionUser);
         CommunityPost post = requireWritablePost(postId);
         requireOwner(post, userId);
-        validateInlineImage(image);
+        uploadPolicy.validateInlineImage(image);
         ensureAttachmentCapacity(postId, 1, image.getSize());
 
         PostAttachment attachment = new PostAttachment();
         attachment.setPostId(postId);
         attachment.setUploaderId(userId);
-        attachment.setOriginalName(originalName(image));
-        attachment.setStoredName(storedName(image));
+        attachment.setOriginalName(uploadPolicy.originalName(image));
+        attachment.setStoredName(uploadPolicy.storedName(image));
         attachment.setFilePath("community/" + postId + "/inline/" + attachment.getStoredName());
         attachment.setFileSize(image.getSize());
-        saveFile(image, attachment.getFilePath());
-        postAttachmentMapper.insert(attachment);
+        storeAndInsert(image, attachment);
         return attachment;
     }
 
     @Transactional
     public void saveMetadata(Long postId, Long uploaderId, List<MultipartFile> files) {
-        List<MultipartFile> uploadFiles = nonEmptyFiles(files);
+        List<MultipartFile> uploadFiles = uploadPolicy.nonEmptyFiles(files);
         if (uploadFiles.isEmpty()) {
             return;
         }
-
         long totalSize = uploadFiles.stream().mapToLong(MultipartFile::getSize).sum();
         ensureAttachmentCapacity(postId, uploadFiles.size(), totalSize);
-
-        for (MultipartFile file : uploadFiles) {
-            validateFile(file);
-            PostAttachment attachment = new PostAttachment();
-            attachment.setPostId(postId);
-            attachment.setUploaderId(uploaderId);
-            attachment.setOriginalName(originalName(file));
-            attachment.setStoredName(storedName(file));
-            attachment.setFilePath("community/" + postId + "/" + attachment.getStoredName());
-            attachment.setFileSize(file.getSize());
-            saveFile(file, attachment.getFilePath());
-            postAttachmentMapper.insert(attachment);
+        List<String> storedKeys = new ArrayList<>();
+        try {
+            for (MultipartFile file : uploadFiles) {
+                uploadPolicy.validateFile(file);
+                PostAttachment attachment = new PostAttachment();
+                attachment.setPostId(postId);
+                attachment.setUploaderId(uploaderId);
+                attachment.setOriginalName(uploadPolicy.originalName(file));
+                attachment.setStoredName(uploadPolicy.storedName(file));
+                attachment.setFilePath("community/" + postId + "/" + attachment.getStoredName());
+                attachment.setFileSize(file.getSize());
+                storeFile(file, attachment.getFilePath());
+                storedKeys.add(attachment.getFilePath());
+                postAttachmentMapper.insert(attachment);
+            }
+        } catch (RuntimeException exception) {
+            storedKeys.forEach(this::deleteFileQuietly);
+            throw exception;
         }
     }
 
     @Transactional(readOnly = true)
     public AttachmentFile attachmentFile(SessionUser sessionUser, Long attachmentId) {
         PostAttachment attachment = postAttachmentMapper.findById(attachmentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다."));
+                .orElseThrow(() -> notFound("첨부파일을 찾을 수 없습니다."));
         CommunityPost post = communityPostMapper.findById(attachment.getPostId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다."));
+                .orElseThrow(() -> notFound("첨부파일을 찾을 수 없습니다."));
         if (!STATUS_ACTIVE.equals(post.getStatus()) || post.getDeletedAt() != null) {
             Long userId = requireUserId(sessionUser);
             if (!STATUS_DRAFT.equals(post.getStatus()) || !userId.equals(post.getWriterId())) {
-                throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다.");
+                throw notFound("첨부파일을 찾을 수 없습니다.");
             }
         }
-
-        Path targetPath = resolveStoragePath(attachment.getFilePath());
-        if (!Files.exists(targetPath) || !Files.isRegularFile(targetPath)) {
-            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다.");
-        }
         try {
-            Resource resource = new UrlResource(targetPath.toUri());
-            return new AttachmentFile(attachment, resource, contentType(targetPath));
-        } catch (MalformedURLException e) {
-            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다.");
+            StorageObject stored = objectStorage.get(attachment.getFilePath());
+            Resource resource = new InputStreamResource(stored.stream());
+            return new AttachmentFile(attachment, resource, stored.contentType());
+        } catch (IOException | StorageException exception) {
+            throw notFound("첨부파일을 찾을 수 없습니다.");
         }
     }
 
@@ -145,197 +135,94 @@ public class AttachmentService {
     public void delete(SessionUser sessionUser, Long attachmentId) {
         Long userId = requireUserId(sessionUser);
         PostAttachment attachment = postAttachmentMapper.findById(attachmentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다."));
+                .orElseThrow(() -> notFound("첨부파일을 찾을 수 없습니다."));
         CommunityPost post = requireActivePost(attachment.getPostId());
         requireOwner(post, userId);
         postAttachmentMapper.deleteById(attachmentId);
-        deleteFile(attachment.getFilePath());
+        deleteFileQuietly(attachment.getFilePath());
     }
 
     @Transactional
-    public void deleteForPost(
-            SessionUser sessionUser,
-            Long postId,
-            Long attachmentId
-    ) {
+    public void deleteForPost(SessionUser sessionUser, Long postId, Long attachmentId) {
         Long userId = requireUserId(sessionUser);
-
-        // 1. 수정하려는 게시글 A가 존재하고 본인 글인지 확인
         CommunityPost currentPost = requireActivePost(postId);
         requireOwner(currentPost, userId);
-
-        // 2. 삭제하려는 첨부파일 조회
         PostAttachment attachment = postAttachmentMapper.findById(attachmentId)
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.COMMON_NOT_FOUND,
-                        "첨부파일을 찾을 수 없습니다."
-                ));
-
-        // 3. 가장 중요한 관계 검증
+                .orElseThrow(() -> notFound("첨부파일을 찾을 수 없습니다."));
         if (!Objects.equals(attachment.getPostId(), postId)) {
-            throw new BusinessException(
-                    ErrorCode.COMMON_NOT_FOUND,
-                    "현재 게시글의 첨부파일이 아닙니다."
-            );
+            throw notFound("현재 게시글의 첨부파일이 아닙니다.");
         }
-
-        // 4. DB 행 삭제 후 실제 파일 삭제
         postAttachmentMapper.deleteByIdAndPostId(attachmentId, postId);
-        deleteFile(attachment.getFilePath());
+        deleteFileQuietly(attachment.getFilePath());
     }
 
     @Transactional
     public void removeUnreferencedInlineImages(Long postId, String markdown) {
         String renderedMarkdown = markdown == null ? "" : markdown;
         postAttachmentMapper.findByPostId(postId).stream()
-                .filter(this::isInlineImage)
+                .filter(uploadPolicy::isInlineImage)
                 .filter(attachment -> !renderedMarkdown.contains(attachment.getFileUrl()))
                 .forEach(attachment -> {
                     postAttachmentMapper.deleteById(attachment.getAttachmentId());
-                    deleteFile(attachment.getFilePath());
+                    deleteFileQuietly(attachment.getFilePath());
                 });
     }
 
-    private List<MultipartFile> nonEmptyFiles(List<MultipartFile> files) {
-        if (files == null) {
-            return List.of();
-        }
-        return files.stream()
-                .filter(file -> file != null && !file.isEmpty())
-                .toList();
-    }
-
-    private void validateFile(MultipartFile file) {
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 1개 크기는 10MB를 넘을 수 없습니다.");
-        }
-        String extension = extension(originalName(file));
-        if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "지원하지 않는 첨부파일 확장자입니다.");
-        }
-        String contentType = file.getContentType();
-        if (contentType != null && !contentType.isBlank() && !ALLOWED_CONTENT_TYPES.contains(contentType)) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "지원하지 않는 첨부파일 MIME type입니다.");
+    private void storeAndInsert(MultipartFile file, PostAttachment attachment) {
+        storeFile(file, attachment.getFilePath());
+        try {
+            postAttachmentMapper.insert(attachment);
+        } catch (RuntimeException exception) {
+            deleteFileQuietly(attachment.getFilePath());
+            throw exception;
         }
     }
 
-    private void validateInlineImage(MultipartFile image) {
-        if (image == null || image.isEmpty()) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "이미지 파일이 필요합니다.");
+    private void storeFile(MultipartFile file, String key) {
+        try (InputStream input = file.getInputStream()) {
+            objectStorage.put(key, input, file.getSize(), file.getContentType());
+        } catch (IOException | StorageException exception) {
+            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 저장에 실패했습니다.");
         }
-        if (image.getSize() > MAX_FILE_SIZE) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "이미지 1개 크기는 10MB를 넘을 수 없습니다.");
+    }
+
+    private void deleteFileQuietly(String key) {
+        if (key == null || key.isBlank()) {
+            return;
         }
-        String extension = extension(originalName(image));
-        if (!IMAGE_EXTENSIONS.contains(extension)) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "PNG, JPG, WEBP 이미지만 본문에 넣을 수 있습니다.");
-        }
-        String contentType = image.getContentType();
-        if (contentType == null || contentType.isBlank() || !IMAGE_CONTENT_TYPES.contains(contentType)) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "지원하지 않는 이미지 MIME type입니다.");
+        try {
+            objectStorage.delete(key);
+        } catch (IOException | StorageException exception) {
+            log.warn("Storage cleanup failed for attachment key", exception);
         }
     }
 
     private void ensureAttachmentCapacity(Long postId, int additionalCount, long additionalSize) {
         List<PostAttachment> existingAttachments = postAttachmentMapper.findByPostId(postId);
-        int existingCount = existingAttachments.size();
-        if (existingCount + additionalCount > MAX_FILES_PER_POST) {
+        if (existingAttachments.size() + additionalCount > AttachmentUploadPolicy.MAX_FILES_PER_POST) {
             throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일은 게시글당 최대 5개까지 가능합니다.");
         }
         long existingSize = existingAttachments.stream()
                 .mapToLong(attachment -> attachment.getFileSize() == null ? 0L : attachment.getFileSize())
                 .sum();
-        if (existingSize + additionalSize > MAX_TOTAL_SIZE) {
+        if (existingSize + additionalSize > AttachmentUploadPolicy.MAX_TOTAL_SIZE) {
             throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 전체 크기는 20MB를 넘을 수 없습니다.");
-        }
-    }
-
-    private String originalName(MultipartFile file) {
-        String original = file.getOriginalFilename();
-        if (original == null || original.isBlank()) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 이름이 필요합니다.");
-        }
-        return original;
-    }
-
-    private String storedName(MultipartFile file) {
-        return UUID.randomUUID() + "." + extension(originalName(file));
-    }
-
-    private String extension(String fileName) {
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex < 0 || dotIndex == fileName.length() - 1) {
-            return "";
-        }
-        return fileName.substring(dotIndex + 1).toLowerCase(Locale.ROOT);
-    }
-
-    private Path uploadBasePath(String configuredUploadBasePath) {
-        String basePath = configuredUploadBasePath == null || configuredUploadBasePath.isBlank()
-                ? "./uploads"
-                : configuredUploadBasePath;
-        return Path.of(basePath).toAbsolutePath().normalize();
-    }
-
-    private void saveFile(MultipartFile file, String relativePath) {
-        Path targetPath = resolveStoragePath(relativePath);
-        try {
-            Files.createDirectories(targetPath.getParent());
-            file.transferTo(targetPath);
-        } catch (IOException e) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 저장에 실패했습니다.");
-        }
-    }
-
-    private void deleteFile(String relativePath) {
-        if (relativePath == null || relativePath.isBlank()) {
-            return;
-        }
-        try {
-            Files.deleteIfExists(resolveStoragePath(relativePath));
-        } catch (IOException ignored) {
-        }
-    }
-
-    private Path resolveStoragePath(String relativePath) {
-        if (relativePath == null || relativePath.isBlank()) {
-            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "첨부파일을 찾을 수 없습니다.");
-        }
-        Path targetPath = uploadBasePath.resolve(relativePath).normalize();
-        if (!targetPath.startsWith(uploadBasePath)) {
-            throw new BusinessException(ErrorCode.COMMON_VALIDATION_FAILED, "첨부파일 경로가 올바르지 않습니다.");
-        }
-        return targetPath;
-    }
-
-    private String contentType(Path targetPath) {
-        try {
-            String contentType = Files.probeContentType(targetPath);
-            return contentType == null || contentType.isBlank() ? "application/octet-stream" : contentType;
-        } catch (IOException e) {
-            return "application/octet-stream";
         }
     }
 
     private CommunityPost requireActivePost(Long postId) {
         return communityPostMapper.findActiveById(postId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> notFound("게시글을 찾을 수 없습니다."));
     }
 
     private CommunityPost requireWritablePost(Long postId) {
         CommunityPost post = communityPostMapper.findById(postId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> notFound("게시글을 찾을 수 없습니다."));
         if ((!STATUS_ACTIVE.equals(post.getStatus()) && !STATUS_DRAFT.equals(post.getStatus()))
                 || post.getDeletedAt() != null) {
-            throw new BusinessException(ErrorCode.COMMON_NOT_FOUND, "게시글을 찾을 수 없습니다.");
+            throw notFound("게시글을 찾을 수 없습니다.");
         }
         return post;
-    }
-
-    private boolean isInlineImage(PostAttachment attachment) {
-        return attachment.isImage()
-                && attachment.getFilePath() != null
-                && attachment.getFilePath().contains("/inline/");
     }
 
     private void requireOwner(CommunityPost post, Long userId) {
@@ -351,6 +238,9 @@ public class AttachmentService {
         return sessionUser.userId();
     }
 
-    public record AttachmentFile(PostAttachment attachment, Resource resource, String contentType) {
+    private BusinessException notFound(String message) {
+        return new BusinessException(ErrorCode.COMMON_NOT_FOUND, message);
     }
+
+    public record AttachmentFile(PostAttachment attachment, Resource resource, String contentType) {}
 }

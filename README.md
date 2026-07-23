@@ -99,11 +99,14 @@ flowchart LR
     APP --> DB[("MySQL")]
     APP --> AI["OpenAI API"]
     APP --> OAUTH["Google · GitHub OAuth"]
-    APP --> MAIL["SMTP / Amazon SES"]
-    APP --> VOLUME["EC2 upload volume"]
+    APP --> MAIL["AWS Lambda · SES v2"]
+    APP --> STORAGE["ObjectStorage · private S3"]
 
     GH["GitHub main"] --> GA["GitHub Actions"]
     GA -->|"OIDC"| AWS["AWS IAM Role"]
+    AWS --> SAM["SAM · Lambda/S3 stack"]
+    SAM --> MAIL
+    SAM --> STORAGE
     AWS --> ECR["Amazon ECR"]
     ECR --> SSM["AWS Systems Manager"]
     SSM --> APP
@@ -111,9 +114,11 @@ flowchart LR
 
 ### Deployment flow
 
-`main` push → Gradle test · bootJar → Docker image build (`linux/amd64`) → Amazon ECR push → AWS Systems Manager command → EC2 container replace → `/health` check
+`main` push → Gradle test · bootJar → Lambda/S3 SAM build·배포·smoke test → Docker image build (`linux/amd64`) → Amazon ECR push → AWS Systems Manager command → EC2 container replace → `/health` check
 
-GitHub Actions는 long-lived access key 대신 **OIDC로 IAM Role을 assume**해 AWS 배포 권한을 얻는다. 서비스 요청은 Route 53 · ACM · ALB를 거쳐 EC2의 Dockerized Spring Boot 애플리케이션으로 전달된다.
+GitHub Actions는 long-lived access key 대신 **OIDC로 IAM Role을 assume**해 AWS 배포 권한을 얻는다. 서비스 요청은 Route 53 · ACM · ALB를 거쳐 EC2의 Dockerized Spring Boot 애플리케이션으로 전달된다. 비밀번호 재설정 메일은 EC2가 Lambda를 동기 호출하고 Lambda가 SES API로 발송하며, 첨부·프로필 이미지는 기존 same-origin endpoint를 통해 private S3에서 streaming한다.
+
+메일과 파일 저장은 각각 `MAIL_TRANSPORT=smtp|lambda`, `KNOWVA_STORAGE_MODE=local|mirror|s3`로 단계 전환한다. 기본값은 기존 서비스와의 호환을 위해 `smtp/local`이며, Lambda/S3 검증 후 production 값을 전환한다.
 
 ## 🧱 Tech Stack
 
@@ -122,8 +127,8 @@ GitHub Actions는 long-lived access key 대신 **OIDC로 IAM Role을 assume**해
 | Backend | Java 17, Spring Boot 4, Spring MVC, Validation, JavaMailSender |
 | View | Thymeleaf, HTML/CSS/JavaScript, CodeMirror 기반 코드 에디터, Markdown editor |
 | Data | MySQL 8, MyBatis, H2 test runtime |
-| AI & Auth | OpenAI API, Google OAuth 2.0, GitHub OAuth, SMTP / Amazon SES |
-| Infra | Docker, AWS EC2, ALB, Route 53, ACM, ECR, Systems Manager |
+| AI & Auth | OpenAI API, Google OAuth 2.0, GitHub OAuth, AWS Lambda, Amazon SES v2 |
+| Infra | Docker, AWS EC2, private S3, Lambda, ALB, Route 53, ACM, ECR, SAM, Systems Manager |
 | CI/CD | GitHub Actions, GitHub Environment, OIDC IAM Role |
 | Test | JUnit 5, Spring Boot Test, MyBatis Test, Gradle |
 
@@ -148,6 +153,8 @@ GitHub Actions는 long-lived access key 대신 **OIDC로 IAM Role을 assume**해
 ├── docs/
 │   ├── ddl/              # DDL, sample data, demo setup data
 │   └── 산출물/            # 기획·발표 산출물
+├── mail-lambda/           # Java 17 비-Spring password-reset Lambda
+├── infra/aws/template.yaml # Lambda, private S3, IAM 정책 SAM template
 └── .github/workflows/deploy.yml
 ```
 
