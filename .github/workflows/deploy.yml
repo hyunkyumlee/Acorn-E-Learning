@@ -53,6 +53,9 @@ jobs:
           cache: gradle
 
       - name: Build and test
+        env:
+          # S3 bucket은 이후 인프라 배포 단계에서 확정되므로 테스트는 local storage로 격리한다.
+          KNOWVA_STORAGE_MODE: local
         run: ./gradlew test bootJar
 
       - name: Check Lambda deployment configuration
