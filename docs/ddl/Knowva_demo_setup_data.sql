@@ -1,11 +1,12 @@
 /*
-  Knowva demo setup data v2.5.6 - MySQL 8 / InnoDB / utf8mb4
+  Knowva demo setup data v2.5.7 - MySQL 8 / InnoDB / utf8mb4
   File: docs/ddl/Knowva_demo_setup_data.sql
   Compatibility: Knowva_DDL.sql / Notion DB 명세 v2.4
   Source: 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정 / 관리자 댓글 삭제 주체
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Revision history
+  - v2.5.7 (2026-07-23): 시연 계정(user_id=6)의 Silver 진도에 맞춰 레슨 문제 풀이 3회(30문항), 오답 2건, 채점 완료 AI 코딩테스트 2회와 분석 리포트를 추가. 분석 대시보드가 실제 풀이 이력을 표시한다.
   - v2.5.6 (2026-07-22): ranking_seed_data.sql의 20개 랭킹 데모 계정·학습 활동·WEEKLY/MONTHLY 집계 데이터를 본 셋업에 통합. 별도 랭킹 seed 실행은 필요 없음.
   - v2.5.5 (2026-07-21): 일반·Premium 계정은 Knowva_sample_data.sql 원본 진행·시험·결제 데이터를 보존하도록 final reconciliation 정리 범위에서 제외.
   - v2.5.4 (2026-07-21): seed 실행 세션에서만 sql_safe_updates를 일시 해제하고 COMMIT 뒤 원래 값으로 복구해 optimizer의 full scan 선택에도 전체 실행을 보장.
@@ -1791,6 +1792,230 @@ ON DUPLICATE KEY UPDATE
   progress_rate = VALUES(progress_rate),
   completed_at = VALUES(completed_at),
   updated_at = CURRENT_TIMESTAMP;
+
+-- -----------------------------------------------------------------------------
+-- Demo user practice and analysis fixture
+-- -----------------------------------------------------------------------------
+-- user_id=6은 Java Bronze를 마치고 Silver 5행성 9번 레슨까지 학습한 시연 계정이다.
+-- 학습 진도만 두면 분석 대시보드가 기준으로 삼는 GRADED exam_sessions가 없어
+-- 빈 상태가 된다. 아래 데이터는 실제 레슨 풀이와 코딩테스트 이력을 함께 만든다.
+-- 고정 ID + upsert로 재실행해도 동일한 이력이 유지된다.
+
+INSERT INTO practice_set_attempts (
+  set_attempt_id, user_id, subject_id, node_id, lesson_id,
+  total_count, correct_count, status, passed, completed_at, created_at, updated_at
+)
+VALUES
+  (610110, 6, @java_subject_id, 1, 110, 10, 8, 'COMPLETED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 18 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 18 DAY), CURRENT_TIMESTAMP),
+  (611210, 6, @java_subject_id, 12, 1210, 10, 9, 'COMPLETED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 DAY), CURRENT_TIMESTAMP),
+  (611509, 6, @java_subject_id, 15, 1509, 10, 8, 'COMPLETED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  subject_id = VALUES(subject_id),
+  node_id = VALUES(node_id),
+  lesson_id = VALUES(lesson_id),
+  total_count = VALUES(total_count),
+  correct_count = VALUES(correct_count),
+  status = VALUES(status),
+  passed = VALUES(passed),
+  completed_at = VALUES(completed_at),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO practice_set_items (
+  set_item_id, set_attempt_id, problem_id, sort_order, created_at
+)
+SELECT
+  (attempt.set_attempt_id * 100) + problem_step.problem_no AS set_item_id,
+  attempt.set_attempt_id,
+  (attempt.lesson_id * 100) + problem_step.problem_no AS problem_id,
+  problem_step.problem_no,
+  attempt.created_at
+FROM practice_set_attempts attempt
+CROSS JOIN (
+  SELECT 1 AS problem_no UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
+  SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+) problem_step
+WHERE attempt.user_id = 6
+  AND attempt.set_attempt_id IN (610110, 611210, 611509)
+ON DUPLICATE KEY UPDATE
+  set_attempt_id = VALUES(set_attempt_id),
+  problem_id = VALUES(problem_id),
+  sort_order = VALUES(sort_order);
+
+INSERT INTO practice_submissions (
+  submission_id, set_attempt_id, set_item_id, user_id, problem_id,
+  submission_context, submitted_answer, is_correct, is_skipped, solved_at, created_at
+)
+SELECT
+  (attempt.set_attempt_id * 100) + item.sort_order AS submission_id,
+  attempt.set_attempt_id,
+  item.set_item_id,
+  attempt.user_id,
+  item.problem_id,
+  'PRACTICE_SET',
+  CASE
+    WHEN item.sort_order <= attempt.correct_count THEN problem.answer_text
+    WHEN item.sort_order = 9 THEN '조건을 먼저 확인한다'
+    ELSE '예외를 무시하고 계속 진행한다'
+  END AS submitted_answer,
+  IF(item.sort_order <= attempt.correct_count, 1, 0) AS is_correct,
+  0 AS is_skipped,
+  attempt.completed_at,
+  attempt.created_at
+FROM practice_set_attempts attempt
+JOIN practice_set_items item ON item.set_attempt_id = attempt.set_attempt_id
+JOIN practice_problems problem ON problem.problem_id = item.problem_id
+WHERE attempt.user_id = 6
+  AND attempt.set_attempt_id IN (610110, 611210, 611509)
+ON DUPLICATE KEY UPDATE
+  set_attempt_id = VALUES(set_attempt_id),
+  set_item_id = VALUES(set_item_id),
+  user_id = VALUES(user_id),
+  problem_id = VALUES(problem_id),
+  submission_context = VALUES(submission_context),
+  submitted_answer = VALUES(submitted_answer),
+  is_correct = VALUES(is_correct),
+  is_skipped = VALUES(is_skipped),
+  solved_at = VALUES(solved_at);
+
+INSERT INTO wrong_answers (
+  wrong_answer_id, user_id, set_attempt_id, problem_id, last_submission_id,
+  wrong_count, review_status, retry_bonus_awarded, created_at, updated_at
+)
+VALUES
+  (6101509, 6, 611509, 150909, 61150909, 2, 'OPEN', 0, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY), CURRENT_TIMESTAMP),
+  (6101510, 6, 611509, 150910, 61150910, 1, 'SOLVED', 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 3 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  set_attempt_id = VALUES(set_attempt_id),
+  problem_id = VALUES(problem_id),
+  last_submission_id = VALUES(last_submission_id),
+  wrong_count = VALUES(wrong_count),
+  review_status = VALUES(review_status),
+  retry_bonus_awarded = VALUES(retry_bonus_awarded),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO exam_sessions (
+  exam_id, user_id, subject_id, level_code, status, result_status,
+  total_problem_count, correct_count, retry_count,
+  started_at, submitted_at, graded_at, created_at, updated_at
+)
+VALUES
+  (610001, 6, @java_subject_id, 'BRONZE', 'GRADED', 'PASSED', 3, 2, 1,
+   DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), CURRENT_TIMESTAMP),
+  (610002, 6, @java_subject_id, 'SILVER', 'GRADED', 'FAILED', 3, 1, 2,
+   DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  subject_id = VALUES(subject_id),
+  level_code = VALUES(level_code),
+  status = VALUES(status),
+  result_status = VALUES(result_status),
+  total_problem_count = VALUES(total_problem_count),
+  correct_count = VALUES(correct_count),
+  retry_count = VALUES(retry_count),
+  started_at = VALUES(started_at),
+  submitted_at = VALUES(submitted_at),
+  graded_at = VALUES(graded_at),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO ai_exam_problems (
+  ai_problem_id, exam_id, problem_no, prompt, test_case_spec, ai_raw_response, status, created_at, updated_at
+)
+VALUES
+  (6100011, 610001, 1, '두 정수 a, b를 받아 합을 반환하는 add 메서드를 작성하세요.',
+   JSON_OBJECT('cases', JSON_ARRAY(JSON_OBJECT('input', '2, 3', 'expected', '5'), JSON_OBJECT('input', '10, -4', 'expected', '6'))),
+   JSON_OBJECT('problems', JSON_ARRAY(JSON_OBJECT('starterCode', 'public static int add(int a, int b) { return 0; }'), JSON_OBJECT('starterCode', 'public static String grade(int score) { return ""; }'), JSON_OBJECT('starterCode', 'public static int countEven(int[] values) { return 0; }'))),
+   'GENERATED', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), CURRENT_TIMESTAMP),
+  (6100012, 610001, 2, '점수가 70점 이상이면 "PASS", 아니면 "RETRY"를 반환하는 grade 메서드를 작성하세요.',
+   JSON_OBJECT('cases', JSON_ARRAY(JSON_OBJECT('input', '75', 'expected', 'PASS'), JSON_OBJECT('input', '60', 'expected', 'RETRY'))),
+   JSON_OBJECT('problems', JSON_ARRAY(JSON_OBJECT('starterCode', 'public static int add(int a, int b) { return 0; }'), JSON_OBJECT('starterCode', 'public static String grade(int score) { return ""; }'), JSON_OBJECT('starterCode', 'public static int countEven(int[] values) { return 0; }'))),
+   'GENERATED', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), CURRENT_TIMESTAMP),
+  (6100013, 610001, 3, '정수 배열에서 짝수 개수를 반환하는 countEven 메서드를 작성하세요.',
+   JSON_OBJECT('cases', JSON_ARRAY(JSON_OBJECT('input', '[1, 2, 4, 7]', 'expected', '2'))),
+   JSON_OBJECT('problems', JSON_ARRAY(JSON_OBJECT('starterCode', 'public static int add(int a, int b) { return 0; }'), JSON_OBJECT('starterCode', 'public static String grade(int score) { return ""; }'), JSON_OBJECT('starterCode', 'public static int countEven(int[] values) { return 0; }'))),
+   'GENERATED', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), CURRENT_TIMESTAMP),
+  (6100021, 610002, 1, '문자열 배열에서 빈 문자열을 제외하고 가장 긴 값을 반환하는 longestWord 메서드를 작성하세요.',
+   JSON_OBJECT('cases', JSON_ARRAY(JSON_OBJECT('input', '["java", "", "spring"]', 'expected', 'spring'))),
+   JSON_OBJECT('problems', JSON_ARRAY(JSON_OBJECT('starterCode', 'public static String longestWord(String[] words) { return ""; }'), JSON_OBJECT('starterCode', 'public static int safeDivide(int a, int b) { return 0; }'), JSON_OBJECT('starterCode', 'public static String readText(Path path) throws IOException { return ""; }'))),
+   'GENERATED', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (6100022, 610002, 2, 'b가 0이면 0을 반환하고, 아니면 a를 b로 나눈 값을 반환하는 safeDivide 메서드를 작성하세요.',
+   JSON_OBJECT('cases', JSON_ARRAY(JSON_OBJECT('input', '10, 2', 'expected', '5'), JSON_OBJECT('input', '10, 0', 'expected', '0'))),
+   JSON_OBJECT('problems', JSON_ARRAY(JSON_OBJECT('starterCode', 'public static String longestWord(String[] words) { return ""; }'), JSON_OBJECT('starterCode', 'public static int safeDivide(int a, int b) { return 0; }'), JSON_OBJECT('starterCode', 'public static String readText(Path path) throws IOException { return ""; }'))),
+   'GENERATED', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (6100023, 610002, 3, 'Path를 받아 UTF-8 텍스트 파일의 내용을 읽어 반환하는 readText 메서드를 작성하세요.',
+   JSON_OBJECT('cases', JSON_ARRAY(JSON_OBJECT('input', 'memo.txt', 'expected', 'file content'))),
+   JSON_OBJECT('problems', JSON_ARRAY(JSON_OBJECT('starterCode', 'public static String longestWord(String[] words) { return ""; }'), JSON_OBJECT('starterCode', 'public static int safeDivide(int a, int b) { return 0; }'), JSON_OBJECT('starterCode', 'public static String readText(Path path) throws IOException { return ""; }'))),
+   'GENERATED', DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  exam_id = VALUES(exam_id),
+  problem_no = VALUES(problem_no),
+  prompt = VALUES(prompt),
+  test_case_spec = VALUES(test_case_spec),
+  ai_raw_response = VALUES(ai_raw_response),
+  status = VALUES(status),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO exam_answers (
+  answer_id, exam_id, ai_problem_id, answer_text, passed_case_count, is_correct,
+  ai_review, test_case_result, submitted_at, graded_at, created_at, updated_at
+)
+VALUES
+  (6100011, 610001, 6100011, 'public static int add(int a, int b) { return a + b; }', 2, 1,
+   '기본 연산과 반환값 처리가 정확합니다.', JSON_OBJECT('passed', 2, 'total', 2), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), CURRENT_TIMESTAMP),
+  (6100012, 610001, 6100012, 'public static String grade(int score) { return score > 70 ? "PASS" : "RETRY"; }', 1, 0,
+   '경계값 70에서 PASS가 되어야 합니다. 조건식의 비교 연산자를 다시 확인하세요.', JSON_OBJECT('passed', 1, 'total', 2), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), CURRENT_TIMESTAMP),
+  (6100013, 610001, 6100013, 'public static int countEven(int[] values) { int count = 0; for (int value : values) { if (value % 2 == 0) count++; } return count; }', 1, 1,
+   '배열 순회와 짝수 판별을 올바르게 구현했습니다.', JSON_OBJECT('passed', 1, 'total', 1), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), CURRENT_TIMESTAMP),
+  (6100021, 610002, 6100021, 'public static String longestWord(String[] words) { return words[0]; }', 0, 0,
+   '배열 전체를 순회하지 않아 가장 긴 문자열을 찾지 못했습니다. 빈 문자열도 제외해야 합니다.', JSON_OBJECT('passed', 0, 'total', 1), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (6100022, 610002, 6100022, 'public static int safeDivide(int a, int b) { return b == 0 ? 0 : a / b; }', 2, 1,
+   '0으로 나누는 경우를 먼저 막아 예외 없이 처리했습니다.', JSON_OBJECT('passed', 2, 'total', 2), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP),
+  (6100023, 610002, 6100023, 'public static String readText(Path path) throws IOException { return ""; }', 0, 0,
+   '파일 읽기 로직과 IOException 처리가 빠져 있습니다. Files.readString 사용을 연습해 보세요.', JSON_OBJECT('passed', 0, 'total', 1), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  exam_id = VALUES(exam_id),
+  ai_problem_id = VALUES(ai_problem_id),
+  answer_text = VALUES(answer_text),
+  passed_case_count = VALUES(passed_case_count),
+  is_correct = VALUES(is_correct),
+  ai_review = VALUES(ai_review),
+  test_case_result = VALUES(test_case_result),
+  submitted_at = VALUES(submitted_at),
+  graded_at = VALUES(graded_at),
+  updated_at = CURRENT_TIMESTAMP;
+
+INSERT INTO ai_analysis_reports (
+  report_id, user_id, exam_id, status, free_summary, premium_detail,
+  analysis_error_code, retry_count, created_at, updated_at
+)
+VALUES
+  (610001, 6, 610001, 'SUCCESS',
+   '기본 연산과 배열 순회는 안정적입니다. 조건 경계값을 한 번 더 점검하면 정확도가 높아집니다.',
+   JSON_OBJECT('strengths', JSON_ARRAY('기본 연산', '배열 순회'), 'weaknesses', JSON_ARRAY('조건 경계값'), 'nextActions', JSON_ARRAY('70점 경계값 문제 3개 복습')),
+   NULL, 1, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY), CURRENT_TIMESTAMP),
+  (610002, 6, 610002, 'SUCCESS',
+   '입력 검증은 잘 처리했지만, 배열 전체 순회와 파일 입출력 구현이 아직 부족합니다.',
+   JSON_OBJECT('strengths', JSON_ARRAY('입력 검증', '예외 예방'), 'weaknesses', JSON_ARRAY('배열 순회', '파일 입출력'), 'nextActions', JSON_ARRAY('문자열 배열 순회 문제 3개', 'Files.readString 예제 복습')),
+   NULL, 2, DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 2 DAY), CURRENT_TIMESTAMP)
+ON DUPLICATE KEY UPDATE
+  user_id = VALUES(user_id),
+  exam_id = VALUES(exam_id),
+  status = VALUES(status),
+  free_summary = VALUES(free_summary),
+  premium_detail = VALUES(premium_detail),
+  analysis_error_code = VALUES(analysis_error_code),
+  retry_count = VALUES(retry_count),
+  updated_at = CURRENT_TIMESTAMP;
+
+UPDATE user_level_unlocks
+SET unlock_source = 'AI_EXAM',
+    unlocked_by_exam_id = 610001,
+    unlocked_at = DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 17 DAY)
+WHERE user_id = 6
+  AND subject_id = @java_subject_id
+  AND level_code = 'SILVER'
+  AND unlock_id > 0;
 
 -- -----------------------------------------------------------------------------
 -- Ranking demo fixture
