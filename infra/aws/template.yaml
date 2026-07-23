@@ -7,9 +7,6 @@ Parameters:
     Type: String
     Description: Verified SES sender identity email address
     NoEcho: true
-  SesIdentityArn:
-    Type: String
-    Description: Verified SES identity ARN allowed to send mail
   S3KeyPrefix:
     Type: String
     Default: prod/
@@ -61,7 +58,10 @@ Resources:
               Effect: Allow
               Action:
                 - ses:SendEmail
-              Resource: !Ref SesIdentityArn
+              Resource: '*'
+              Condition:
+                StringEquals:
+                  ses:FromAddress: !Ref MailFrom
 
   KnowvaUploadRuntimePolicy:
     Type: AWS::IAM::ManagedPolicy

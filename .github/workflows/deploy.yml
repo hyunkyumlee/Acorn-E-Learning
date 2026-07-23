@@ -29,7 +29,6 @@ jobs:
       MAIL_LAMBDA_ENABLED: ${{ vars.MAIL_LAMBDA_ENABLED || 'false' }}
       MAIL_LAMBDA_STACK_NAME: ${{ vars.MAIL_LAMBDA_STACK_NAME || 'knowva-mail' }}
       MAIL_FROM: ${{ vars.MAIL_FROM }}
-      SES_IDENTITY_ARN: ${{ vars.SES_IDENTITY_ARN }}
       KNOWVA_STORAGE_MODE: ${{ vars.KNOWVA_STORAGE_MODE || 'local' }}
       KNOWVA_S3_PREFIX: ${{ vars.KNOWVA_S3_PREFIX || 'prod/' }}
     steps:
@@ -61,7 +60,7 @@ jobs:
       - name: Check Lambda deployment configuration
         if: env.MAIL_LAMBDA_ENABLED == 'true'
         run: |
-          for variable in MAIL_FROM SES_IDENTITY_ARN; do
+          for variable in MAIL_FROM; do
             if [ -z "${!variable}" ]; then
               echo "::error::GitHub Actions variable ${variable} is required when MAIL_LAMBDA_ENABLED=true."
               exit 1
@@ -122,7 +121,6 @@ jobs:
             --no-fail-on-empty-changeset \
             --parameter-overrides \
               MailFrom="$MAIL_FROM" \
-              SesIdentityArn="$SES_IDENTITY_ARN" \
               S3KeyPrefix="$KNOWVA_S3_PREFIX"
 
           invoke_name="$(aws cloudformation describe-stacks \
