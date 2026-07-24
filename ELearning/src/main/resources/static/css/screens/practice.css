@@ -74,6 +74,40 @@
     word-break: keep-all;
 }
 
+/* DB 질문은 Markdown을 허용한다. 코드 펜스는 실제 코드 블록으로 표시한다. */
+.practice-question > :first-child { margin-top: 0; }
+.practice-question > :last-child { margin-bottom: 0; }
+.practice-question p {
+    margin: 0 0 var(--space-4);
+    font-size: 22px;
+    font-weight: 850;
+    line-height: 1.45;
+    word-break: keep-all;
+}
+.practice-question :not(pre) > code {
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: var(--surface-soft);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+}
+.practice-question pre {
+    overflow-x: auto;
+    margin: var(--space-4) 0;
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-soft);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    line-height: 1.6;
+}
+.practice-question pre code {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+}
+
 /* 진행바 */
 .practice-body progress {
     width: 100%;
@@ -209,6 +243,10 @@
     .practice-problem-card h2,
     .practice-intro h2,
     .practice-complete h2 {
+        font-size: 20px;
+    }
+
+    .practice-question p {
         font-size: 20px;
     }
 

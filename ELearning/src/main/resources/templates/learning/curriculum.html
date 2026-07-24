@@ -42,8 +42,16 @@
         </span>
       </div>
       <hr/>
-      <div class="lesson-content" th:text="${lesson.content}">본문</div>
-      <pre th:if="${lesson.exampleCode != null}"><code th:text="${lesson.exampleCode}">예시 코드</code></pre>
+      <textarea hidden
+                data-community-markdown-source
+                th:data-target="${'#lesson-content-' + lesson.lessonId}"
+                th:text="${lesson.content}"></textarea>
+      <div class="lesson-content"
+           th:id="${'lesson-content-' + lesson.lessonId}">
+        <p th:text="${lesson.content}">본문</p>
+      </div>
+      <pre class="lesson-example-code"
+           th:if="${lesson.exampleCode != null and !#strings.contains(lesson.content, '```')}"><code th:text="${lesson.exampleCode}">예시 코드</code></pre>
 
       <!--
         액션 한 줄(버튼 높이 통일): (미완) 이론 완료 → 문제 풀이 → 북마크 / (완료) 문제 풀이(primary) → 북마크.
@@ -90,5 +98,6 @@
       <a class="button primary" th:href="@{/learning}">학습 로드맵으로 가기</a>
     </section>
   </main>
+  <script type="module" th:src="@{/js/vendor/community-markdown-viewer.bundle.js}"></script>
 </body>
 </html>

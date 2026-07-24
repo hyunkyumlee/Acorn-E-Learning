@@ -172,8 +172,22 @@
 
       <progress th:value="${currentIndex + 1}" th:max="${totalCount}"></progress>
 
-      <p class="practice-problem-type" th:text="${problem['problemType']}">문제유형</p>
-      <h2 th:text="${problem['question']}">문제 내용</h2>
+      <p class="practice-problem-type" th:switch="${problem['problemType']}">
+        <span th:case="'MULTIPLE_CHOICE'">객관식</span>
+        <span th:case="'FILL_BLANK'">빈칸 채우기</span>
+        <span th:case="'SHORT_ANSWER'">단답형</span>
+        <span th:case="'CODE_OUTPUT'">코드 결과 예측</span>
+        <span th:case="'CODE_SHORT'">간단 코드 입력</span>
+        <span th:case="'SHORT_CODE'">간단 코드 입력</span>
+        <span th:case="*" th:text="${problem['problemType']}">문제 유형</span>
+      </p>
+      <textarea hidden
+                data-community-markdown-source
+                th:data-target="${'#practice-question-' + problem['problemId']}"
+                th:text="${problem['question']}"></textarea>
+      <div class="practice-question" th:id="${'practice-question-' + problem['problemId']}">
+        <p th:text="${problem['question']}">문제 내용</p>
+      </div>
 
       <div th:if="${!answered}">
         <div th:if="${problem['problemType'] == 'MULTIPLE_CHOICE'}">
@@ -345,5 +359,6 @@
 
   </section>
 </main>
+<script type="module" th:src="@{/js/vendor/community-markdown-viewer.bundle.js}"></script>
 </body>
 </html>
