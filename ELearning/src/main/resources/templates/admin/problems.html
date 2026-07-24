@@ -148,6 +148,7 @@
               <form method="post"
                     th:action="@{/admin/problems/{problemId}/delete(problemId=${problem.problemId})}"
                     onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <button type="submit" class="problem-table-button">삭제</button>
               </form>
             </div>
@@ -222,6 +223,7 @@
 
     <form method="post" action="/admin/problems" id="problemManageForm" th:object="${problemForm}"
           onsubmit="return confirm('문제를 저장하시겠습니까?');">
+      <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <div class="problem-form-layout">
         <div class="problem-form-fields">
           <input type="hidden" name="problemId" id="problemId">

@@ -203,10 +203,12 @@
              placeholder="프로필 정보 (이메일, 닉네임, 관심 과목, 가입일)">
       <div class="admin-user-detail-actions">
         <form id="userStatusForm" method="post" action="/admin/users/0/status">
+          <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <input type="hidden" name="status" id="userStatusValue" value="SUSPENDED">
           <button type="submit" id="userStatusButton" class="admin-user-primary-button" disabled>계정 정지</button>
         </form>
         <form id="userRoleForm" method="post" action="/admin/users/0/role">
+          <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <select name="role" id="userRoleValue">
             <option value="ROLE_ADMIN">ROLE_ADMIN</option>
             <option value="ROLE_USER">ROLE_USER</option>

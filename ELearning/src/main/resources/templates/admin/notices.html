@@ -125,6 +125,7 @@
     <h2>공지사항 등록 / 수정</h2>
 
     <form method="post" id="noticeForm" action="/admin/notices">
+      <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <div class="notice-form-layout">
         <div class="notice-form-fields">
           <label for="noticeTitle">제목</label>
@@ -148,7 +149,9 @@
         </div>
       </div>
     </form>
-    <form method="post" id="noticeDeleteForm"></form>
+    <form method="post" id="noticeDeleteForm">
+      <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    </form>
   </section>
 
 </main>
