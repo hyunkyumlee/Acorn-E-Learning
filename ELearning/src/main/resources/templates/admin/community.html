@@ -106,18 +106,21 @@
               <form method="post"
                     th:action="@{/admin/community/posts/{postId}/status(postId=${post.postId})}"
                     onsubmit="return confirm('이 게시글을 공개 상태로 변경할까요?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="status" value="ACTIVE">
                 <button type="submit">공개</button>
               </form>
               <form method="post"
                     th:action="@{/admin/community/posts/{postId}/status(postId=${post.postId})}"
                     onsubmit="return confirm('이 게시글을 숨김 상태로 변경할까요?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="status" value="HIDDEN">
                 <button type="submit">숨김</button>
               </form>
               <form method="post"
                     th:action="@{/admin/community/posts/{postId}/status(postId=${post.postId})}"
                     onsubmit="return confirm('이 게시글을 삭제 상태로 변경할까요?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="status" value="DELETED">
                 <button type="submit">삭제</button>
               </form>
@@ -193,18 +196,21 @@
               <form method="post"
                     th:action="@{/admin/community/comments/{commentId}/status(commentId=${comment.commentId})}"
                     onsubmit="return confirm('이 댓글을 공개 상태로 변경할까요?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="status" value="ACTIVE">
                 <button type="submit">공개</button>
               </form>
               <form method="post"
                     th:action="@{/admin/community/comments/{commentId}/status(commentId=${comment.commentId})}"
                     onsubmit="return confirm('이 댓글을 숨김 상태로 변경할까요?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="status" value="HIDDEN">
                 <button type="submit">숨김</button>
               </form>
               <form method="post"
                     th:action="@{/admin/community/comments/{commentId}/status(commentId=${comment.commentId})}"
                     onsubmit="return confirm('이 댓글을 삭제 상태로 변경할까요?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="status" value="DELETED">
                 <button type="submit">삭제</button>
               </form>

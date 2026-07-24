@@ -98,6 +98,7 @@
             <form method="post"
                   th:action="@{/admin/recommendations/{contentId}/delete(contentId=${content.contentId})}"
                   onsubmit="return confirm('추천 콘텐츠를 삭제하시겠습니까?');">
+              <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
               <button type="submit" class="admin-recommendation-action">삭제</button>
             </form>
           </td>
@@ -126,6 +127,7 @@
   <section class="admin-recommendation-form-panel" id="recommendationFormPanel">
     <h2 id="recommendationFormTitle">추천 콘텐츠 등록</h2>
     <form method="post" id="recommendationForm" th:action="@{/admin/recommendations}">
+      <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <input type="hidden" id="recommendationContentId">
       <div class="admin-recommendation-form-grid">
         <label>

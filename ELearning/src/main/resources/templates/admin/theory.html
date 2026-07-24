@@ -113,6 +113,7 @@
               <form method="post"
                     th:action="@{/admin/theory/{lessonId}/delete(lessonId=${lesson.lessonId})}"
                     onsubmit="return confirm('이 이론 자료를 삭제하시겠습니까?');">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <button type="submit" class="theory-table-button">삭제</button>
               </form>
             </div>
@@ -160,6 +161,7 @@
 
     <form method="post" action="/admin/theory" th:object="${lessonForm}"
           onsubmit="return confirm('이론 자료를 저장하시겠습니까?');">
+      <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
       <div class="theory-form-layout">
         <div class="theory-form-fields">
           <input type="hidden" name="lessonId" id="lessonId">

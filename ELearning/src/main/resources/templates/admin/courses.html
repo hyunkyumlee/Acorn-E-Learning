@@ -102,6 +102,7 @@
 
       <form method="post" action="/admin/courses/subjects" th:object="${subjectForm}"
             onsubmit="return confirm('과목 정보를 저장하시겠습니까?');">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <div class="course-form-row course-subject-form-row">
           <input type="hidden" name="subjectId" id="subjectId">
           <input type="text" name="subjectName" id="subjectName" placeholder="과목명 입력">
@@ -267,6 +268,7 @@
 
       <form method="post" action="/admin/courses/curriculum-nodes" th:object="${curriculumNodeForm}"
             onsubmit="return confirm('커리큘럼 정보를 저장하시겠습니까?');">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <div class="course-form-row course-curriculum-form-row">
           <input type="hidden" name="nodeId" id="curriculumNodeId">
           <select name="subjectId" id="curriculumSubjectId">
