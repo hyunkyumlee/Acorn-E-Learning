@@ -80,13 +80,7 @@ public class LearningService {
     public List<SubjectCardView> getSubjectCards(Long userId, Long selectedSubjectId) {
         Set<Long> enrolledSubjectIds = enrollmentService.getEnrolledSubjectIds(userId);
         Map<Long, Integer> progressBySubject = progressService.computeSubjectProgress(userId);
-
-        Map<Long, String> levelBySubject = new HashMap<>();
-        for (UserLevelUnlock unlock : userLevelUnlockMapper.findByUser(userId)) {
-            levelBySubject.merge(unlock.getSubjectId(), unlock.getLevelCode(),
-                    (current, candidate) ->
-                            LEVEL_ORDER.indexOf(candidate) > LEVEL_ORDER.indexOf(current) ? candidate : current);
-        }
+        Map<Long, String> levelBySubject = highestUnlockedLevels(userId);
 
         return getActiveSubjects().stream()
                 .map(subject -> {
@@ -121,16 +115,34 @@ public class LearningService {
 
     /**
      * 학습 메인 대시보드의 사용자 프로필/출석 정보를 조립한다.
-     * - user_learning_profiles: 주 과목 / 현재 레벨 / 등급 / 누적 점수
+     * - user_learning_profiles: 주 과목 / 등급 / 누적 점수
+     * - user_level_unlocks: 선택 과목에서 현재 열린 가장 높은 레벨(없으면 주 과목 프로필 레벨 fallback)
      * - attendance_records: 최근 출석의 streak, 오늘 출석 여부
      * 로드맵 진행률(행성 완료수·%)은 선택 과목 기준으로 ProgressService가 별도 계산한다.
      * 출석/streak는 ranking 점수와 무관하다(분담 기준).
      */
     public LearningDashboardView getLearningHome(SessionUser user) {
+        return getLearningHome(user, null);
+    }
+
+    /**
+     * 학습 메인/API가 선택한 과목의 실제 해금 레벨을 함께 조회한다.
+     * 프로필의 current_level_code는 레벨 테스트 배정값이라 이후 게이트 통과 진도를 반영하지 않는다.
+     */
+    public LearningDashboardView getLearningHome(SessionUser user, Long selectedSubjectId) {
         Long userId = user.userId();
 
         UserLearningProfile profile = learningProfileReadMapper.findByUserId(userId).orElse(null);
         Long primarySubjectId = (profile != null) ? profile.getPrimarySubjectId() : null;
+        Long displaySubjectId = selectedSubjectId != null ? selectedSubjectId : primarySubjectId;
+        String unlockedLevel = displaySubjectId == null
+                ? null
+                : highestUnlockedLevels(userId).get(displaySubjectId);
+        String currentLevelCode = unlockedLevel != null
+                ? unlockedLevel
+                : (displaySubjectId != null && displaySubjectId.equals(primarySubjectId) && profile != null
+                        ? profile.getCurrentLevelCode()
+                        : null);
 
         int streakCount = 0;
         boolean attendedToday = false;
@@ -148,11 +160,24 @@ public class LearningService {
         return new LearningDashboardView(
                 user.nickname(),
                 primarySubjectId,
-                (profile != null) ? profile.getCurrentLevelCode() : null,
+                currentLevelCode,
                 (profile != null) ? profile.getGradeCode() : null,
                 (profile != null && profile.getTotalScore() != null) ? profile.getTotalScore() : 0,
                 streakCount,
                 attendedToday
         );
+    }
+
+    private Map<Long, String> highestUnlockedLevels(Long userId) {
+        Map<Long, String> levelBySubject = new HashMap<>();
+        for (UserLevelUnlock unlock : userLevelUnlockMapper.findByUser(userId)) {
+            if (unlock.getSubjectId() == null || unlock.getLevelCode() == null) {
+                continue;
+            }
+            levelBySubject.merge(unlock.getSubjectId(), unlock.getLevelCode(),
+                    (current, candidate) ->
+                            LEVEL_ORDER.indexOf(candidate) > LEVEL_ORDER.indexOf(current) ? candidate : current);
+        }
+        return levelBySubject;
     }
 }

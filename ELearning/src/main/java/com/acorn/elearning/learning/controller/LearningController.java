@@ -91,7 +91,7 @@ public class LearningController {
         enrollmentService.ensureBackfill(user.userId());
 
         // 학습 메인 대시보드: 프로필/레벨/등급/점수/출석 streak
-        LearningDashboardView dashboard = learningService.getLearningHome(user);
+        LearningDashboardView dashboard = learningService.getLearningHome(user, subjectId);
         model.addAttribute("dashboard", dashboard);
 
         // 이번 주 요일별 출석(월~일 boolean 7) — 사이드바 주간 출석 도트

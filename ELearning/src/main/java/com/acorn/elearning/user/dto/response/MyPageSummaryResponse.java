@@ -185,7 +185,7 @@ public record MyPageSummaryResponse(
             return new LearningSummary(
                     learningProfile == null ? null : learningProfile.getPrimarySubjectId(),
                     learningProfile == null ? null : learningProfile.getLearningGoal(),
-                    learningProfile == null ? null : learningProfile.getCurrentLevelCode(),
+                    currentLevelCode(learningProfile, progressBySubjectLevel),
                     totalScore,
                     learningProfile == null ? null : learningProfile.getGradeCode(),
                     streakCount,
@@ -217,6 +217,27 @@ public record MyPageSummaryResponse(
                     .sorted(Comparator.naturalOrder())
                     .map(LocalDate::toString)
                     .toList();
+        }
+
+        private static String currentLevelCode(
+                UserLearningProfile learningProfile,
+                Map<Long, List<LearningStatusPageResponse.SubjectLevelProgress>> progressBySubjectLevel
+        ) {
+            if (learningProfile == null) {
+                return null;
+            }
+            if (learningProfile.getPrimarySubjectId() == null || progressBySubjectLevel == null) {
+                return learningProfile.getCurrentLevelCode();
+            }
+            List<LearningStatusPageResponse.SubjectLevelProgress> levels =
+                    progressBySubjectLevel.getOrDefault(learningProfile.getPrimarySubjectId(), List.of());
+            for (String levelCode : List.of("GOLD", "SILVER", "BRONZE")) {
+                boolean unlocked = levels.stream().anyMatch(level -> levelCode.equals(level.levelCode()) && level.unlocked());
+                if (unlocked) {
+                    return levelCode;
+                }
+            }
+            return learningProfile.getCurrentLevelCode();
         }
 
         private static int completedCount(List<LearningProgress> progressItems) {

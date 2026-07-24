@@ -111,10 +111,9 @@ public record LearningStatusPageResponse(
                         )
                         .thenComparing(SubjectMeta::subjectId))
                 .limit(safeLimit)
-                .map(meta -> LearningStatusItem.from(
+                .map(meta -> LearningStatusItem.overview(
                         meta,
-                        progressBySubject.getOrDefault(meta.subjectId(), List.of()),
-                        currentLevelProgress(progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId()))
+                        progressBySubjectLevel == null ? null : progressBySubjectLevel.get(meta.subjectId())
                 ))
                 .toList();
     }

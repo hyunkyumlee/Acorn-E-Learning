@@ -94,7 +94,7 @@ public class LearningApiController {
             @RequestParam(name = "subjectId", required = false) Long subjectId) {
         SessionUser user = resolve(sessionUser);
 
-        LearningDashboardView home = learningService.getLearningHome(user);
+        LearningDashboardView home = learningService.getLearningHome(user, subjectId);
         List<Subject> subjects = learningService.getActiveSubjects();
 
         Long roadmapSubjectId = (subjectId != null) ? subjectId
