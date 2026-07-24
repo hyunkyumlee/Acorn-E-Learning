@@ -1,11 +1,12 @@
 /*
-  Knowva demo setup data v2.5.7 - MySQL 8 / InnoDB / utf8mb4
+  Knowva demo setup data v2.5.8 - MySQL 8 / InnoDB / utf8mb4
   File: docs/ddl/Knowva_demo_setup_data.sql
   Compatibility: Knowva_DDL.sql / Notion DB 명세 v2.4
   Source: 레슨 단위 학습 구조 / Premium 환불 / 비밀번호 재설정 / 관리자 댓글 삭제 주체
   Execute after docs/ddl/Knowva_DDL.sql.
 
   Revision history
+  - v2.5.8 (2026-07-24): 오답노트 Markdown 다운로드·커뮤니티 초안 기능은 기존 wrong_answers/practice_problems와 community_posts를 사용한다. 추가 seed row는 없으며, 시연 계정의 기존 오답 2건으로 기능을 검증한다.
   - v2.5.7 (2026-07-23): 시연 계정(user_id=6)의 Silver 진도에 맞춰 레슨 문제 풀이 3회(30문항), 오답 2건, 채점 완료 AI 코딩테스트 2회와 분석 리포트를 추가. 분석 대시보드가 실제 풀이 이력을 표시한다.
   - v2.5.6 (2026-07-22): ranking_seed_data.sql의 20개 랭킹 데모 계정·학습 활동·WEEKLY/MONTHLY 집계 데이터를 본 셋업에 통합. 별도 랭킹 seed 실행은 필요 없음.
   - v2.5.5 (2026-07-21): 일반·Premium 계정은 Knowva_sample_data.sql 원본 진행·시험·결제 데이터를 보존하도록 final reconciliation 정리 범위에서 제외.

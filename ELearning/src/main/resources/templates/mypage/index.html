@@ -286,6 +286,7 @@
       var attendanceDates = /*[[${view.learning().attendanceDates()}]]*/ [];
       var selectedYear = /*[[${view.learning().initialCalendarYear()}]]*/ 2026;
       var selectedMonth = /*[[${view.learning().initialCalendarMonth()}]]*/ 6;
+      var attendanceStampSrc = /*[[@{/assets/images/characters/nuvi-celebrate.png}]]*/ "/assets/images/characters/nuvi-celebrate.png";
       var attendedSet = new Set(attendanceDates);
       var monthLabel = document.querySelector("[data-calendar-month-label]");
       var monthTitle = document.querySelector("[data-calendar-title]");
@@ -347,10 +348,22 @@
         for (var day = 1; day <= totalDays; day += 1) {
           var key = dateKey(selectedYear, selectedMonth, day);
           var dayCell = document.createElement("span");
-          dayCell.textContent = day;
+          var dayNumber = document.createElement("span");
+          dayNumber.className = "calendar-day-number";
+          dayNumber.textContent = day;
+          dayCell.appendChild(dayNumber);
           if (attendedSet.has(key)) {
             dayCell.classList.add("attended");
+            dayCell.setAttribute("aria-label", key + " 출석 완료");
+            var stamp = document.createElement("img");
+            stamp.className = "nuvi-attendance-stamp";
+            stamp.src = attendanceStampSrc;
+            stamp.alt = "";
+            stamp.setAttribute("aria-hidden", "true");
+            dayCell.appendChild(stamp);
             attendedThisMonth += 1;
+          } else {
+            dayCell.setAttribute("aria-label", key);
           }
           if (key === todayKey) {
             dayCell.classList.add("today");

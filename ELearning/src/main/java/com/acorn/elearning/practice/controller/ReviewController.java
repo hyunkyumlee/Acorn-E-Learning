@@ -3,9 +3,15 @@ package com.acorn.elearning.practice.controller;
 import com.acorn.elearning.practice.form.WrongAnswerRetryForm;
 import com.acorn.elearning.practice.service.WrongAnswerService;
 import com.acorn.elearning.practice.view.WrongAnswerDetailView;
+import com.acorn.elearning.practice.view.WrongAnswerNote;
 import com.acorn.elearning.practice.view.WrongAnswerPageView;
 import com.acorn.elearning.practice.view.WrongAnswerSummaryView;
 import com.acorn.elearning.security.SessionUser;
+import java.nio.charset.StandardCharsets;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -117,6 +123,41 @@ public class ReviewController {
         model.addAttribute("screen", "learning/review");
 
         return "learning/review";
+    }
+
+    @GetMapping(value = "/learning/review/{wrongAnswerId}/note.md", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseBody
+    public ResponseEntity<byte[]> downloadNote(
+            @PathVariable Long wrongAnswerId,
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser
+    ) {
+        WrongAnswerNote note = wrongAnswerService.note(sessionUser, wrongAnswerId);
+
+        byte[] markdown = note.markdown().getBytes(StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok()
+                .contentType(new MediaType("application", "octet-stream", StandardCharsets.UTF_8))
+                .contentLength(markdown.length)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment()
+                                .filename(note.fileName(), StandardCharsets.UTF_8)
+                                .build()
+                                .toString()
+                )
+                .body(markdown);
+    }
+
+    @PostMapping("/learning/review/{wrongAnswerId}/community-draft")
+    public String createCommunityDraft(
+            @PathVariable Long wrongAnswerId,
+            @SessionAttribute(name = SessionUser.SESSION_KEY, required = false) SessionUser sessionUser,
+            RedirectAttributes redirectAttributes
+    ) {
+        WrongAnswerNote note = wrongAnswerService.note(sessionUser, wrongAnswerId);
+        redirectAttributes.addFlashAttribute("wrongAnswerCommunityDraft", note);
+        redirectAttributes.addFlashAttribute("message", "오답노트를 게시글 초안으로 옮겼습니다. 내용을 보완한 뒤 등록해 주세요.");
+        return "redirect:/community/write";
     }
 
     @PostMapping("/learning/review/{wrongAnswerId}/retry")

@@ -105,6 +105,22 @@
         </p>
       </article>
 
+      <section class="review-note-actions" aria-label="오답노트 활용">
+        <div>
+          <strong>오답노트 활용</strong>
+          <p>복습 내용을 Markdown 파일로 저장하거나, 커뮤니티 초안으로 이어서 작성할 수 있어요.</p>
+        </div>
+        <div class="review-note-action-buttons">
+          <a th:href="@{|/learning/review/${view.attributes()['wrongAnswerId']}/note.md|}" download>
+            오답노트 저장 (.md)
+          </a>
+          <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/community-draft|}" method="post">
+            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit">커뮤니티에 이어 쓰기</button>
+          </form>
+        </div>
+      </section>
+
       <hr>
 
       <section th:if="${retryResultMessage == null}" class="review-retry-section">
@@ -113,6 +129,7 @@
         <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/retry|}"
               method="post"
               class="review-retry-form">
+          <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <input type="hidden" name="lessonId" th:value="${view.attributes()['lessonId']}">
           <div>
             <label for="submittedAnswer">답안 입력</label>
@@ -148,6 +165,7 @@
         <h3>검토 완료</h3>
 
         <form th:action="@{|/learning/review/${view.attributes()['wrongAnswerId']}/reviewed|}" method="post">
+          <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <input type="hidden" name="lessonId" th:value="${view.attributes()['lessonId']}">
           <button type="submit">검토 완료 처리</button>
         </form>

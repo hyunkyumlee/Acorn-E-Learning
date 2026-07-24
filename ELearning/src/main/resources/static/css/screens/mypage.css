@@ -559,10 +559,12 @@ textarea.mypage-field {
   text-align: center;
 }
 
-.calendar-days span {
+.calendar-days > span {
   display: grid;
   min-height: 42px;
   place-items: center;
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--mypage-line);
   border-radius: 8px;
   background: var(--surface);
@@ -570,18 +572,62 @@ textarea.mypage-field {
   font-weight: 900;
 }
 
-.calendar-days .attended {
+.calendar-days > .attended {
   border-color: color-mix(in srgb, var(--success) 38%, var(--line));
   background: var(--mypage-success-soft);
-  color: var(--success);
 }
 
-.calendar-days .today {
+.calendar-day-number {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.calendar-days > .attended .calendar-day-number {
+  align-self: end;
+  justify-self: end;
+  margin: 0 5px 4px 0;
+  color: color-mix(in srgb, var(--text) 84%, var(--success));
+  font-size: 11px;
+  text-shadow: 0 1px 1px var(--surface);
+}
+
+.nuvi-attendance-stamp {
+  position: absolute;
+  z-index: 0;
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 3px color-mix(in srgb, var(--success) 22%, transparent));
+  transform: rotate(-8deg);
+  animation: nuvi-attendance-stamp-pop 240ms ease-out both;
+}
+
+.calendar-days > .today {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 
-.calendar-days .muted {
+.calendar-days > .muted {
   opacity: 0.38;
+}
+
+@keyframes nuvi-attendance-stamp-pop {
+  from {
+    opacity: 0;
+    transform: rotate(-16deg) scale(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nuvi-attendance-stamp {
+    animation: none;
+  }
 }
 
 .streak-card {

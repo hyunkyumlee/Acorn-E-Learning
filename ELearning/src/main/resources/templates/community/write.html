@@ -29,6 +29,9 @@
         <div class="community-panel-header">
           <div>
             <h2>새 글</h2>
+            <p class="community-form-notice" th:if="${communityDraftNotice != null}" th:text="${communityDraftNotice}">
+              오답노트 내용을 불러왔습니다. 수정한 뒤 등록해 주세요.
+            </p>
           </div>
           <a class="button" th:href="@{/community/board}">목록</a>
         </div>
@@ -63,7 +66,7 @@
                    th:data-create-draft-url="@{/api/community/drafts}"
                    th:data-upload-url-template="@{/api/community/posts/POST_ID_PLACEHOLDER/inline-images}"
                    aria-describedby="community-editor-help">
-                <textarea th:field="*{content}" class="community-editor-source" rows="12" required></textarea>
+                <textarea th:field="*{content}" class="community-editor-source" rows="12" maxlength="10000" required></textarea>
                 <div class="community-editor-mount" aria-label="게시글 내용 편집기"></div>
               </div>
             </div>

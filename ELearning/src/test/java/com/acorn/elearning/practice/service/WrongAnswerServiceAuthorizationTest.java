@@ -31,6 +31,12 @@ class WrongAnswerServiceAuthorizationTest {
     }
 
     @Test
+    void note_rejects_null_session_user() {
+        BusinessException exception = assertThrows(BusinessException.class, () -> service.note(null, 1L));
+        assertEquals(ErrorCode.AUTH_REQUIRED, exception.errorCode());
+    }
+
+    @Test
     void retry_rejects_null_session_user() {
         BusinessException exception = assertThrows(
                 BusinessException.class,

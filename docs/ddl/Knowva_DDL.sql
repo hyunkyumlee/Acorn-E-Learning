@@ -26,6 +26,11 @@
   - AI 시험 정답/오답 판정은 AI 점수가 아니라 testcase 실행 결과로 저장한다.
   - 인증 수단별 독립 계정 정책: users.email은 연락처/표시 정보이며 계정 병합 기준으로 사용하지 않는다.
     이메일 로그인은 user_credentials.login_email, 소셜 로그인은 social_accounts(provider, provider_user_id)로 식별한다.
+  - 마이페이지의 누비 출석 도장은 attendance_records.attendance_date를 시각화한 화면 요소다.
+    출석 판정·저장 규칙이나 attendance_records 구조는 변경하지 않는다.
+  - 오답노트 Markdown 다운로드와 커뮤니티 초안은 wrong_answers와 practice_problems를 조회해 생성한다.
+    별도 오답노트 table을 만들지 않으며, 사용자가 수정·등록한 최종 본문만 community_posts에 저장한다.
+  - community_posts.content는 DB에서 MEDIUMTEXT를 유지하고, 애플리케이션 입력 정책은 10,000자다.
 */
 
 SET NAMES utf8mb4;
@@ -702,7 +707,7 @@ CREATE TABLE community_posts (
   subject_id BIGINT UNSIGNED NOT NULL,
   board_type VARCHAR(30) NOT NULL,
   title VARCHAR(200) NOT NULL,
-  content MEDIUMTEXT NOT NULL,
+  content MEDIUMTEXT NOT NULL COMMENT '애플리케이션 본문 입력 정책 최대 10,000자; 오답노트 Markdown 초안 포함',
   view_count INT UNSIGNED NOT NULL DEFAULT 0,
   like_count INT UNSIGNED NOT NULL DEFAULT 0,
   comment_count INT UNSIGNED NOT NULL DEFAULT 0,

@@ -31,6 +31,16 @@
   line-height: 1.5;
 }
 
+.community-form-notice {
+  max-width: 560px;
+  border-left: 3px solid var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  padding: 7px 10px;
+  color: var(--text) !important;
+  font-size: 13px;
+  font-weight: 750;
+}
+
 .community-home-layout {
   display: grid;
   grid-template-columns: minmax(180px, 220px) minmax(0, 1fr) minmax(220px, 280px);

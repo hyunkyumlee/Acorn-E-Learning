@@ -13,6 +13,7 @@ import com.acorn.elearning.community.mapper.CommunityWriterMapper;
 import com.acorn.elearning.community.model.Comment;
 import com.acorn.elearning.community.model.CommunityPost;
 import com.acorn.elearning.community.service.PostService;
+import com.acorn.elearning.practice.view.WrongAnswerNote;
 import com.acorn.elearning.security.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -110,6 +111,14 @@ public class PostController {
         }
         model.addAttribute("screen", "community/write");
         PostForm form = new PostForm();
+        Object wrongAnswerCommunityDraft = model.asMap().get("wrongAnswerCommunityDraft");
+        if (wrongAnswerCommunityDraft instanceof WrongAnswerNote note) {
+            form.setTitle(note.postTitle());
+            form.setContent(note.markdown());
+            form.setSubjectId(note.subjectId());
+            form.setBoardType("STUDY_LOG");
+            model.addAttribute("communityDraftNotice", "오답노트 내용을 불러왔습니다. 수정한 뒤 등록해 주세요.");
+        }
         form.setIdempotencyToken(
                 idempotencyTokenService.issue(
                         CREATE_POST_FORM_TYPE,
