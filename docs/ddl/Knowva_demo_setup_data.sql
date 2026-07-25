@@ -1418,7 +1418,8 @@ INSERT INTO notices (
 )
 VALUES
   (1, 1, 'Knowva 로컬 개발 샘플 공지', '샘플 계정과 샘플 데이터를 사용해 화면 흐름을 검수할 수 있습니다.', 'PUBLISHED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-  (2, 1, 'AI 코딩테스트 안내', 'AI 시험은 문제 생성, 테스트케이스 생성 보조, 해설 생성, 코드 리뷰에 ChatGPT API를 사용합니다.', 'PUBLISHED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  (2, 1, 'AI 코딩테스트 안내', 'AI 시험은 문제 생성, 테스트케이스 생성 보조, 해설 생성, 코드 리뷰에 ChatGPT API를 사용합니다.', 'PUBLISHED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  (3, 1, 'ChatGPT 서비스 장애로 인한 코딩테스트 및 분석 메뉴 이용 불가 안내', '현재 ChatGPT 서비스에 장애가 생겨 Knowva의 코딩테스트 문제 생성, 분석 생성에 제한이 있습니다. 학습자 여러분들의 양해 부탁드립니다.', 'PUBLISHED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   writer_id = VALUES(writer_id),
   title = VALUES(title),
@@ -1432,7 +1433,8 @@ INSERT INTO admin_operation_logs (
 )
 VALUES
   (1, 1, 'CREATE_NOTICE', 'NOTICE', 1, 'Knowva 로컬 개발 샘플 공지', '공지사항을 등록하고 게시 상태로 설정', 'SUCCESS', CURRENT_TIMESTAMP),
-  (2, 1, 'HANDLE_REPORT', 'REPORT', 1, 'Java 질문 게시글 신고', '스팸 신고를 처리하고 신고 상태를 RESOLVED로 변경', 'SUCCESS', CURRENT_TIMESTAMP)
+  (2, 1, 'HANDLE_REPORT', 'REPORT', 1, 'Java 질문 게시글 신고', '스팸 신고를 처리하고 신고 상태를 RESOLVED로 변경', 'SUCCESS', CURRENT_TIMESTAMP),
+  (3, 1, 'CREATE_NOTICE', 'NOTICE', 3, 'ChatGPT 서비스 장애로 인한 코딩테스트 및 분석 메뉴 이용 불가 안내', 'ChatGPT 서비스 장애에 따른 코딩테스트 및 분석 메뉴 제한 공지 등록', 'SUCCESS', CURRENT_TIMESTAMP)
 ON DUPLICATE KEY UPDATE
   admin_id = VALUES(admin_id),
   action_type = VALUES(action_type),
