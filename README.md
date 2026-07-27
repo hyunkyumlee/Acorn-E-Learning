@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="ELearning/src/main/resources/static/assets/images/icons/header_logo_light.png" width="240" alt="Knowva logo" />
+  <img src="ELearning/src/main/resources/static/assets/images/icons/header_logo_dark.png" width="240" alt="Knowva logo" />
 </p>
 
 <h1 align="center">Knowva</h1>
@@ -151,44 +151,15 @@ GitHub Actions는 long-lived access key 대신 **OIDC로 IAM Role을 assume**해
 │   │   └── mappers/      # MyBatis XML mappers
 │   └── Dockerfile
 ├── docs/
-│   ├── ddl/              # DDL, sample data, demo setup data
+│   ├── sql/              # DDL, sample data, demo setup data
 │   └── 산출물/            # 기획·발표 산출물
 ├── mail-lambda/           # Java 17 비-Spring password-reset Lambda
 ├── infra/aws/template.yaml # Lambda, private S3, IAM 정책 SAM template
 └── .github/workflows/deploy.yml
 ```
 
-## 🏁 로컬 실행
-
-### Prerequisites
-
-- JDK 17
-- MySQL 8.x
-- 환경별 DB, OAuth, OpenAI, mail 설정값
-
-### Run
-
-```bash
-# 1. DDL과 sample data 실행
-# docs/ddl/Knowva_DDL.sql
-# docs/ddl/Knowva_sample_data.sql
-
-# 2. 애플리케이션 실행
-cd ELearning
-./gradlew bootRun
-```
-
-테스트는 아래 명령으로 실행한다.
-
-```bash
-cd ELearning
-./gradlew test
-```
-
-> 환경 변수와 credential은 repository에 포함하지 않는다. 실행 전 `ELearning/src/main/resources/application.properties`가 참조하는 환경별 값을 설정해야 한다.
-
 ## 🔗 Links
 
 - Service: [knowvaedu.com](https://knowvaedu.com)
 - Planning & deliverables: [E Knowva Notion](https://app.notion.com/p/E-Knowva-37b04ef58e2a803287a3e65d4ec452b9?source=copy_link)
-- Database documents: [docs/ddl](docs/ddl)
+- Database documents: [docs/sql](docs/sql)
