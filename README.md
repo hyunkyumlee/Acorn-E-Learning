@@ -191,7 +191,5 @@ flowchart LR
 ```
 
 ## 🔗 Links
-
-- Service: [knowvaedu.com](https://knowvaedu.com)
 - Planning & deliverables: [E Knowva Notion](https://app.notion.com/p/E-Knowva-37b04ef58e2a803287a3e65d4ec452b9?source=copy_link)
 - Database documents: [docs/sql](docs/sql)
