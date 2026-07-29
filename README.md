@@ -12,6 +12,9 @@
   <a href="https://knowvaedu.com">서비스 바로가기</a>
   ·
   <a href="https://app.notion.com/p/E-Knowva-37b04ef58e2a803287a3e65d4ec452b9?source=copy_link">기획·산출물</a>
+  ·
+  <a href="https://www.youtube.com/watch?v=8a7laRKY914&t=1s">
+  시연 영상</a>
 </p>
 
 > 에이콘 E학습터 최종 프로젝트입니다. <br>
